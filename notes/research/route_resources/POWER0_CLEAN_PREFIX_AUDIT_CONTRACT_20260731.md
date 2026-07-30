@@ -143,6 +143,11 @@ passes 1,385 tests in 27.239 seconds with the three existing skips.
 
 ## Required Next Gate
 
+The finite pickup/resource recurrence and complete 0..128 static SHT
+capability ledger are now retained in
+`POWER_PICKUP_CAPABILITY_LEDGER_CONTRACT_20260731.md`. They do not close the
+missing physical pickup identity or route carry-forward below.
+
 A valid `POWER-ROUTE-01` causal experiment needs:
 
 - a natural, first-hit-bounded Route-2/Lunatic root at Power 0;

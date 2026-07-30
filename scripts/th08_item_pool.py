@@ -56,6 +56,8 @@ class ItemPoolConfig:
 class ItemPoolState:
     slots: tuple[ItemSlot, ...]
     resources: ItemResources
+    next_allocation_index: int = 0
+    active_order: tuple[int, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -80,25 +82,49 @@ def initial_item_pool_state(resources: ItemResources) -> ItemPoolState:
     return ItemPoolState((), resources)
 
 
-def _validate_slots(slots: tuple[ItemSlot, ...]) -> None:
-    indices = tuple(slot.index for slot in slots)
+def _validate_state(state: ItemPoolState) -> tuple[int, ...]:
+    indices = tuple(slot.index for slot in state.slots)
     if indices != tuple(sorted(indices)) or len(indices) != len(set(indices)):
         raise ValueError("item slots must be uniquely sorted")
     if any(not 0 <= index < ITEM_POOL_SIZE for index in indices):
         raise ValueError("item slot index is outside the native pool")
+    if not 0 <= state.next_allocation_index < ITEM_POOL_SIZE:
+        raise ValueError("item allocation cursor is outside the native pool")
+    active_order = state.active_order or indices
+    if len(active_order) != len(set(active_order)) or set(active_order) != set(
+        indices
+    ):
+        raise ValueError(
+            "item active order must contain every occupied slot exactly once"
+        )
+    return active_order
 
 
-def _first_free_slot(occupied: set[int]) -> int | None:
-    for index in range(ITEM_POOL_SIZE):
+def _next_free_slot(
+    occupied: set[int],
+    cursor: int,
+) -> tuple[int | None, int]:
+    """Match the native rotating allocation cursor and cyclic scan."""
+
+    for _ in range(ITEM_POOL_SIZE):
+        index = cursor
+        cursor = (cursor + 1) % ITEM_POOL_SIZE
         if index not in occupied:
-            return index
-    return None
+            return index, cursor
+    return None, cursor
 
 
 def _convert_active_power_items(slots: dict[int, ItemState]) -> None:
     for index, item in tuple(slots.items()):
         if item.item_type in (ITEM_POWER_SMALL, ITEM_POWER_LARGE):
-            slots[index] = replace(item, item_type=ITEM_POWER_OVERFLOW)
+            converted = replace(item, item_type=ITEM_POWER_OVERFLOW)
+            if converted.velocity_y > -0.5:
+                converted = replace(
+                    converted,
+                    velocity_x=0.0,
+                    velocity_y=-0.5,
+                )
+            slots[index] = converted
 
 
 def step_item_pool(
@@ -115,22 +141,30 @@ def step_item_pool(
     timer_scale: float = 1.0,
     global_scatter_timer_negative: bool = False,
 ) -> ItemPoolStep:
-    """Spawn, move, collect, and cull once in ascending native slot order.
+    """Spawn, move, collect, and cull once in native active-list order.
 
     ``spawns_before_update`` is deliberately explicit: it means the source
     event occurred before priority-14 ``item_manager_update``. Items created by
     the later hostile-projectile pass must be supplied on the next frame.
     """
 
-    _validate_slots(state.slots)
+    active_order = list(_validate_state(state))
     slots = {slot.index: slot.item for slot in state.slots}
     occupied = set(slots)
+    allocation_cursor = state.next_allocation_index
     spawned: list[int] = []
     pool_exhausted = False
     resources = state.resources
 
     for request in spawns_before_update:
-        index = _first_free_slot(occupied)
+        # Native rejects an out-of-range spawn before it scans or advances the
+        # allocation cursor and before callback RNG is consumed.
+        if request.x < -64.0 or request.x > 448.0:
+            continue
+        index, allocation_cursor = _next_free_slot(
+            occupied,
+            allocation_cursor,
+        )
         if index is None:
             pool_exhausted = True
             break
@@ -147,6 +181,7 @@ def step_item_pool(
             continue
         slots[index] = item
         occupied.add(index)
+        active_order.append(index)
         spawned.append(index)
 
     collected: list[CollectedItem] = []
@@ -154,7 +189,7 @@ def step_item_pool(
     fall_scale = (
         config.focused_fall_scale if focused else config.unfocused_fall_scale
     )
-    for index in tuple(sorted(slots)):
+    for index in tuple(active_order):
         item = slots.get(index)
         if item is None:
             continue
@@ -176,6 +211,7 @@ def step_item_pool(
         )
         if not stepped.alive:
             del slots[index]
+            active_order.remove(index)
             culled.append(index)
             continue
         slots[index] = stepped.item
@@ -209,12 +245,18 @@ def step_item_pool(
             )
         )
         del slots[index]
+        active_order.remove(index)
         if result.converted_active_power_items:
             _convert_active_power_items(slots)
 
     next_slots = tuple(ItemSlot(index, item) for index, item in sorted(slots.items()))
     return ItemPoolStep(
-        ItemPoolState(next_slots, resources),
+        ItemPoolState(
+            next_slots,
+            resources,
+            allocation_cursor,
+            tuple(active_order),
+        ),
         tuple(collected),
         tuple(spawned),
         tuple(culled),

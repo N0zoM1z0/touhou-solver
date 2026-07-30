@@ -11,6 +11,7 @@ from pathlib import Path
 from th08_ecl import EclFile, EclHeader, Timeline, TimelineInstruction
 from th08_item_model import (
     FREE,
+    HOMING,
     ITEM_BOMB,
     ITEM_POWER_LARGE,
     ITEM_POWER_OVERFLOW,
@@ -101,6 +102,90 @@ class ItemPoolTests(unittest.TestCase):
             [slot.item.item_type for slot in result.state.slots],
             [ITEM_POWER_OVERFLOW, ITEM_POWER_OVERFLOW],
         )
+        # Slot 0 was already updated before the pickup and retains the native
+        # conversion clamp. Slot 2 is converted before its active-list turn,
+        # then immediately performs the ordinary full-Power homing update.
+        self.assertEqual(
+            (
+                result.state.slots[0].item.velocity_x,
+                result.state.slots[0].item.velocity_y,
+            ),
+            (0.0, -0.5),
+        )
+        self.assertEqual(result.state.slots[1].item.motion_state, HOMING)
+
+    def test_rotating_cursor_and_active_list_order_control_same_frame_ledger(
+        self,
+    ) -> None:
+        state = ItemPoolState(
+            (
+                ItemSlot(
+                    2,
+                    ItemState(100, 100, 0, 0, item_type=ITEM_POWER_SMALL),
+                ),
+                ItemSlot(
+                    10,
+                    ItemState(100, 100, 0, 0, item_type=ITEM_POWER_LARGE),
+                ),
+            ),
+            ItemResources(power=120, point_value=100000),
+            next_allocation_index=10,
+            active_order=(10, 2),
+        )
+        result = step_item_pool(
+            state,
+            player_x=100,
+            player_y=100,
+            player_state=0,
+            focused=False,
+            config=CONFIG,
+            rng=Th08Rng(0x1234),
+        )
+        self.assertEqual(
+            [(item.slot_index, item.item_type) for item in result.collected],
+            [(10, ITEM_POWER_LARGE), (2, ITEM_POWER_OVERFLOW)],
+        )
+        self.assertEqual(result.state.resources.power, 128)
+        self.assertEqual(result.state.active_order, ())
+        self.assertEqual(result.state.next_allocation_index, 10)
+
+        spawned = step_item_pool(
+            result.state,
+            spawns_before_update=(
+                ItemSpawnRequest(300, 300, ITEM_POWER_SMALL, FREE),
+            ),
+            player_x=0,
+            player_y=400,
+            player_state=0,
+            focused=False,
+            config=CONFIG,
+            rng=Th08Rng(0x1234),
+        )
+        self.assertEqual(spawned.spawned_slots, (10,))
+        self.assertEqual(spawned.state.next_allocation_index, 11)
+        self.assertEqual(spawned.state.active_order, (10,))
+
+    def test_rejected_spawn_does_not_advance_cursor_or_rng(self) -> None:
+        rng = Th08Rng(0x1234)
+        result = step_item_pool(
+            ItemPoolState(
+                (),
+                ItemResources(),
+                next_allocation_index=37,
+            ),
+            spawns_before_update=(
+                ItemSpawnRequest(-65, 100, ITEM_POWER_SMALL, SCATTER_DELAY),
+            ),
+            player_x=0,
+            player_y=400,
+            player_state=0,
+            focused=False,
+            config=CONFIG,
+            rng=rng,
+        )
+        self.assertEqual(result.spawned_slots, ())
+        self.assertEqual(result.state.next_allocation_index, 37)
+        self.assertEqual(rng.calls, 0)
 
     def test_integrated_timeline_then_item_share_one_rng_stream(self) -> None:
         program = _random_spawn_ecl()

@@ -214,7 +214,7 @@ class ItemModelTests(unittest.TestCase):
             ItemResources(power=124),
             difficulty_index=3,
         )
-        self.assertEqual(power.resources.power, 132)
+        self.assertEqual(power.resources.power, 128)
         self.assertTrue(power.converted_active_power_items)
         self.assertTrue(power.power_level_changed)
         self.assertEqual(power.score_value, 10)

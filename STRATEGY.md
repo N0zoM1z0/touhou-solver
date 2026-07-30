@@ -1790,6 +1790,15 @@ first.
   item auto-homing model was also corrected from stage index to the
   revalidated native route/team ID selector; Route 2 stays on the ordinary
   branch.
+- **Corrected item recurrence and capability ledger (2026-07-31):** CE-0220
+  rejects the old Power-132 result for a large pickup at Power 124 and rejects
+  numeric slot order as native update order. Power now clamps at 128; the pool
+  carries its rotating allocation cursor and active linked-list order; and
+  full-Power conversion retains its conditional velocity rewrite. A complete
+  387-row static ledger maps every Power 0..128 plus small, large, or Full
+  Power pickup to both Focus-conditioned SHT capability bands. This closes
+  finite resource arithmetic, not physical pickup identity, safe collection,
+  or later causal benefit.
 - **Boundary:** first revalidate native HP/damageability/end-reason/drop
   semantics, retain trace-only exposure and damage attribution, and separate
   kill, timeout, scripted despawn, and unknown. Any shadow target may rank
@@ -1827,7 +1836,8 @@ first.
   `notes/research/stage5_combat/ROUTE2_ENEMY_END_SEMANTICS_CONTRACT_20260731.md`, and
   `notes/research/stage5_combat/ORDINARY_ENEMY_LIFECYCLE_EVENT_RING_CONTRACT_20260731.md`, and
   `notes/research/stage5_combat/ROUTE2_DAMAGEABILITY_AND_STATIC_SHOT_COVERAGE_CONTRACT_20260731.md`, and
-  `notes/research/route_resources/POWER0_CLEAN_PREFIX_AUDIT_CONTRACT_20260731.md`.
+  `notes/research/route_resources/POWER0_CLEAN_PREFIX_AUDIT_CONTRACT_20260731.md`, and
+  `notes/research/route_resources/POWER_PICKUP_CAPABILITY_LEDGER_CONTRACT_20260731.md`.
   The raw first-64 inventory now has physical trace-only observation
   authority. The Power-0 audit has first-hit-bounded route observation
   authority. The lifecycle ring has offline/synthetic implementation

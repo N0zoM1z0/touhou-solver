@@ -464,7 +464,10 @@ def collect_item(
         if updated.power < 128:
             delta = 1 if item_type == ITEM_POWER_SMALL else 8
             old_level = sum(updated.power >= threshold for threshold in POWER_LEVEL_THRESHOLDS)
-            updated = replace(updated, power=updated.power + delta)
+            # Native add_player_power runs first, then sub_406FA0(128)
+            # immediately writes the canonical cap when the result reaches or
+            # crosses full Power.
+            updated = replace(updated, power=min(128, updated.power + delta))
             new_level = sum(updated.power >= threshold for threshold in POWER_LEVEL_THRESHOLDS)
             convert_power = updated.power >= 128
             score_value = 10

@@ -22,11 +22,12 @@ historical handoff.
 - The WS-H route-2 Focus/Shot foundation, Stage-5 presence-episode audit,
   first-hit-bounded natural Power-0 audit, forced-HP-zero/end-semantics
   correction, default-off native lifecycle event ring, native damageability/
-  HP gate, action-conditioned static shot atlas, `CONTENT-01` shipped content
-  manifest, and `CONTENT-02` static mandatory-event atlas are the current
-  repository checkpoint; no new physical trial was run.
-- Complete Linux discovery passes 1,430 tests in 13.398 seconds.
-- Complete Windows UNC discovery passes 1,430 tests in 28.178 seconds with
+  HP gate, action-conditioned static shot atlas, corrected item-pool
+  recurrence/static Power ledger, `CONTENT-01` shipped content manifest, and
+  `CONTENT-02` static mandatory-event atlas are the current repository
+  checkpoint; no new physical trial was run.
+- Complete Linux discovery passes 1,437 tests in 13.586 seconds.
+- Complete Windows UNC discovery passes 1,437 tests in 28.463 seconds with
   the three existing skips.
 - No TH08, controller, supervisor, native-replay runner, or Windows test
   process is intentionally left running.
@@ -122,6 +123,21 @@ historical handoff.
   `artifacts/runtime_reports/lunatic_route2_power0_clean_prefix_audit_20260731.json`,
   SHA-256
   `837244e9ca86bd70271cc4fa311bbeb67313e4d6c5281285de2872df5e791a6f`.
+- CE-0220 corrects the offline item recurrence. Native small/large Power
+  pickups clamp at 128, the 2,096-slot allocator uses a rotating cursor, and
+  update follows active linked-list allocation order rather than numeric slot
+  order. Full-Power conversion also conditionally rewrites converted item
+  velocity before later list entries update.
+- The complete static Power ledger enumerates all 387 combinations of Power
+  0..128 and requested small, large, or Full Power pickup. It joins the capped
+  resource result to both Focus-conditioned SHT capability bands. This is
+  finite resource/shot authority only, not observed pickup or route benefit.
+- Retained capability ledger:
+  `artifacts/runtime_reports/th08_route2_power_capability_ledger_20260731.json`,
+  SHA-256
+  `06a12eb6f2de97823286613322f6da9fbeac7abec490099ee3298bc6acf1dcf9`.
+  Detailed boundary:
+  `notes/research/route_resources/POWER_PICKUP_CAPABILITY_LEDGER_CONTRACT_20260731.md`.
 - No live Focus/Shot ranking, combat objective, action authority, or physical
   promotion changed.
 
@@ -409,9 +425,10 @@ historical handoff.
   foundations. Damageability and static shot coverage are now retained; the
   next causal combat gate must join an immutable root to enemy generation,
   HP delta, shot/option/RNG state, target motion, and viable actions.
-  Drop/Power thresholds and source-lifetime-to-emission linkage remain open.
-  Do not infer events across ring overflow or install the probe as a live
-  issue-time consumer.
+  The drop/Power static ledger is now complete, but same-update physical item
+  identity, pickup attribution, and carried later benefit remain open.
+  Source-lifetime-to-emission linkage also remains open. Do not infer events
+  across ring overflow or install either probe as a live issue-time consumer.
 - A supervised warm wind-tunnel service remains deferred. If later branch
   throughput becomes the bottleneck, it must preserve a single writer,
   immutable session/root IDs, branch-level root/FX/stack/thread/map checks,

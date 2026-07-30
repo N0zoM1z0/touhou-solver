@@ -92,10 +92,10 @@ describe the same decision. Python/C++ parity is not physical correctness.
 ### Exact state
 
 - Branch: `main`.
-- Latest retained research checkpoint: `ca69ace`
-  (`Implement priority-17 publication probe`).
-- Latest pre-trial repository/live code checkpoint: `ca69ace`
-  (`Implement priority-17 publication probe`).
+- Latest retained research checkpoint: `b2e1eff`
+  (`Fix priority-17 physical preflight`).
+- Latest pre-trial repository/live code checkpoint: `b2e1eff`
+  (`Fix priority-17 physical preflight`).
 - The code at `3f0e56f` was physically exercised by the whole Stage-6B C5-2
   workload below. Its nested exact schedule-delivery gate passes, while the
   complete stage remains a 22-hit survival failure.
@@ -107,11 +107,11 @@ describe the same decision. Python/C++ parity is not physical correctness.
   frames `1..42463`, 11,879 decisions, `route_complete`, and ten CE-0192
   hit edges. It is not observer-off survival, a Power-0 route, or NMNB.
 - Latest physical attempt:
-  `lunatic_route2_stage5_unattended_20260730_041408`. It closes the
-  SEM-MODE-B shipped-runtime occurrence gate with 11,763 coherent captures,
-  299 secondary-character transitions, and stable enemy bodies changing
-  exactly bit `0x800` in both directions. Its diagnostic root-scale proxy and
-  capture cost grant no hard or physical-survival authority.
+  `lunatic_route2_stage5_unattended_20260730_082428`. It installed and cleaned
+  the priority-17 hook, then stopped at gameplay frame 1 with
+  `time_scale_authority_unknown` before any decision or hit. CE-0194 retains
+  the command/trace-cursor counterexample. It is not a stage or survival
+  sample; the latest complete physical workload remains `041408`.
 - No TH08, controller, practice supervisor, full-route supervisor, or test
   process is intentionally left running.
 - `audits/` is untracked user input. Never stage it.
@@ -304,6 +304,21 @@ unrelated auxiliary-ECL timing gate; isolated p95/p99/max then passed at
 `0.311/0.318/0.320 ms`, and the subsequent complete suite passed. No game has
 yet exercised the probe. It has trace/preflight authority only and supplies
 no delay adapter, action, hard-survival, or NMNB authority.
+
+Checkpoint `b2e1eff` corrects CE-0194 after physical preflight `082428`.
+The probe installed successfully and baseline serial 0 was retained, but the
+existing root-only scale authority check stopped at frame 1 before decisions.
+The attempt also showed that an early pre-issue exit could advance the local
+probe cursor without retaining its batch.
+
+The explicit diagnostic constant-root continuation is now permitted under
+the priority-17 whole-stage observer as well as the enemy-mode observer. It
+remains unknown-direction/no-authority and conflicts with exact Final-B scale
+authority. Probe reads now occur after every pre-issue early exit, and the
+serial cursor advances only after the containing decision row is flushed.
+Complete Linux/Windows discovery passes 1,226 tests in 14.851/30.813 seconds,
+with three existing Windows skips. Corrected physical revalidation is the
+next gate.
 
 Checkpoint `e309c81` passes the `SEM-TIMER` offline semantic gate: 17/17
 product/raw-oracle/Linux-and-Windows-native cases per platform, a separate
@@ -661,15 +676,19 @@ Do not resume broad G5 work first.
    route. C5 exact delivery is closed for its declared source-local contract;
    the two failed workloads already supply their reachability, resource, and
    non-aborting evidence.
-2. Continue `SEM-MODE-C` from checkpoint `ca69ace`. The independent ordered
+2. Continue `SEM-MODE-C` from checkpoint `b2e1eff`. The independent ordered
    transaction state and native priority-9-before-priority-17 composition are
    complete offline. The retained post-hoc audit exhausts the current trace
    and proves exact publication deadline unidentifiable from it. The bounded
    priority-17 serial/event ring and pre/post-dispatch brackets now pass
-   preflight. Run one complete original-game Lunatic Stage-5 workload with
-   only `--trace-priority17-publications`; preserve hard no-Bomb,
+   preflight. CE-0194 rejects the probe-only command because the existing
+   root-only scale authority check stops at frame 1. Run one complete
+   original-game Lunatic Stage-5 workload with
+   `--trace-priority17-publications` and the explicit
+   `--diagnostic-continue-root-only-scale`; preserve hard no-Bomb,
    `stop-after-hits=0`, stage-level scope, and normal completion even if the
-   probe becomes unavailable. Retain the compact report and use only
+   probe becomes unavailable. The scale proxy has unknown direction and no
+   survival authority. Retain the compact report and use only
    fully-covered serial intervals to close asynchronous capture/issue phase
    and physical completion-delay support without treating manager frame as
    an input clock. Then build an optimized implementation and run exact
@@ -2575,14 +2594,17 @@ now one authorized SEM-MODE-C physical command:
 /mnt/c/Windows/System32/cmd.exe /d /c call \
   '\\wsl.localhost\ubuntu\home\pentester\coding\codex_ida\th08\run_th08_practice_agent.bat' \
   --stage 5 --status-seconds 15 --stall-timeout 120 \
-  --trace-priority17-publications
+  --trace-priority17-publications \
+  --diagnostic-continue-root-only-scale
 ```
 
 This is one complete original-game Stage-5 diagnostic, not a named-spell
 gate. It keeps hard no-Bomb and `stop-after-hits=0`; probe
 unavailability/overflow/read failure must not abort the stage. Do not combine
-it with the enemy-mode/root-scale observer, THPRAC, or another experiment
-flag. The supervisor retains
+it with the enemy-mode observer, THPRAC, or another experiment flag. The
+constant-root scale continuation is an explicit unknown-direction
+non-authoritative proxy required by CE-0194, not survival evidence. The
+supervisor retains
 `*.priority17_publication_report.json` after ordinary whole-stage completion.
 
 The current explicit trace-only native birth-observer gate adds:

@@ -7,7 +7,7 @@ and design/run notes retain derivations and history.
 `notes/README.md` is the short topology index when a referenced note must be
 located; it does not change the authority order below.
 
-## Current Handoff — Native Replay Wind-Tunnel Closure
+## Current Handoff — One-Tick Native Snapshot Closure
 
 This section supersedes older checkpoint/next-gate prose later in this
 historical handoff.
@@ -15,12 +15,12 @@ historical handoff.
 ### Exact checkpoint
 
 - Branch: `main`.
-- Latest implementation checkpoint: `49747f2`
-  (`Build native replay wind tunnel and save automation`).
+- Latest implementation checkpoint: `ae78095`
+  (`Build one-tick native snapshot executor`).
 - The following retention/documentation checkpoint is the current repository
   HEAD.
-- Complete Linux discovery passes 1,315 tests in 15.066 seconds.
-- Complete Windows UNC discovery passes 1,315 tests in 32.243 seconds with
+- Complete Linux discovery passes 1,323 tests in 14.124 seconds.
+- Complete Windows UNC discovery passes 1,323 tests in 29.618 seconds with
   the three existing skips.
 - No TH08, controller, supervisor, native-replay runner, or Windows test
   process is intentionally left running.
@@ -50,12 +50,13 @@ historical handoff.
 - Native replay first hit: manager frame 2,136.
 - Exact input alignment: replay input frame `manager - 1`, matching
   2,136/2,136 masks, 450/450 transitions, and a 64-frame suffix.
-- Current branch root: replay frame 2,129; exact byte capture at manager
-  2,130.
+- Current branch root: replay frame and manager frame 2,129, before the
+  priority-6 replay action load and the native calculation chain.
 - Atomic partial-root SHA-256:
   `289da8a4daf80353ea98f0394ffc0b011b7a30e950007a41f47452bbf3ebeabb`,
-  bracket `[2130,2130]`. It has no restore executor and no predictive
-  authority.
+  bracket `[2130,2130]`. This older seven-of-ten byte inventory remains
+  retained history; it is superseded for same-session iteration by the
+  explicit executor below.
 - Corrected all-36 original-engine replay branches at stop fence 2,137:
   30 hit, six locally reached the fence.
 - Extending those six masks (`0x14/15/90/91/94/95`) to frame 2,257 produced
@@ -65,6 +66,30 @@ historical handoff.
 - Stop-at-2,136 pilot reports are rejected: manager priority advances before
   same-frame collision, so an external observer must see a later fence.
 
+### One-tick native snapshot result
+
+- `scripts/th08_runtime/native_snapshot.py` replaces only the fixed
+  `0x00441F4D -> 0x0043CA50` calculation-chain call. At manager frame 2,129
+  it holds the owner before calculation, freezes the other 33 threads, runs
+  one original update chain, and stops before render at frame 2,130.
+- The stable same-session root covered 110,141,440 bytes in 248 writable
+  private/image regions. The first observation changed region partitioning;
+  it was discarded, and the second pre/post-stable mapping became the root.
+- A1 and A2 used the recorded no-Bomb action `0x05` with true no-write
+  semantics. Their captured endpoint SHA-256 and revalidated native
+  projection SHA-256 were each exactly equal.
+- B=`0x15` changed exactly one replay-root byte and diverged in gameplay
+  RNG/input, ordinary-enemy ECL/callback roots, ordinary-enemy template/pool,
+  and player/resource-transition state.
+- All three branches preserved one thread/mapping epoch and restored every
+  dirty span to the same root. Native calculation took 0.785--0.999 ms;
+  endpoint scan, projection, restore, and verification yield roughly four to
+  five candidates per second after reaching the root once.
+- Compact report:
+  `artifacts/runtime_reports/th08_native_snapshot_one_tick_20260730.json`,
+  SHA-256
+  `6144624093386619d0ac66b69da5bf90c84b88f158d4b4f5529f953d376585a9`.
+
 ### Authority and next useful gate
 
 - Accepted replay saving and original-engine replay branching are
@@ -73,15 +98,20 @@ historical handoff.
   candidate validator. Repeating a whole replay prefix for all 36 actions is
   rejected as the primary inner loop; the complete portfolio took roughly
   half an hour.
-- The next decisive milestone is a TH08-specific one-tick explicit-root
-  restore-and-step executor at a revalidated input/scheduler boundary.
-- First prove `A -> restore -> A` fingerprint identity and
-  `A -> restore -> B` divergence only after the declared input effect.
-  Return `UNKNOWN` on unowned allocation, mapping, callback, thread, timer,
-  renderer/audio, transition, or external-state effects.
-- Grow exact horizons `1/2/4/8/16`, then run all 36 masks. Only an exact
-  causal no-hit witness returns to original replay and a focused complete
-  stage.
+- The one-tick A/A/B construction gate is observed only at the canonical
+  frame-2,129 root. It has offline same-session iteration authority, not live
+  or physical predictive authority.
+- Forty-two writable regions, external handle/device/audio/timer effects,
+  and event classes outside this root remain unresolved. Preserve
+  fail-closed `UNKNOWN` behavior on mapping/thread/stack/transition changes.
+- The next useful gate is repeated one-tick A/A/B identity at distinct event
+  classes such as spawn, redirect, callback transition, and laser lifecycle.
+  Then grow exact horizons `2/4/8/16` and only afterward run all 36 masks.
+- Endpoint discovery still scans about 110 MB and costs 152--172 ms.
+  Write-watch or guarded dirty-page tracking is a performance proposal, not
+  correctness authority.
+- Only an exact causal no-hit witness returns to original replay and a
+  focused complete stage.
 - Do not run another unchanged Stage-5 physical trial or another exhaustive
   replay-prefix portfolio. No THPRAC/exact-spell automation is assumed; the
   physical research unit remains a complete selected stage.

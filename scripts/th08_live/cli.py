@@ -119,6 +119,17 @@ def build_live_parser(
         ),
     )
     parser.add_argument(
+        "--losing-control-reserve",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+        help=(
+            "after an empty global kernel, rank fresh-hard-equivalent local "
+            "endpoints by delay-scaled reversible boundary reserve; enabled "
+            "for the versioned Stage-5 physical gate, with "
+            "--no-losing-control-reserve as the exact rollback"
+        ),
+    )
+    parser.add_argument(
         "--postpublished-survival-shadow",
         action="store_true",
         help=(

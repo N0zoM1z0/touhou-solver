@@ -18,6 +18,7 @@ from th08_future_body_identity import Route2SlotLifetimeLedger
 from th08_live.enemy_sensor import (
     ENEMY_ACTIVE_FLAG,
     ENEMY_FLAGS_OFFSET,
+    ENEMY_POOL_BASE,
     ENEMY_POOL_SIZE,
     ENEMY_STRIDE,
 )
@@ -25,12 +26,14 @@ from th08_runtime.game_state import ADDR_ENEMY_MANAGER_FRAME
 from touhou_control.pipeline_identity import VersionIdentity
 
 
-ROOT_SLICE_SCHEMA = "th08-native-future-body-root-slice-v1"
-ROOT_COMPONENT_SCHEMA = "th08-native-future-body-root-component-v1"
+ROOT_SLICE_SCHEMA = "th08-native-future-body-root-slice-v2"
+ROOT_COMPONENT_SCHEMA = "th08-native-future-body-root-component-v2"
 ROOT_COMPONENT_CAPTURE_SCHEMA = (
-    "th08-native-future-body-root-component-capture-v1"
+    "th08-native-future-body-root-component-capture-v2"
 )
 ROOT_SLICE_AUTHORITY = "native_root_bytes_only_no_predictive_authority"
+TH08_ENEMY_MANAGER_TEMPLATE_BASE = 0x0057D2F0
+TH08_TIMELINE_RUNTIME_BASE = 0x00F5A0C0
 
 MINIMUM_ROOT_REQUIREMENTS = (
     "damage_power_and_resources",
@@ -79,6 +82,7 @@ class Route2NativeRootComponentSpec:
     requirements: tuple[str, ...]
     layout_version: str
     evidence_state: str
+    complete_requirement_coverage: bool = True
     schema: str = ROOT_COMPONENT_SCHEMA
 
     def __post_init__(self) -> None:
@@ -114,6 +118,10 @@ class Route2NativeRootComponentSpec:
             raise ValueError("native-root layout version must not be empty")
         if self.evidence_state not in _EVIDENCE_STATES:
             raise ValueError("unsupported native-root evidence state")
+        if type(self.complete_requirement_coverage) is not bool:
+            raise ValueError(
+                "native-root requirement coverage must be an exact boolean"
+            )
 
     def record(self) -> dict[str, object]:
         return {
@@ -124,6 +132,9 @@ class Route2NativeRootComponentSpec:
             "requirements": list(self.requirements),
             "layout_version": self.layout_version,
             "evidence_state": self.evidence_state,
+            "complete_requirement_coverage": (
+                self.complete_requirement_coverage
+            ),
         }
 
 
@@ -219,7 +230,10 @@ class Route2NativeFutureBodyRootSlice:
                 {
                     requirement
                     for component in self.components
-                    if component.spec.evidence_state == "revalidated"
+                    if (
+                        component.spec.evidence_state == "revalidated"
+                        and component.spec.complete_requirement_coverage
+                    )
                     for requirement in component.spec.requirements
                 }
             )
@@ -320,6 +334,195 @@ def decode_route2_ordinary_pool_active_slots(
     )
 
 
+def route2_revalidated_native_root_component_specs(
+) -> tuple[Route2NativeRootComponentSpec, ...]:
+    """Return the current static native-root layout inventory.
+
+    Partial entries deliberately do not satisfy their semantic requirement.
+    They identify exact fixed bytes whose dynamic pointees or companion
+    regions must still be captured in the same transaction.
+    """
+
+    return (
+        Route2NativeRootComponentSpec(
+            name="ordinary_enemy_template_and_pool",
+            address=TH08_ENEMY_MANAGER_TEMPLATE_BASE,
+            size=(ENEMY_POOL_SIZE + 1) * ENEMY_STRIDE,
+            requirements=(
+                "motion_flag_and_lifecycle_state",
+                "ordinary_enemy_template_and_pool",
+            ),
+            layout_version=(
+                "ida-0x42a4e0-template-plus-480x0x53d0-20260730"
+            ),
+            evidence_state="revalidated",
+        ),
+        Route2NativeRootComponentSpec(
+            name="ordinary_enemy_ecl_and_callback_roots",
+            address=ENEMY_POOL_BASE,
+            size=ENEMY_POOL_SIZE * ENEMY_STRIDE,
+            requirements=(
+                "external_callback_and_transition_state",
+                "main_and_auxiliary_ecl_contexts",
+            ),
+            layout_version=(
+                "ida-0x42c660-main-vm-plus-aux-pointer-roots-20260730"
+            ),
+            evidence_state="revalidated",
+            complete_requirement_coverage=False,
+        ),
+        Route2NativeRootComponentSpec(
+            name="timeline_runtime_clock_table",
+            address=TH08_TIMELINE_RUNTIME_BASE,
+            size=16 * 16,
+            requirements=("timeline_runtime_state",),
+            layout_version=(
+                "ida-0x42c7c3-16x16-timeline-state-table-20260730"
+            ),
+            evidence_state="revalidated",
+            complete_requirement_coverage=False,
+        ),
+        Route2NativeRootComponentSpec(
+            name="timeline_markers_and_spawn_suppression",
+            address=0x00F54E1C,
+            size=0x14,
+            requirements=(
+                "physical_clock_and_scheduler_gates",
+                "timeline_runtime_state",
+            ),
+            layout_version=(
+                "ida-0x42a944-0x42ac81-marker4-plus-suppression-20260730"
+            ),
+            evidence_state="revalidated",
+            complete_requirement_coverage=False,
+        ),
+        Route2NativeRootComponentSpec(
+            name="indexed_enemy_registry",
+            address=0x00F54CC0,
+            size=8 * 4,
+            requirements=("external_callback_and_transition_state",),
+            layout_version="ida-0x42ac18-0x42ac6b-8xpointer-20260730",
+            evidence_state="revalidated",
+            complete_requirement_coverage=False,
+        ),
+        Route2NativeRootComponentSpec(
+            name="runtime_ecl_file_context",
+            address=0x004ECCB8,
+            size=8,
+            requirements=(
+                "main_and_auxiliary_ecl_contexts",
+                "timeline_runtime_state",
+            ),
+            layout_version="ida-0x418330-context-two-dwords-20260730",
+            evidence_state="revalidated",
+            complete_requirement_coverage=False,
+        ),
+        Route2NativeRootComponentSpec(
+            name="gameplay_identity_prefix",
+            address=0x0164D0A8,
+            size=0x10,
+            requirements=("gameplay_and_route_identity",),
+            layout_version=(
+                "ida-0x42c6d1-route-engine-identity-prefix-20260730"
+            ),
+            evidence_state="revalidated",
+            complete_requirement_coverage=False,
+        ),
+        Route2NativeRootComponentSpec(
+            name="stage_route_and_enemy_clock",
+            address=0x0164D2CC,
+            size=0x44,
+            requirements=(
+                "gameplay_and_route_identity",
+                "physical_clock_and_scheduler_gates",
+            ),
+            layout_version=(
+                "ida-runtime-stage-route-through-enemy-frame-20260730"
+            ),
+            evidence_state="revalidated",
+            complete_requirement_coverage=False,
+        ),
+        Route2NativeRootComponentSpec(
+            name="gameplay_rng_and_input_masks",
+            address=0x0164D520,
+            size=0x18,
+            requirements=(
+                "player_input_mode_and_shot_state",
+                "shared_gameplay_rng",
+            ),
+            layout_version=(
+                "ida-0x43ecc0-rng-state-calls-plus-input-masks-20260730"
+            ),
+            evidence_state="revalidated",
+            complete_requirement_coverage=False,
+        ),
+        Route2NativeRootComponentSpec(
+            name="gameplay_rng_exact",
+            address=0x0164D520,
+            size=8,
+            requirements=("shared_gameplay_rng",),
+            layout_version="ida-0x43ecc0-u16-state-u32-call-count-20260730",
+            evidence_state="revalidated",
+        ),
+        Route2NativeRootComponentSpec(
+            name="player_state_through_resource_transitions",
+            address=0x017D5EF8,
+            size=0xE2A70,
+            requirements=(
+                "damage_power_and_resources",
+                "player_input_mode_and_shot_state",
+            ),
+            layout_version=(
+                "ida-0x44c390-player-through-predeath-lockout-20260730"
+            ),
+            evidence_state="revalidated",
+            complete_requirement_coverage=False,
+        ),
+        Route2NativeRootComponentSpec(
+            name="run_state_inner_pointer",
+            address=0x0160F510,
+            size=4,
+            requirements=("damage_power_and_resources",),
+            layout_version=(
+                "runtime-run-state-pointer-lives-bombs-power-pointee-20260730"
+            ),
+            evidence_state="revalidated",
+            complete_requirement_coverage=False,
+        ),
+        Route2NativeRootComponentSpec(
+            name="scheduler_gate_globals",
+            address=0x0160F428,
+            size=0x118,
+            requirements=("physical_clock_and_scheduler_gates",),
+            layout_version=(
+                "ida-frscreen-serial-pointer-freeze-difficulty-20260730"
+            ),
+            evidence_state="revalidated",
+            complete_requirement_coverage=False,
+        ),
+        Route2NativeRootComponentSpec(
+            name="spell_transition_state",
+            address=0x004EA670,
+            size=0x114,
+            requirements=("external_callback_and_transition_state",),
+            layout_version=(
+                "ida-spell-prefix-through-timer-elapsed-20260730"
+            ),
+            evidence_state="revalidated",
+            complete_requirement_coverage=False,
+        ),
+        Route2NativeRootComponentSpec(
+            name="global_gameplay_time_scale",
+            address=0x017CE8E0,
+            size=4,
+            requirements=("external_callback_and_transition_state",),
+            layout_version="ida-ecl-callback-global-f32-scale-20260730",
+            evidence_state="revalidated",
+            complete_requirement_coverage=False,
+        ),
+    )
+
+
 def capture_route2_native_future_body_root_slice(
     reader: NativeRootReader,
     *,
@@ -388,10 +591,13 @@ __all__ = [
     "ROOT_COMPONENT_SCHEMA",
     "ROOT_SLICE_AUTHORITY",
     "ROOT_SLICE_SCHEMA",
+    "TH08_ENEMY_MANAGER_TEMPLATE_BASE",
+    "TH08_TIMELINE_RUNTIME_BASE",
     "NativeRootReader",
     "Route2NativeFutureBodyRootSlice",
     "Route2NativeRootComponentCapture",
     "Route2NativeRootComponentSpec",
     "capture_route2_native_future_body_root_slice",
     "decode_route2_ordinary_pool_active_slots",
+    "route2_revalidated_native_root_component_specs",
 ]

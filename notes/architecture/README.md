@@ -17,6 +17,7 @@ authority.
 - [native ECL timer semantics](TH08_NATIVE_ECL_TIMER_SEMANTICS_20260729.md)
 - [player/laser global time-scale semantics](TH08_PLAYER_LASER_GLOBAL_TIME_SCALE_SEMANTICS_20260729.md)
 - [action-conditioned player/enemy mode semantics](TH08_ACTION_CONDITIONED_PLAYER_ENEMY_MODE_SEMANTICS_20260730.md)
+- [native producer root layout and timeline spawn lifecycle](NATIVE_PRODUCER_ROOT_LAYOUT_AND_TIMELINE_SPAWN_LIFECYCLE_20260730.md)
 
 Current code placement rules remain in `../../AGENTS.md` and the consolidated
 roadmap.

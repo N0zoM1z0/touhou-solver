@@ -154,6 +154,43 @@ class TimelineModelTests(unittest.TestCase):
         self.assertEqual(result.state.player.frame_index, 1)
         self.assertEqual(len(result.state.last_timeline_step.spawns), 1)
 
+    def test_integrated_timeline_spawn_updates_generation_ledger(self) -> None:
+        program = _ecl(
+            (
+                _instruction(0x10, 0, 0x00, SPAWN_ARGS),
+                _instruction(0x28, 0, 0x00, SPAWN_ARGS),
+            )
+        )
+        returns = iter((-1, 0))
+        state = initial_route2_stage_simulation_state(
+            program,
+            rng_seed=0,
+            active_timeline_difficulty_mask=1,
+            initial_enemy_vm_executor=(
+                lambda _request, _identity: next(returns)
+            ),
+            short_spawn_mode=True,
+        )
+
+        result = route2_stage_executor().step(
+            state,
+            Th08Route2FrameControl(0),
+            frame_index=0,
+        )
+        lifecycle = result.state.last_timeline_spawn_lifecycle
+        self.assertIsNotNone(lifecycle)
+        assert lifecycle is not None
+        self.assertEqual(
+            tuple((event.kind, event.slot) for event in lifecycle.lifecycle.events),
+            (("allocate", 0), ("retire", 0), ("allocate", 0)),
+        )
+        self.assertEqual(
+            lifecycle.lifecycle.successor.identity_for_active_slot(
+                0
+            ).allocation_generation,
+            1,
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

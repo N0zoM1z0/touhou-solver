@@ -48,6 +48,7 @@ class Th08LiveCliTests(unittest.TestCase):
         self.assertEqual(arguments.auxiliary_vm_native_call_mode, "held")
         self.assertFalse(arguments.trace_auxiliary_ecl_events)
         self.assertFalse(arguments.trace_priority17_publications)
+        self.assertTrue(arguments.losing_control_reserve)
         self.assertEqual(
             arguments.bullet_birth_native_call_mode,
             "released",
@@ -85,6 +86,13 @@ class Th08LiveCliTests(unittest.TestCase):
         )
 
         self.assertTrue(arguments.trace_priority17_publications)
+
+    def test_losing_control_reserve_has_explicit_rollback(self) -> None:
+        arguments = controller.build_parser().parse_args(
+            ["trace.jsonl", "--no-losing-control-reserve"]
+        )
+
+        self.assertFalse(arguments.losing_control_reserve)
 
 
 if __name__ == "__main__":

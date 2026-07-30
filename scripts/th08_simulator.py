@@ -8,6 +8,12 @@ from dataclasses import dataclass, field, replace
 from deterministic_sim import DeterministicFrameExecutor, EventContext
 from state_trace import FloatEncoding, ProjectionField, StateProjection
 from th08_ecl import EclFile
+from th08_enemy_spawn_lifecycle import (
+    InitialEnemyVmExecutor,
+    Route2TimelineSpawnLifecycleStep,
+    execute_route2_timeline_spawn_lifecycles,
+)
+from th08_future_body_identity import Route2SlotLifetimeLedger
 from th08_hostile_bullet_pool import (
     HostileBulletPoolState,
     HostileBulletPoolStep,
@@ -96,6 +102,11 @@ class Th08Route2SimulationState:
     timeline: StageTimelineState | None = None
     active_timeline_difficulty_mask: int = 0
     last_timeline_step: StageTimelineStep | None = None
+    enemy_lifetime_ledger: Route2SlotLifetimeLedger | None = None
+    initial_enemy_vm_executor: InitialEnemyVmExecutor | None = None
+    last_timeline_spawn_lifecycle: (
+        Route2TimelineSpawnLifecycleStep | None
+    ) = None
     gameplay_rng_state: int = 0
     gameplay_rng_calls: int = 0
     item_pool: ItemPoolState | None = None
@@ -125,6 +136,9 @@ def initial_route2_stage_simulation_state(
     item_config: ItemPoolConfig | None = None,
     hostile_bullet_player_config: HostileBulletPlayerConfig | None = None,
     laser_player_config: LaserPlayerConfig | None = None,
+    initial_enemy_vm_executor: InitialEnemyVmExecutor | None = None,
+    initial_enemy_active_slots: tuple[int, ...] = (),
+    root_physical_update: int = 0,
     **player_kwargs: object,
 ) -> Th08Route2SimulationState:
     """Initialize the replay/player/timeline slice without inventing enemy VM state."""
@@ -133,6 +147,10 @@ def initial_route2_stage_simulation_state(
         raise ValueError("active timeline difficulty mask must fit in one byte")
     if (item_resources is None) != (item_config is None):
         raise ValueError("item resources and item config must be supplied together")
+    if initial_enemy_vm_executor is None and initial_enemy_active_slots:
+        raise ValueError(
+            "initial enemy slots require an initial-VM executor"
+        )
     if item_resources is not None:
         requested_bombs = player_kwargs.get("bombs", item_resources.bombs)
         if requested_bombs != item_resources.bombs:
@@ -144,6 +162,15 @@ def initial_route2_stage_simulation_state(
         timeline=initial_stage_timeline_state(ecl, rng_seed=rng_seed),
         active_timeline_difficulty_mask=active_timeline_difficulty_mask,
         gameplay_rng_state=rng_seed,
+        enemy_lifetime_ledger=(
+            Route2SlotLifetimeLedger.from_root_active_slots(
+                root_physical_update=root_physical_update,
+                active_slots=initial_enemy_active_slots,
+            )
+            if initial_enemy_vm_executor is not None
+            else None
+        ),
+        initial_enemy_vm_executor=initial_enemy_vm_executor,
         item_pool=(
             initial_item_pool_state(item_resources)
             if item_resources is not None
@@ -225,10 +252,28 @@ def _step_stage_timeline(
         active_difficulty_mask=state.active_timeline_difficulty_mask,
         external=control.timeline_external,
     )
+    spawn_lifecycle = None
+    enemy_lifetime_ledger = state.enemy_lifetime_ledger
+    if enemy_lifetime_ledger is not None:
+        if state.initial_enemy_vm_executor is None:
+            raise RuntimeError(
+                "enemy lifetime ledger requires an initial-VM executor"
+            )
+        spawn_lifecycle = execute_route2_timeline_spawn_lifecycles(
+            enemy_lifetime_ledger,
+            next_physical_update=(
+                enemy_lifetime_ledger.current_physical_update + 1
+            ),
+            spawns=result.spawns,
+            initial_vm_executor=state.initial_enemy_vm_executor,
+        )
+        enemy_lifetime_ledger = spawn_lifecycle.lifecycle.successor
     return replace(
         state,
         timeline=result.state,
         last_timeline_step=result,
+        enemy_lifetime_ledger=enemy_lifetime_ledger,
+        last_timeline_spawn_lifecycle=spawn_lifecycle,
         gameplay_rng_state=result.state.rng_state,
         gameplay_rng_calls=result.state.rng_calls,
     )

@@ -3939,6 +3939,9 @@ def _run_live_session(
                         horizon=args.horizon,
                         threat_horizon=args.threat_horizon,
                         beam_width=args.beam_width,
+                        losing_control_reserve=(
+                            args.losing_control_reserve
+                        ),
                         preserve_previous_direction_inertia=(
                             not corridor_context_changed
                         ),

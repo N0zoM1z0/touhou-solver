@@ -193,9 +193,11 @@ Retained report:
 `artifacts/runtime_reports/th08_future_body_generation_differential_20260730.json`
 
 SHA-256:
-`501a78c6c54600d6615b5d5d4805a851e66d579044e49df783ad6ffb60aa3d24`
+`701f1ca778e6e20c94996061afec3cea68bf4233ba920af80de0fa63b4930334`
 
-Linux and Windows render byte-identical output.
+Linux and Windows render LF-normalized-identical output. Schema v2 adds an
+explicit `complete_requirement_coverage` bit so a revalidated pointer cell
+cannot claim complete pointee coverage.
 Twenty-two focused tests cover identity encoding, native-order lifecycle
 updates, endpoint reconciliation, root capture/retry/coverage, full-pool
 active decoding, independent differential parity, and retained-report
@@ -238,3 +240,25 @@ identity. Complete Linux/Windows discovery passes 1,288/1,288 in
 5. Retain native replay only when the original game naturally produces one,
    then repeat the Stage 3/4A/5/Final-B promotion ring before the Power-0 full
    route.
+
+## 7. 2026-07-30 allocation/root-layout update
+
+The timeline allocation boundary is now connected to the ledger. The
+integrated simulator performs the native first-inactive scan for each ordered
+timeline request, invokes an explicit initial-main-VM executor, emits
+immediate retirement for exact return `-1`, and permits later same-update
+reuse. Four independent scalar/product cases agree at retained payload
+SHA-256
+`d5db9e32cf029249b17f3e99cf8b7782856bbdb128acf52e5f7538f827c2ac17`.
+
+The concrete native layout inventory is also versioned. Revalidated fixed
+addresses no longer imply complete requirement coverage: runtime ECL images,
+auxiliary/callback heaps, and the run-state resource pointee remain outside
+their pointer cells. Only template/pool, slot motion/flags/lifecycle, and
+shared RNG currently satisfy a whole minimum root requirement. See
+`notes/architecture/NATIVE_PRODUCER_ROOT_LAYOUT_AND_TIMELINE_SPAWN_LIFECYCLE_20260730.md`.
+
+This completes former gate 2 only for an explicitly supplied initial-VM
+result. The complete initial ECL VM and its dynamic root remain open, followed
+by child allocation, all other retirement paths, callbacks, motion/flags,
+damage/resources, and joint RNG/scheduler execution.

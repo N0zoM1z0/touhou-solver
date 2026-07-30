@@ -1326,8 +1326,8 @@ reconcile a complete event history.
 
 Four deterministic product cases match an independent scalar oracle; an
 endpoint-only foil merges three hidden-reuse cases. Linux and Windows render
-the retained report byte-identically at SHA-256
-`501a78c6c54600d6615b5d5d4805a851e66d579044e49df783ad6ffb60aa3d24`.
+the retained schema-v2 report LF-normalized-identically at SHA-256
+`701f1ca778e6e20c94996061afec3cea68bf4233ba920af80de0fa63b4930334`.
 A separate native-root byte-slice envelope brackets and hashes declared raw
 components, decodes all 480 active bits, and reports missing requirements.
 It always denies predictive authority; no complete physical root or
@@ -1341,6 +1341,127 @@ immediate-VM termination before later birth/lifecycle classes. Do not run an
 unchanged physical stage. When a new fixed predictive version exists, the
 physical unit remains the complete original-game stage without fail-close or
 THPRAC, followed by Stage 3/4A/5/Final-B and the Power-0 route.
+
+2026-07-30 allocation/initial-VM update: connected IDA revalidates the
+template/manager root `0x0057D2F0`, ordinary pool `0x005826C0`, main VM
+`enemy+0x07F8`, and the 16×16-byte timeline state table at `0x00F5A0C0`.
+The concrete fixed-region inventory now covers all ten requirement names but
+distinguishes revalidated layout from complete semantic coverage. Runtime ECL
+image bytes, auxiliary/callback heap pointees, run-state resources, and
+multi-region scheduler/player roots remain partial; a pointer cell cannot
+satisfy a whole root requirement.
+
+`th08_enemy_spawn_lifecycle.py` now connects ordered timeline spawn requests
+to the generational ledger: first-inactive allocation, one explicit initial
+main-VM execution, immediate `-1` retirement, and later same-update reuse.
+The integrated simulator consumes this path directly. Four independent
+scalar/product cases agree, retained at payload SHA-256
+`d5db9e32cf029249b17f3e99cf8b7782856bbdb128acf52e5f7538f827c2ac17`.
+This remains offline because the complete initial VM, child allocators, other
+retirements, callbacks, motion/flags, damage/resources, and shared-RNG
+execution are not yet connected.
+
+The physical feedback loop is deliberately shorter than the remaining native
+producer program. The already screened empty-kernel boundary-reserve fallback
+is enabled as a versioned Stage-5 falsifier, with exact rollback
+`--no-losing-control-reserve`. On 500 deterministic pre-hit rows from
+`20260729_161313`, it changes seven actions, improves reserve on all seven,
+and preserves every declared local/issue/terminal hard vector; it does not
+change that trace's canonical first-hit window and is not proof of prevented
+contact. The next gate is therefore one complete original-game Lunatic
+Stage 5, no fail-close and no THPRAC. A result at `<=10` with a later first
+contact is useful, `<=8` is a strong favorable signal, and any result must be
+followed by first-hit causal analysis rather than aggregate-only promotion.
+Offline trace/native replay remains a screening and hypothesis-validation
+tool; fresh physical play remains required.
+
+2026-07-30 offline-iteration protocol correction: the full research audit is
+now retained at
+`notes/review/TH08_OFFLINE_ITERATION_RESEARCH_20260730.md`. It separates five
+questions that the old whole-stage loop conflated: recurrence correctness,
+fixed-history shipped-engine parity, same-root policy counterfactuals,
+real-time delivery, and full physical route survival. Only the last two
+inherently require normal-speed live play.
+
+The new default inner loop is therefore a content-addressed, fail-closed
+causal-prefix executor, not a complete visual TH08 clone:
+
+1. capture one coherent full native root and immutable executable/content/
+   policy identities;
+2. execute exactly one native physical update in shipped event order;
+3. return `UNKNOWN(event_class, frame, identity)` before any unsupported
+   mutation;
+4. compare every supported before/after fingerprint with original-game
+   deterministic replay under the same input;
+5. shrink the first mismatch into a retained counterexample;
+6. branch all 36 no-Bomb masks only when the reached event classes are exact
+   or conservatively enveloped for the queried property; and
+7. extend one frame/event boundary at a time, re-rooting frequently.
+
+Shared RNG begins equal at paired roots but evolves independently according
+to each branch's exact native event order. A recorded future schedule may
+validate one fixed input history; it must never become the counterfactual
+future of a different action. An accelerated/render-skipped native engine is
+a later, separate mechanics-oracle experiment and gains authority only after
+normal-speed/replay per-frame fingerprints agree.
+
+This process change does not weaken physical acceptance. Original-game
+real-time trials remain irreducible for delivery/contention, native input
+pickup and no-write, foreground/transitions/cleanup, fresh Stage 3/4A/5/
+Final-B scene coverage, Power-0 resources, and repeated Lunatic/Extra routes.
+Physical play moves from the semantic-debug inner loop to a sparse named
+falsifier and promotion gate.
+
+The companion feasibility perspective is retained at
+`notes/review/NMNB_FEASIBILITY_AND_FIRST_HIT_ITERATION_PERSPECTIVE_20260730.md`.
+Its operational correction is important: `74 -> 0` is not a sequence of 74
+independent fixes. After the first contact, respawn position, invulnerability,
+Power, damage, phase timing, source lifetime, and RNG history contaminate the
+remainder. Aggregate hits remain a workload metric, but the primary research
+unit is the first contact of a fresh attempt and the decision roots leading
+to it.
+
+The decisive NMNB milestone is therefore a closed first-hit loop:
+
+1. capture the canonical pre-contact native root with complete causal state;
+2. branch all 36 no-Bomb masks without reusing action-incompatible futures;
+3. obtain an exact no-contact witness within the input-delay/cadence model;
+4. reproduce the same fixed-input prefix against the original native engine;
+5. deliver the witness through the live controller in the whole-stage
+   physical scene; and
+6. repeat on the same root class before advancing to the next canonical first
+   contact.
+
+If all actions are exactly losing inside the verified delay support, the
+result is still high-value: it directs work to earlier anticipation, cadence,
+action authority, or the planner/model architecture rather than aggregate
+parameter tuning.
+
+The already preregistered losing-control-reserve Stage-5 run is the transition
+gate because it is a changed live ranking, has an exact rollback, preserves
+all screened hard vectors, and asks a physical question that replay cannot
+answer. It may run once after the immutable checkpoint. A failed or
+inconclusive result is not followed by blind RNG reruns: its first contact is
+routed back into the fixed-root/event-coverage loop. A favorable result begins
+the existing two-consecutive `<=10` confirmation gate; it does not complete
+NMNB promotion.
+
+Revised implementation priority:
+
+1. finish the complete one-frame native root and explicit coverage result;
+2. complete input/player mode/Shot/RNG order and the current timeline
+   allocation/initial-VM lifecycle;
+3. add main/aux VM control, callbacks, child birth, and every reachable
+   retirement;
+4. add enemy motion/world composition, flags/body eligibility, damage/death/
+   despawn, then bullet/laser/item birth/transform/collision/resource effects;
+5. retain a fixed-root corpus spanning first hits, viable-to-losing edges,
+   Stage 3/4A/5/Final B, non-unit scale, focus/Shot/Power, boundary and dense
+   geometry, allocation reuse, and frozen-clock/dialogue transitions;
+6. certify one frame, then the shortest event-crossing prefix, then all 36
+   root masks, then bounded multi-frame/planning-horizon continuation; and
+7. only after deterministic replay fingerprints exist, investigate a
+   render-skipped or externally single-stepped native mechanics oracle.
 
 ### Phase 2 — Repair collision geometry and lifecycle
 

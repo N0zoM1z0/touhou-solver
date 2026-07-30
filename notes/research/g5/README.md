@@ -38,6 +38,7 @@ themselves grant future-geometry, planner, or action authority.
 30. [V6 isolated preflight](G5_AUXILIARY_LITERAL_FIRE_CYCLE_COALESCED_DELIVERY_V6_PREFLIGHT_20260729.md)
 31. [failed V6 Stage-5 result](G5_AUXILIARY_LITERAL_FIRE_CYCLE_COALESCED_DELIVERY_V6_STAGE5_FAILURE_20260729.md)
 32. [eight-hit checkpoint regression audit](STAGE5_EIGHT_HIT_CHECKPOINT_REGRESSION_AUDIT_20260729.md)
+33. [losing-control-reserve physical gate](STAGE5_LOSING_CONTROL_RESERVE_PHYSICAL_GATE_20260730.md)
 
 The corresponding `*_RESULT_*`, `*_GATE_*`, attribution, rejection, and
 performance-experiment notes retain the evidence for each transition. The

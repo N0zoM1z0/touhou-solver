@@ -255,8 +255,8 @@ reconcile the event stream.
 Generation zero preserves retrospective slot IDs. Reuse is injectively
 encoded as `(generation << 32) | slot`. Four product cases match an
 independent recurrence; an endpoint-only foil merges three. The retained
-Linux/Windows-byte-identical report hashes to
-`501a78c6c54600d6615b5d5d4805a851e66d579044e49df783ad6ffb60aa3d24`.
+Linux/Windows-LF-normalized-identical schema-v2 report hashes to
+`701f1ca778e6e20c94996061afec3cea68bf4233ba920af80de0fa63b4930334`.
 
 `scripts/th08_native_future_body_root.py` implements only a non-mutating,
 frame-bracketed, content-addressed root byte-slice envelope. Revalidated,

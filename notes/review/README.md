@@ -1,6 +1,8 @@
 # Reviews And Roadmaps
 
 - [TH08 native-to-solver read-only audit](TH08_NATIVE_TO_SOLVER_READ_ONLY_AUDIT_20260729.md)
+- [TH08 offline-iteration/native-prefix research](TH08_OFFLINE_ITERATION_RESEARCH_20260730.md)
+- [NMNB feasibility and first-hit iteration perspective](NMNB_FEASIBILITY_AND_FIRST_HIT_ITERATION_PERSPECTIVE_20260730.md)
 - [Lunatic NMNB program review and roadmap](LUNATIC_NMNB_PROGRAM_REVIEW_AND_ROADMAP_20260729.md)
 - [consolidated research/refactor roadmap](CONSOLIDATED_RESEARCH_AND_REFACTOR_ROADMAP_20260727.md)
 - [notes information-architecture plan](NOTES_INFORMATION_ARCHITECTURE_AND_MIGRATION_PLAN_20260728.md)

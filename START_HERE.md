@@ -82,7 +82,10 @@ located; it does not change the authority order below.
 65. `notes/review/RUNTIME_REPORT_RETENTION_AND_EMISSION_AUDIT_20260729.md`
 66. `notes/review/REUSABLE_AGENT_SKILLS_20260729.md`
 67. `notes/review/TH08_NATIVE_TO_SOLVER_READ_ONLY_AUDIT_20260729.md`
-68. `notes/review/LUNATIC_NMNB_PROGRAM_REVIEW_AND_ROADMAP_20260729.md`
+68. `notes/review/LUNATIC_NMNB_PROGRAM_REVIEW_AND_ROADMAP_20260729.md`,
+    together with
+    `notes/review/TH08_OFFLINE_ITERATION_RESEARCH_20260730.md` and
+    `notes/review/NMNB_FEASIBILITY_AND_FIRST_HIT_ITERATION_PERSPECTIVE_20260730.md`
 69. `notes/architecture/TH08_NATIVE_ECL_TIMER_SEMANTICS_20260729.md`
 70. `notes/architecture/TH08_PLAYER_LASER_GLOBAL_TIME_SCALE_SEMANTICS_20260729.md`
 71. `notes/architecture/TH08_ACTION_CONDITIONED_PLAYER_ENEMY_MODE_SEMANTICS_20260730.md`
@@ -445,8 +448,9 @@ encoded.
 The retained generation differential
 `artifacts/runtime_reports/th08_future_body_generation_differential_20260730.json`
 hashes to
-`501a78c6c54600d6615b5d5d4805a851e66d579044e49df783ad6ffb60aa3d24`.
-Linux/Windows bytes agree. The product matches an independent oracle in four
+`701f1ca778e6e20c94996061afec3cea68bf4233ba920af80de0fa63b4930334`.
+Linux/Windows LF-normalized schema-v2 bytes agree. The product matches an
+independent oracle in four
 cases; an endpoint-only foil merges three hidden-reuse cases. A new immutable
 native-root slice can bracket declared raw components under one manager frame,
 hash them, label inherited/hypothesized layouts incomplete, and decode all
@@ -811,7 +815,14 @@ Do not resume broad G5 work first.
    route. C5 exact delivery is closed for its declared source-local contract;
    the two failed workloads already supply their reachability, resource, and
    non-aborting evidence.
-2. Continue `SEM-MODE-C` after the asynchronous scalar/native checkpoint.
+2. First close the preregistered changed Stage-5
+   `losing_control_reserve` falsifier. It is enabled only after Boolean
+   exhaustion, preserves the screened fresh hard vector, and has exact
+   rollback `--no-losing-control-reserve`. Run the complete original-game
+   stage without THPRAC or fail-close. Treat the first fresh contact as the
+   canonical causal witness. A failed/inconclusive result returns to offline
+   fixed-root/event analysis; do not blindly repeat unrelated RNG samples.
+3. Continue `SEM-MODE-C` after the asynchronous scalar/native checkpoint.
    Callback-in-dispatch issue, superseded transient targets, no-write, and
    exact bounded scalar/native parity are now implemented offline. The
    observed callback-step values `1..5` remain proposal data, not a universal
@@ -819,32 +830,34 @@ Do not resume broad G5 work first.
    callback/cadence supports also lack a verified joint scheduler automaton.
    The offline immutable schedule/version/body-set, causal-family, and
    generational-identity differentials now pass, but no predictive producer
-   exists. The root byte-slice envelope is implemented; next revalidate
-   concrete layouts and capture/version the minimum full native root:
-   timeline clocks/markers/gates, allocation/template state, all live
-   main/auxiliary VMs, shared RNG, player/damage/resource state, and the
-   motion/flag/lifecycle fields needed by `+0x2D88`. Connect timeline
-   allocation and immediate-VM termination to the ordered lifetime ledger,
-   then extend the exact executor one named event class at a time; do not
-   substitute the current `future hazard events unseen` snapshot or a
-   retrospective fixture. Only after all relevant classes are exact or
-   conservatively enveloped should viable-state and safe-action-mask
-   differentials run.
-   Only after that predictive producer/model version exists may one new
-   whole-stage physical falsifier run without fail-close. Then complete
-   SEM-MODE-D damage-objective separation and SEM-MODE-E whole-model
-   optimized/native parity. Keep unfocused-combat promotion disabled and do
-   not repeat the unchanged priority-17 Stage-5 workload.
-3. Then continue `SEM-GEOM`, `SEM-SOURCE`, and `SEM-ROBUST` in roadmap order.
+   exists. The root byte-slice envelope, concrete fixed-region inventory, and
+   timeline first-inactive allocation/immediate-VM-`-1` lifecycle boundary
+   are implemented. Next capture/version the dynamic pointees and complete
+   minimum full native root: timeline clocks/markers/gates, all live main/
+   auxiliary VMs, shared RNG consumers, player/damage/resource state, and
+   the motion/flag/lifecycle fields needed by `+0x2D88`. Extend the exact
+   executor one named event class at a time; do not substitute the current
+   `future hazard events unseen` snapshot or a retrospective fixture. Only
+   after all relevant classes are exact or conservatively enveloped should
+   viable-state and safe-action-mask differentials run.
+   After this one transition falsifier, physical play leaves the semantic
+   inner loop. Build a content-addressed one-frame causal root/executor,
+   return explicit `UNKNOWN` before unsupported mutations, compare each
+   supported event class against same-input original-game native replay, and
+   branch all 36 no-Bomb masks only after compatible future coverage exists.
+   Then complete SEM-MODE-D damage-objective separation and SEM-MODE-E
+   whole-model optimized/native parity. Keep unfocused-combat promotion
+   disabled and do not repeat the unchanged priority-17 Stage-5 workload.
+4. Then continue `SEM-GEOM`, `SEM-SOURCE`, and `SEM-ROBUST` in roadmap order.
    Take the smallest whole-stage falsifier applicable to each immutable model
    version. Stage 4A is the current highest-hit physical workload, followed
    by Final B and Stage 5; this prioritizes analysis but does not bypass
    semantic dependencies.
-4. Restart the two-consecutive observer-off `<=10` Stage-5 gate only for an
+5. Restart the two-consecutive observer-off `<=10` Stage-5 gate only for an
    immutable corrected model version. Require fresh compatible Stage-3,
    Stage-4A, Stage-5, and Final-B stage evidence before another complete
    Power-0 route.
-5. Resume a matched V6 report/compact-tail correction or a
+6. Resume a matched V6 report/compact-tail correction or a
    separately contracted nonspell combat, Power, or unfocused-shot
    experiment only after its semantic dependencies and separate physical
    contract are satisfied.
@@ -2385,7 +2398,7 @@ global-planning objective.
 | shadow | explicit complete-mask active/held/pending certificate | Canonical trace identity and a 36-action scalar/native recurrence exist. CE-0134 is corrected offline; future-event unknown coverage, CE-0120, performance/publication, and physical integration block live ranking. |
 | shadow | restricted losing-root candidate verifier/publication | May prove a declared finite candidate and retain its witness; cannot claim unrestricted losing/optimality or change input. |
 | offline/shadow | belief lower bounds, revealed-delay upper, resumable refinement | Feasibility/optimality research; too slow or optimistic for current live authority. |
-| proposal-only | losing-state control reserve | Ranks fresh-hard-equivalent actions after Boolean exhaustion; physical effect unmeasured. |
+| live, versioned falsifier | losing-state control reserve | Ranks fresh-hard-equivalent actions after Boolean exhaustion for one preregistered Stage-5 gate; it cannot relabel viability or override hard safety. `--no-losing-control-reserve` is exact rollback and physical effect remains unmeasured. |
 | proposal-only | final-only continuation and width-4 supplemental lane | Preserves hard membership and the historical incumbent in finite replay; no live CLI or delivery authority. |
 | rejected | repair-aware shared beam pruning | CE-0129 terminal-hard regressions. |
 | rejected | synchronous native supplemental delivery | End-to-end Windows latency gate failed. |

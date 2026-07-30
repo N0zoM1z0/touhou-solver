@@ -40,6 +40,32 @@ The local native layer accelerates existing semantics. It does not prove the
 semantics complete and does not authorize an explicit active/held/pending
 belief root for live ranking.
 
+### Iteration protocol
+
+The default research loop is now offline-first:
+
+1. independent scalar/adversarial checks for the declared recurrence;
+2. a content-addressed native-root capsule and fail-closed exact-prefix
+   executor for the changed event class;
+3. same-root, same-action per-frame differential against original-game native
+   replay;
+4. fixed-root all-36-no-Bomb-mask counterfactual portfolios once the causal
+   prefix covers every reached event; and only then
+5. one named real-time physical falsifier for an immutable integrated
+   behavior/version.
+
+The executor returns `UNKNOWN` before an unsupported mutation. A recorded
+future is never reused after an alternative action, and future RNG is never
+forced equal after policy branches diverge. Rendering, audio, menus, and a
+portable replacement game are outside the current simulator target.
+
+Original-game physical play remains mandatory for Windows sensing,
+publication/issue deadlines, input pickup/no-write behavior, foreground and
+transition handling, mandatory Stage 3/4A/5/Final-B scenes, Power-0 resource
+history, and final repeated Lunatic/Extra acceptance. It is a sparse oracle
+and promotion gate, not the parser/model-debug inner loop. See
+`notes/review/TH08_OFFLINE_ITERATION_RESEARCH_20260730.md`.
+
 ### Current evidence
 
 **Observed:** Hard Stage-1 `175049` completed with zero hits, Bombs, and
@@ -862,8 +888,8 @@ Endpoint active bits only reconcile the event stream.
 
 The product matches an independent scalar oracle on four event-order cases.
 An endpoint-only foil merges three hidden-reuse histories. Linux/Windows
-render byte-identical report bytes at SHA-256
-`501a78c6c54600d6615b5d5d4805a851e66d579044e49df783ad6ffb60aa3d24`.
+render LF-normalized-identical schema-v2 report bytes at SHA-256
+`701f1ca778e6e20c94996061afec3cea68bf4233ba920af80de0fa63b4930334`.
 The accompanying native-root byte-slice envelope content-addresses declared
 frame-bracketed components and explicit missing requirements, but always
 publishes no predictive authority.
@@ -1285,7 +1311,7 @@ first.
 | S02 | forward corridor waypoints and gate commitment | Live macro guidance only |
 | S03 | dynamic hold and adaptive delay support | Live |
 | S04 | robust backward viability | Live coarse Boolean authority |
-| S05 | empty-kernel endpoint recovery and boundary reserve | Limited live fallback; not a certificate |
+| S05 | empty-kernel endpoint recovery and boundary reserve | Versioned live physical falsifier; not a certificate |
 | S06 | max-min safety value | Offline oracle; rejected live |
 | S07 | observation-complete versioned safety transaction | Partly live; hazard completeness still open |
 | S08 | item/Power/score/graze objectives | Disabled for survival acceptance |
@@ -1348,13 +1374,21 @@ first.
 
 ### S05 — Empty-Kernel Endpoint Recovery And Boundary Reserve
 
-- **Status:** Limited live fallback; not a certificate.
+- **Status:** Recovery distance is live; losing-state boundary reserve is
+  enabled for a versioned Stage-5 physical falsifier, not as a certificate.
 - **Model:** after Boolean exhaustion, choose among fresh-hard-equivalent
   actions using recovery/boundary reserve.
-- **Observed:** retained replay found useful reserve improvements.
+- **Observed:** retained Hard replay changed 28/400 actions with equal hard
+  vectors and no reserve regression. A new 500-row `20260729_161313` Stage-5
+  reservoir changes seven actions, improves reserve on all seven, and keeps
+  all 500 local/issue/terminal hard vectors equal.
 - **Limitation:** it cannot relabel the root viable, prove unrestricted
-  survival, or override immediate hard ordering.
-- **Evidence:** `notes/LOSING_STATE_ROOT_CAUSE_20260725.md`.
+  survival, override immediate hard ordering, or prove a prevented hit from
+  single-step trace replay. `--no-losing-control-reserve` is the exact
+  rollback. Promotion requires complete original-game Stage-5 evidence and
+  then two consecutive `<=10` controls.
+- **Evidence:** `notes/LOSING_STATE_ROOT_CAUSE_20260725.md` and
+  `notes/research/g5/STAGE5_LOSING_CONTROL_RESERVE_PHYSICAL_GATE_20260730.md`.
 
 ### S06 — Max-Min Safety Value
 

@@ -10,10 +10,13 @@ from th08_live.enemy_sensor import (
 )
 from th08_native_future_body_root import (
     MINIMUM_ROOT_REQUIREMENTS,
+    TH08_ENEMY_MANAGER_TEMPLATE_BASE,
+    TH08_TIMELINE_RUNTIME_BASE,
     Route2NativeRootComponentCapture,
     Route2NativeRootComponentSpec,
     capture_route2_native_future_body_root_slice,
     decode_route2_ordinary_pool_active_slots,
+    route2_revalidated_native_root_component_specs,
 )
 from touhou_control.pipeline_identity import VersionIdentity
 
@@ -29,6 +32,7 @@ def _spec(
     requirements: tuple[str, ...],
     *,
     evidence_state: str = "revalidated",
+    complete_requirement_coverage: bool = True,
 ) -> Route2NativeRootComponentSpec:
     return Route2NativeRootComponentSpec(
         name=name,
@@ -37,6 +41,7 @@ def _spec(
         requirements=requirements,
         layout_version=f"{name}-layout-v1",
         evidence_state=evidence_state,
+        complete_requirement_coverage=complete_requirement_coverage,
     )
 
 
@@ -125,6 +130,32 @@ class Route2NativeFutureBodyRootTests(unittest.TestCase):
 
         self.assertIn("shared_gameplay_rng", capture.missing_requirements)
         self.assertEqual(capture.revalidated_requirements, ())
+
+    def test_revalidated_pointer_root_does_not_claim_complete_coverage(
+        self,
+    ) -> None:
+        spec = _spec(
+            "run_state_pointer",
+            0x160F510,
+            4,
+            ("damage_power_and_resources",),
+            complete_requirement_coverage=False,
+        )
+        capture = capture_route2_native_future_body_root_slice(
+            _Reader(frames=(8, 8), regions={(0x160F510, 4): b"ptr!"}),
+            root_identity=_version("native-root"),
+            clock_version=_version("native-clock"),
+            component_specs=(spec,),
+            active_slots_from_components=lambda _components: (),
+        )
+
+        self.assertIn(
+            "damage_power_and_resources",
+            capture.missing_requirements,
+        )
+        self.assertFalse(
+            spec.record()["complete_requirement_coverage"]
+        )
 
     def test_capture_retries_one_crossed_manager_frame(self) -> None:
         spec = _spec(
@@ -262,6 +293,42 @@ class Route2NativeFutureBodyRootTests(unittest.TestCase):
             )
 
         self.assertNotEqual(capture(b"aa").digest, capture(b"ab").digest)
+
+    def test_revalidated_layout_inventory_preserves_open_dynamic_roots(
+        self,
+    ) -> None:
+        specs = route2_revalidated_native_root_component_specs()
+        by_name = {spec.name: spec for spec in specs}
+
+        self.assertEqual(
+            by_name["ordinary_enemy_template_and_pool"].address,
+            TH08_ENEMY_MANAGER_TEMPLATE_BASE,
+        )
+        self.assertEqual(
+            by_name["timeline_runtime_clock_table"].address,
+            TH08_TIMELINE_RUNTIME_BASE,
+        )
+        self.assertEqual(
+            by_name["ordinary_enemy_template_and_pool"].size,
+            (ENEMY_POOL_SIZE + 1) * ENEMY_STRIDE,
+        )
+        complete = {
+            requirement
+            for spec in specs
+            if (
+                spec.evidence_state == "revalidated"
+                and spec.complete_requirement_coverage
+            )
+            for requirement in spec.requirements
+        }
+        self.assertEqual(
+            complete,
+            {
+                "motion_flag_and_lifecycle_state",
+                "ordinary_enemy_template_and_pool",
+                "shared_gameplay_rng",
+            },
+        )
 
 
 if __name__ == "__main__":

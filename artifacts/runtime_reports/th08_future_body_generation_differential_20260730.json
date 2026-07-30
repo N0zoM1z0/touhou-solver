@@ -208,32 +208,34 @@
     },
     "components": [
       {
-        "schema": "th08-native-future-body-root-component-capture-v1",
+        "schema": "th08-native-future-body-root-component-capture-v2",
         "sha256": "8a851ff82ee7048ad09ec3847f1ddf44944104d2cbd17ef4e3db22c6785a0d45",
         "spec": {
           "address": 4096,
+          "complete_requirement_coverage": true,
           "evidence_state": "revalidated",
           "layout_version": "fixture-control-v1",
           "name": "control_identity",
           "requirements": [
             "gameplay_and_route_identity"
           ],
-          "schema": "th08-native-future-body-root-component-v1",
+          "schema": "th08-native-future-body-root-component-v2",
           "size": 8
         }
       },
       {
-        "schema": "th08-native-future-body-root-component-capture-v1",
+        "schema": "th08-native-future-body-root-component-capture-v2",
         "sha256": "17e88db187afd62c16e5debf3e6527cd006bc012bc90b51a810cd80c2d511f43",
         "spec": {
           "address": 8192,
+          "complete_requirement_coverage": true,
           "evidence_state": "revalidated",
           "layout_version": "fixture-rng-v1",
           "name": "shared_rng",
           "requirements": [
             "shared_gameplay_rng"
           ],
-          "schema": "th08-native-future-body-root-component-v1",
+          "schema": "th08-native-future-body-root-component-v2",
           "size": 6
         }
       }
@@ -290,8 +292,8 @@
       },
       "namespace": "th08-native-root-fixture"
     },
-    "schema": "th08-native-future-body-root-slice-v1",
-    "sha256": "c33f77f5213ddefe44d171a38dc823808511374810b3ae7a1e28e6c5adb7e379"
+    "schema": "th08-native-future-body-root-slice-v2",
+    "sha256": "9a027ce0592ba5879655bc5c6e491b0308cc5b5fbd2ab9c8277598d5185d523b"
   },
   "open_boundary": {
     "allocation_event_producer_connected": false,

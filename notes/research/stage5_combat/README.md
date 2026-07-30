@@ -12,6 +12,7 @@ Read in order:
 4. [physical-gate preparation](STAGE5_ENEMY_COMBAT_PROGRESS_PHYSICAL_GATE_PREPARATION_20260728.md)
 5. [physical Stage-5 result](STAGE5_ENEMY_COMBAT_PROGRESS_STAGE5_RESULT_20260728.md)
 6. [route-2 Focus/Shot emission contract](ROUTE2_FOCUS_SHOT_EMISSION_CONTRACT_20260731.md)
+7. [retained presence-episode audit contract](STAGE5_ENEMY_PRESENCE_EPISODE_AUDIT_CONTRACT_20260731.md)
 
 The raw first-64 observer is physically accepted for trace-only use.
 Generation/end reason, kill-versus-despawn, exposure causality, Power

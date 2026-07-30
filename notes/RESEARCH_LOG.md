@@ -29,7 +29,7 @@ in [`../STRATEGY.md`](../STRATEGY.md), and the volatile handoff belongs in
 | [2026-07-28](research_log/2026-07-28.md) | Current G3/G5, performance, ECL-source, and combat-progress checkpoints. |
 | [2026-07-29](research_log/2026-07-29.md) | Runtime-delivery review and physical validation checkpoints. |
 | [2026-07-30](research_log/2026-07-30.md) | Power-0/full-stage physical evidence, C5 reachability, and SEM-MODE native observation/recurrence. |
-| [2026-07-31](research_log/2026-07-31.md) | WS-H Focus/Shot emission semantics, root capture, and combat-policy foundations. |
+| [2026-07-31](research_log/2026-07-31.md) | WS-H Focus/Shot semantics and kill/end observation authority. |
 
 ## Preservation
 

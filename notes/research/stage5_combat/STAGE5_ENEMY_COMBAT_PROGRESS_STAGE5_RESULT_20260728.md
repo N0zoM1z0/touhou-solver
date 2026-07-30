@@ -138,6 +138,13 @@ bullet births and phase exposure; and record Power/drop/pickup ambiguity. Only
 after that evidence may a Stage-5 nonspell target shadow rank actions already
 inside the unchanged viable and issue-safe set.
 
+The 2026-07-31 retrospective presence-episode audit confirms that this
+generation/end tracker cannot be reconstructed from the accepted raw trace:
+all 1,789 observed disappearances end after a positive-HP, mode-0 active row,
+and all 17 damage-adjacent cases remain unknown. See
+`STAGE5_ENEMY_PRESENCE_EPISODE_AUDIT_CONTRACT_20260731.md`. No new physical
+trial was run.
+
 G5 auxiliary ECL event lowering remains a separate future-hazard completeness
 line.
 

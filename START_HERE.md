@@ -19,10 +19,11 @@ historical handoff.
   (`Build rolling native snapshot iteration loop`).
 - H=32 causal-search checkpoint: `3d15953`
   (`Build causal native snapshot policy search`).
-- The WS-H route-2 Focus/Shot semantic foundation and retained taskbook are
-  the current repository HEAD; no new physical trial was run.
-- Complete Linux discovery passes 1,380 tests in 13.531 seconds.
-- Complete Windows UNC discovery passes 1,380 tests in 27.294 seconds with
+- The WS-H route-2 Focus/Shot foundation, retained taskbook, and Stage-5
+  presence-episode audit are the current repository checkpoint; no new
+  physical trial was run.
+- Complete Linux discovery passes 1,382 tests in 13.002 seconds.
+- Complete Windows UNC discovery passes 1,382 tests in 27.356 seconds with
   the three existing skips.
 - No TH08, controller, supervisor, native-replay runner, or Windows test
   process is intentionally left running.
@@ -48,6 +49,16 @@ historical handoff.
   `artifacts/runtime_reports/th08_route2_focus_shot_emission_root2129_20260731.json`,
   SHA-256
   `f78e820fe7aeabd12d5c6b4a2fd901462a54ada26758f3ba11fae615318738e8`.
+- `COMBAT-KILL-01` cannot reuse the accepted Stage-5 active-only observer as
+  kill evidence. Its deterministic audit retains 1,823 presence episodes;
+  all 1,789 observed disappearances end after a positive-HP, defeat-mode-0
+  row, including 17 damage-adjacent candidates. Revalidated native mode-0
+  defeat clears active in the same manager update, so verified kill count is
+  zero and every end reason remains unknown.
+- Retained presence-episode report:
+  `artifacts/runtime_reports/lunatic_route2_stage5_unattended_20260728_224116.presence_episode_audit.json`,
+  SHA-256
+  `d483268f3e69443a5d36ace92b71e8da165f87b59e45d761bcdb99fcb2865162`.
 - No live Focus/Shot ranking, combat objective, action authority, or physical
   promotion changed.
 
@@ -1190,13 +1201,15 @@ respawn, Power, position, damage, and route timing.
 
 Do not resume broad G5 work first.
 
-0. Continue the user-prioritized high-ROI WS-H line. Capture one explicit v4
-   identical-root ordinary-enemy corpus with shot timer/pool identity, then
-   compare focused, unfocused, and causal refocus schedules only inside the
-   unchanged survival-feasible set. Require exact RNG/shot ordering, native
-   HP/kill-end and later-hostile-birth attribution before calling a combat
-   benefit. Keep live Focus/Shot ranking disabled and do not launch a physical
-   trial merely to fill the old root-2,129 capture debt.
+0. Continue the user-prioritized high-ROI WS-H line. The old active-only
+   Stage-5 trace is rejected as a kill-policy gate; do not relabel HP decrease
+   or slot disappearance as kill. `COMBAT-KILL-01` next requires a same-update
+   end event before slot reuse, with native clear path, damage, source birth,
+   drops, and RNG joins. Continue `POWER-ROUTE-01` from existing natural
+   Power-0 route-prefix evidence while that capture debt is open. A later
+   explicit v4 ordinary-enemy corpus may compare focused, unfocused, and
+   causal refocus schedules only inside the unchanged survival-feasible set.
+   Do not launch a physical trial merely to fill either capture debt.
 1. Do not repeat C5, the 22-hit Stage-6B run, or the unchanged 74-hit full
    route. C5 exact delivery is closed for its declared source-local contract;
    the two failed workloads already supply their reachability, resource, and

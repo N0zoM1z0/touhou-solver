@@ -718,16 +718,38 @@ world-trajectory producer.
 Nine focused tests and complete Linux/Windows discovery pass 1,266/1,266 in
 14.471/31.192 seconds, with the three existing Windows skips.
 
+## Generational Body Identity And Native Root Slice
+
+CE-0198 rejects slot/pointer or endpoint active-bit identity. IDA confirms
+that `enemy_spawn_from_timeline` selects the first inactive slot at
+`0x0042A54E`, may clear its active bit at `0x0042A5F5` after an immediate
+initial-VM `-1`, and can expose that slot to later same-update timeline work.
+
+`th08_future_body_identity.py` assigns root-relative
+`(slot, allocation_generation)` identities from a complete ordered
+allocation/retirement event stream. The endpoint active set only checks the
+result. Generation zero retains old compact slot IDs; reuse is injective.
+Four product/oracle cases agree and an endpoint-only foil fails three cases.
+
+`th08_native_future_body_root.py` provides a frame-bracketed immutable byte
+envelope for declared native root regions, a full-480 active-bit decoder, and
+explicit revalidated/inherited/hypothesized coverage. It supplies no event
+execution or predictive authority. No concrete complete physical root is
+retained yet.
+Twenty-two focused tests and complete Linux/Windows discovery pass
+1,288/1,288 in 14.102/31.159 seconds, with the three existing Windows skips.
+
 ## Remaining Implementation And Promotion Plan
 
 1. **SEM-MODE-C predictive schedule producer:** the asynchronous ordered
    scalar/native recurrence and offline immutable schedule/body-set/causal
-   family differentials are implemented. Next add generational slot identity,
-   capture the complete native producer root, and execute allocation/initial
-   VM, births, non-mode flags, despawns/transforms, final world geometry,
-   damage/shared RNG, and joint scheduler/cadence support. A missing class
-   remains `UNKNOWN`; never substitute a current snapshot or retrospective
-   fixture.
+   family and generational-identity differentials are implemented. The root
+   byte-slice envelope exists, but concrete complete layouts/capture do not.
+   Next connect timeline allocation and immediate initial-VM termination to
+   lifecycle events, capture the complete native producer root, and execute
+   births, non-mode flags, despawns/transforms, final world geometry, damage/
+   shared RNG, and joint scheduler/cadence support. A missing class remains
+   `UNKNOWN`; never substitute a current snapshot or retrospective fixture.
 2. **SEM-MODE-C survival integration:** bind one fixed predictive schedule
    version to movement/collision, then publish viable-state and
    safe-action-mask differentials without changing live action authority.

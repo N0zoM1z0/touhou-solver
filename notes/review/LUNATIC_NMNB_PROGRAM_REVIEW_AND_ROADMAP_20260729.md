@@ -1307,14 +1307,40 @@ IDA revalidation also names the internal-bound clamp at `0x0042C180` and
 internal-motion integrator at `0x0042DEB0`; neither advances final lethal
 world position `+0x2D88` alone.
 
-This closes only the causal family representation. A physical producer still
-needs generational slot identity, complete root capture, allocation/initial
-VM, all body-affecting ECL/callback/motion/flag/lifecycle state, damage/
-resource coupling, shared RNG, and joint scheduler support. Status remains
-**Offline / no live authority**; the Stage-3/4A/5/Final-B promotion ring is
-unchanged.
+This closes only the causal family representation. The subsequent update
+below closes generational slot identity, but a physical producer still needs
+complete root capture, allocation/initial VM, all body-affecting ECL/callback/
+motion/flag/lifecycle state, damage/resource coupling, shared RNG, and joint
+scheduler support. Status remains **Offline / no live authority**; the
+Stage-3/4A/5/Final-B promotion ring is unchanged.
 Nine focused tests and complete Linux/Windows discovery pass 1,266/1,266 in
 14.471/31.192 seconds, with the three existing Windows skips.
+
+2026-07-30 generational producer-identity correction: CE-0198 rejects
+pointer/slot and frame-boundary active edges as body lifetime identity.
+Connected IDA confirms same-update allocation, immediate initial-VM
+retirement, and later slot reuse are possible. The new root-relative ledger
+therefore consumes ordered native allocation/retirement events and uses
+`(slot, allocation_generation)` identity. Endpoint active slots only
+reconcile a complete event history.
+
+Four deterministic product cases match an independent scalar oracle; an
+endpoint-only foil merges three hidden-reuse cases. Linux and Windows render
+the retained report byte-identically at SHA-256
+`501a78c6c54600d6615b5d5d4805a851e66d579044e49df783ad6ffb60aa3d24`.
+A separate native-root byte-slice envelope brackets and hashes declared raw
+components, decodes all 480 active bits, and reports missing requirements.
+It always denies predictive authority; no complete physical root or
+allocation-event producer is connected.
+Twenty-two focused tests pass on Linux and Windows. Complete discovery passes
+1,288/1,288 in 14.102/31.159 seconds, with the three existing Windows skips.
+
+Status remains **Offline / no live authority**. Next revalidate the ten
+concrete root component layouts and connect timeline allocation plus
+immediate-VM termination before later birth/lifecycle classes. Do not run an
+unchanged physical stage. When a new fixed predictive version exists, the
+physical unit remains the complete original-game stage without fail-close or
+THPRAC, followed by Stage 3/4A/5/Final-B and the Power-0 route.
 
 ### Phase 2 — Repair collision geometry and lifecycle
 

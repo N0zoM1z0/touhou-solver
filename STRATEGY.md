@@ -843,13 +843,39 @@ impossible pairs with zero mismatch. The byte-identical Linux/Windows report
 hashes to
 `d9f4c6202f87b2fd1515bb779284bb2cb4f51f37c08982faa092c1f43ba1898e`.
 
-Status remains **Offline**. This fixes causal finite representation only.
-Generational slot identity, native root capture, allocation/initial VM,
-complete ECL/motion/flag/lifecycle execution, damage/shared RNG, collision,
-and physical producer delivery remain absent. No live, survival, damage/
-unfocused combat, physical, or NMNB promotion occurs.
+Status remains **Offline**. The causal-family checkpoint fixes finite
+representation only. The next checkpoint below closes generational identity,
+but native root capture, allocation/initial VM, complete ECL/motion/flag/
+lifecycle execution, damage/shared RNG, collision, and physical producer
+delivery remain absent. No live, survival, damage/unfocused combat, physical,
+or NMNB promotion occurs.
 Nine focused tests and complete Linux/Windows discovery pass 1,266/1,266 in
 14.471/31.192 seconds, with the three existing Windows skips.
+
+**2026-07-30 generational body-identity/root-slice checkpoint:** CE-0198
+rejects pointer, pool slot, and adjacent active-bit edges as cross-time body
+identity. Native `enemy_spawn_from_timeline` may allocate, immediately end
+the initial VM and clear active bit 0, then allow later same-update reuse.
+The exact offline ledger therefore consumes ordered allocation/retirement
+events and uses root-relative `(slot, allocation_generation)` identity.
+Endpoint active bits only reconcile the event stream.
+
+The product matches an independent scalar oracle on four event-order cases.
+An endpoint-only foil merges three hidden-reuse histories. Linux/Windows
+render byte-identical report bytes at SHA-256
+`501a78c6c54600d6615b5d5d4805a851e66d579044e49df783ad6ffb60aa3d24`.
+The accompanying native-root byte-slice envelope content-addresses declared
+frame-bracketed components and explicit missing requirements, but always
+publishes no predictive authority.
+Twenty-two focused tests pass on Linux and Windows. Complete discovery passes
+1,288/1,288 in 14.102/31.159 seconds, with the three existing Windows skips.
+
+Status remains **Offline**. No complete physical producer root or
+allocation-event source is connected; allocation/initial VM, later births,
+all retirement paths, body-affecting ECL/callback/motion/flag/damage/RNG,
+collision, delivery, and physical survival remain open. Do not launch an
+unchanged stage run. Next revalidate the concrete root layouts and connect
+timeline allocation plus immediate initial-VM termination to the ledger.
 
 The amendment and CE-0183/0184 override the numbered historical backlog
 below until the semantic correction/model-version gate is complete. Those

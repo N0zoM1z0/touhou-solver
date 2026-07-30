@@ -441,6 +441,16 @@ Passing claim 1 does not establish claims 2--4.
   Cartesian pairs, rejecting 16 impossible pairs with zero mismatch. This
   closes causal finite representation only; the native producer state and
   event classes remain absent.
+- CE-0198 rejects pointer/slot or adjacent active-bit edges as lifetime
+  identity. `th08_future_body_identity.py` consumes ordered native allocation
+  and retirement events and assigns root-relative
+  `(slot, allocation_generation)` identities. Same-update
+  allocate/retire/reallocate remains visible even when endpoint active bits
+  match. Four product/oracle cases agree; an endpoint-only foil merges three.
+  `th08_native_future_body_root.py` separately content-addresses declared
+  frame-bracketed root components and missing semantic requirements. It has
+  byte-provenance authority only and always denies physical predictive
+  authority.
 - Lookup-only version/root checks are exact.  In the first physical shadow,
   every root that was both covered and completed was consumed; miss delivery,
   not lookup corruption, caused the low hit rate.

@@ -48,7 +48,10 @@ b = (identity, base_flags, x, y, half_width, half_height, uncertainty)
 
 Requirements:
 
-- `identity` is a nonnegative native pointer/slot identity;
+- `identity` is a nonnegative opaque integer. Retrospective fixtures may use
+  generation-zero ordinary slot IDs, but a physical producer must lower the
+  root-relative `(slot, allocation_generation)` identity defined by
+  `GENERATIONAL_BODY_IDENTITY_AND_NATIVE_ROOT_SLICE_CONTRACT_20260730.md`;
 - geometry and uncertainty are finite canonical binary32 values;
 - extents and uncertainty are nonnegative;
 - identities are sorted and unique within one physical step;
@@ -141,6 +144,12 @@ Version 1 omits:
 
 Its physical error direction is unknown. Offline exact fixtures can validate
 composition and version identity only.
+
+CE-0198 additionally rejects pointer/slot and adjacent active-bit edges as a
+cross-time physical identity. Same-update allocation, initial-VM retirement,
+and later reuse can leave a misleading endpoint. The predictive producer
+must therefore consume ordered lifecycle events; this version-1 supplied
+schedule wrapper does not infer generation from snapshots.
 
 Concrete falsifiers:
 

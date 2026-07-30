@@ -1,0 +1,268 @@
+from __future__ import annotations
+
+import struct
+import unittest
+
+from th08_live.enemy_sensor import (
+    ENEMY_FLAGS_OFFSET,
+    ENEMY_POOL_SIZE,
+    ENEMY_STRIDE,
+)
+from th08_native_future_body_root import (
+    MINIMUM_ROOT_REQUIREMENTS,
+    Route2NativeRootComponentCapture,
+    Route2NativeRootComponentSpec,
+    capture_route2_native_future_body_root_slice,
+    decode_route2_ordinary_pool_active_slots,
+)
+from touhou_control.pipeline_identity import VersionIdentity
+
+
+def _version(namespace: str) -> VersionIdentity:
+    return VersionIdentity.from_mapping(namespace, {"fixture": "root-v1"})
+
+
+def _spec(
+    name: str,
+    address: int,
+    data_size: int,
+    requirements: tuple[str, ...],
+    *,
+    evidence_state: str = "revalidated",
+) -> Route2NativeRootComponentSpec:
+    return Route2NativeRootComponentSpec(
+        name=name,
+        address=address,
+        size=data_size,
+        requirements=requirements,
+        layout_version=f"{name}-layout-v1",
+        evidence_state=evidence_state,
+    )
+
+
+class _Reader:
+    def __init__(
+        self,
+        *,
+        frames: tuple[int, ...],
+        regions: dict[tuple[int, int], bytes],
+    ) -> None:
+        self.frames = list(frames)
+        self.regions = regions
+
+    def u32(self, _address: int) -> int:
+        if not self.frames:
+            raise AssertionError("unexpected frame read")
+        return self.frames.pop(0)
+
+    def read(self, address: int, size: int) -> bytes:
+        return self.regions[(address, size)]
+
+
+class Route2NativeFutureBodyRootTests(unittest.TestCase):
+    def test_stable_capture_is_content_addressed_but_not_predictive(
+        self,
+    ) -> None:
+        specs = (
+            _spec(
+                "control",
+                0x1000,
+                4,
+                ("gameplay_and_route_identity",),
+            ),
+            _spec(
+                "rng",
+                0x2000,
+                6,
+                ("shared_gameplay_rng",),
+            ),
+        )
+        capture = capture_route2_native_future_body_root_slice(
+            _Reader(
+                frames=(77, 77),
+                regions={
+                    (0x1000, 4): b"ctrl",
+                    (0x2000, 6): b"rng123",
+                },
+            ),
+            root_identity=_version("native-root"),
+            clock_version=_version("native-clock"),
+            component_specs=specs,
+            active_slots_from_components=lambda _components: (3, 7),
+        )
+
+        self.assertTrue(capture.coherent)
+        self.assertFalse(capture.inventory_complete)
+        self.assertFalse(capture.record()["physical_predictive_authority"])
+        self.assertEqual(
+            capture.authority_status,
+            "partial_native_root_inventory",
+        )
+        self.assertEqual(
+            tuple(
+                identity.slot
+                for identity in capture.lifetime_ledger.active_identities
+            ),
+            (3, 7),
+        )
+        self.assertEqual(capture.record()["sha256"], capture.digest)
+
+    def test_inherited_layout_does_not_satisfy_a_requirement(self) -> None:
+        spec = _spec(
+            "rng",
+            0x2000,
+            2,
+            ("shared_gameplay_rng",),
+            evidence_state="inherited",
+        )
+        capture = capture_route2_native_future_body_root_slice(
+            _Reader(frames=(8, 8), regions={(0x2000, 2): b"xx"}),
+            root_identity=_version("native-root"),
+            clock_version=_version("native-clock"),
+            component_specs=(spec,),
+            active_slots_from_components=lambda _components: (),
+        )
+
+        self.assertIn("shared_gameplay_rng", capture.missing_requirements)
+        self.assertEqual(capture.revalidated_requirements, ())
+
+    def test_capture_retries_one_crossed_manager_frame(self) -> None:
+        spec = _spec(
+            "rng",
+            0x2000,
+            2,
+            ("shared_gameplay_rng",),
+        )
+        capture = capture_route2_native_future_body_root_slice(
+            _Reader(
+                frames=(10, 11, 12, 12),
+                regions={(0x2000, 2): b"xx"},
+            ),
+            root_identity=_version("native-root"),
+            clock_version=_version("native-clock"),
+            component_specs=(spec,),
+            active_slots_from_components=lambda _components: (),
+            maximum_attempts=2,
+        )
+
+        self.assertTrue(capture.coherent)
+        self.assertEqual(capture.attempts, 2)
+        self.assertEqual((capture.frame_before, capture.frame_after), (12, 12))
+
+    def test_exhausted_crossed_capture_remains_incoherent(self) -> None:
+        spec = _spec(
+            "rng",
+            0x2000,
+            2,
+            ("shared_gameplay_rng",),
+        )
+        capture = capture_route2_native_future_body_root_slice(
+            _Reader(
+                frames=(10, 11, 12, 13),
+                regions={(0x2000, 2): b"xx"},
+            ),
+            root_identity=_version("native-root"),
+            clock_version=_version("native-clock"),
+            component_specs=(spec,),
+            active_slots_from_components=lambda _components: (),
+            maximum_attempts=2,
+        )
+
+        self.assertFalse(capture.coherent)
+        self.assertEqual(
+            capture.authority_status,
+            "incoherent_native_root_slice",
+        )
+
+    def test_complete_byte_inventory_still_has_no_executor_authority(
+        self,
+    ) -> None:
+        spec = _spec(
+            "all_revalidated_root_bytes",
+            0x3000,
+            1,
+            MINIMUM_ROOT_REQUIREMENTS,
+        )
+        capture = capture_route2_native_future_body_root_slice(
+            _Reader(frames=(9, 9), regions={(0x3000, 1): b"x"}),
+            root_identity=_version("native-root"),
+            clock_version=_version("native-clock"),
+            component_specs=(spec,),
+            active_slots_from_components=lambda _components: (),
+        )
+
+        self.assertTrue(capture.inventory_complete)
+        self.assertEqual(
+            capture.authority_status,
+            "complete_root_bytes_without_executor_authority",
+        )
+        self.assertFalse(capture.record()["physical_predictive_authority"])
+
+    def test_short_component_read_fails_closed(self) -> None:
+        spec = _spec(
+            "rng",
+            0x2000,
+            2,
+            ("shared_gameplay_rng",),
+        )
+
+        with self.assertRaisesRegex(RuntimeError, "short native-root read"):
+            capture_route2_native_future_body_root_slice(
+                _Reader(frames=(1,), regions={(0x2000, 2): b"x"}),
+                root_identity=_version("native-root"),
+                clock_version=_version("native-clock"),
+                component_specs=(spec,),
+                active_slots_from_components=lambda _components: (),
+            )
+
+    def test_full_pool_decoder_uses_native_active_bit(self) -> None:
+        pool = bytearray(ENEMY_POOL_SIZE * ENEMY_STRIDE)
+        for slot, flags in ((0, 1), (17, 0x101), (479, 0x800)):
+            struct.pack_into(
+                "<I",
+                pool,
+                slot * ENEMY_STRIDE + ENEMY_FLAGS_OFFSET,
+                flags,
+            )
+        spec = _spec(
+            "ordinary_enemy_pool",
+            0x005826C0,
+            len(pool),
+            (
+                "main_and_auxiliary_ecl_contexts",
+                "motion_flag_and_lifecycle_state",
+                "ordinary_enemy_template_and_pool",
+            ),
+        )
+        component = Route2NativeRootComponentCapture(
+            spec=spec,
+            data=bytes(pool),
+        )
+
+        self.assertEqual(
+            decode_route2_ordinary_pool_active_slots((component,)),
+            (0, 17),
+        )
+
+    def test_component_bytes_change_root_version(self) -> None:
+        spec = _spec(
+            "rng",
+            0x2000,
+            2,
+            ("shared_gameplay_rng",),
+        )
+
+        def capture(data: bytes):
+            return capture_route2_native_future_body_root_slice(
+                _Reader(frames=(5, 5), regions={(0x2000, 2): data}),
+                root_identity=_version("native-root"),
+                clock_version=_version("native-clock"),
+                component_specs=(spec,),
+                active_slots_from_components=lambda _components: (),
+            )
+
+        self.assertNotEqual(capture(b"aa").digest, capture(b"ab").digest)
+
+
+if __name__ == "__main__":
+    unittest.main()

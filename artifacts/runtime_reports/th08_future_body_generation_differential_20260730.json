@@ -1,0 +1,309 @@
+{
+  "authority": "offline_identity_and_capture_boundary_only",
+  "cases": [
+    {
+      "boundary_only_final": [
+        7
+      ],
+      "boundary_only_matches": false,
+      "events": [
+        {
+          "kind": "allocate",
+          "sequence": 0,
+          "slot": 7
+        },
+        {
+          "kind": "retire",
+          "sequence": 1,
+          "slot": 7
+        },
+        {
+          "kind": "allocate",
+          "sequence": 2,
+          "slot": 7
+        }
+      ],
+      "matches_oracle": true,
+      "name": "inactive_allocate_immediate_end_reallocate",
+      "oracle": {
+        "allocated": [
+          7,
+          4294967303
+        ],
+        "final": [
+          4294967303
+        ],
+        "retired": [
+          7
+        ]
+      },
+      "product": {
+        "allocated": [
+          7,
+          4294967303
+        ],
+        "final": [
+          4294967303
+        ],
+        "retired": [
+          7
+        ]
+      },
+      "root_active_slots": [],
+      "successor_ledger_sha256": "e650f1ba141446ae63971eed69d244176a313235baa51cdea5b26a849b92cab9"
+    },
+    {
+      "boundary_only_final": [
+        9
+      ],
+      "boundary_only_matches": false,
+      "events": [
+        {
+          "kind": "retire",
+          "sequence": 0,
+          "slot": 9
+        },
+        {
+          "kind": "allocate",
+          "sequence": 1,
+          "slot": 9
+        }
+      ],
+      "matches_oracle": true,
+      "name": "root_active_retire_reallocate",
+      "oracle": {
+        "allocated": [
+          4294967305
+        ],
+        "final": [
+          4294967305
+        ],
+        "retired": [
+          9
+        ]
+      },
+      "product": {
+        "allocated": [
+          4294967305
+        ],
+        "final": [
+          4294967305
+        ],
+        "retired": [
+          9
+        ]
+      },
+      "root_active_slots": [
+        9
+      ],
+      "successor_ledger_sha256": "d3c2a87c2ad3c1ca805a337e252263d3bbb20269ffa97f8e814b955959a4f2ef"
+    },
+    {
+      "boundary_only_final": [
+        2
+      ],
+      "boundary_only_matches": true,
+      "events": [],
+      "matches_oracle": true,
+      "name": "root_active_unchanged",
+      "oracle": {
+        "allocated": [],
+        "final": [
+          2
+        ],
+        "retired": []
+      },
+      "product": {
+        "allocated": [],
+        "final": [
+          2
+        ],
+        "retired": []
+      },
+      "root_active_slots": [
+        2
+      ],
+      "successor_ledger_sha256": "b4b08e22952398804f192c9487b2f9422adbd40aac38b227fc2b7df17ca62990"
+    },
+    {
+      "boundary_only_final": [
+        1,
+        3
+      ],
+      "boundary_only_matches": false,
+      "events": [
+        {
+          "kind": "retire",
+          "sequence": 0,
+          "slot": 1
+        },
+        {
+          "kind": "allocate",
+          "sequence": 1,
+          "slot": 3
+        },
+        {
+          "kind": "retire",
+          "sequence": 2,
+          "slot": 5
+        },
+        {
+          "kind": "allocate",
+          "sequence": 3,
+          "slot": 1
+        }
+      ],
+      "matches_oracle": true,
+      "name": "ordered_multi_slot_reuse",
+      "oracle": {
+        "allocated": [
+          3,
+          4294967297
+        ],
+        "final": [
+          4294967297,
+          3
+        ],
+        "retired": [
+          1,
+          5
+        ]
+      },
+      "product": {
+        "allocated": [
+          3,
+          4294967297
+        ],
+        "final": [
+          4294967297,
+          3
+        ],
+        "retired": [
+          1,
+          5
+        ]
+      },
+      "root_active_slots": [
+        1,
+        5
+      ],
+      "successor_ledger_sha256": "0cb09a9e507f78e88585af35a22217395b3a2c0febcc31acdb0b8fdfed34a420"
+    }
+  ],
+  "native_evidence": {
+    "enemy_spawn_from_timeline": "0x0042A4E0",
+    "finding": "one manager update may contain allocation, immediate retirement, and later slot reuse",
+    "first_inactive_test": "0x0042A54E",
+    "immediate_end_active_clear": "0x0042A5F5"
+  },
+  "native_root_slice_fixture": {
+    "attempts": 1,
+    "authority": "native_root_bytes_only_no_predictive_authority",
+    "authority_status": "partial_native_root_inventory",
+    "clock_version": {
+      "components": {
+        "address": 23384844
+      },
+      "namespace": "th08-manager-clock-fixture"
+    },
+    "components": [
+      {
+        "schema": "th08-native-future-body-root-component-capture-v1",
+        "sha256": "8a851ff82ee7048ad09ec3847f1ddf44944104d2cbd17ef4e3db22c6785a0d45",
+        "spec": {
+          "address": 4096,
+          "evidence_state": "revalidated",
+          "layout_version": "fixture-control-v1",
+          "name": "control_identity",
+          "requirements": [
+            "gameplay_and_route_identity"
+          ],
+          "schema": "th08-native-future-body-root-component-v1",
+          "size": 8
+        }
+      },
+      {
+        "schema": "th08-native-future-body-root-component-capture-v1",
+        "sha256": "17e88db187afd62c16e5debf3e6527cd006bc012bc90b51a810cd80c2d511f43",
+        "spec": {
+          "address": 8192,
+          "evidence_state": "revalidated",
+          "layout_version": "fixture-rng-v1",
+          "name": "shared_rng",
+          "requirements": [
+            "shared_gameplay_rng"
+          ],
+          "schema": "th08-native-future-body-root-component-v1",
+          "size": 6
+        }
+      }
+    ],
+    "frame_bracket": [
+      500,
+      500
+    ],
+    "inventory_complete": false,
+    "lifetime_ledger": {
+      "active_identities": [
+        {
+          "allocation_generation": 0,
+          "encoded": 1,
+          "schema": "th08-ordinary-enemy-generation-identity-v1",
+          "slot": 1
+        },
+        {
+          "allocation_generation": 0,
+          "encoded": 5,
+          "schema": "th08-ordinary-enemy-generation-identity-v1",
+          "slot": 5
+        }
+      ],
+      "current_physical_update": 500,
+      "event_count": 0,
+      "nonzero_generations": [],
+      "root_physical_update": 500,
+      "schema": "th08-ordinary-enemy-lifetime-ledger-v1",
+      "seen_lifetime_slots": [
+        1,
+        5
+      ],
+      "sha256": "c78cd6f7f75fc6355161d3f71adf663861fe45beb893593c8ca4443ba6fb05c5"
+    },
+    "missing_requirements": [
+      "damage_power_and_resources",
+      "external_callback_and_transition_state",
+      "main_and_auxiliary_ecl_contexts",
+      "motion_flag_and_lifecycle_state",
+      "ordinary_enemy_template_and_pool",
+      "physical_clock_and_scheduler_gates",
+      "player_input_mode_and_shot_state",
+      "timeline_runtime_state"
+    ],
+    "physical_predictive_authority": false,
+    "revalidated_requirements": [
+      "gameplay_and_route_identity",
+      "shared_gameplay_rng"
+    ],
+    "root_identity": {
+      "components": {
+        "exe_sha256": "fixture"
+      },
+      "namespace": "th08-native-root-fixture"
+    },
+    "schema": "th08-native-future-body-root-slice-v1",
+    "sha256": "c33f77f5213ddefe44d171a38dc823808511374810b3ae7a1e28e6c5adb7e379"
+  },
+  "open_boundary": {
+    "allocation_event_producer_connected": false,
+    "complete_physical_root_captured": false,
+    "live_schedule_authority": false
+  },
+  "physical_predictive_authority": false,
+  "schema": "th08-future-body-generation-differential-v1",
+  "summary": {
+    "all_product_oracle_matches": true,
+    "boundary_only_mismatch_count": 3,
+    "case_count": 4,
+    "oracle_mismatch_count": 0
+  }
+}

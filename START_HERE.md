@@ -408,14 +408,14 @@ action, collision/viability, damage, or NMNB authority follows.
 Ten focused tests and complete Linux/Windows discovery pass 1,257/1,257 in
 14.286/31.013 seconds, with the three existing Windows skips.
 
-Checkpoint `14b5a84` then records CE-0197 and rejects treating that exogenous schedule as independent of
-asynchronous input. Direction changes player position and aimed motion;
-Focus changes enemy mode; Shot/Power changes damage, defeat, and despawn; and
-route-2 player callbacks can change shared gameplay RNG. The new offline
-causal family maps every exact reachable active-mask history to only its
-compatible supplied schedule support. Missing/extra histories fail closed,
-and the next observation carries the family version without revealing the
-hidden history.
+Checkpoint `14b5a84` then records CE-0197 and rejects treating that exogenous
+schedule as independent of asynchronous input. Direction changes player
+position and aimed motion; Focus changes enemy mode; Shot/Power changes
+damage, defeat, and despawn; and route-2 player callbacks can change shared
+gameplay RNG. The new offline causal family maps every exact reachable
+active-mask history to only its compatible supplied schedule support.
+Missing/extra histories fail closed, and the next observation carries the
+family version without revealing the hidden history.
 
 The retained causal differential
 `artifacts/runtime_reports/th08_causal_future_body_schedule_differential_20260730.json`
@@ -432,6 +432,27 @@ Connected IDA revalidation also records
 `enemy_advance_internal_motion_component` at `0x0042DEB0`. Both operate on
 internal motion `+0x2D34`; neither alone advances final lethal world position
 `+0x2D88`.
+
+CE-0198 now rejects pointer/slot and adjacent active-bit edges as cross-time
+body identity. Connected IDA confirms that `enemy_spawn_from_timeline` can
+select a slot at `0x0042A54E`, execute its initial VM, clear active bit 0 at
+`0x0042A5F5`, and permit later same-update reuse. The new root-relative
+generation ledger consumes ordered allocation/retirement events; endpoint
+active slots only reconcile a complete event stream. Generation zero retains
+legacy slot IDs, while reuse is injectively encoded.
+
+The retained generation differential
+`artifacts/runtime_reports/th08_future_body_generation_differential_20260730.json`
+hashes to
+`501a78c6c54600d6615b5d5d4805a851e66d579044e49df783ad6ffb60aa3d24`.
+Linux/Windows bytes agree. The product matches an independent oracle in four
+cases; an endpoint-only foil merges three hidden-reuse cases. A new immutable
+native-root slice can bracket declared raw components under one manager frame,
+hash them, label inherited/hypothesized layouts incomplete, and decode all
+480 active bits. It always records no predictive authority; no complete
+physical root or allocation-event producer has been captured or connected.
+Twenty-two focused tests pass on Linux and Windows. Complete discovery passes
+1,288/1,288 in 14.102/31.159 seconds, with the three existing Windows skips.
 
 Checkpoint `e309c81` passes the `SEM-TIMER` offline semantic gate: 17/17
 product/raw-oracle/Linux-and-Windows-native cases per platform, a separate
@@ -795,16 +816,19 @@ Do not resume broad G5 work first.
    observed callback-step values `1..5` remain proposal data, not a universal
    bound or direct mapping from `control_delay_candidates`; the independent
    callback/cadence supports also lack a verified joint scheduler automaton.
-   The offline immutable schedule/version/body-set and causal-family
-   differentials now pass, but no predictive producer exists. Next add
-   generational slot identity and capture/version the minimum full native
-   root: timeline clocks/markers/gates, allocation/template state, all live
+   The offline immutable schedule/version/body-set, causal-family, and
+   generational-identity differentials now pass, but no predictive producer
+   exists. The root byte-slice envelope is implemented; next revalidate
+   concrete layouts and capture/version the minimum full native root:
+   timeline clocks/markers/gates, allocation/template state, all live
    main/auxiliary VMs, shared RNG, player/damage/resource state, and the
-   motion/flag/lifecycle fields needed by `+0x2D88`. Then extend the exact
-   executor one named event class at a time; do not substitute the current
-   `future hazard events unseen` snapshot or a retrospective fixture. Only
-   after all relevant classes are exact or conservatively enveloped should
-   viable-state and safe-action-mask differentials run.
+   motion/flag/lifecycle fields needed by `+0x2D88`. Connect timeline
+   allocation and immediate-VM termination to the ordered lifetime ledger,
+   then extend the exact executor one named event class at a time; do not
+   substitute the current `future hazard events unseen` snapshot or a
+   retrospective fixture. Only after all relevant classes are exact or
+   conservatively enveloped should viable-state and safe-action-mask
+   differentials run.
    Only after that predictive producer/model version exists may one new
    whole-stage physical falsifier run without fail-close. Then complete
    SEM-MODE-D damage-objective separation and SEM-MODE-E whole-model

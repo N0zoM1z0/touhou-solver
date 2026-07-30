@@ -60,12 +60,13 @@ General control formalizations deliberately remain at stable root paths:
 4. [asynchronous ordered input publication](ASYNC_ORDERED_INPUT_PUBLICATION_CONTRACT_20260730.md);
 5. [immutable future body/flag/geometry schedule](IMMUTABLE_FUTURE_BODY_FLAG_GEOMETRY_SCHEDULE_CONTRACT_20260730.md);
 6. [causal action-conditioned future-body producer](CAUSAL_ACTION_CONDITIONED_FUTURE_BODY_PRODUCER_CONTRACT_20260730.md);
-7. [dual-bound query-local refinement](DUAL_BOUND_QUERY_LOCAL_REFINEMENT_CONTRACT_20260727.md);
-8. [budgeted belief refinement](BUDGETED_BELIEF_REFINEMENT_20260725.md);
-9. [exact augmented partial survival](EXACT_AUGMENTED_PARTIAL_SURVIVAL_WITNESS_CONTRACT_20260727.md);
-10. [frozen manager/input clock](FROZEN_MANAGER_INPUT_CLOCK_BOUNDARY_20260726.md);
-11. [pre-loss continuation reserve](PRELOSS_CONTINUATION_RESERVE_CONTRACT_20260726.md); and
-12. [exact-version supplemental publication](EXACT_VERSION_ASYNC_SUPPLEMENTAL_PUBLICATION_20260726.md).
+7. [generational body identity and native root slice](GENERATIONAL_BODY_IDENTITY_AND_NATIVE_ROOT_SLICE_CONTRACT_20260730.md);
+8. [dual-bound query-local refinement](DUAL_BOUND_QUERY_LOCAL_REFINEMENT_CONTRACT_20260727.md);
+9. [budgeted belief refinement](BUDGETED_BELIEF_REFINEMENT_20260725.md);
+10. [exact augmented partial survival](EXACT_AUGMENTED_PARTIAL_SURVIVAL_WITNESS_CONTRACT_20260727.md);
+11. [frozen manager/input clock](FROZEN_MANAGER_INPUT_CLOCK_BOUNDARY_20260726.md);
+12. [pre-loss continuation reserve](PRELOSS_CONTINUATION_RESERVE_CONTRACT_20260726.md); and
+13. [exact-version supplemental publication](EXACT_VERSION_ASYNC_SUPPLEMENTAL_PUBLICATION_20260726.md).
 
 `START_HERE.md` remains authoritative for the exact subset and reading order
 required by the current checkpoint.

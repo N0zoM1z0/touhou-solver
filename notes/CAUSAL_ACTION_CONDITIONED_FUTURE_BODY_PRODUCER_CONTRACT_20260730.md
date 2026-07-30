@@ -234,7 +234,39 @@ rejection.
 Complete Linux/Windows discovery passes 1,266/1,266 in 14.471/31.192
 seconds; Windows retains the three existing skips.
 
-This is still an offline supplied-family representation. It does not
-implement allocation generation, native root capture, enemy VM/motion/
-lifecycle execution, shared RNG, physical publication, collision/viability,
-or live action. Exit gates 2–7 remain open.
+This is still an offline supplied-family representation. The next section
+implements allocation generation as a separate producer-boundary slice.
+Native root capture, enemy VM/motion/lifecycle execution, shared RNG,
+physical publication, collision/viability, and live action remain open.
+
+## 9. Retained Generational Identity And Root-Slice Boundary
+
+Exit gate 2 is implemented offline in
+`notes/GENERATIONAL_BODY_IDENTITY_AND_NATIVE_ROOT_SLICE_CONTRACT_20260730.md`
+and `scripts/th08_future_body_identity.py`.
+
+Connected IDA revalidation confirms that the first-inactive test at
+`0x0042A54E` may be followed by initial-VM return `-1` and active-bit clear at
+`0x0042A5F5` inside the same spawn call. Later timeline work in the same
+physical update may reuse that slot. Therefore exact identity consumes
+ordered allocation/retirement events; frame-boundary active edges only
+reconcile the event stream.
+
+Generation zero preserves retrospective slot IDs. Reuse is injectively
+encoded as `(generation << 32) | slot`. Four product cases match an
+independent recurrence; an endpoint-only foil merges three. The retained
+Linux/Windows-byte-identical report hashes to
+`501a78c6c54600d6615b5d5d4805a851e66d579044e49df783ad6ffb60aa3d24`.
+
+`scripts/th08_native_future_body_root.py` implements only a non-mutating,
+frame-bracketed, content-addressed root byte-slice envelope. Revalidated,
+inherited, and hypothesized layouts remain distinct; missing requirements
+are explicit. Even a byte-complete coherent slice reports
+`complete_root_bytes_without_executor_authority`.
+Twenty-two focused tests pass on Linux and Windows. Complete discovery passes
+1,288/1,288 in 14.102/31.159 seconds, with the three existing Windows skips.
+
+Exit gate 3 is therefore not complete: no physical root containing every
+revalidated required component has been retained. The timeline allocator/
+initial-VM executor also does not yet emit the ordered lifecycle events.
+Exit gates 3–7 remain open.

@@ -1,0 +1,288 @@
+{
+  "authority": {
+    "hard_survival_authority": false,
+    "live_action_authority": false,
+    "physical_predictive_authority": false,
+    "status": "offline_conditioned_schedule_family_only"
+  },
+  "cases": [
+    {
+      "branches": [
+        {
+          "active_mask_history": [
+            33,
+            1
+          ],
+          "conditioned_history": [
+            33,
+            1
+          ],
+          "expected_x_bits": "0x41800000",
+          "matches": true,
+          "observed_x_bits": "0x41800000",
+          "schedule_branch_sha256": "e36fef911bbff4ee965e2d3946ebd5420c87e41395a78ca53455c09979b4899b",
+          "schedule_sha256": "ffd1257790cd8d71c5824c08f5ca552b5b8211acdf02d5eefb4c1a6fdb94bc0a"
+        },
+        {
+          "active_mask_history": [
+            33,
+            33
+          ],
+          "conditioned_history": [
+            33,
+            33
+          ],
+          "expected_x_bits": "0x42400000",
+          "matches": true,
+          "observed_x_bits": "0x42400000",
+          "schedule_branch_sha256": "b0c3015222d4af7a98991e582196fd6d593f46675a9ef56153fbd0e17b87301f",
+          "schedule_sha256": "ae46849da5b4b3148b0c7ce9714d6938a9b34279ed2666d00fb04426ff10cc74"
+        },
+        {
+          "active_mask_history": [
+            33,
+            65
+          ],
+          "conditioned_history": [
+            33,
+            65
+          ],
+          "expected_x_bits": "0x42a00000",
+          "matches": true,
+          "observed_x_bits": "0x42a00000",
+          "schedule_branch_sha256": "4222e2a5e4808d3af570427b572fa07cbc3b7aa3bc10b8f69e55f01fd47b3bc6",
+          "schedule_sha256": "97653d571831e97ba14826aba980f9c54dcde2bce8239a009550b3517c31b160"
+        }
+      ],
+      "causal_pair_count": 3,
+      "conditioned_schedule_count": 3,
+      "converged_observation_class_count": 1,
+      "family": {
+        "authority": "offline_conditioned_schedule_family_only",
+        "clock_version": {
+          "components": {
+            "physical_update": true
+          },
+          "namespace": "causal-future-body-differential-clock-v1"
+        },
+        "members": [
+          {
+            "active_mask_history": [
+              33,
+              1
+            ],
+            "future_schedule_sha256": "ffd1257790cd8d71c5824c08f5ca552b5b8211acdf02d5eefb4c1a6fdb94bc0a"
+          },
+          {
+            "active_mask_history": [
+              33,
+              33
+            ],
+            "future_schedule_sha256": "ae46849da5b4b3148b0c7ce9714d6938a9b34279ed2666d00fb04426ff10cc74"
+          },
+          {
+            "active_mask_history": [
+              33,
+              65
+            ],
+            "future_schedule_sha256": "97653d571831e97ba14826aba980f9c54dcde2bce8239a009550b3517c31b160"
+          }
+        ],
+        "physical_predictive_authority": false,
+        "root_physical_update": 500,
+        "schema": "th08-route2-causal-future-body-family-v1",
+        "selected_action": "right_shot",
+        "selected_mask": 65,
+        "sha256": "69d0500a366ea244e6e7bcf65a68d036c84d8784712aa08a3deebc8f838a17ff"
+      },
+      "identity": "two_edge_direction_reversal",
+      "incompatible_pair_count": 0,
+      "input_branch_count": 3,
+      "naive_cartesian_pair_count": 9,
+      "reachable_history_count": 3
+    },
+    {
+      "branches": [
+        {
+          "active_mask_history": [
+            1,
+            1,
+            1
+          ],
+          "conditioned_history": [
+            1,
+            1,
+            1
+          ],
+          "expected_x_bits": "0x42200000",
+          "matches": true,
+          "observed_x_bits": "0x42200000",
+          "schedule_branch_sha256": "f407618e6c6e291a80756c4e1e0a0ec94e195694c9bb6b5b41ffaee35c76f6d7",
+          "schedule_sha256": "d5f05349a28b30f25d1240a1607400f9c446b7d9a072dfcd206f4d05ad0e3435"
+        },
+        {
+          "active_mask_history": [
+            1,
+            1,
+            5
+          ],
+          "conditioned_history": [
+            1,
+            1,
+            5
+          ],
+          "expected_x_bits": "0x42600000",
+          "matches": true,
+          "observed_x_bits": "0x42600000",
+          "schedule_branch_sha256": "d6be163f4f065279beaadd230614ab5a02a062446a35e5a79fecd39815f4ef50",
+          "schedule_sha256": "cd0f9ff23f539764528b169e70be95fcaa7427b23ddaf27a3981f43586d6705b"
+        },
+        {
+          "active_mask_history": [
+            1,
+            1,
+            5
+          ],
+          "conditioned_history": [
+            1,
+            1,
+            5
+          ],
+          "expected_x_bits": "0x42600000",
+          "matches": true,
+          "observed_x_bits": "0x42600000",
+          "schedule_branch_sha256": "d6be163f4f065279beaadd230614ab5a02a062446a35e5a79fecd39815f4ef50",
+          "schedule_sha256": "cd0f9ff23f539764528b169e70be95fcaa7427b23ddaf27a3981f43586d6705b"
+        },
+        {
+          "active_mask_history": [
+            1,
+            5,
+            5
+          ],
+          "conditioned_history": [
+            1,
+            5,
+            5
+          ],
+          "expected_x_bits": "0x42900000",
+          "matches": true,
+          "observed_x_bits": "0x42900000",
+          "schedule_branch_sha256": "96cfe146aa68123aa4e85cb064c0882c9be5d31c63c9b3c57bfa067e0b953b85",
+          "schedule_sha256": "baed1bae56eb5a4c5632729ecb834598443ef5210a28b958bffcad93b23eb71e"
+        },
+        {
+          "active_mask_history": [
+            1,
+            5,
+            5
+          ],
+          "conditioned_history": [
+            1,
+            5,
+            5
+          ],
+          "expected_x_bits": "0x42900000",
+          "matches": true,
+          "observed_x_bits": "0x42900000",
+          "schedule_branch_sha256": "96cfe146aa68123aa4e85cb064c0882c9be5d31c63c9b3c57bfa067e0b953b85",
+          "schedule_sha256": "baed1bae56eb5a4c5632729ecb834598443ef5210a28b958bffcad93b23eb71e"
+        }
+      ],
+      "causal_pair_count": 5,
+      "conditioned_schedule_count": 3,
+      "converged_observation_class_count": 3,
+      "family": {
+        "authority": "offline_conditioned_schedule_family_only",
+        "clock_version": {
+          "components": {
+            "physical_update": true
+          },
+          "namespace": "causal-future-body-differential-clock-v1"
+        },
+        "members": [
+          {
+            "active_mask_history": [
+              1,
+              1,
+              1
+            ],
+            "future_schedule_sha256": "d5f05349a28b30f25d1240a1607400f9c446b7d9a072dfcd206f4d05ad0e3435"
+          },
+          {
+            "active_mask_history": [
+              1,
+              1,
+              5
+            ],
+            "future_schedule_sha256": "cd0f9ff23f539764528b169e70be95fcaa7427b23ddaf27a3981f43586d6705b"
+          },
+          {
+            "active_mask_history": [
+              1,
+              5,
+              5
+            ],
+            "future_schedule_sha256": "baed1bae56eb5a4c5632729ecb834598443ef5210a28b958bffcad93b23eb71e"
+          }
+        ],
+        "physical_predictive_authority": false,
+        "root_physical_update": 500,
+        "schema": "th08-route2-causal-future-body-family-v1",
+        "selected_action": "focus_shot",
+        "selected_mask": 5,
+        "sha256": "c146bd3bcc5e993dd5123b75bdeaad846e5bddd85ed73d5493ee850e578983d2"
+      },
+      "identity": "asynchronous_focus_acquire",
+      "incompatible_pair_count": 0,
+      "input_branch_count": 5,
+      "naive_cartesian_pair_count": 15,
+      "reachable_history_count": 3
+    }
+  ],
+  "integrity": {
+    "mismatch_count": 0,
+    "passed": true
+  },
+  "native_boundary": {
+    "ida_database_changes": [
+      {
+        "address": "0x0042C180",
+        "name": "enemy_clamp_internal_motion_bounds"
+      },
+      {
+        "address": "0x0042DEB0",
+        "name": "enemy_advance_internal_motion_component"
+      }
+    ],
+    "observed_order": [
+      "stage_timelines",
+      "slot_allocation_and_immediate_initial_vm",
+      "ascending_480_slot_enemy_loop",
+      "mode_sync_ecl_motion_lifecycle",
+      "contact_and_player_shot_damage"
+    ],
+    "open_event_classes": [
+      "live_timeline_root_and_allocation_generation",
+      "complete_main_and_auxiliary_vm",
+      "final_world_geometry_and_non_mode_flags",
+      "despawn_damage_phase_and_shared_rng",
+      "joint_external_scheduler_support"
+    ],
+    "predictive_producer_available": false
+  },
+  "schema_version": "th08.causal_future_body_schedule_differential.v1",
+  "scope": {
+    "case_count": 2,
+    "causal_pair_count": 8,
+    "naive_cartesian_pair_count": 24,
+    "rejected_incompatible_pair_count": 16
+  },
+  "source_sha256": {
+    "scripts/analysis/th08_causal_future_body_schedule_differential.py": "c2feabec96c538228223c75815aa6f9485bac978affbdfec9cbc046504a9032a",
+    "scripts/th08_causal_future_body_schedule.py": "882daa54615e0669a0a89b1d751442c3983d84f323a81aa67df0bf8aed65db4d",
+    "scripts/th08_enemy_mode.py": "fa045f5bde2c65c1d837d07f9dde19a6032d895165691bad6346fb698061041a",
+    "scripts/th08_future_body_schedule.py": "fca82d3bc42342d86cd73eec8228f5f0bbc13763ee5a0d0a57994c956438e1db",
+    "scripts/touhou_control/ordered_input_transaction_oracle.py": "a5446a1bedcf4dbc2bb33fd5ea43e2337e34a0603f97244e192ed9bc66a483c9"
+  }
+}

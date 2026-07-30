@@ -827,6 +827,30 @@ or safe-action-mask integration and before any new stage-level falsifier.
 Ten focused tests and complete Linux/Windows discovery pass 1,257/1,257 in
 14.286/31.013 seconds, with the three existing Windows skips.
 
+**2026-07-30 causal future-schedule family checkpoint:** CE-0197 rejects an
+independent Cartesian product between asynchronous input histories and future
+body schedules. Direction, Focus, Shot/Power, damage/despawn, aimed motion,
+and shared gameplay RNG make physical future geometry action/history
+conditioned.
+
+The new offline family first enumerates exact reachable active-mask histories
+and requires one compatible supplied schedule support for each. Missing or
+extra histories fail closed. Its single family version is observable; the
+conditioned history and member branch remain hidden until complete
+observations distinguish them. Direction-reversal and Focus fixtures retain
+eight compatible branches instead of 24 Cartesian pairs, rejecting 16
+impossible pairs with zero mismatch. The byte-identical Linux/Windows report
+hashes to
+`d9f4c6202f87b2fd1515bb779284bb2cb4f51f37c08982faa092c1f43ba1898e`.
+
+Status remains **Offline**. This fixes causal finite representation only.
+Generational slot identity, native root capture, allocation/initial VM,
+complete ECL/motion/flag/lifecycle execution, damage/shared RNG, collision,
+and physical producer delivery remain absent. No live, survival, damage/
+unfocused combat, physical, or NMNB promotion occurs.
+Nine focused tests and complete Linux/Windows discovery pass 1,266/1,266 in
+14.471/31.192 seconds, with the three existing Windows skips.
+
 The amendment and CE-0183/0184 override the numbered historical backlog
 below until the semantic correction/model-version gate is complete. Those
 rows retain evidence/status history; they are not permission to resume G5

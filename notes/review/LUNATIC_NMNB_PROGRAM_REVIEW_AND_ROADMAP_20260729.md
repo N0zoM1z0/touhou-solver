@@ -1287,6 +1287,35 @@ Lunatic Stage 3, Stage 4A, Stage 5, and Final B before a Power-0 full route.
 Ten focused tests and complete Linux/Windows discovery pass 1,257/1,257 in
 14.286/31.013 seconds, with the three existing Windows skips.
 
+2026-07-30 causal producer correction: CE-0197 rejects crossing one exogenous
+body schedule independently with asynchronous actuator histories. Direction
+affects player position/aimed motion; Focus affects the mode gate; Shot,
+Power, and alignment affect damage/defeat/despawn; and route-2 player
+callbacks can consume the same gameplay RNG as timelines and enemy ECL.
+
+`scripts/th08_causal_future_body_schedule.py` now represents one selected
+action as an immutable map from every exact reachable active-mask history to
+its compatible schedule support. Missing/extra histories fail closed. The
+family version reaches the next observation, while hidden history/member
+identity does not. Two direction/Focus cases contain eight exact actuator
+branches: a naive Cartesian product admits 24 pairs, while the causal family
+retains eight and rejects 16 impossible pairs with zero mismatch. The
+byte-identical Linux/Windows report hashes to
+`d9f4c6202f87b2fd1515bb779284bb2cb4f51f37c08982faa092c1f43ba1898e`.
+
+IDA revalidation also names the internal-bound clamp at `0x0042C180` and
+internal-motion integrator at `0x0042DEB0`; neither advances final lethal
+world position `+0x2D88` alone.
+
+This closes only the causal family representation. A physical producer still
+needs generational slot identity, complete root capture, allocation/initial
+VM, all body-affecting ECL/callback/motion/flag/lifecycle state, damage/
+resource coupling, shared RNG, and joint scheduler support. Status remains
+**Offline / no live authority**; the Stage-3/4A/5/Final-B promotion ring is
+unchanged.
+Nine focused tests and complete Linux/Windows discovery pass 1,266/1,266 in
+14.471/31.192 seconds, with the three existing Windows skips.
+
 ### Phase 2 — Repair collision geometry and lifecycle
 
 Implement as small, separately reviewable changes:

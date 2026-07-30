@@ -699,15 +699,35 @@ deadline, or physical stage gates.
 Ten focused tests and complete Linux/Windows discovery pass 1,257/1,257 in
 14.286/31.013 seconds, with the three existing Windows skips.
 
+CE-0197 additionally rejects independent actuator/schedule Cartesian
+composition. The causal family maps each exact active-mask history to one
+compatible supplied schedule set under one immutable family version. The
+direction/Focus differential retains eight compatible branches instead of 24
+Cartesian pairs and rejects 16 impossible pairs with zero mismatch. Its
+Linux/Windows-byte-identical report hashes to
+`d9f4c6202f87b2fd1515bb779284bb2cb4f51f37c08982faa092c1f43ba1898e`.
+
+Connected IDA revalidation renames/comments:
+
+- `0x0042C180` as `enemy_clamp_internal_motion_bounds`; and
+- `0x0042DEB0` as `enemy_advance_internal_motion_component`.
+
+Both operate on internal motion `+0x2D34`. Final contact geometry consumes
+the later composed world position `+0x2D88`, so neither is a standalone
+world-trajectory producer.
+Nine focused tests and complete Linux/Windows discovery pass 1,266/1,266 in
+14.471/31.192 seconds, with the three existing Windows skips.
+
 ## Remaining Implementation And Promotion Plan
 
 1. **SEM-MODE-C predictive schedule producer:** the asynchronous ordered
-   scalar/native recurrence and offline immutable schedule/body-set
-   differential are implemented. Next enumerate or conservatively envelope
-   unseen births, future non-mode flag writes, despawns/transforms,
-   per-update geometry, and their joint scheduler/cadence support. A missing
-   class remains `UNKNOWN`; never substitute a current snapshot or
-   retrospective fixture.
+   scalar/native recurrence and offline immutable schedule/body-set/causal
+   family differentials are implemented. Next add generational slot identity,
+   capture the complete native producer root, and execute allocation/initial
+   VM, births, non-mode flags, despawns/transforms, final world geometry,
+   damage/shared RNG, and joint scheduler/cadence support. A missing class
+   remains `UNKNOWN`; never substitute a current snapshot or retrospective
+   fixture.
 2. **SEM-MODE-C survival integration:** bind one fixed predictive schedule
    version to movement/collision, then publish viable-state and
    safe-action-mask differentials without changing live action authority.

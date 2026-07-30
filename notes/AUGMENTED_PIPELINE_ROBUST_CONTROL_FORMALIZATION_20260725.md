@@ -433,6 +433,14 @@ Passing claim 1 does not establish claims 2--4.
   zero mismatch. This is representation and composition authority only:
   no predictive producer exists and physical future coverage remains
   `UNKNOWN` from root+1.
+- CE-0197 rejects crossing that exogenous schedule independently with
+  asynchronous input histories. `th08_causal_future_body_schedule.py` first
+  enumerates the exact scalar actuator histories and requires an immutable
+  mapping from each history to its compatible schedule support. Two
+  direction/Focus fixtures retain eight compatible branches instead of 24
+  Cartesian pairs, rejecting 16 impossible pairs with zero mismatch. This
+  closes causal finite representation only; the native producer state and
+  event classes remain absent.
 - Lookup-only version/root checks are exact.  In the first physical shadow,
   every root that was both covered and completed was consumed; miss delivery,
   not lookup corruption, caused the low hit rate.

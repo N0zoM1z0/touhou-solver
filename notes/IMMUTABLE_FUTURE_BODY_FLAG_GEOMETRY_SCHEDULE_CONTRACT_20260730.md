@@ -73,6 +73,13 @@ One branch means deterministic finite input. Multiple branches are one
 declared finite nature support. The controller action is selected uniformly
 before nature chooses a branch.
 
+CE-0197 and
+`CAUSAL_ACTION_CONDITIONED_FUTURE_BODY_PRODUCER_CONTRACT_20260730.md`
+forbid promoting one exogenous schedule through an independent Cartesian
+product with asynchronous active-mask histories. Version 1 remains valid for
+explicitly action-independent supplied fixtures. A physical producer must
+publish one immutable history-conditioned schedule family.
+
 ## 3. State, Observation, And Causality
 
 The enclosing asynchronous actuator/mode state remains:

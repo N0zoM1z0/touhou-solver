@@ -21,6 +21,8 @@ located; it does not change the authority order below.
 8. `notes/ASYNC_ORDERED_INPUT_PUBLICATION_CONTRACT_20260730.md`
    and
    `notes/IMMUTABLE_FUTURE_BODY_FLAG_GEOMETRY_SCHEDULE_CONTRACT_20260730.md`
+   and
+   `notes/CAUSAL_ACTION_CONDITIONED_FUTURE_BODY_PRODUCER_CONTRACT_20260730.md`
 9. `notes/DUAL_BOUND_QUERY_LOCAL_REFINEMENT_CONTRACT_20260727.md`
 10. `notes/BUDGETED_BELIEF_REFINEMENT_20260725.md`
 11. `notes/EXACT_AUGMENTED_PARTIAL_SURVIVAL_WITNESS_CONTRACT_20260727.md`
@@ -406,6 +408,31 @@ action, collision/viability, damage, or NMNB authority follows.
 Ten focused tests and complete Linux/Windows discovery pass 1,257/1,257 in
 14.286/31.013 seconds, with the three existing Windows skips.
 
+CE-0197 then rejects treating that exogenous schedule as independent of
+asynchronous input. Direction changes player position and aimed motion;
+Focus changes enemy mode; Shot/Power changes damage, defeat, and despawn; and
+route-2 player callbacks can change shared gameplay RNG. The new offline
+causal family maps every exact reachable active-mask history to only its
+compatible supplied schedule support. Missing/extra histories fail closed,
+and the next observation carries the family version without revealing the
+hidden history.
+
+The retained causal differential
+`artifacts/runtime_reports/th08_causal_future_body_schedule_differential_20260730.json`
+hashes to
+`d9f4c6202f87b2fd1515bb779284bb2cb4f51f37c08982faa092c1f43ba1898e`.
+Linux/Windows bytes agree. Two direction/Focus cases retain eight compatible
+branches instead of 24 Cartesian pairs, rejecting 16 impossible pairs with
+zero mismatch. Nine focused tests pass on both platforms. Complete
+Linux/Windows discovery passes 1,266/1,266 in 14.471/31.192 seconds, with the
+three existing Windows skips.
+
+Connected IDA revalidation also records
+`enemy_clamp_internal_motion_bounds` at `0x0042C180` and
+`enemy_advance_internal_motion_component` at `0x0042DEB0`. Both operate on
+internal motion `+0x2D34`; neither alone advances final lethal world position
+`+0x2D88`.
+
 Checkpoint `e309c81` passes the `SEM-TIMER` offline semantic gate: 17/17
 product/raw-oracle/Linux-and-Windows-native cases per platform, a separate
 4,096-case exact raw-bit sweep, component-versioned V2 retained replay, and
@@ -768,13 +795,16 @@ Do not resume broad G5 work first.
    observed callback-step values `1..5` remain proposal data, not a universal
    bound or direct mapping from `control_delay_candidates`; the independent
    callback/cadence supports also lack a verified joint scheduler automaton.
-   The offline immutable schedule/version representation and exact body-set
-   differential now pass, but no predictive producer exists. Next enumerate
-   or conservatively envelope unseen births, future non-mode flag writes,
-   despawns/transforms, per-update geometry, and their joint scheduler/
-   cadence support; do not substitute the current `future hazard events
-   unseen` snapshot or a retrospective fixture. Then publish viable-state and
-   safe-action-mask differentials without granting live action authority.
+   The offline immutable schedule/version/body-set and causal-family
+   differentials now pass, but no predictive producer exists. Next add
+   generational slot identity and capture/version the minimum full native
+   root: timeline clocks/markers/gates, allocation/template state, all live
+   main/auxiliary VMs, shared RNG, player/damage/resource state, and the
+   motion/flag/lifecycle fields needed by `+0x2D88`. Then extend the exact
+   executor one named event class at a time; do not substitute the current
+   `future hazard events unseen` snapshot or a retrospective fixture. Only
+   after all relevant classes are exact or conservatively enveloped should
+   viable-state and safe-action-mask differentials run.
    Only after that predictive producer/model version exists may one new
    whole-stage physical falsifier run without fail-close. Then complete
    SEM-MODE-D damage-objective separation and SEM-MODE-E whole-model

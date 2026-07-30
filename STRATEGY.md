@@ -1781,11 +1781,14 @@ first.
   native event ring now covers both ordinary-pool allocations, all five
   revalidated active-bit retirements, and the distinct forced-HP-zero write.
   It retains ordered before/after flags and HP, resolved frame damage, and the
-  four shipped forced-zero callers. Full-ring overwrite, overflow, unstable
-  reads, multi-site activation rollback, reverse cleanup, and unsafe restore
-  behavior pass 14 focused tests on Linux and Windows. This is synthetic
-  implementation authority only; no TH08 process has installed it and no
-  generation, kill, emission, strategy, or action claim is promoted.
+  four shipped forced-zero callers. Allocation events additionally retain
+  native stage-route index plus the signed-word root passed unchanged to
+  `ecl_start_subroutine`. Full-ring overwrite, overflow, unstable reads,
+  program-identity rejection, multi-site activation rollback, reverse
+  cleanup, and unsafe restore behavior pass 15 focused tests on Linux and
+  Windows. This is synthetic implementation authority only; no TH08 process
+  has installed it and no generation, kill, emission, strategy, or action
+  claim is promoted.
 - **Implemented lifecycle transport (2026-07-31):** the live CLI, hotkey
   contract, stage-practice supervisor, and full-route supervisor expose one
   explicit default-off lifecycle option. It installs only after target
@@ -1800,9 +1803,12 @@ first.
   Nonadvancing read/race failures can be recovered by a later exact batch;
   overflow or malformed advancement cuts the authoritative prefix. It creates
   per-slot observed generations, keeps baseline-active enemies as partial
-  starts, and reuses the forced-zero/lethal-damage classifier. Seven
-  adversarial tests pass, but no runtime batch has been observed and no source
-  program, prevented birth, exposure, strategy, or action claim is promoted.
+  starts, retains exact allocation `(stage, root)` identity, and reuses the
+  forced-zero/lethal-damage classifier. Its optional SHA-pinned candidate-board
+  join matches only exact timeline-root programs and reports child/phase roots
+  as unmatched. Ten adversarial tests pass, but no runtime batch has been
+  observed and no executed source program, prevented birth, exposure,
+  strategy, or action claim is promoted.
 - **Static source/emission candidate atlas (2026-07-31):** pinned Route-2
   Lunatic Final-B ECL across Stages 1/2/3/4A/5/Final B contains 991 eligible
   timeline spawns and 70 unique root programs. Conservative source ownership
@@ -1925,9 +1931,9 @@ first.
   recurrence/static opportunity authority only. The cross-atlas board has
   immutable static-cohort authority only. The Boss configuration atlas has
   shipped-content/native-static full-configuration-mode authority only.
-  Runtime generation/end tracking, instruction execution, phase sequence,
-  exposure causality, causal collection, targeting, and S18 live action
-  authority remain none.
+  Runtime-observed generation/end tracking and candidate-board joins,
+  instruction execution, phase sequence, exposure causality, causal
+  collection, targeting, and S18 live action authority remain none.
 
 ## Adding Or Changing A Strategy
 

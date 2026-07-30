@@ -110,9 +110,24 @@ def _event(
     hp_before: int = 5,
     hp_after: int = 5,
     frame_damage: int = 0,
+    root_subroutine: int | None = None,
+    stage_route_index: int = 5,
 ) -> bytes:
+    encoded_root = (
+        root_subroutine
+        if root_subroutine is not None
+        else (
+            7
+            if kind
+            in {
+                EnemyLifecycleKind.ALLOCATE_TIMELINE,
+                EnemyLifecycleKind.ALLOCATE_INHERITED_REGISTERS,
+            }
+            else -1
+        )
+    )
     return struct.pack(
-        "<IIIIIIiiiI",
+        "<IIIIIIiiiIiI",
         serial,
         1000 + serial,
         int(kind),
@@ -123,6 +138,8 @@ def _event(
         hp_after,
         frame_damage,
         caller,
+        encoded_root,
+        stage_route_index,
     )
 
 
@@ -188,6 +205,10 @@ class EnemyLifecycleProbeTests(unittest.TestCase):
                 ),
             ],
         )
+        self.assertEqual(
+            [site.capture_root_subroutine for site in HOOK_SITES],
+            [True, True, False, False, False, False, False, False],
+        )
 
     def test_stubs_replay_original_then_return_and_fit_fixed_slots(self) -> None:
         remote_base = 0x02000000
@@ -195,6 +216,8 @@ class EnemyLifecycleProbeTests(unittest.TestCase):
             stub = build_site_stub(remote_base, site)
             self.assertTrue(stub.startswith(b"\x9c\x60"))
             self.assertIn(site.original, stub)
+            if site.capture_root_subroutine:
+                self.assertIn(b"\x0f\xbf\x55\x08\x89\x51\x28", stub)
             self.assertLessEqual(len(stub), PROBE_STUB_STRIDE)
             self.assertEqual(stub[-5], 0xE9)
             displacement = struct.unpack("<i", stub[-4:])[0]
@@ -274,6 +297,45 @@ class EnemyLifecycleProbeTests(unittest.TestCase):
             event.compact_record()["kind"],
             "retire_defeat_mode0",
         )
+        self.assertIsNone(event.root_subroutine)
+
+    def test_allocation_event_retains_exact_root_subroutine(self) -> None:
+        event = EnemyLifecycleEvent.decode(
+            _event(
+                6,
+                kind=EnemyLifecycleKind.ALLOCATE_TIMELINE,
+                slot=9,
+                root_subroutine=31,
+            )
+        )
+        self.assertTrue(event.is_allocation)
+        self.assertEqual(event.root_subroutine, 31)
+        self.assertEqual(event.stage_route_index, 5)
+        self.assertEqual(event.compact_record()["root_subroutine"], 31)
+        with self.assertRaisesRegex(ValueError, "no root subroutine"):
+            EnemyLifecycleEvent.decode(
+                _event(
+                    6,
+                    kind=EnemyLifecycleKind.ALLOCATE_TIMELINE,
+                    root_subroutine=-1,
+                )
+            )
+        with self.assertRaisesRegex(ValueError, "stage-route index"):
+            EnemyLifecycleEvent.decode(
+                _event(
+                    6,
+                    kind=EnemyLifecycleKind.ALLOCATE_TIMELINE,
+                    stage_route_index=9,
+                )
+            )
+        with self.assertRaisesRegex(ValueError, "non-allocation"):
+            EnemyLifecycleEvent.decode(
+                _event(
+                    6,
+                    kind=EnemyLifecycleKind.RETIRE_MAIN_VM,
+                    root_subroutine=31,
+                )
+            )
 
     def test_forced_zero_requires_one_of_the_four_shipped_callers(self) -> None:
         event = EnemyLifecycleEvent.decode(

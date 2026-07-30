@@ -30,6 +30,14 @@ byte reads:
 | defeat-mode-0 retirement | `0x0042D899` | `898a24330000` | `edx` |
 | eligible-enemy forced HP zero | `0x0042F039` | `c781fc2d000000000000` | `ecx` |
 
+At both allocation hooks, signed word `[ebp+8]` is the exact root ECL
+subroutine argument passed unchanged to `ecl_start_subroutine` later in the
+same allocator. Native `g_stage_route_index` at `0x0164D2CC` selects the
+loaded normal-stage ECL table (`0..8` for Stage 1 through Extra). The pair
+`(stage_route_index, root_subroutine)` therefore identifies the concrete
+allocation's loaded ECL program under the pinned normal-route content
+boundary.
+
 The five retirement sites clear active flag bit `0x01`. The forced-zero site
 writes current HP `+0x2DFC = 0` and does **not** clear active. Its caller return
 address distinguishes the four shipped call edges:
@@ -46,11 +54,11 @@ authority for these boundaries.
 ## Event ABI And Publication
 
 `scripts/th08_runtime/enemy_lifecycle_probe.py` defines schema
-`th08-enemy-lifecycle-probe-v1`:
+`th08-enemy-lifecycle-probe-v2`:
 
 - one 32-byte identity/header record;
 - eight fixed, position-specific x86 stubs;
-- a power-of-two ring of 256 40-byte events;
+- a power-of-two ring of 256 48-byte events;
 - one unsigned 32-bit serial shared by the single native producer;
 - explicit site-set CRC, PID, version, capacity, event size, and hook count.
 
@@ -62,7 +70,10 @@ Each event retains:
 4. flags before and after the overwritten instruction;
 5. HP before and after it;
 6. the already-resolved frame damage at enemy `+0x3354`; and
-7. the forced-zero caller return address, or zero for every other kind.
+7. the forced-zero caller return address, or zero for every other kind;
+8. the signed allocation root subroutine, or `-1` for non-allocation events;
+   and
+9. native stage-route index `0..8`.
 
 Each stub:
 
@@ -95,6 +106,8 @@ stored in every selected slot. It returns:
 Overflow, unstable slots, invalid pool pointers, unknown event kinds, a
 nonzero caller on a non-forced event, or a forced-zero caller outside the four
 shipped call edges cannot become partial positive evidence.
+An allocation without a nonnegative signed-word root, a non-allocation with a
+root, or a stage-route index outside `0..8` is also rejected.
 
 For defeat-mode-0 retirement, the event exposes
 `post_damage_hp + resolved_frame_damage`, but that arithmetic alone is not
@@ -163,8 +176,9 @@ rows, but the ring is not an observation used by the planner or issue path.
    than imputed.
 
 3. **Does an exact result answer the physical question?**
-   An exact batch answers only which covered native lifecycle edges executed,
-   in order, for covered ordinary-pool records. It does not by itself prove
+   An exact batch answers which covered native lifecycle edges executed, in
+   order, for covered ordinary-pool records. Allocation events additionally
+   answer the loaded stage/root program identity. It does not by itself prove
    player-shot causation, drop creation, future-emission suppression,
    damageability, targeting, or survival benefit.
 
@@ -183,13 +197,14 @@ rows, but the ring is not an observation used by the planner or issue path.
 
 ## Tests And Current Authority
 
-The original focused Linux and Windows discovery passes cover 14 probe tests:
+The focused probe suite now covers 15 tests:
 
 - all IDA-revalidated addresses and byte spans;
 - stub replay/return layout and fixed-slot bounds;
 - direct activation targets and full-instruction padding;
 - cleanup quiescence over every patch and stub;
 - event and forced-caller validation;
+- exact allocation root/stage identity and invalid-identity rejection;
 - exact, overflow, and unstable reads;
 - activation-last install plus reverse-order cleanup;
 - activation quiescence before replacing any in-flight instruction span;
@@ -202,7 +217,11 @@ target termination on unsafe instrumentation state.
 
 No game, native replay, runtime installation, or physical trial was run. The
 ring and its transport currently have implementation/synthetic-test authority
-only.
+only. Complete discovery passes 1,491 tests in 14.072 seconds on Linux and
+31.252 seconds through the Windows UNC loader, with the three existing skips.
+The first Windows discovery failed only the pre-existing auxiliary-ECL timing
+gate at 30.903 seconds; its isolated two-test repeat passed in 0.217 seconds,
+and the subsequent complete discovery passed.
 
 ## Next Gate
 
@@ -213,5 +232,7 @@ Before any strategy claim:
 2. prove exact ordered agreement for allocation/retirement and forced zero;
 3. run the fail-closed lifecycle lowerer with `--require-complete` and compare
    its generation/end output to that independent bracket; and
-4. then test whether an earlier verified kill actually prevents emissions or
-   shortens exposure.
+4. join exact stage/root generations to the immutable combat/resource
+   candidate board; then
+5. test whether an earlier verified kill actually prevents emissions,
+   creates/collects the declared Power opportunity, or shortens exposure.

@@ -3,16 +3,27 @@
 
 from __future__ import annotations
 
+from pathlib import Path
 import unittest
 
 from analysis.th08_enemy_lifecycle_trace_audit import (
     audit_lifecycle_trace_rows,
+    join_candidate_board,
 )
 from th08_runtime.enemy_lifecycle_probe import (
     ENEMY_POOL_BASE,
     ENEMY_STRIDE,
     FORCED_ZERO_RETURN_OPCODE_5F,
     PROBE_SCHEMA,
+)
+
+
+ROOT = Path(__file__).resolve().parents[1]
+CANDIDATE_BOARD = (
+    ROOT
+    / "artifacts"
+    / "runtime_reports"
+    / "th08_route2_combat_resource_candidate_board_20260731.json"
 )
 
 
@@ -28,7 +39,14 @@ def _event(
     hp_after: int = 20,
     frame_damage: int = 0,
     caller: int | None = None,
+    root_subroutine: int | None = None,
+    stage_route_index: int = 5,
 ) -> dict[str, object]:
+    encoded_root = (
+        root_subroutine
+        if root_subroutine is not None
+        else (7 if kind.startswith("allocate_") else None)
+    )
     return {
         "serial": serial,
         "manager_frame": frame,
@@ -41,6 +59,8 @@ def _event(
         "hp_after": hp_after,
         "frame_damage": frame_damage,
         "caller_return_address": caller,
+        "root_subroutine": encoded_root,
+        "stage_route_index": stage_route_index,
     }
 
 
@@ -107,7 +127,7 @@ class EnemyLifecycleTraceAuditTests(unittest.TestCase):
             0,
             3,
             [
-                _event(1, "allocate_timeline"),
+                _event(1, "allocate_timeline", root_subroutine=7),
                 _event(
                     2,
                     "forced_hp_zero",
@@ -137,6 +157,7 @@ class EnemyLifecycleTraceAuditTests(unittest.TestCase):
                     frame=120,
                     hp_before=5,
                     hp_after=5,
+                    root_subroutine=19,
                 ),
                 _event(
                     5,
@@ -178,6 +199,24 @@ class EnemyLifecycleTraceAuditTests(unittest.TestCase):
                 for lifetime in report["lifetimes"]
             ],
             [1, 2],
+        )
+        self.assertEqual(
+            [lifetime["root_subroutine"] for lifetime in report["lifetimes"]],
+            [7, 19],
+        )
+        self.assertEqual(
+            report["summary"]["observed_root_subroutine_counts"],
+            {"7": 1, "19": 1},
+        )
+        self.assertEqual(
+            report["summary"]["observed_program_counts"],
+            {"stage-5:root-7": 1, "stage-5:root-19": 1},
+        )
+        self.assertTrue(
+            report["authority"]["accepted_allocation_root_identity_exact"]
+        )
+        self.assertTrue(
+            report["authority"]["accepted_program_identity_exact"]
         )
 
     def test_transient_read_error_is_recovered_by_later_exact_batch(
@@ -321,6 +360,7 @@ class EnemyLifecycleTraceAuditTests(unittest.TestCase):
         )
         self.assertEqual(report["summary"]["partial_start_lifetime_count"], 1)
         self.assertFalse(report["lifetimes"][0]["start_observed"])
+        self.assertIsNone(report["lifetimes"][0]["root_subroutine"])
         self.assertEqual(
             report["lifetimes"][0]["end_classification"]["reason"],
             "scripted_main_vm_end",
@@ -352,6 +392,126 @@ class EnemyLifecycleTraceAuditTests(unittest.TestCase):
             report["serial_chain"]["irrecoverable_gap"]["reason"],
             "invalid_event",
         )
+
+    def test_allocation_without_root_identity_invalidates_its_batch(self) -> None:
+        allocation = _event(1, "allocate_timeline")
+        allocation["root_subroutine"] = None
+        report = audit_lifecycle_trace_rows(
+            _rows(
+                [
+                    _batch(
+                        "exact",
+                        0,
+                        1,
+                        [allocation],
+                    )
+                ],
+                final=_batch("no_events", 1, 1),
+            )
+        )
+
+        self.assertEqual(report["accepted_prefix_event_count"], 0)
+        self.assertEqual(
+            report["serial_chain"]["irrecoverable_gap"]["reason"],
+            "invalid_event",
+        )
+
+    def test_lifetime_cannot_cross_native_stage_route_identity(self) -> None:
+        report = audit_lifecycle_trace_rows(
+            _rows(
+                [
+                    _batch(
+                        "exact",
+                        0,
+                        2,
+                        [
+                            _event(
+                                1,
+                                "allocate_timeline",
+                                stage_route_index=5,
+                            ),
+                            _event(
+                                2,
+                                "retire_main_vm",
+                                flags_after=0,
+                                stage_route_index=7,
+                            ),
+                        ],
+                    )
+                ],
+                final=_batch("no_events", 2, 2),
+            )
+        )
+
+        self.assertFalse(
+            report["authority"]["generation_stream_complete"]
+        )
+        self.assertIn(
+            "changes stage-route index",
+            report["serial_chain"]["errors"][-1],
+        )
+
+    def test_exact_program_identity_joins_the_immutable_candidate_board(
+        self,
+    ) -> None:
+        report = audit_lifecycle_trace_rows(
+            _rows(
+                [
+                    _batch(
+                        "exact",
+                        0,
+                        3,
+                        [
+                            _event(
+                                1,
+                                "allocate_timeline",
+                                root_subroutine=2,
+                                stage_route_index=5,
+                            ),
+                            _event(
+                                2,
+                                "retire_main_vm",
+                                flags_after=0,
+                                stage_route_index=5,
+                            ),
+                            _event(
+                                3,
+                                "allocate_timeline",
+                                root_subroutine=7,
+                                stage_route_index=5,
+                            ),
+                        ],
+                    )
+                ],
+                final=_batch("no_events", 3, 3),
+            )
+        )
+        joined = join_candidate_board(report, CANDIDATE_BOARD)
+
+        self.assertEqual(joined["summary"]["matched_lifetime_count"], 1)
+        self.assertEqual(
+            joined["matched_lifetimes"][0]["candidate_id"],
+            "ecldata5.ecl:root:2",
+        )
+        self.assertIn(
+            "ordinary_emitter_configured_extra_power",
+            joined["matched_lifetimes"][0]["candidate_families"],
+        )
+        self.assertEqual(
+            joined["unmatched_programs"],
+            [
+                {
+                    "stage_route_index": 5,
+                    "root_subroutine": 7,
+                    "lifetime_count": 1,
+                    "reason": "program_not_timeline_rooted_in_candidate_board",
+                }
+            ],
+        )
+        self.assertTrue(
+            joined["authority"]["matched_program_identity_exact"]
+        )
+        self.assertFalse(joined["authority"]["candidate_benefit_verified"])
 
     def test_final_read_failure_leaves_stream_incomplete(self) -> None:
         report = audit_lifecycle_trace_rows(

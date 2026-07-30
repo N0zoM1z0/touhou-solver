@@ -24,7 +24,7 @@ import time
 from typing import Any
 import zlib
 
-from .game_state import ADDR_ENEMY_MANAGER_FRAME
+from .game_state import ADDR_ENEMY_MANAGER_FRAME, ADDR_STAGE_ROUTE_INDEX
 from .priority17_publication_probe import (
     MEM_COMMIT,
     MEM_RELEASE,
@@ -45,11 +45,11 @@ from .priority17_publication_probe import (
 )
 
 
-PROBE_SCHEMA = "th08-enemy-lifecycle-probe-v1"
-PROBE_MAGIC = b"ELR1"
-PROBE_VERSION = 1
+PROBE_SCHEMA = "th08-enemy-lifecycle-probe-v2"
+PROBE_MAGIC = b"ELR2"
+PROBE_VERSION = 2
 PROBE_CAPACITY = 256
-PROBE_EVENT_SIZE = 40
+PROBE_EVENT_SIZE = 48
 PROBE_ALLOCATION_SIZE = 0x4000
 PROBE_HEADER_SIZE = 32
 PROBE_SERIAL_OFFSET = 16
@@ -78,7 +78,7 @@ FORCED_ZERO_RETURN_ADDRESSES = frozenset(
 )
 
 _HEADER = struct.Struct("<4s7I")
-_EVENT = struct.Struct("<IIIIIIiiiI")
+_EVENT = struct.Struct("<IIIIIIiiiIiI")
 
 
 class EnemyLifecycleKind(IntEnum):
@@ -117,6 +117,7 @@ class EnemyLifecycleHookSite:
     kind: EnemyLifecycleKind
     pointer_source: str
     capture_return_address: bool = False
+    capture_root_subroutine: bool = False
 
     def __post_init__(self) -> None:
         if not self.name:
@@ -131,6 +132,10 @@ class EnemyLifecycleHookSite:
             self.kind is EnemyLifecycleKind.FORCED_HP_ZERO
         ):
             raise ValueError("only forced-HP-zero hooks capture a return address")
+        if self.capture_root_subroutine != (self.kind in _ALLOCATION_KINDS):
+            raise ValueError(
+                "only allocation hooks capture a root subroutine"
+            )
 
     @property
     def return_address(self) -> int:
@@ -144,6 +149,7 @@ HOOK_SITES = (
         original=b"\x8b\x55\xf8\x8b\x45\xfc\x89\x82\x0c\x2e\x00\x00",
         kind=EnemyLifecycleKind.ALLOCATE_TIMELINE,
         pointer_source="ebp_minus_8",
+        capture_root_subroutine=True,
     ),
     EnemyLifecycleHookSite(
         name="allocate_inherited_registers",
@@ -151,6 +157,7 @@ HOOK_SITES = (
         original=b"\x8b\x55\xf8\x8b\x45\xfc\x89\x82\x0c\x2e\x00\x00",
         kind=EnemyLifecycleKind.ALLOCATE_INHERITED_REGISTERS,
         pointer_source="ebp_minus_8",
+        capture_root_subroutine=True,
     ),
     EnemyLifecycleHookSite(
         name="retire_initial_vm_timeline",
@@ -206,7 +213,9 @@ def _site_digest() -> int:
         payload += site.original
         payload += site.name.encode("ascii") + b"\0"
         payload += site.pointer_source.encode("ascii") + b"\0"
-        payload += bytes((site.capture_return_address,))
+        payload += bytes(
+            (site.capture_return_address, site.capture_root_subroutine)
+        )
     return zlib.crc32(payload) & 0xFFFFFFFF
 
 
@@ -295,6 +304,13 @@ def build_site_stub(
     else:
         code += b"\x31\xd2"  # xor edx, edx
     code += b"\x89\x51\x24"  # aux/caller return address
+    if site.capture_root_subroutine:
+        code += b"\x0f\xbf\x55\x08"  # movsx edx, word [ebp + 8]
+    else:
+        code += b"\x83\xca\xff"  # or edx, -1
+    code += b"\x89\x51\x28"  # root subroutine, or -1 when not an allocation
+    code += b"\x8b\x15" + _u32(ADDR_STAGE_ROUTE_INDEX)
+    code += b"\x89\x51\x2c"  # native stage-route index
     code += b"\x61\x9d"  # popad; popfd
 
     # Exact shipped bytes execute before publication of the event.
@@ -374,6 +390,8 @@ class EnemyLifecycleEvent:
     hp_after: int
     frame_damage: int
     caller_return_address: int
+    root_subroutine: int | None
+    stage_route_index: int
 
     @classmethod
     def decode(cls, payload: bytes) -> EnemyLifecycleEvent:
@@ -390,6 +408,8 @@ class EnemyLifecycleEvent:
             hp_after,
             frame_damage,
             caller_return_address,
+            root_subroutine,
+            stage_route_index,
         ) = _EVENT.unpack(payload)
         try:
             kind = EnemyLifecycleKind(kind_value)
@@ -407,6 +427,19 @@ class EnemyLifecycleEvent:
                 raise ValueError("forced-HP-zero caller is not a shipped caller")
         elif caller_return_address:
             raise ValueError("non-forced lifecycle event has a caller address")
+        if kind in _ALLOCATION_KINDS:
+            if root_subroutine < 0:
+                raise ValueError(
+                    "allocation lifecycle event has no root subroutine"
+                )
+        elif root_subroutine != -1:
+            raise ValueError(
+                "non-allocation lifecycle event has a root subroutine"
+            )
+        if not 0 <= stage_route_index <= 8:
+            raise ValueError(
+                "lifecycle event stage-route index is outside 0..8"
+            )
         return cls(
             serial=serial,
             manager_frame=manager_frame,
@@ -418,6 +451,10 @@ class EnemyLifecycleEvent:
             hp_after=hp_after,
             frame_damage=frame_damage,
             caller_return_address=caller_return_address,
+            root_subroutine=(
+                root_subroutine if kind in _ALLOCATION_KINDS else None
+            ),
+            stage_route_index=stage_route_index,
         )
 
     @property
@@ -456,6 +493,8 @@ class EnemyLifecycleEvent:
             "frame_damage": self.frame_damage,
             "reconstructed_pre_damage_hp": self.reconstructed_pre_damage_hp,
             "caller_return_address": self.caller_return_address or None,
+            "root_subroutine": self.root_subroutine,
+            "stage_route_index": self.stage_route_index,
         }
 
 

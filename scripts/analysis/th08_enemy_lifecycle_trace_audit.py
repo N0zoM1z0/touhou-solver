@@ -16,6 +16,10 @@ import json
 from pathlib import Path
 from typing import Iterable, Mapping
 
+from analysis.th08_route2_combat_resource_candidate_board import (
+    EXPECTED_SOURCE_ATLAS_SHA256,
+    SCHEMA as CANDIDATE_BOARD_SCHEMA,
+)
 from th08_enemy_end_semantics import (
     BOSS_DEFEAT_FORCED_HP_ZERO,
     INHERITED_VM_INITIAL_RETIRE,
@@ -42,7 +46,10 @@ from th08_runtime.enemy_lifecycle_probe import (
 )
 
 
-REPORT_SCHEMA = "th08-enemy-lifecycle-trace-audit-v1"
+REPORT_SCHEMA = "th08-enemy-lifecycle-trace-audit-v2"
+EXPECTED_CANDIDATE_BOARD_SHA256 = (
+    "34e70a50e6c38c8241df0425be83367e6bf9e369106d600956d5a052dfa8cfea"
+)
 _UINT32_MASK = 0xFFFFFFFF
 _RECOVERABLE_NONADVANCING = frozenset({"read_error", "race_unknown"})
 _RETIREMENT_SOURCE = {
@@ -208,6 +215,13 @@ def _validated_event(
         "slot": slot,
         "enemy_pointer": enemy_pointer,
     }
+    stage_route_index = _exact_int(
+        event.get("stage_route_index"),
+        f"{location}.stage_route_index",
+    )
+    if not 0 <= stage_route_index <= 8:
+        raise ValueError(f"{location} stage-route index is outside 0..8")
+    parsed["stage_route_index"] = stage_route_index
     for field in (
         "flags_before",
         "flags_after",
@@ -226,6 +240,23 @@ def _validated_event(
             caller,
             f"{location}.caller_return_address",
         )
+    root_subroutine = event.get("root_subroutine")
+    if kind in _ALLOCATION_KINDS:
+        root = _exact_int(
+            root_subroutine,
+            f"{location}.root_subroutine",
+        )
+        if not 0 <= root <= 0x7FFF:
+            raise ValueError(
+                f"{location} root subroutine is outside signed-word range"
+            )
+        parsed["root_subroutine"] = root
+    else:
+        if root_subroutine is not None:
+            raise ValueError(
+                f"{location} non-allocation event has a root subroutine"
+            )
+        parsed["root_subroutine"] = None
     return parsed
 
 
@@ -413,6 +444,7 @@ def _new_lifetime(
         "generation_key": generation_key,
         "slot": slot,
         "enemy_pointer": int(event["enemy_pointer"]),
+        "stage_route_index": int(event["stage_route_index"]),
         "observed_generation_index": observed_generation_index,
         "start_observed": observed_generation_index is not None,
         "start_serial": serial if observed_generation_index is not None else None,
@@ -423,6 +455,11 @@ def _new_lifetime(
         ),
         "allocation_kind": (
             str(event["kind"])
+            if observed_generation_index is not None
+            else None
+        ),
+        "root_subroutine": (
+            int(event["root_subroutine"])
             if observed_generation_index is not None
             else None
         ),
@@ -474,6 +511,14 @@ def _lower_generations(
             )
             lifetimes.append(lifetime)
             current[pointer] = lifetime
+        elif int(lifetime["stage_route_index"]) != int(
+            event["stage_route_index"]
+        ):
+            errors.append(
+                f"serial {event['serial']} changes stage-route index inside "
+                f"{lifetime['generation_key']}"
+            )
+            break
 
         if kind == "forced_hp_zero":
             caller = int(event["caller_return_address"])
@@ -590,6 +635,19 @@ def audit_lifecycle_trace_rows(
         for lifetime in completed
         if isinstance(lifetime["end_classification"], Mapping)
     )
+    root_counts = Counter(
+        int(lifetime["root_subroutine"])
+        for lifetime in lifetimes
+        if lifetime["root_subroutine"] is not None
+    )
+    program_counts = Counter(
+        (
+            int(lifetime["stage_route_index"]),
+            int(lifetime["root_subroutine"]),
+        )
+        for lifetime in lifetimes
+        if lifetime["root_subroutine"] is not None
+    )
     continuous_after_baseline = bool(
         chain["baseline_present"]
         and chain["irrecoverable_gap"] is None
@@ -627,6 +685,13 @@ def audit_lifecycle_trace_rows(
             ),
             "verified_player_shot_kill_count": len(verified_kills),
             "end_reason_counts": dict(sorted(reason_counts.items())),
+            "observed_root_subroutine_counts": {
+                str(root): root_counts[root] for root in sorted(root_counts)
+            },
+            "observed_program_counts": {
+                f"stage-{stage}:root-{root}": program_counts[(stage, root)]
+                for stage, root in sorted(program_counts)
+            },
         },
         "authority": {
             "continuous_native_event_stream_after_baseline": (
@@ -634,7 +699,126 @@ def audit_lifecycle_trace_rows(
             ),
             "generation_stream_complete": generation_stream_complete,
             "prefix_lifetimes_are_exact_only": True,
+            "accepted_allocation_root_identity_exact": not lowering_errors,
+            "accepted_program_identity_exact": not lowering_errors,
             "runtime_installation_observed": False,
+            "strategy_authority": False,
+            "action_authority": False,
+        },
+    }
+
+
+def join_candidate_board(
+    report: dict[str, object],
+    candidate_board_path: Path,
+) -> dict[str, object]:
+    raw = candidate_board_path.read_bytes()
+    board_sha256 = hashlib.sha256(raw).hexdigest()
+    if board_sha256 != EXPECTED_CANDIDATE_BOARD_SHA256:
+        raise ValueError(
+            "combat/resource candidate board SHA-256 differs from the "
+            "accepted checkpoint"
+        )
+    board = json.loads(raw)
+    if board.get("schema") != CANDIDATE_BOARD_SCHEMA:
+        raise ValueError("combat/resource candidate board schema is unsupported")
+    source_sha256 = board["inputs"]["source_emission_atlas"]["sha256"]
+    if source_sha256 != EXPECTED_SOURCE_ATLAS_SHA256:
+        raise ValueError(
+            "candidate board source-atlas identity is unsupported"
+        )
+
+    indexed: dict[tuple[int, int], Mapping[str, object]] = {}
+    for stage in board["stages"]:
+        stage_index = _exact_int(
+            stage["route_stage_index"],
+            "candidate board route_stage_index",
+        )
+        for program in stage["programs"]:
+            root = _exact_int(
+                program["root_subroutine"],
+                "candidate board root_subroutine",
+            )
+            key = (stage_index, root)
+            if key in indexed:
+                raise ValueError(
+                    f"candidate board duplicates stage {stage_index} root {root}"
+                )
+            indexed[key] = program
+
+    matched: list[dict[str, object]] = []
+    unmatched_counts: Counter[tuple[int, int]] = Counter()
+    partial_start_count = 0
+    family_counts: Counter[str] = Counter()
+    lifetimes = report.get("lifetimes")
+    if not isinstance(lifetimes, list):
+        raise ValueError("lifecycle report has no lifetime list")
+    for lifetime in lifetimes:
+        if not isinstance(lifetime, Mapping):
+            raise ValueError("lifecycle report lifetime is not an object")
+        root = lifetime.get("root_subroutine")
+        if root is None:
+            partial_start_count += 1
+            continue
+        stage_index = _exact_int(
+            lifetime.get("stage_route_index"),
+            "lifetime stage_route_index",
+        )
+        root_index = _exact_int(root, "lifetime root_subroutine")
+        program = indexed.get((stage_index, root_index))
+        if program is None:
+            unmatched_counts[(stage_index, root_index)] += 1
+            continue
+        families = [str(value) for value in program["candidate_families"]]
+        family_counts.update(families)
+        matched.append(
+            {
+                "generation_key": lifetime["generation_key"],
+                "stage_route_index": stage_index,
+                "root_subroutine": root_index,
+                "candidate_id": program["candidate_id"],
+                "candidate_families": families,
+                "start_serial": lifetime["start_serial"],
+                "start_manager_frame": lifetime["start_manager_frame"],
+            }
+        )
+
+    return {
+        "schema": "th08-enemy-lifecycle-candidate-board-join-v1",
+        "role": "offline_trace_join_no_action_authority",
+        "candidate_board": {
+            "name": candidate_board_path.name,
+            "sha256": board_sha256,
+            "report_digest": board["report_digest"],
+        },
+        "summary": {
+            "lifetime_count": len(lifetimes),
+            "matched_lifetime_count": len(matched),
+            "unmatched_program_lifetime_count": sum(unmatched_counts.values()),
+            "partial_start_lifetime_count": partial_start_count,
+            "candidate_family_lifetime_counts": dict(
+                sorted(family_counts.items())
+            ),
+        },
+        "matched_lifetimes": matched,
+        "unmatched_programs": [
+            {
+                "stage_route_index": stage,
+                "root_subroutine": root,
+                "lifetime_count": unmatched_counts[(stage, root)],
+                "reason": "program_not_timeline_rooted_in_candidate_board",
+            }
+            for stage, root in sorted(unmatched_counts)
+        ],
+        "authority": {
+            "immutable_candidate_board_identity": True,
+            "matched_program_identity_exact": bool(
+                report["authority"]["accepted_program_identity_exact"]
+            ),
+            "runtime_installation_observed": bool(
+                report["authority"]["runtime_installation_observed"]
+            ),
+            "candidate_benefit_verified": False,
             "strategy_authority": False,
             "action_authority": False,
         },
@@ -659,7 +843,11 @@ def _load_jsonl(path: Path) -> tuple[list[Mapping[str, object]], bytes]:
     return rows, raw
 
 
-def build_report(path: Path) -> dict[str, object]:
+def build_report(
+    path: Path,
+    *,
+    candidate_board_path: Path | None = None,
+) -> dict[str, object]:
     rows, raw = _load_jsonl(path)
     report = audit_lifecycle_trace_rows(rows)
     report["source"] = {
@@ -667,6 +855,11 @@ def build_report(path: Path) -> dict[str, object]:
         "sha256": hashlib.sha256(raw).hexdigest(),
         "size_bytes": len(raw),
     }
+    if candidate_board_path is not None:
+        report["candidate_board_join"] = join_candidate_board(
+            report,
+            candidate_board_path,
+        )
     return report
 
 
@@ -674,6 +867,7 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("trace", type=Path)
     parser.add_argument("--output", type=Path)
+    parser.add_argument("--candidate-board", type=Path)
     parser.add_argument(
         "--require-complete",
         action="store_true",
@@ -683,7 +877,10 @@ def main() -> int:
         ),
     )
     arguments = parser.parse_args()
-    report = build_report(arguments.trace)
+    report = build_report(
+        arguments.trace,
+        candidate_board_path=arguments.candidate_board,
+    )
     encoded = json.dumps(report, indent=2, sort_keys=True) + "\n"
     if arguments.output is None:
         print(encoded, end="")

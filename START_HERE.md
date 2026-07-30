@@ -28,13 +28,13 @@ historical handoff.
   board, exact bounded Boss HP/timeout transition prefix and five-successor
   stable capture, route-wide static Boss
   phase-configuration atlas, route-wide static source/emission candidate
-  atlas, exact lifecycle ring diagnostic transport and fail-closed
-  generation/end lowerer,
+  atlas, exact stage/root-aware lifecycle ring diagnostic transport,
+  fail-closed generation/end lowerer, and immutable candidate-board join,
   `CONTENT-01` shipped content manifest, and `CONTENT-02` static
   mandatory-event atlas are the current repository checkpoint; no new
   physical trial was run.
-- Complete Linux discovery passes 1,487 tests in 15.671 seconds.
-- Complete Windows UNC discovery passes 1,487 tests in 30.206 seconds with
+- Complete Linux discovery passes 1,491 tests in 14.072 seconds.
+- Complete Windows UNC discovery passes 1,491 tests in 31.252 seconds with
   the three existing skips.
 - No TH08, controller, supervisor, native-replay runner, or Windows test
   process is intentionally left running.
@@ -83,9 +83,11 @@ historical handoff.
   default-off trace transport over two allocation edges, five exact
   active-clear retirements, and the distinct forced-HP-zero write. Its
   256-entry ring records before/after flags and HP, resolved frame damage,
-  and the forced-zero caller; overflow and unstable reads are explicit
-  `UNKNOWN`.
-- Fourteen focused tests pass on Linux and Windows, including activation
+  the forced-zero caller, the native stage-route index, and the signed-word
+  allocation root passed unchanged to `ecl_start_subroutine`; overflow and
+  unstable reads are explicit `UNKNOWN`.
+- Fifteen focused tests pass on Linux and Windows, including allocation
+  program-identity validation, activation
   quiescence before replacing an in-flight instruction span, full-ring
   overwrite invalidation, multi-site activation rollback, reverse-order
   cleanup, and unsafe restore retention. This is implementation/synthetic
@@ -102,8 +104,16 @@ historical handoff.
   generations and reuses the fail-closed end classifier. Nonadvancing
   read/race failures may be recovered by a later exact batch; overflow,
   malformed advancement, or pointer/slot disagreement cuts authority.
-  Baseline-active enemies remain explicit partial starts. Seven deterministic
+  Baseline-active enemies remain explicit partial starts. Observed allocations
+  retain exact `(stage_route_index, root_subroutine)` identity and can be
+  joined only to the SHA-pinned combat/resource candidate board; non-timeline
+  child/phase roots remain explicit unmatched programs. Ten deterministic
   tests pass, but no runtime ring batch has been observed.
+- Connected-IDB dataflow revalidation confirms both allocation hooks read
+  signed word `[ebp+8]` before that same value is passed unchanged to
+  `ecl_start_subroutine`. `g_stage_route_index` at `0x0164D2CC` selects the
+  loaded normal-stage ECL table. IDA comments at `0x0042A55F` and
+  `0x0042A6FF` retain this allocation-identity boundary.
 - Detailed lowering boundary:
   `notes/research/stage5_combat/ROUTE2_ENEMY_LIFECYCLE_TRACE_LOWERING_CONTRACT_20260731.md`.
 - Detailed lifecycle-ring contract:

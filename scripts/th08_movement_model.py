@@ -28,7 +28,10 @@ INPUT_DOWN = 0x20
 INPUT_LEFT = 0x40
 INPUT_RIGHT = 0x80
 
-TH08_PLAYFIELD_BOUNDS = MovementBounds(0.0, 0.0, 384.0, 448.0)
+TH08_PLAYER_CENTER_BOUNDS_SEMANTICS_VERSION = (
+    "th08-player-center-playfield-bounds-v1"
+)
+TH08_PLAYFIELD_BOUNDS = MovementBounds(8.0, 16.0, 376.0, 432.0)
 ROUTE2_MOVEMENT_PROFILE = MovementProfile(
     unfocused_cardinal=4.0,
     focused_cardinal=2.299999952316284,
@@ -173,7 +176,8 @@ def project_route2_movement_schedule(
 
 
 TH08_ROUTE2_MOVEMENT_SCALE_SEMANTICS_VERSION = (
-    f"{TH08_PLAYER_LASER_SCALE_SEMANTICS_VERSION}:route2-movement"
+    f"{TH08_PLAYER_LASER_SCALE_SEMANTICS_VERSION}:"
+    f"{TH08_PLAYER_CENTER_BOUNDS_SEMANTICS_VERSION}:route2-movement"
 )
 
 
@@ -186,6 +190,7 @@ __all__ = [
     "INPUT_SHOT",
     "INPUT_UP",
     "ROUTE2_MOVEMENT_PROFILE",
+    "TH08_PLAYER_CENTER_BOUNDS_SEMANTICS_VERSION",
     "TH08_PLAYFIELD_BOUNDS",
     "TH08_ROUTE2_MOVEMENT_SCALE_SEMANTICS_VERSION",
     "decode_th08_direction",

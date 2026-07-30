@@ -10,6 +10,7 @@ import unittest
 
 import numpy as np
 
+from numeric_model import binary32_store
 from th08_bullet_transform_model import (
     BulletTransformRuntime,
     TransformKind,
@@ -724,6 +725,41 @@ class BulletRuntimeDecoderTests(unittest.TestCase):
         self.assertEqual(
             [float(frame[1][0]) for frame in frames],
             [19.0, 18.0, 18.0, 18.0, 18.0],
+        )
+
+    def test_velocity_event_replaces_float32_value_without_delta_rounding(
+        self,
+    ) -> None:
+        initial_velocity = 5.275492191314697
+        replacement_velocity = -4.898619651794434
+        bullet = Bullet(
+            0.0,
+            20.0,
+            initial_velocity,
+            0.0,
+            2.0,
+            3.0,
+            velocity_changes=(
+                VelocityChange(2, replacement_velocity, 0.0),
+            ),
+        )
+        frames = _build_bullet_frames(
+            (bullet,),
+            horizon=3,
+            snapshot_lag=0,
+        )
+        expected_x = 0.0
+        expected = []
+        for velocity in (
+            initial_velocity,
+            replacement_velocity,
+            replacement_velocity,
+        ):
+            expected_x = binary32_store(expected_x + velocity)
+            expected.append(expected_x)
+        self.assertEqual(
+            [float(frame[0][0]) for frame in frames],
+            expected,
         )
 
     def test_callback_event_is_rebased_to_bullet_snapshot_epoch(self) -> None:

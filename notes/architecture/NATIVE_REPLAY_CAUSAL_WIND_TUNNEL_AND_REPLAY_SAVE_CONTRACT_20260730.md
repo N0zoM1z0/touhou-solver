@@ -458,12 +458,49 @@ SHA-256
 It emits content-addressed `NativeRootCapsule`, `NativeTrajectory`,
 `FirstMismatchReport`, `ActionPortfolio`, `CounterexampleCorpus`, and
 `ExactWitness` records. `ModelTrajectory` is deliberately
-`not_generated`; connecting the rebuilt solver to this immutable root and
-schedule is the next semantic gate.
+`not_generated` in that immutable report. The companion differential below
+binds the rebuilt model without rewriting the original evidence.
 
-Complete Linux discovery passes 1,344 tests in 14.367 seconds. Complete
-Windows UNC discovery passes 1,344 tests in 28.864 seconds with the three
+Complete Linux discovery passes 1,351 tests in 13.760 seconds. Complete
+Windows UNC discovery passes 1,351 tests in 28.592 seconds with the three
 existing skips.
+
+## ModelTrajectory And First-Mismatch Result
+
+`scripts/analysis/th08_native_model_trajectory.py` SHA-pins both the compact
+causal report and its ignored raw H=32 witness, validates the
+content-addressed root/trajectory, and emits explicit player-mechanics and
+constant-velocity-hazard layers. A `null` schedule entry resolves only from
+the corresponding `NativeTrajectory.selected_action`; it must equal the
+recorded action. Missing fields, digest disagreement, Bomb, or changed
+time-scale identity fail closed.
+
+**Observed CE-0211:** the prior default movement bounds represented playfield
+extents `(0,0)..(384,448)`, not player-center clamps. From root
+`(376,432)`, action `0x94` therefore projected `x=377.626343` at frame 2,130
+instead of native `x=376`. The legacy trajectory had zero exact ticks.
+Versioned center bounds `(8,16)..(376,432)` make position, input history,
+focus transition state, secondary-character mode, and the declared carried
+normal phase bit-exact for all 32 ticks.
+
+**Observed CE-0212:** production bullet projection used
+`base + velocity * elapsed`. Retained constant-velocity slot 45 first
+distinguishes that expression from native repeated float32 stores at frame
+2,132: x bits `0x43B97BCA` versus native `0x43B97BCB`. Production now
+advances and stores once per native update, applying a velocity event before
+that update. It matches an independent repeated-binary32 oracle and all three
+retained native samples. Nonpositive snapshot alignment preserves the
+existing linear-rewind convention.
+
+The deterministic report is
+`artifacts/runtime_reports/th08_native_model_trajectory_root2129_h32_20260730.json`,
+SHA-256
+`7f86ffb72ef3b7c72c329cd240bed6cdf5ee7d99d8e9defee88b4d219887a2af`.
+It explicitly returns `UNKNOWN` for integrated collision/planner parity:
+the compact input retains summaries and hashes rather than a full
+model-consumable hostile inventory and event ledger. No physical run was
+used. The next semantic gate is persisting that causal state/event input and
+using it for integrated planner replay before any named physical falsifier.
 
 ### Warm-session lifecycle
 

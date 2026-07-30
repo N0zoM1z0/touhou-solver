@@ -12,6 +12,7 @@ from th08_movement_model import (
     INPUT_LEFT,
     INPUT_RIGHT,
     INPUT_UP,
+    TH08_PLAYFIELD_BOUNDS,
     decode_th08_direction,
     route2_effective_focus,
     step_route2_movement,
@@ -43,6 +44,27 @@ class Th08MovementModelTests(unittest.TestCase):
         )
         self.assertAlmostEqual(focused.velocity_x, -1.6263456344604492)
         self.assertAlmostEqual(focused.velocity_y, -1.6263456344604492)
+
+    def test_default_bounds_are_native_player_center_bounds(self) -> None:
+        self.assertEqual(
+            (
+                TH08_PLAYFIELD_BOUNDS.left,
+                TH08_PLAYFIELD_BOUNDS.top,
+                TH08_PLAYFIELD_BOUNDS.right,
+                TH08_PLAYFIELD_BOUNDS.bottom,
+            ),
+            (8.0, 16.0, 376.0, 432.0),
+        )
+        cases = (
+            (8.0, 200.0, INPUT_LEFT, 8.0, 200.0),
+            (376.0, 200.0, INPUT_RIGHT, 376.0, 200.0),
+            (200.0, 16.0, INPUT_UP, 200.0, 16.0),
+            (200.0, 432.0, INPUT_DOWN, 200.0, 432.0),
+        )
+        for x, y, mask, expected_x, expected_y in cases:
+            with self.subTest(mask=mask):
+                step = step_route2_movement(x=x, y=y, input_mask=mask)
+                self.assertEqual((step.x, step.y), (expected_x, expected_y))
 
     def test_active_bomb_callback_parity_overrides_focus_input(self) -> None:
         self.assertFalse(

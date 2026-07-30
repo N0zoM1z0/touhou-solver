@@ -47,12 +47,13 @@ The default research loop is now offline-first:
 1. independent scalar/adversarial checks for the declared recurrence;
 2. a content-addressed native-root capsule and fail-closed exact-prefix
    executor for the changed event class;
-3. same-root, same-action per-frame differential against original-game native
-   replay;
-4. fixed-root all-36-no-Bomb-mask counterfactual portfolios once the causal
-   prefix covers every reached event; and only then
-5. one named real-time physical falsifier for an immutable integrated
-   behavior/version.
+3. an explicit-layer `ModelTrajectory` and same-root, same-action per-frame
+   differential against original-game native replay;
+4. focused native counterfactuals only after that differential identifies a
+   proposed engine/planner correction; all-36 portfolios are retained gates,
+   not a mandatory pass for every edit; and only then
+5. one named real-time physical falsifier after the immutable integrated
+   behavior/version shows an offline improvement.
 
 The executor returns `UNKNOWN` before an unsupported mutation. A recorded
 future is never reused after an alternative action, and future RNG is never
@@ -116,20 +117,31 @@ single-intervention claim is now corrected through the declared H=32 horizon
 by observation-compatible causal continuation. The content-addressed report
 is
 `artifacts/runtime_reports/th08_native_snapshot_causal_policy_root2129_h32_20260730.json`.
-Its `ModelTrajectory` remains explicitly pending, so rebuilt-model parity and
-the model/native first mismatch are still open.
+Its original pending `ModelTrajectory` remains immutable. The companion
+`th08_native_model_trajectory_root2129_h32_20260730.json` now observes that
+legacy playfield-extent bounds mismatch native immediately at frame 2,130,
+while corrected player-center bounds produce `32/32` bit-exact
+player-mechanics ticks. It also observes the closed-form slot-45 bullet
+forecast first differing by one x ULP at frame 2,132; the corrected
+per-update binary32 recurrence matches the independent oracle and retained
+native fixture.
 
-The executor gains no live authority until the rebuilt solver is bound to the
-retained root/schedule, additional event-class roots pass, complete causal
-coverage and delivery preflight hold, and focused physical validation passes.
+This grants exact authority only to those declared layers on this root.
+Integrated hazard/collision/planner parity remains `UNKNOWN` until a
+model-consumable hostile inventory and event ledger exist.
 
-The next performance proposal is a supervised warm wind-tunnel service with
-a single-writer queue, immutable session/root IDs, branch-level root/FX/
-stack/thread/map validation, cooperative cancellation, idle TTL, poison
-state, cleanup, and automatic replay rebootstrap. The current batch executor
-already completed 180 branches in one warm session with an exact parent
-repeat. CE-0210 retains one intermittent mapping-epoch poison event; a warm
-service must recover from it rather than weakening the epoch check.
+The executor gains no live authority until the integrated hazard/planner
+solver is bound to a model-consumable retained root/schedule, additional
+event-class roots pass, complete causal coverage and delivery preflight hold,
+and focused physical validation passes.
+
+The deferred performance proposal is a supervised warm wind-tunnel service
+with a single-writer queue, immutable session/root IDs, branch-level
+root/FX/stack/thread/map validation, cooperative cancellation, idle TTL,
+poison state, cleanup, and automatic replay rebootstrap. The current batch
+executor already completed 180 branches in one warm session with an exact
+parent repeat. CE-0210 retains one intermittent mapping-epoch poison event; a
+warm service must recover from it rather than weakening the epoch check.
 
 Accepted replay saving, explicit-root limits, branch evidence, and the next
 gate are in

@@ -17,10 +17,11 @@ historical handoff.
 - Branch: `main`.
 - Base rolling implementation checkpoint: `cb6c59f`
   (`Build rolling native snapshot iteration loop`).
-- The following retention/documentation checkpoint is the current repository
-  HEAD.
-- Complete Linux discovery passes 1,344 tests in 14.367 seconds.
-- Complete Windows UNC discovery passes 1,344 tests in 28.864 seconds with
+- H=32 causal-search checkpoint: `3d15953`
+  (`Build causal native snapshot policy search`).
+- The model/native differential checkpoint is the current repository HEAD.
+- Complete Linux discovery passes 1,351 tests in 13.760 seconds.
+- Complete Windows UNC discovery passes 1,351 tests in 28.592 seconds with
   the three existing skips.
 - No TH08, controller, supervisor, native-replay runner, or Windows test
   process is intentionally left running.
@@ -145,6 +146,45 @@ historical handoff.
   pending `ModelTrajectory`, `FirstMismatchReport`, 324-branch
   `ActionPortfolio` evidence, `CounterexampleCorpus`, and `ExactWitness`.
 
+### Model/native first-mismatch result
+
+- `scripts/analysis/th08_native_model_trajectory.py` consumes the immutable
+  causal report and its SHA-pinned local H=32 witness. It validates the
+  content-addressed root/trajectory, fails closed on missing fields or action
+  disagreement, and resolves a `null` schedule entry only through the
+  corresponding `NativeTrajectory.selected_action`.
+- **Observed player counterexample:** the inherited default movement bounds
+  used playfield extents `(0,0)..(384,448)`. At the root player position
+  `(376,432)`, action `0x94` projected `x=377.626343` at manager frame 2,130
+  while native clamped to `x=376`. The legacy player trajectory was exact at
+  `0/32` ticks.
+- **Observed correction:** production now uses player-center bounds
+  `(8,16)..(376,432)`, versioned as
+  `th08-player-center-playfield-bounds-v1`. Player position, current/previous
+  input, focus logic/counter, secondary-character mode, and the declared
+  carried normal phase now match native bit-for-bit at `32/32` ticks.
+- **Observed hazard counterexample:** bullet slot 45 first distinguishes
+  closed-form `base + velocity * elapsed` from native repeated binary32
+  stores at manager frame 2,132. Closed-form x is `370.967102`
+  (`0x43B97BCA`); native x is `370.967133` (`0x43B97BCB`).
+- **Observed correction:** production constant-velocity projection now
+  advances once per native update with a binary32 store and applies velocity
+  events before that update. It matches both the independent repeated-store
+  oracle and the retained slot-45 native samples through the declared
+  three-tick fixture. Existing packed/object, snapshot-lag, velocity-event,
+  and local-certificate gates pass.
+- The full integrated collision/planner differential remains `UNKNOWN`
+  because the compact causal report persists collision summaries and hashes,
+  not a model-consumable full hostile inventory and event ledger. No defaults
+  or future native state were substituted.
+- Synthetic 2,000-bullet projection including tuple packing measures H32
+  median `1.213 ms` and p95 `1.347 ms`; no warm-service work is justified by
+  this corrected kernel.
+- Deterministic companion report:
+  `artifacts/runtime_reports/th08_native_model_trajectory_root2129_h32_20260730.json`,
+  SHA-256
+  `7f86ffb72ef3b7c72c329cd240bed6cdf5ee7d99d8e9defee88b4d219887a2af`.
+
 ### Authority and next useful gate
 
 - Accepted replay saving and original-engine replay branching are
@@ -160,25 +200,26 @@ historical handoff.
 - Forty-two writable regions, external handle/device/audio/timer effects,
   and event classes outside this root remain unresolved. Preserve
   fail-closed `UNKNOWN` behavior on mapping/thread/stack/transition changes.
-- The next useful semantic gate is binding the rebuilt solver to the retained
-  `NativeRootCapsule` and exact H=32 action schedule so it emits a
-  `ModelTrajectory` and a true model/native first mismatch. After that,
-  repeat rolling identity at distinct event classes such as spawn, redirect,
-  callback transition, and laser lifecycle.
-- The next performance architecture is a supervised warm wind-tunnel
-  service, not a portable cross-process snapshot. It must keep a single
-  writer, immutable session/root IDs, branch-level root/FX/stack/thread/map
-  verification, cancellation, idle TTL, poison state, cleanup, and automatic
-  replay rebootstrap. One interrupted 216-branch attempt observed a mapping
-  epoch change after 14 continuations and was correctly poisoned/cleaned;
-  CE-0210 preserves that limit.
+- The first rebuilt-model binding gate is now complete for the explicit
+  player-mechanics layer and the slot-45 constant-velocity hazard fixture.
+  It does not establish full hazard, collision, solver, or planner parity.
+- The next useful semantic gate is a model-consumable hostile-state capsule
+  with an explicit birth/redirect/transform/laser event ledger. It must drive
+  a causal hazard trajectory and planner replay to a real first mismatch or
+  explicit `UNKNOWN`; only then should focused native branches test a proposed
+  engine/planner improvement.
+- A supervised warm wind-tunnel service remains deferred. If later branch
+  throughput becomes the bottleneck, it must preserve a single writer,
+  immutable session/root IDs, branch-level root/FX/stack/thread/map checks,
+  cancellation, idle TTL, poison cleanup, and replay rebootstrap. CE-0210
+  preserves the intermittent mapping-epoch requirement.
 - Endpoint discovery still scans about 110 MB and costs 152--172 ms.
   Write-watch or guarded dirty-page tracking is a performance proposal, not
   correctness authority.
-- The H=32 exact causal witness now permits model differential work and a
-  later named original-replay falsifier. It still does not authorize a
-  complete physical stage until the solver integration, event-class, and
-  delivery gates pass.
+- Physical play is not the routine model-debug loop. Run a named original-game
+  falsifier only after the offline wind tunnel shows that an immutable
+  engine/planner version fixes its retained mismatch or improves its declared
+  decision metric, and after integration/event/delivery gates pass.
 - Do not run another unchanged Stage-5 physical trial or another exhaustive
   replay-prefix portfolio. No THPRAC/exact-spell automation is assumed; the
   physical research unit remains a complete selected stage.

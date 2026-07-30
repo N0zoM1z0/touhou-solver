@@ -169,47 +169,61 @@ def _build_bullet_frames(
         )
     event_indices: list[int] = []
     event_frames: list[int] = []
-    event_delta_x: list[float] = []
-    event_delta_y: list[float] = []
+    event_velocity_x: list[float] = []
+    event_velocity_y: list[float] = []
     if not isinstance(bullets, PackedBulletSnapshot):
         for bullet_index, bullet in enumerate(bullets):
-            previous_x = bullet.vx
-            previous_y = bullet.vy
             for change in bullet.velocity_changes:
                 event_indices.append(bullet_index)
                 event_frames.append(change.frame)
-                event_delta_x.append(change.velocity_x - previous_x)
-                event_delta_y.append(change.velocity_y - previous_y)
-                previous_x = change.velocity_x
-                previous_y = change.velocity_y
+                event_velocity_x.append(change.velocity_x)
+                event_velocity_y.append(change.velocity_y)
     packed_event_indices = np.asarray(event_indices, dtype=np.intp)
     packed_event_frames = np.asarray(event_frames, dtype=np.int32)
-    packed_event_delta_x = np.asarray(event_delta_x, dtype=np.float32)
-    packed_event_delta_y = np.asarray(event_delta_y, dtype=np.float32)
+    packed_event_velocity_x = np.asarray(event_velocity_x, dtype=np.float32)
+    packed_event_velocity_y = np.asarray(event_velocity_y, dtype=np.float32)
+    projected_x = base_x.copy()
+    projected_y = base_y.copy()
+    current_velocity_x = velocity_x.copy()
+    current_velocity_y = velocity_y.copy()
+    projected_elapsed = 0
     for step in range(1, horizon + 1):
         elapsed = snapshot_lag + step
-        projected_x = base_x + velocity_x * elapsed
-        projected_y = base_y + velocity_y * elapsed
-        if packed_event_indices.size:
-            affected_updates = elapsed - packed_event_frames + 1
-            active = affected_updates > 0
-            if np.any(active):
-                np.add.at(
+        if elapsed <= 0:
+            # Negative snapshot alignment has no native future-update
+            # recurrence. Preserve the existing linear rewind convention.
+            frame_x = base_x + velocity_x * elapsed
+            frame_y = base_y + velocity_y * elapsed
+        else:
+            while projected_elapsed < elapsed:
+                projected_elapsed += 1
+                active = packed_event_frames == projected_elapsed
+                if np.any(active):
+                    current_velocity_x[packed_event_indices[active]] = (
+                        packed_event_velocity_x[active]
+                    )
+                    current_velocity_y[packed_event_indices[active]] = (
+                        packed_event_velocity_y[active]
+                    )
+                # Native bullet motion stores binary32 after every update.
+                # Keeping the recurrence iterative is observable after only
+                # three updates for retained counterexample bullet slot 45.
+                np.add(
                     projected_x,
-                    packed_event_indices[active],
-                    packed_event_delta_x[active]
-                    * affected_updates[active],
+                    current_velocity_x,
+                    out=projected_x,
                 )
-                np.add.at(
+                np.add(
                     projected_y,
-                    packed_event_indices[active],
-                    packed_event_delta_y[active]
-                    * affected_updates[active],
+                    current_velocity_y,
+                    out=projected_y,
                 )
+            frame_x = projected_x.copy()
+            frame_y = projected_y.copy()
         frames.append(
             (
-                projected_x,
-                projected_y,
+                frame_x,
+                frame_y,
                 half_width,
                 half_height,
                 transformed,

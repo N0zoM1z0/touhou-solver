@@ -1,0 +1,1624 @@
+{
+  "artifacts": {
+    "first_mismatch_report": {
+      "artifact_id": "sha256:29bb5c937986e04bceaa5981f2ec2380dbf5f1b84222381965e325e141cff43b",
+      "kind": "FirstMismatchReport",
+      "payload": {
+        "hazard_slot45": {
+          "event_class": "constant_velocity_no_transform",
+          "horizon": 3,
+          "independent_repeated_binary32_oracle": {
+            "first_mismatch": null,
+            "status": "exact"
+          },
+          "legacy_closed_form": {
+            "error_safety_direction": "unknown_geometry_dependent",
+            "first_mismatch": {
+              "axes": [
+                "x"
+              ],
+              "manager_frame": 2132,
+              "native": {
+                "x": {
+                  "bits": 1136229323,
+                  "value": 370.9671325683594
+                },
+                "y": {
+                  "bits": 1137964165,
+                  "value": 423.9103088378906
+                }
+              },
+              "projected": {
+                "x": {
+                  "bits": 1136229322,
+                  "value": 370.96710205078125
+                },
+                "y": {
+                  "bits": 1137964165,
+                  "value": 423.9103088378906
+                }
+              },
+              "tick_index": 2
+            },
+            "status": "mismatch"
+          },
+          "production": {
+            "first_mismatch": null,
+            "status": "exact"
+          },
+          "slot": 45
+        },
+        "integrated_collision_model": {
+          "reason": "the retained compact capsule contains collision summaries and digests, not a model-consumable full hostile-hazard inventory and event ledger",
+          "status": "UNKNOWN"
+        },
+        "player_corrected_center_bounds": {
+          "bounds": {
+            "bottom": 432.0,
+            "left": 8.0,
+            "right": 376.0,
+            "top": 16.0
+          },
+          "exact_tick_count": 32,
+          "first_mismatch": null,
+          "status": "exact"
+        },
+        "player_legacy_extent_bounds": {
+          "bounds": {
+            "bottom": 448.0,
+            "left": 0.0,
+            "right": 384.0,
+            "top": 0.0
+          },
+          "exact_tick_count": 0,
+          "first_mismatch": {
+            "fields": [
+              "player_x"
+            ],
+            "manager_frame": 2130,
+            "model": {
+              "focus_logic": 1,
+              "focus_transition_counter": 30,
+              "input_current": 148,
+              "input_previous": 5,
+              "player_phase": 0,
+              "player_x": {
+                "bits": 1136447532,
+                "value": 377.6263427734375
+              },
+              "player_y": {
+                "bits": 1138175956,
+                "value": 430.3736572265625
+              },
+              "secondary_character_active": true
+            },
+            "native": {
+              "focus_logic": 1,
+              "focus_transition_counter": 30,
+              "input_current": 148,
+              "input_previous": 5,
+              "player_phase": 0,
+              "player_x": {
+                "bits": 1136394240,
+                "value": 376.0
+              },
+              "player_y": {
+                "bits": 1138175956,
+                "value": 430.3736572265625
+              },
+              "secondary_character_active": true
+            },
+            "tick_index": 0
+          },
+          "status": "mismatch"
+        }
+      }
+    },
+    "hazard_forecast_probe": {
+      "artifact_id": "sha256:38e375e12d39d489f5f3904f8dfb85ba0853bc57fd1d8ca5df7c0d33afc2b482",
+      "kind": "HazardForecastProbe",
+      "payload": {
+        "event_class": "constant_velocity_no_transform",
+        "horizon": 3,
+        "independent_repeated_binary32_oracle": {
+          "first_mismatch": null,
+          "status": "exact"
+        },
+        "layer": "constant_velocity_bullet_forecast",
+        "legacy_closed_form": {
+          "error_safety_direction": "unknown_geometry_dependent",
+          "first_mismatch": {
+            "axes": [
+              "x"
+            ],
+            "manager_frame": 2132,
+            "native": {
+              "x": {
+                "bits": 1136229323,
+                "value": 370.9671325683594
+              },
+              "y": {
+                "bits": 1137964165,
+                "value": 423.9103088378906
+              }
+            },
+            "projected": {
+              "x": {
+                "bits": 1136229322,
+                "value": 370.96710205078125
+              },
+              "y": {
+                "bits": 1137964165,
+                "value": 423.9103088378906
+              }
+            },
+            "tick_index": 2
+          },
+          "status": "mismatch"
+        },
+        "production": {
+          "first_mismatch": null,
+          "status": "exact"
+        },
+        "root_manager_frame": 2129,
+        "slot": 45,
+        "ticks": [
+          {
+            "elapsed_updates": 1,
+            "independent_repeated_binary32_oracle": {
+              "x": {
+                "bits": 1136195211,
+                "value": 369.9261169433594
+              },
+              "y": {
+                "bits": 1137894893,
+                "value": 421.7962951660156
+              }
+            },
+            "legacy_closed_form": {
+              "x": {
+                "bits": 1136195211,
+                "value": 369.9261169433594
+              },
+              "y": {
+                "bits": 1137894893,
+                "value": 421.7962951660156
+              }
+            },
+            "manager_frame": 2130,
+            "mismatched_axes": {
+              "independent_repeated_binary32_oracle": [],
+              "legacy_closed_form": [],
+              "production": []
+            },
+            "native": {
+              "x": {
+                "bits": 1136195211,
+                "value": 369.9261169433594
+              },
+              "y": {
+                "bits": 1137894893,
+                "value": 421.7962951660156
+              }
+            },
+            "production": {
+              "x": {
+                "bits": 1136195211,
+                "value": 369.9261169433594
+              },
+              "y": {
+                "bits": 1137894893,
+                "value": 421.7962951660156
+              }
+            },
+            "tick_index": 0
+          },
+          {
+            "elapsed_updates": 2,
+            "independent_repeated_binary32_oracle": {
+              "x": {
+                "bits": 1136212267,
+                "value": 370.4466247558594
+              },
+              "y": {
+                "bits": 1137929529,
+                "value": 422.8533020019531
+              }
+            },
+            "legacy_closed_form": {
+              "x": {
+                "bits": 1136212267,
+                "value": 370.4466247558594
+              },
+              "y": {
+                "bits": 1137929529,
+                "value": 422.8533020019531
+              }
+            },
+            "manager_frame": 2131,
+            "mismatched_axes": {
+              "independent_repeated_binary32_oracle": [],
+              "legacy_closed_form": [],
+              "production": []
+            },
+            "native": {
+              "x": {
+                "bits": 1136212267,
+                "value": 370.4466247558594
+              },
+              "y": {
+                "bits": 1137929529,
+                "value": 422.8533020019531
+              }
+            },
+            "production": {
+              "x": {
+                "bits": 1136212267,
+                "value": 370.4466247558594
+              },
+              "y": {
+                "bits": 1137929529,
+                "value": 422.8533020019531
+              }
+            },
+            "tick_index": 1
+          },
+          {
+            "elapsed_updates": 3,
+            "independent_repeated_binary32_oracle": {
+              "x": {
+                "bits": 1136229323,
+                "value": 370.9671325683594
+              },
+              "y": {
+                "bits": 1137964165,
+                "value": 423.9103088378906
+              }
+            },
+            "legacy_closed_form": {
+              "x": {
+                "bits": 1136229322,
+                "value": 370.96710205078125
+              },
+              "y": {
+                "bits": 1137964165,
+                "value": 423.9103088378906
+              }
+            },
+            "manager_frame": 2132,
+            "mismatched_axes": {
+              "independent_repeated_binary32_oracle": [],
+              "legacy_closed_form": [
+                "x"
+              ],
+              "production": []
+            },
+            "native": {
+              "x": {
+                "bits": 1136229323,
+                "value": 370.9671325683594
+              },
+              "y": {
+                "bits": 1137964165,
+                "value": 423.9103088378906
+              }
+            },
+            "production": {
+              "x": {
+                "bits": 1136229323,
+                "value": 370.9671325683594
+              },
+              "y": {
+                "bits": 1137964165,
+                "value": 423.9103088378906
+              }
+            },
+            "tick_index": 2
+          }
+        ]
+      }
+    },
+    "model_trajectory": {
+      "artifact_id": "sha256:47102569347c7ce17b29f6f36423a83fdc25bb3757d05ef98c1dc68bc3ede8ac",
+      "kind": "ModelTrajectory",
+      "payload": {
+        "action_resolution": "explicit schedule entries are authoritative; null entries resolve only from NativeTrajectory.selected_action and must equal recorded_action",
+        "bounds": {
+          "bottom": 432.0,
+          "left": 8.0,
+          "right": 376.0,
+          "top": 16.0
+        },
+        "bounds_semantics_version": "th08-player-center-playfield-bounds-v1",
+        "exact_tick_count": 32,
+        "first_mismatch": null,
+        "layer": "player_mechanics",
+        "movement_semantics_version": "th08-player-laser-phase-scale-v1-0044ba67-00431bc9:th08-player-center-playfield-bounds-v1:route2-movement",
+        "native_trajectory_artifact_id": "sha256:3b6884b93e25c9a38070d88148eed824a7f212b063b236afbf1d39c6493e6913",
+        "phase_semantics": "player-only layer carries the root normal phase; collision and resource transitions are outside this layer",
+        "root_artifact_id": "sha256:cf1f50d4ac5edb9eaf003b0062dd2157e32b226cfdadfbba233e8539152340de",
+        "status": "exact",
+        "tick_count": 32,
+        "ticks": [
+          {
+            "action_source": "PolicySchedule.explicit_action",
+            "manager_frame": 2130,
+            "mismatched_fields": [],
+            "model": {
+              "focus_logic": 1,
+              "focus_transition_counter": 30,
+              "input_current": 148,
+              "input_previous": 5,
+              "player_phase": 0,
+              "player_x": {
+                "bits": 1136394240,
+                "value": 376.0
+              },
+              "player_y": {
+                "bits": 1138175956,
+                "value": 430.3736572265625
+              },
+              "secondary_character_active": true
+            },
+            "native": {
+              "focus_logic": 1,
+              "focus_transition_counter": 30,
+              "input_current": 148,
+              "input_previous": 5,
+              "player_phase": 0,
+              "player_x": {
+                "bits": 1136394240,
+                "value": 376.0
+              },
+              "player_y": {
+                "bits": 1138175956,
+                "value": 430.3736572265625
+              },
+              "secondary_character_active": true
+            },
+            "resolved_action": 148,
+            "tick_index": 0
+          },
+          {
+            "action_source": "PolicySchedule.explicit_action",
+            "manager_frame": 2131,
+            "mismatched_fields": [],
+            "model": {
+              "focus_logic": 1,
+              "focus_transition_counter": 31,
+              "input_current": 148,
+              "input_previous": 148,
+              "player_phase": 0,
+              "player_x": {
+                "bits": 1136394240,
+                "value": 376.0
+              },
+              "player_y": {
+                "bits": 1138122664,
+                "value": 428.747314453125
+              },
+              "secondary_character_active": true
+            },
+            "native": {
+              "focus_logic": 1,
+              "focus_transition_counter": 31,
+              "input_current": 148,
+              "input_previous": 148,
+              "player_phase": 0,
+              "player_x": {
+                "bits": 1136394240,
+                "value": 376.0
+              },
+              "player_y": {
+                "bits": 1138122664,
+                "value": 428.747314453125
+              },
+              "secondary_character_active": true
+            },
+            "resolved_action": 148,
+            "tick_index": 1
+          },
+          {
+            "action_source": "PolicySchedule.explicit_action",
+            "manager_frame": 2132,
+            "mismatched_fields": [],
+            "model": {
+              "focus_logic": 1,
+              "focus_transition_counter": 32,
+              "input_current": 148,
+              "input_previous": 148,
+              "player_phase": 0,
+              "player_x": {
+                "bits": 1136394240,
+                "value": 376.0
+              },
+              "player_y": {
+                "bits": 1138069372,
+                "value": 427.1209716796875
+              },
+              "secondary_character_active": true
+            },
+            "native": {
+              "focus_logic": 1,
+              "focus_transition_counter": 32,
+              "input_current": 148,
+              "input_previous": 148,
+              "player_phase": 0,
+              "player_x": {
+                "bits": 1136394240,
+                "value": 376.0
+              },
+              "player_y": {
+                "bits": 1138069372,
+                "value": 427.1209716796875
+              },
+              "secondary_character_active": true
+            },
+            "resolved_action": 148,
+            "tick_index": 2
+          },
+          {
+            "action_source": "NativeTrajectory.selected_action",
+            "manager_frame": 2133,
+            "mismatched_fields": [],
+            "model": {
+              "focus_logic": 1,
+              "focus_transition_counter": 33,
+              "input_current": 5,
+              "input_previous": 148,
+              "player_phase": 0,
+              "player_x": {
+                "bits": 1136394240,
+                "value": 376.0
+              },
+              "player_y": {
+                "bits": 1138069372,
+                "value": 427.1209716796875
+              },
+              "secondary_character_active": true
+            },
+            "native": {
+              "focus_logic": 1,
+              "focus_transition_counter": 33,
+              "input_current": 5,
+              "input_previous": 148,
+              "player_phase": 0,
+              "player_x": {
+                "bits": 1136394240,
+                "value": 376.0
+              },
+              "player_y": {
+                "bits": 1138069372,
+                "value": 427.1209716796875
+              },
+              "secondary_character_active": true
+            },
+            "resolved_action": 5,
+            "tick_index": 3
+          },
+          {
+            "action_source": "NativeTrajectory.selected_action",
+            "manager_frame": 2134,
+            "mismatched_fields": [],
+            "model": {
+              "focus_logic": 1,
+              "focus_transition_counter": 34,
+              "input_current": 5,
+              "input_previous": 5,
+              "player_phase": 0,
+              "player_x": {
+                "bits": 1136394240,
+                "value": 376.0
+              },
+              "player_y": {
+                "bits": 1138069372,
+                "value": 427.1209716796875
+              },
+              "secondary_character_active": true
+            },
+            "native": {
+              "focus_logic": 1,
+              "focus_transition_counter": 34,
+              "input_current": 5,
+              "input_previous": 5,
+              "player_phase": 0,
+              "player_x": {
+                "bits": 1136394240,
+                "value": 376.0
+              },
+              "player_y": {
+                "bits": 1138069372,
+                "value": 427.1209716796875
+              },
+              "secondary_character_active": true
+            },
+            "resolved_action": 5,
+            "tick_index": 4
+          },
+          {
+            "action_source": "NativeTrajectory.selected_action",
+            "manager_frame": 2135,
+            "mismatched_fields": [],
+            "model": {
+              "focus_logic": 1,
+              "focus_transition_counter": 35,
+              "input_current": 5,
+              "input_previous": 5,
+              "player_phase": 0,
+              "player_x": {
+                "bits": 1136394240,
+                "value": 376.0
+              },
+              "player_y": {
+                "bits": 1138069372,
+                "value": 427.1209716796875
+              },
+              "secondary_character_active": true
+            },
+            "native": {
+              "focus_logic": 1,
+              "focus_transition_counter": 35,
+              "input_current": 5,
+              "input_previous": 5,
+              "player_phase": 0,
+              "player_x": {
+                "bits": 1136394240,
+                "value": 376.0
+              },
+              "player_y": {
+                "bits": 1138069372,
+                "value": 427.1209716796875
+              },
+              "secondary_character_active": true
+            },
+            "resolved_action": 5,
+            "tick_index": 5
+          },
+          {
+            "action_source": "NativeTrajectory.selected_action",
+            "manager_frame": 2136,
+            "mismatched_fields": [],
+            "model": {
+              "focus_logic": 0,
+              "focus_transition_counter": 0,
+              "input_current": 81,
+              "input_previous": 5,
+              "player_phase": 0,
+              "player_x": {
+                "bits": 1136301558,
+                "value": 373.17156982421875
+              },
+              "player_y": {
+                "bits": 1137976690,
+                "value": 424.29254150390625
+              },
+              "secondary_character_active": true
+            },
+            "native": {
+              "focus_logic": 0,
+              "focus_transition_counter": 0,
+              "input_current": 81,
+              "input_previous": 5,
+              "player_phase": 0,
+              "player_x": {
+                "bits": 1136301558,
+                "value": 373.17156982421875
+              },
+              "player_y": {
+                "bits": 1137976690,
+                "value": 424.29254150390625
+              },
+              "secondary_character_active": true
+            },
+            "resolved_action": 81,
+            "tick_index": 6
+          },
+          {
+            "action_source": "NativeTrajectory.selected_action",
+            "manager_frame": 2137,
+            "mismatched_fields": [],
+            "model": {
+              "focus_logic": 0,
+              "focus_transition_counter": 1,
+              "input_current": 81,
+              "input_previous": 81,
+              "player_phase": 0,
+              "player_x": {
+                "bits": 1136208876,
+                "value": 370.3431396484375
+              },
+              "player_y": {
+                "bits": 1137884008,
+                "value": 421.464111328125
+              },
+              "secondary_character_active": true
+            },
+            "native": {
+              "focus_logic": 0,
+              "focus_transition_counter": 1,
+              "input_current": 81,
+              "input_previous": 81,
+              "player_phase": 0,
+              "player_x": {
+                "bits": 1136208876,
+                "value": 370.3431396484375
+              },
+              "player_y": {
+                "bits": 1137884008,
+                "value": 421.464111328125
+              },
+              "secondary_character_active": true
+            },
+            "resolved_action": 81,
+            "tick_index": 7
+          },
+          {
+            "action_source": "PolicySchedule.explicit_action",
+            "manager_frame": 2138,
+            "mismatched_fields": [],
+            "model": {
+              "focus_logic": 1,
+              "focus_transition_counter": 0,
+              "input_current": 68,
+              "input_previous": 81,
+              "player_phase": 0,
+              "player_x": {
+                "bits": 1136133510,
+                "value": 368.04315185546875
+              },
+              "player_y": {
+                "bits": 1137884008,
+                "value": 421.464111328125
+              },
+              "secondary_character_active": true
+            },
+            "native": {
+              "focus_logic": 1,
+              "focus_transition_counter": 0,
+              "input_current": 68,
+              "input_previous": 81,
+              "player_phase": 0,
+              "player_x": {
+                "bits": 1136133510,
+                "value": 368.04315185546875
+              },
+              "player_y": {
+                "bits": 1137884008,
+                "value": 421.464111328125
+              },
+              "secondary_character_active": true
+            },
+            "resolved_action": 68,
+            "tick_index": 8
+          },
+          {
+            "action_source": "PolicySchedule.explicit_action",
+            "manager_frame": 2139,
+            "mismatched_fields": [],
+            "model": {
+              "focus_logic": 1,
+              "focus_transition_counter": 1,
+              "input_current": 68,
+              "input_previous": 68,
+              "player_phase": 0,
+              "player_x": {
+                "bits": 1136058144,
+                "value": 365.7431640625
+              },
+              "player_y": {
+                "bits": 1137884008,
+                "value": 421.464111328125
+              },
+              "secondary_character_active": true
+            },
+            "native": {
+              "focus_logic": 1,
+              "focus_transition_counter": 1,
+              "input_current": 68,
+              "input_previous": 68,
+              "player_phase": 0,
+              "player_x": {
+                "bits": 1136058144,
+                "value": 365.7431640625
+              },
+              "player_y": {
+                "bits": 1137884008,
+                "value": 421.464111328125
+              },
+              "secondary_character_active": true
+            },
+            "resolved_action": 68,
+            "tick_index": 9
+          },
+          {
+            "action_source": "PolicySchedule.explicit_action",
+            "manager_frame": 2140,
+            "mismatched_fields": [],
+            "model": {
+              "focus_logic": 1,
+              "focus_transition_counter": 2,
+              "input_current": 68,
+              "input_previous": 68,
+              "player_phase": 0,
+              "player_x": {
+                "bits": 1135982778,
+                "value": 363.44317626953125
+              },
+              "player_y": {
+                "bits": 1137884008,
+                "value": 421.464111328125
+              },
+              "secondary_character_active": true
+            },
+            "native": {
+              "focus_logic": 1,
+              "focus_transition_counter": 2,
+              "input_current": 68,
+              "input_previous": 68,
+              "player_phase": 0,
+              "player_x": {
+                "bits": 1135982778,
+                "value": 363.44317626953125
+              },
+              "player_y": {
+                "bits": 1137884008,
+                "value": 421.464111328125
+              },
+              "secondary_character_active": true
+            },
+            "resolved_action": 68,
+            "tick_index": 10
+          },
+          {
+            "action_source": "NativeTrajectory.selected_action",
+            "manager_frame": 2141,
+            "mismatched_fields": [],
+            "model": {
+              "focus_logic": 0,
+              "focus_transition_counter": 0,
+              "input_current": 81,
+              "input_previous": 68,
+              "player_phase": 0,
+              "player_x": {
+                "bits": 1135890096,
+                "value": 360.61474609375
+              },
+              "player_y": {
+                "bits": 1137791326,
+                "value": 418.63568115234375
+              },
+              "secondary_character_active": true
+            },
+            "native": {
+              "focus_logic": 0,
+              "focus_transition_counter": 0,
+              "input_current": 81,
+              "input_previous": 68,
+              "player_phase": 0,
+              "player_x": {
+                "bits": 1135890096,
+                "value": 360.61474609375
+              },
+              "player_y": {
+                "bits": 1137791326,
+                "value": 418.63568115234375
+              },
+              "secondary_character_active": true
+            },
+            "resolved_action": 81,
+            "tick_index": 11
+          },
+          {
+            "action_source": "NativeTrajectory.selected_action",
+            "manager_frame": 2142,
+            "mismatched_fields": [],
+            "model": {
+              "focus_logic": 0,
+              "focus_transition_counter": 1,
+              "input_current": 81,
+              "input_previous": 81,
+              "player_phase": 0,
+              "player_x": {
+                "bits": 1135797414,
+                "value": 357.78631591796875
+              },
+              "player_y": {
+                "bits": 1137698644,
+                "value": 415.8072509765625
+              },
+              "secondary_character_active": true
+            },
+            "native": {
+              "focus_logic": 0,
+              "focus_transition_counter": 1,
+              "input_current": 81,
+              "input_previous": 81,
+              "player_phase": 0,
+              "player_x": {
+                "bits": 1135797414,
+                "value": 357.78631591796875
+              },
+              "player_y": {
+                "bits": 1137698644,
+                "value": 415.8072509765625
+              },
+              "secondary_character_active": true
+            },
+            "resolved_action": 81,
+            "tick_index": 12
+          },
+          {
+            "action_source": "NativeTrajectory.selected_action",
+            "manager_frame": 2143,
+            "mismatched_fields": [],
+            "model": {
+              "focus_logic": 0,
+              "focus_transition_counter": 2,
+              "input_current": 81,
+              "input_previous": 81,
+              "player_phase": 0,
+              "player_x": {
+                "bits": 1135704732,
+                "value": 354.9578857421875
+              },
+              "player_y": {
+                "bits": 1137605962,
+                "value": 412.97882080078125
+              },
+              "secondary_character_active": true
+            },
+            "native": {
+              "focus_logic": 0,
+              "focus_transition_counter": 2,
+              "input_current": 81,
+              "input_previous": 81,
+              "player_phase": 0,
+              "player_x": {
+                "bits": 1135704732,
+                "value": 354.9578857421875
+              },
+              "player_y": {
+                "bits": 1137605962,
+                "value": 412.97882080078125
+              },
+              "secondary_character_active": true
+            },
+            "resolved_action": 81,
+            "tick_index": 13
+          },
+          {
+            "action_source": "NativeTrajectory.selected_action",
+            "manager_frame": 2144,
+            "mismatched_fields": [],
+            "model": {
+              "focus_logic": 1,
+              "focus_transition_counter": 0,
+              "input_current": 69,
+              "input_previous": 81,
+              "player_phase": 0,
+              "player_x": {
+                "bits": 1135629366,
+                "value": 352.65789794921875
+              },
+              "player_y": {
+                "bits": 1137605962,
+                "value": 412.97882080078125
+              },
+              "secondary_character_active": true
+            },
+            "native": {
+              "focus_logic": 1,
+              "focus_transition_counter": 0,
+              "input_current": 69,
+              "input_previous": 81,
+              "player_phase": 0,
+              "player_x": {
+                "bits": 1135629366,
+                "value": 352.65789794921875
+              },
+              "player_y": {
+                "bits": 1137605962,
+                "value": 412.97882080078125
+              },
+              "secondary_character_active": true
+            },
+            "resolved_action": 69,
+            "tick_index": 14
+          },
+          {
+            "action_source": "NativeTrajectory.selected_action",
+            "manager_frame": 2145,
+            "mismatched_fields": [],
+            "model": {
+              "focus_logic": 1,
+              "focus_transition_counter": 1,
+              "input_current": 101,
+              "input_previous": 69,
+              "player_phase": 0,
+              "player_x": {
+                "bits": 1135576074,
+                "value": 351.03155517578125
+              },
+              "player_y": {
+                "bits": 1137659254,
+                "value": 414.60516357421875
+              },
+              "secondary_character_active": true
+            },
+            "native": {
+              "focus_logic": 1,
+              "focus_transition_counter": 1,
+              "input_current": 101,
+              "input_previous": 69,
+              "player_phase": 0,
+              "player_x": {
+                "bits": 1135576074,
+                "value": 351.03155517578125
+              },
+              "player_y": {
+                "bits": 1137659254,
+                "value": 414.60516357421875
+              },
+              "secondary_character_active": true
+            },
+            "resolved_action": 101,
+            "tick_index": 15
+          },
+          {
+            "action_source": "PolicySchedule.explicit_action",
+            "manager_frame": 2146,
+            "mismatched_fields": [],
+            "model": {
+              "focus_logic": 0,
+              "focus_transition_counter": 0,
+              "input_current": 16,
+              "input_previous": 101,
+              "player_phase": 0,
+              "player_x": {
+                "bits": 1135576074,
+                "value": 351.03155517578125
+              },
+              "player_y": {
+                "bits": 1137528182,
+                "value": 410.60516357421875
+              },
+              "secondary_character_active": true
+            },
+            "native": {
+              "focus_logic": 0,
+              "focus_transition_counter": 0,
+              "input_current": 16,
+              "input_previous": 101,
+              "player_phase": 0,
+              "player_x": {
+                "bits": 1135576074,
+                "value": 351.03155517578125
+              },
+              "player_y": {
+                "bits": 1137528182,
+                "value": 410.60516357421875
+              },
+              "secondary_character_active": true
+            },
+            "resolved_action": 16,
+            "tick_index": 16
+          },
+          {
+            "action_source": "PolicySchedule.explicit_action",
+            "manager_frame": 2147,
+            "mismatched_fields": [],
+            "model": {
+              "focus_logic": 0,
+              "focus_transition_counter": 1,
+              "input_current": 16,
+              "input_previous": 16,
+              "player_phase": 0,
+              "player_x": {
+                "bits": 1135576074,
+                "value": 351.03155517578125
+              },
+              "player_y": {
+                "bits": 1137397110,
+                "value": 406.60516357421875
+              },
+              "secondary_character_active": true
+            },
+            "native": {
+              "focus_logic": 0,
+              "focus_transition_counter": 1,
+              "input_current": 16,
+              "input_previous": 16,
+              "player_phase": 0,
+              "player_x": {
+                "bits": 1135576074,
+                "value": 351.03155517578125
+              },
+              "player_y": {
+                "bits": 1137397110,
+                "value": 406.60516357421875
+              },
+              "secondary_character_active": true
+            },
+            "resolved_action": 16,
+            "tick_index": 17
+          },
+          {
+            "action_source": "PolicySchedule.explicit_action",
+            "manager_frame": 2148,
+            "mismatched_fields": [],
+            "model": {
+              "focus_logic": 0,
+              "focus_transition_counter": 2,
+              "input_current": 16,
+              "input_previous": 16,
+              "player_phase": 0,
+              "player_x": {
+                "bits": 1135576074,
+                "value": 351.03155517578125
+              },
+              "player_y": {
+                "bits": 1137266038,
+                "value": 402.60516357421875
+              },
+              "secondary_character_active": true
+            },
+            "native": {
+              "focus_logic": 0,
+              "focus_transition_counter": 2,
+              "input_current": 16,
+              "input_previous": 16,
+              "player_phase": 0,
+              "player_x": {
+                "bits": 1135576074,
+                "value": 351.03155517578125
+              },
+              "player_y": {
+                "bits": 1137266038,
+                "value": 402.60516357421875
+              },
+              "secondary_character_active": true
+            },
+            "resolved_action": 16,
+            "tick_index": 18
+          },
+          {
+            "action_source": "NativeTrajectory.selected_action",
+            "manager_frame": 2149,
+            "mismatched_fields": [],
+            "model": {
+              "focus_logic": 0,
+              "focus_transition_counter": 3,
+              "input_current": 81,
+              "input_previous": 16,
+              "player_phase": 0,
+              "player_x": {
+                "bits": 1135483392,
+                "value": 348.203125
+              },
+              "player_y": {
+                "bits": 1137173356,
+                "value": 399.7767333984375
+              },
+              "secondary_character_active": true
+            },
+            "native": {
+              "focus_logic": 0,
+              "focus_transition_counter": 3,
+              "input_current": 81,
+              "input_previous": 16,
+              "player_phase": 0,
+              "player_x": {
+                "bits": 1135483392,
+                "value": 348.203125
+              },
+              "player_y": {
+                "bits": 1137173356,
+                "value": 399.7767333984375
+              },
+              "secondary_character_active": true
+            },
+            "resolved_action": 81,
+            "tick_index": 19
+          },
+          {
+            "action_source": "NativeTrajectory.selected_action",
+            "manager_frame": 2150,
+            "mismatched_fields": [],
+            "model": {
+              "focus_logic": 1,
+              "focus_transition_counter": 0,
+              "input_current": 37,
+              "input_previous": 81,
+              "player_phase": 0,
+              "player_x": {
+                "bits": 1135483392,
+                "value": 348.203125
+              },
+              "player_y": {
+                "bits": 1137248722,
+                "value": 402.07672119140625
+              },
+              "secondary_character_active": true
+            },
+            "native": {
+              "focus_logic": 1,
+              "focus_transition_counter": 0,
+              "input_current": 37,
+              "input_previous": 81,
+              "player_phase": 0,
+              "player_x": {
+                "bits": 1135483392,
+                "value": 348.203125
+              },
+              "player_y": {
+                "bits": 1137248722,
+                "value": 402.07672119140625
+              },
+              "secondary_character_active": true
+            },
+            "resolved_action": 37,
+            "tick_index": 20
+          },
+          {
+            "action_source": "NativeTrajectory.selected_action",
+            "manager_frame": 2151,
+            "mismatched_fields": [],
+            "model": {
+              "focus_logic": 1,
+              "focus_transition_counter": 1,
+              "input_current": 37,
+              "input_previous": 37,
+              "player_phase": 0,
+              "player_x": {
+                "bits": 1135483392,
+                "value": 348.203125
+              },
+              "player_y": {
+                "bits": 1137324088,
+                "value": 404.376708984375
+              },
+              "secondary_character_active": true
+            },
+            "native": {
+              "focus_logic": 1,
+              "focus_transition_counter": 1,
+              "input_current": 37,
+              "input_previous": 37,
+              "player_phase": 0,
+              "player_x": {
+                "bits": 1135483392,
+                "value": 348.203125
+              },
+              "player_y": {
+                "bits": 1137324088,
+                "value": 404.376708984375
+              },
+              "secondary_character_active": true
+            },
+            "resolved_action": 37,
+            "tick_index": 21
+          },
+          {
+            "action_source": "NativeTrajectory.selected_action",
+            "manager_frame": 2152,
+            "mismatched_fields": [],
+            "model": {
+              "focus_logic": 1,
+              "focus_transition_counter": 2,
+              "input_current": 37,
+              "input_previous": 37,
+              "player_phase": 0,
+              "player_x": {
+                "bits": 1135483392,
+                "value": 348.203125
+              },
+              "player_y": {
+                "bits": 1137399454,
+                "value": 406.67669677734375
+              },
+              "secondary_character_active": true
+            },
+            "native": {
+              "focus_logic": 1,
+              "focus_transition_counter": 2,
+              "input_current": 37,
+              "input_previous": 37,
+              "player_phase": 0,
+              "player_x": {
+                "bits": 1135483392,
+                "value": 348.203125
+              },
+              "player_y": {
+                "bits": 1137399454,
+                "value": 406.67669677734375
+              },
+              "secondary_character_active": true
+            },
+            "resolved_action": 37,
+            "tick_index": 22
+          },
+          {
+            "action_source": "NativeTrajectory.selected_action",
+            "manager_frame": 2153,
+            "mismatched_fields": [],
+            "model": {
+              "focus_logic": 0,
+              "focus_transition_counter": 0,
+              "input_current": 145,
+              "input_previous": 37,
+              "player_phase": 0,
+              "player_x": {
+                "bits": 1135576074,
+                "value": 351.03155517578125
+              },
+              "player_y": {
+                "bits": 1137306772,
+                "value": 403.8482666015625
+              },
+              "secondary_character_active": true
+            },
+            "native": {
+              "focus_logic": 0,
+              "focus_transition_counter": 0,
+              "input_current": 145,
+              "input_previous": 37,
+              "player_phase": 0,
+              "player_x": {
+                "bits": 1135576074,
+                "value": 351.03155517578125
+              },
+              "player_y": {
+                "bits": 1137306772,
+                "value": 403.8482666015625
+              },
+              "secondary_character_active": true
+            },
+            "resolved_action": 145,
+            "tick_index": 23
+          },
+          {
+            "action_source": "PolicySchedule.explicit_action",
+            "manager_frame": 2154,
+            "mismatched_fields": [],
+            "model": {
+              "focus_logic": 1,
+              "focus_transition_counter": 0,
+              "input_current": 164,
+              "input_previous": 145,
+              "player_phase": 0,
+              "player_x": {
+                "bits": 1135629366,
+                "value": 352.65789794921875
+              },
+              "player_y": {
+                "bits": 1137360064,
+                "value": 405.474609375
+              },
+              "secondary_character_active": true
+            },
+            "native": {
+              "focus_logic": 1,
+              "focus_transition_counter": 0,
+              "input_current": 164,
+              "input_previous": 145,
+              "player_phase": 0,
+              "player_x": {
+                "bits": 1135629366,
+                "value": 352.65789794921875
+              },
+              "player_y": {
+                "bits": 1137360064,
+                "value": 405.474609375
+              },
+              "secondary_character_active": true
+            },
+            "resolved_action": 164,
+            "tick_index": 24
+          },
+          {
+            "action_source": "PolicySchedule.explicit_action",
+            "manager_frame": 2155,
+            "mismatched_fields": [],
+            "model": {
+              "focus_logic": 1,
+              "focus_transition_counter": 1,
+              "input_current": 164,
+              "input_previous": 164,
+              "player_phase": 0,
+              "player_x": {
+                "bits": 1135682658,
+                "value": 354.28424072265625
+              },
+              "player_y": {
+                "bits": 1137413356,
+                "value": 407.1009521484375
+              },
+              "secondary_character_active": true
+            },
+            "native": {
+              "focus_logic": 1,
+              "focus_transition_counter": 1,
+              "input_current": 164,
+              "input_previous": 164,
+              "player_phase": 0,
+              "player_x": {
+                "bits": 1135682658,
+                "value": 354.28424072265625
+              },
+              "player_y": {
+                "bits": 1137413356,
+                "value": 407.1009521484375
+              },
+              "secondary_character_active": true
+            },
+            "resolved_action": 164,
+            "tick_index": 25
+          },
+          {
+            "action_source": "PolicySchedule.explicit_action",
+            "manager_frame": 2156,
+            "mismatched_fields": [],
+            "model": {
+              "focus_logic": 1,
+              "focus_transition_counter": 2,
+              "input_current": 164,
+              "input_previous": 164,
+              "player_phase": 0,
+              "player_x": {
+                "bits": 1135735950,
+                "value": 355.91058349609375
+              },
+              "player_y": {
+                "bits": 1137466648,
+                "value": 408.727294921875
+              },
+              "secondary_character_active": true
+            },
+            "native": {
+              "focus_logic": 1,
+              "focus_transition_counter": 2,
+              "input_current": 164,
+              "input_previous": 164,
+              "player_phase": 0,
+              "player_x": {
+                "bits": 1135735950,
+                "value": 355.91058349609375
+              },
+              "player_y": {
+                "bits": 1137466648,
+                "value": 408.727294921875
+              },
+              "secondary_character_active": true
+            },
+            "resolved_action": 164,
+            "tick_index": 26
+          },
+          {
+            "action_source": "NativeTrajectory.selected_action",
+            "manager_frame": 2157,
+            "mismatched_fields": [],
+            "model": {
+              "focus_logic": 0,
+              "focus_transition_counter": 0,
+              "input_current": 81,
+              "input_previous": 164,
+              "player_phase": 0,
+              "player_x": {
+                "bits": 1135643268,
+                "value": 353.0821533203125
+              },
+              "player_y": {
+                "bits": 1137373966,
+                "value": 405.89886474609375
+              },
+              "secondary_character_active": true
+            },
+            "native": {
+              "focus_logic": 0,
+              "focus_transition_counter": 0,
+              "input_current": 81,
+              "input_previous": 164,
+              "player_phase": 0,
+              "player_x": {
+                "bits": 1135643268,
+                "value": 353.0821533203125
+              },
+              "player_y": {
+                "bits": 1137373966,
+                "value": 405.89886474609375
+              },
+              "secondary_character_active": true
+            },
+            "resolved_action": 81,
+            "tick_index": 27
+          },
+          {
+            "action_source": "NativeTrajectory.selected_action",
+            "manager_frame": 2158,
+            "mismatched_fields": [],
+            "model": {
+              "focus_logic": 0,
+              "focus_transition_counter": 1,
+              "input_current": 81,
+              "input_previous": 81,
+              "player_phase": 0,
+              "player_x": {
+                "bits": 1135550586,
+                "value": 350.25372314453125
+              },
+              "player_y": {
+                "bits": 1137281284,
+                "value": 403.0704345703125
+              },
+              "secondary_character_active": true
+            },
+            "native": {
+              "focus_logic": 0,
+              "focus_transition_counter": 1,
+              "input_current": 81,
+              "input_previous": 81,
+              "player_phase": 0,
+              "player_x": {
+                "bits": 1135550586,
+                "value": 350.25372314453125
+              },
+              "player_y": {
+                "bits": 1137281284,
+                "value": 403.0704345703125
+              },
+              "secondary_character_active": true
+            },
+            "resolved_action": 81,
+            "tick_index": 28
+          },
+          {
+            "action_source": "NativeTrajectory.selected_action",
+            "manager_frame": 2159,
+            "mismatched_fields": [],
+            "model": {
+              "focus_logic": 0,
+              "focus_transition_counter": 2,
+              "input_current": 81,
+              "input_previous": 81,
+              "player_phase": 0,
+              "player_x": {
+                "bits": 1135457904,
+                "value": 347.42529296875
+              },
+              "player_y": {
+                "bits": 1137188602,
+                "value": 400.24200439453125
+              },
+              "secondary_character_active": true
+            },
+            "native": {
+              "focus_logic": 0,
+              "focus_transition_counter": 2,
+              "input_current": 81,
+              "input_previous": 81,
+              "player_phase": 0,
+              "player_x": {
+                "bits": 1135457904,
+                "value": 347.42529296875
+              },
+              "player_y": {
+                "bits": 1137188602,
+                "value": 400.24200439453125
+              },
+              "secondary_character_active": true
+            },
+            "resolved_action": 81,
+            "tick_index": 29
+          },
+          {
+            "action_source": "NativeTrajectory.selected_action",
+            "manager_frame": 2160,
+            "mismatched_fields": [],
+            "model": {
+              "focus_logic": 1,
+              "focus_transition_counter": 0,
+              "input_current": 21,
+              "input_previous": 81,
+              "player_phase": 0,
+              "player_x": {
+                "bits": 1135457904,
+                "value": 347.42529296875
+              },
+              "player_y": {
+                "bits": 1137113236,
+                "value": 397.9420166015625
+              },
+              "secondary_character_active": true
+            },
+            "native": {
+              "focus_logic": 1,
+              "focus_transition_counter": 0,
+              "input_current": 21,
+              "input_previous": 81,
+              "player_phase": 0,
+              "player_x": {
+                "bits": 1135457904,
+                "value": 347.42529296875
+              },
+              "player_y": {
+                "bits": 1137113236,
+                "value": 397.9420166015625
+              },
+              "secondary_character_active": true
+            },
+            "resolved_action": 21,
+            "tick_index": 30
+          },
+          {
+            "action_source": "NativeTrajectory.selected_action",
+            "manager_frame": 2161,
+            "mismatched_fields": [],
+            "model": {
+              "focus_logic": 1,
+              "focus_transition_counter": 1,
+              "input_current": 21,
+              "input_previous": 21,
+              "player_phase": 0,
+              "player_x": {
+                "bits": 1135457904,
+                "value": 347.42529296875
+              },
+              "player_y": {
+                "bits": 1137037870,
+                "value": 395.64202880859375
+              },
+              "secondary_character_active": true
+            },
+            "native": {
+              "focus_logic": 1,
+              "focus_transition_counter": 1,
+              "input_current": 21,
+              "input_previous": 21,
+              "player_phase": 0,
+              "player_x": {
+                "bits": 1135457904,
+                "value": 347.42529296875
+              },
+              "player_y": {
+                "bits": 1137037870,
+                "value": 395.64202880859375
+              },
+              "secondary_character_active": true
+            },
+            "resolved_action": 21,
+            "tick_index": 31
+          }
+        ]
+      }
+    },
+    "native_root_capsule": {
+      "artifact_id": "sha256:cf1f50d4ac5edb9eaf003b0062dd2157e32b226cfdadfbba233e8539152340de",
+      "kind": "NativeRootCapsule"
+    },
+    "native_trajectory": {
+      "artifact_id": "sha256:3b6884b93e25c9a38070d88148eed824a7f212b063b236afbf1d39c6493e6913",
+      "kind": "NativeTrajectory"
+    }
+  },
+  "authority": {
+    "accepted_for": "deterministic player-mechanics differential on this exact root/action schedule and slot-45 constant-velocity forecast",
+    "next_gate": "add model-consumable hostile state and an event ledger before integrated planner replay; keep physical promotion behind a successful offline engine/planner differential",
+    "not_accepted_for": "full collision-model parity, planner correctness, live action authority, other roots, or physical promotion"
+  },
+  "endpoint_manager_frame": 2161,
+  "root_manager_frame": 2129,
+  "schema": "th08-native-model-trajectory-differential-v1",
+  "sources": [
+    {
+      "bytes": 50359,
+      "path": "artifacts/runtime_reports/th08_native_snapshot_causal_policy_root2129_h32_20260730.json",
+      "sha256": "69e6ec2db0f5415a6ee8231808be0669b0f80006faf299f2c90aeb27e221bbaa"
+    },
+    {
+      "bytes": 6274443,
+      "path": "artifacts/native_snapshot_rolling/raw/th08_schedule_94_44_10_a4_h32_natural_20260730.json",
+      "sha256": "97ed8c6006be09e6f68bf24c3722ecb74a110e57640940012ec8ee704a08b349"
+    }
+  ],
+  "status": "accepted_player_layer_exact"
+}

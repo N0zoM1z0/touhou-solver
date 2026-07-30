@@ -112,7 +112,11 @@ Observed in the connected shipped-program IDB:
   `timer_integer_changed` (`0x0040D3D0`) compares it with timer base `+0x00`;
 - callback-table index 7 reaches `0x004501B0`, whose due path calls
   `rng_next_signed_unit` once and then overwrites angle and polar velocity;
-  and
+  the stored angle and both velocity components are float32 fields;
+- `player_shot_initialize` stores source-plus-offset position and
+  `cos/sin(angle) * speed` velocity to float32 fields, and
+  `player_update_shots` stores each default
+  `time_scale * velocity + position` result back to float32; and
 - `rng_next_signed_unit` (`0x0043ED80`) consumes one u32, hence two u16 RNG
   calls.
 
@@ -148,11 +152,12 @@ of birth slot 1220 remains unresolved and is deliberately not pursued here.
 3. Exact solution answers only the player-shot emission/RNG subproblem. It
    does not answer future shot collision, enemy death, hostile-emission
    prevention, or physical survival.
-4. The algorithm is exact for record order, due tests, capacity, and RNG-call
-   count over callbacks 0 and 7. Random-spread trigonometric geometry is an
-   unknown-direction numerical approximation until native-bit differential
-   evidence exists. A native root with retained timer/pool fields whose RNG
-   delta or emitted-record order disagrees falsifies the exact claim.
+4. The algorithm is exact for record order, due tests, capacity, RNG-call
+   count, and observed binary32 storage boundaries over callbacks 0 and 7.
+   Static-CRT trigonometric low bits remain an unknown-direction numerical
+   approximation until native-bit differential evidence exists. A native root
+   with retained timer/pool fields whose RNG delta, emitted-record order, or
+   post-store value disagrees falsifies the corresponding claim.
 5. There is no live consumer. A later proposal may consume this state only
    after exact-version root capture and before its declared issue deadline;
    otherwise combat ranking stays disabled.
@@ -167,6 +172,9 @@ The semantic foundation is implemented without live promotion:
 - an independent test RNG agrees on state, call count, and stored callback-7
   angle; pool-full, capacity-prefix, non-due, unsupported-callback, shipped
   callback-partition, and threshold edges are covered;
+- spawn position, stored angle/velocity, and default motion explicitly round
+  at each native float32 memory write; an adversarial `2^24 +/- 1` regression
+  rejects the old unbounded Python-double accumulation;
 - `scripts/th08_player_shot_runtime.py` captures the timer identity and all
   slot words without changing the live sensing hot path;
 - rolling native snapshot schema v4 retains that state at roots and endpoints
@@ -178,7 +186,7 @@ The semantic foundation is implemented without live promotion:
   `f78e820fe7aeabd12d5c6b4a2fd901462a54ada26758f3ba11fae615318738e8`.
 
 Focused checks, Ruff, and report byte-regeneration pass. Complete discovery
-passes 1,380 tests in 13.531 seconds on Linux and 1,380 tests in 27.294
+passes 1,530 tests in 14.568 seconds on Linux and 1,530 tests in 31.092
 seconds through the Windows UNC loader, with the three existing Windows
 skips.
 

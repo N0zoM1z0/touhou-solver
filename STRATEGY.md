@@ -1750,8 +1750,11 @@ first.
   executable and independently tested. Rolling snapshot v4 retains the
   previously omitted shot timer and slot words. The old root-2,129 four-u16
   prefix is compatible with a focused option-shot pair but is not unique
-  causal proof because its v3 capsule omitted those fields. This changes no
-  S18 status or live ranking authority.
+  causal proof because its v3 capsule omitted those fields. Spawn position,
+  stored angle/velocity, and default per-frame motion now round at every
+  revalidated native binary32 write. Static-CRT `sin/cos` low bits remain an
+  explicit native-differential debt. This changes no S18 status or live
+  ranking authority.
 - **Observed damageability/coverage foundation (2026-07-31):** the native
   manager-to-HP path is now executable as four separate gates: manager update,
   damage block, shot collision, and HP subtraction. This corrects the boss

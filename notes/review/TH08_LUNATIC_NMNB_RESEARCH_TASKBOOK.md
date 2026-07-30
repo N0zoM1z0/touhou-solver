@@ -1053,6 +1053,10 @@ Current semantic correction (2026-07-31):
   failure while retaining Power only as an observed trajectory; unresolved
   callbacks/type-4/5 mutation and runtime generation joins still bound
   authority.
+- The general player-shot scalar now rounds spawn position, stored
+  angle/velocity, and default per-frame motion at each revalidated native
+  binary32 write. Exact static-CRT `sin/cos` low bits remain open, so this
+  narrows numerical error without promoting the Focus coverage envelope.
 
 Exit gate:
 

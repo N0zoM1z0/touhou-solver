@@ -43,6 +43,12 @@ class UnsupportedPlayerShotCallback(ValueError):
     """Raised when an SHT callback/collision branch lacks semantics."""
 
 
+def _stored_float32(value: float) -> float:
+    """Round one native memory write to IEEE-754 binary32."""
+
+    return float32_from_bits(float32_bits(value))
+
+
 @dataclass(frozen=True)
 class PlayerShot:
     x: float
@@ -199,12 +205,24 @@ def spawn_player_shot(
     angle = record.angle if angle_override is None else angle_override
     if not math.isfinite(angle):
         raise ValueError("player-shot angle must be finite")
+    stored_angle = _stored_float32(angle)
+    stored_speed = _stored_float32(record.speed)
     return PlayerShot(
-        x=source_x + record.spawn_offset_x,
-        y=source_y + record.spawn_offset_y,
-        velocity_x=math.cos(angle) * record.speed,
-        velocity_y=math.sin(angle) * record.speed,
-        angle=angle,
+        x=_stored_float32(
+            _stored_float32(source_x)
+            + _stored_float32(record.spawn_offset_x)
+        ),
+        y=_stored_float32(
+            _stored_float32(source_y)
+            + _stored_float32(record.spawn_offset_y)
+        ),
+        velocity_x=_stored_float32(
+            math.cos(stored_angle) * stored_speed
+        ),
+        velocity_y=_stored_float32(
+            math.sin(stored_angle) * stored_speed
+        ),
+        angle=stored_angle,
         hitbox_width=record.hitbox_width,
         hitbox_height=record.hitbox_height,
         damage=record.damage,
@@ -229,7 +247,7 @@ def random_spread_shot_angle(rng: Th08Rng) -> float:
     divisor = float32_from_bits(RANDOM_SPREAD_DIVISOR_BITS)
     center = float32_from_bits(RANDOM_SPREAD_CENTER_BITS)
     projected = rng.next_signed_unit() * pi / divisor - center
-    return float32_from_bits(float32_bits(projected))
+    return _stored_float32(projected)
 
 
 def emit_player_shot_level(
@@ -310,10 +328,17 @@ def step_player_shot(shot: PlayerShot, *, time_scale: float = 1.0) -> PlayerShot
             "player-shot update callback "
             f"{shot.update_callback_index} lacks executable semantics"
         )
+    stored_scale = _stored_float32(time_scale)
     return replace(
         shot,
-        x=shot.x + shot.velocity_x * time_scale,
-        y=shot.y + shot.velocity_y * time_scale,
+        x=_stored_float32(
+            _stored_float32(shot.x)
+            + _stored_float32(shot.velocity_x) * stored_scale
+        ),
+        y=_stored_float32(
+            _stored_float32(shot.y)
+            + _stored_float32(shot.velocity_y) * stored_scale
+        ),
     )
 
 

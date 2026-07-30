@@ -115,17 +115,19 @@ For each profile and Power interval, the atlas retains:
 - merged enemy-point center-x support at 64, 128, and 192 units above the
   player, including the native center/size AABB footprint.
 
-The unfocused callback-0 paths are revalidated scalar projections but have not
-received a native-bit trigonometric differential. Focused callback-7 option
-paths use a continuous outer envelope over:
+The player-shot scalar now preserves every revalidated float32 store in spawn
+and default motion, but the unfocused callback-0 paths have not received a
+native-bit static-CRT trigonometric differential. Focused callback-7 option
+paths still use a continuous outer envelope over:
 
 - the revalidated angle support around `-pi/2`;
 - the observed steady Route-2 option target offsets;
 - the eight-unit option orbit;
 - the shot's vertical and horizontal collision extents.
 
-That envelope contains possible support. It does not prove that every enclosed
-x is attainable at one immutable state or that multiple record envelopes can
+That envelope contains possible support. The binary32 correction narrows
+trajectory error but does not prove that every enclosed x is attainable at
+one immutable state or that multiple record envelopes can
 be realized simultaneously. Treating it as damage coverage is therefore
 **optimistic**, with unknown-direction numerical error from the remaining
 x87/trigonometric differential.

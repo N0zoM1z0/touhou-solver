@@ -59,6 +59,11 @@ historical handoff.
   callback-7 RNG consumption, and pool-capacity semantics. Primary normal
   shots consume no callback RNG; focused secondary normal option shots
   consume two u16 calls each when due and when a free slot exists.
+- Revalidated player-shot initialization and default motion now preserve every
+  observed binary32 memory-write boundary for spawn position, angle/velocity,
+  and per-frame `scale * velocity + position`. Static-CRT `sin/cos` low bits
+  still lack a shipped native-bit differential, so geometry keeps explicit
+  unknown-direction numerical authority rather than becoming exact.
 - Rolling native snapshot schema v4 adds a dedicated non-live capture of the
   shot timer `(previous, fraction_bits, current)` and all 128 slot state
   words. Same-action and natural-frame acceptance now require this state to

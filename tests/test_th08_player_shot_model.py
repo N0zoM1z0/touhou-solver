@@ -296,6 +296,44 @@ class PlayerShotModelTests(unittest.TestCase):
         self.assertEqual(player_shot.update_callback_index, 0)
         self.assertEqual(player_shot.hit_callback_index, 0)
 
+    def test_spawn_and_motion_round_each_native_float32_store(self) -> None:
+        record = replace(
+            self.last_spell.shots[0],
+            spawn_offset_x=1.0,
+            spawn_offset_y=-1.0,
+            angle=0.3,
+            speed=7.0,
+        )
+        shot = spawn_player_shot(
+            record,
+            player_position=(16777216.0, -16777216.0),
+            option_positions=(),
+        )
+
+        self.assertEqual(shot.x, 16777216.0)
+        self.assertEqual(shot.y, -16777216.0)
+        self.assertEqual(shot.angle, _f32(0.3))
+        self.assertEqual(
+            shot.velocity_x,
+            _f32(math.cos(_f32(0.3)) * _f32(7.0)),
+        )
+        self.assertEqual(
+            shot.velocity_y,
+            _f32(math.sin(_f32(0.3)) * _f32(7.0)),
+        )
+
+        moved = step_player_shot(
+            replace(
+                shot,
+                x=16777216.0,
+                y=-16777216.0,
+                velocity_x=1.0,
+                velocity_y=-1.0,
+            ),
+        )
+        self.assertEqual(moved.x, 16777216.0)
+        self.assertEqual(moved.y, -16777216.0)
+
     def test_motion_and_inclusive_aabb_boundary(self) -> None:
         shot = spawn_player_shot(
             self.normal.shots[8],

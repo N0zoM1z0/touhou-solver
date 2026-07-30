@@ -1,0 +1,1333 @@
+{
+  "aggregate_static_width_relations": {
+    "comparison_count": 18,
+    "equal": 0,
+    "focused_outer_envelope_wider": 14,
+    "unfocused_primary_wider": 4
+  },
+  "authority": {
+    "focused_callback7_geometry": "continuous_conservative_outer_envelope_unknown_direction",
+    "focused_envelope_damage_direction": "optimistic",
+    "kind": "offline_shipped_data_static_geometry_audit",
+    "physical_predictive_authority": false,
+    "physical_trial_run": false,
+    "planner_action_authority": false,
+    "unfocused_callback0_geometry": "revalidated_scalar_projection_no_native_bit_differential"
+  },
+  "inputs": {
+    "focused_option_assumption": "steady_active_orbit",
+    "player_shot_pool_assumption": "empty_at_each_cadence_row",
+    "primary_sht": "artifacts/decoded/ply02a.sht",
+    "primary_sht_sha256": "4765744ab5bbf797746469d5a6afc6ec7d4b0371422b5aa5a2e54ae668c48885",
+    "secondary_sht": "artifacts/decoded/ply02as.sht",
+    "secondary_sht_sha256": "f7554b3a32e16da01de9432e22609482a1c98a33212eb904ad47789079abebd3",
+    "target_enemy_size": [
+      0.0,
+      0.0
+    ],
+    "target_rises_from_player": [
+      64.0,
+      128.0,
+      192.0
+    ]
+  },
+  "interpretation": {
+    "falsified_coarse_rule": "releasing Focus is not uniformly wider across Power and target height, even before survival and target motion.",
+    "not_supported": "no static width or nominal-damage row proves a kill, prevented emission, phase shortening, or safe Focus switch",
+    "supported": "Focus changes cadence, nominal base-damage opportunity, horizontal support, and shared RNG consumption at every normal Power partition."
+  },
+  "native_semantics": {
+    "inclusive_center_size_aabb": "0x00451740",
+    "ordinary_shot_frame_damage_cap": 50,
+    "player_compute_damage_to_enemy": "0x00451670",
+    "player_emit_shot_level": "0x00450F60",
+    "player_shot_initialize": "0x0044FB70",
+    "random_spread_callback": "0x004501B0"
+  },
+  "power_profiles": [
+    {
+      "comparison": [
+        {
+          "target_rise": 64.0,
+          "unfocused_minus_focused_outer_envelope": -47.27780580823379,
+          "union_width_relation": "focused_outer_envelope_wider"
+        },
+        {
+          "target_rise": 128.0,
+          "unfocused_minus_focused_outer_envelope": -55.66736928271321,
+          "union_width_relation": "focused_outer_envelope_wider"
+        },
+        {
+          "target_rise": 192.0,
+          "unfocused_minus_focused_outer_envelope": -64.05693275719261,
+          "union_width_relation": "focused_outer_envelope_wider"
+        }
+      ],
+      "focused_secondary": {
+        "coverage": [
+          {
+            "interval_count": 1,
+            "merged_enemy_point_center_x_intervals": [
+              [
+                -32.63890395319026,
+                32.63890395319026
+              ]
+            ],
+            "span_width": 65.27780790638052,
+            "target_rise": 64.0,
+            "union_width": 65.27780790638052
+          },
+          {
+            "interval_count": 1,
+            "merged_enemy_point_center_x_intervals": [
+              [
+                -36.83368569042997,
+                36.83368569042997
+              ]
+            ],
+            "span_width": 73.66737138085993,
+            "target_rise": 128.0,
+            "union_width": 73.66737138085993
+          },
+          {
+            "interval_count": 1,
+            "merged_enemy_point_center_x_intervals": [
+              [
+                -41.02846742766967,
+                41.02846742766967
+              ]
+            ],
+            "span_width": 82.05693485533934,
+            "target_rise": 192.0,
+            "union_width": 82.05693485533934
+          }
+        ],
+        "empty_pool_timer_cycle": {
+          "callback_rng_u16_calls": 8,
+          "emissions": 8,
+          "emissions_by_cadence": [
+            3,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            3,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0
+          ],
+          "nominal_base_damage": 248,
+          "nominal_base_damage_by_cadence": [
+            88,
+            0,
+            0,
+            0,
+            0,
+            36,
+            0,
+            0,
+            0,
+            0,
+            88,
+            0,
+            0,
+            0,
+            0,
+            36,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        "level": 0,
+        "record_count": 3
+      },
+      "power_interval": {
+        "lower_inclusive": 0,
+        "upper_exclusive": 8
+      },
+      "unfocused_primary": {
+        "coverage": [
+          {
+            "interval_count": 1,
+            "merged_enemy_point_center_x_intervals": [
+              [
+                -9.000003846602326,
+                8.999998251544397
+              ]
+            ],
+            "span_width": 18.000002098146723,
+            "target_rise": 64.0,
+            "union_width": 18.000002098146723
+          },
+          {
+            "interval_count": 1,
+            "merged_enemy_point_center_x_intervals": [
+              [
+                -9.00000664413129,
+                8.999995454015433
+              ]
+            ],
+            "span_width": 18.000002098146723,
+            "target_rise": 128.0,
+            "union_width": 18.000002098146723
+          },
+          {
+            "interval_count": 1,
+            "merged_enemy_point_center_x_intervals": [
+              [
+                -9.000009441660254,
+                8.99999265648647
+              ]
+            ],
+            "span_width": 18.000002098146723,
+            "target_rise": 192.0,
+            "union_width": 18.000002098146723
+          }
+        ],
+        "empty_pool_timer_cycle": {
+          "callback_rng_u16_calls": 0,
+          "emissions": 4,
+          "emissions_by_cadence": [
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0
+          ],
+          "nominal_base_damage": 192,
+          "nominal_base_damage_by_cadence": [
+            48,
+            0,
+            0,
+            0,
+            0,
+            48,
+            0,
+            0,
+            0,
+            0,
+            48,
+            0,
+            0,
+            0,
+            0,
+            48,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        "level": 0,
+        "record_count": 1
+      }
+    },
+    {
+      "comparison": [
+        {
+          "target_rise": 64.0,
+          "unfocused_minus_focused_outer_envelope": -6.542623867285954,
+          "union_width_relation": "focused_outer_envelope_wider"
+        },
+        {
+          "target_rise": 128.0,
+          "unfocused_minus_focused_outer_envelope": -6.175450715934346,
+          "union_width_relation": "focused_outer_envelope_wider"
+        },
+        {
+          "target_rise": 192.0,
+          "unfocused_minus_focused_outer_envelope": -14.565014190413763,
+          "union_width_relation": "focused_outer_envelope_wider"
+        }
+      ],
+      "focused_secondary": {
+        "coverage": [
+          {
+            "interval_count": 1,
+            "merged_enemy_point_center_x_intervals": [
+              [
+                -32.63890395319026,
+                32.63890395319026
+              ]
+            ],
+            "span_width": 65.27780790638052,
+            "target_rise": 64.0,
+            "union_width": 65.27780790638052
+          },
+          {
+            "interval_count": 1,
+            "merged_enemy_point_center_x_intervals": [
+              [
+                -36.83368569042997,
+                36.83368569042997
+              ]
+            ],
+            "span_width": 73.66737138085993,
+            "target_rise": 128.0,
+            "union_width": 73.66737138085993
+          },
+          {
+            "interval_count": 1,
+            "merged_enemy_point_center_x_intervals": [
+              [
+                -41.02846742766967,
+                41.02846742766967
+              ]
+            ],
+            "span_width": 82.05693485533934,
+            "target_rise": 192.0,
+            "union_width": 82.05693485533934
+          }
+        ],
+        "empty_pool_timer_cycle": {
+          "callback_rng_u16_calls": 16,
+          "emissions": 12,
+          "emissions_by_cadence": [
+            3,
+            0,
+            0,
+            0,
+            0,
+            3,
+            0,
+            0,
+            0,
+            0,
+            3,
+            0,
+            0,
+            0,
+            0,
+            3,
+            0,
+            0,
+            0,
+            0
+          ],
+          "nominal_base_damage": 352,
+          "nominal_base_damage_by_cadence": [
+            88,
+            0,
+            0,
+            0,
+            0,
+            88,
+            0,
+            0,
+            0,
+            0,
+            88,
+            0,
+            0,
+            0,
+            0,
+            88,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        "level": 1,
+        "record_count": 3
+      },
+      "power_interval": {
+        "lower_inclusive": 8,
+        "upper_exclusive": 24
+      },
+      "unfocused_primary": {
+        "coverage": [
+          {
+            "interval_count": 1,
+            "merged_enemy_point_center_x_intervals": [
+              [
+                -29.367590593315985,
+                29.36759344577858
+              ]
+            ],
+            "span_width": 58.73518403909456,
+            "target_rise": 64.0,
+            "union_width": 58.73518403909456
+          },
+          {
+            "interval_count": 3,
+            "merged_enemy_point_center_x_intervals": [
+              [
+                -38.36220193390943,
+                -13.616243428464347
+              ],
+              [
+                -9.00000664413129,
+                8.999995454015433
+              ],
+              [
+                13.616246799556507,
+                38.36220686089028
+              ]
+            ],
+            "span_width": 76.72440879479971,
+            "target_rise": 128.0,
+            "union_width": 67.49192066492559
+          },
+          {
+            "interval_count": 3,
+            "merged_enemy_point_center_x_intervals": [
+              [
+                -47.35681327450287,
+                -22.61085476905779
+              ],
+              [
+                -9.000009441660254,
+                8.99999265648647
+              ],
+              [
+                22.610860214668204,
+                47.35682027600198
+              ]
+            ],
+            "span_width": 94.71363355050485,
+            "target_rise": 192.0,
+            "union_width": 67.49192066492557
+          }
+        ],
+        "empty_pool_timer_cycle": {
+          "callback_rng_u16_calls": 0,
+          "emissions": 8,
+          "emissions_by_cadence": [
+            3,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            3,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0
+          ],
+          "nominal_base_damage": 232,
+          "nominal_base_damage_by_cadence": [
+            84,
+            0,
+            0,
+            0,
+            0,
+            32,
+            0,
+            0,
+            0,
+            0,
+            84,
+            0,
+            0,
+            0,
+            0,
+            32,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        "level": 1,
+        "record_count": 3
+      }
+    },
+    {
+      "comparison": [
+        {
+          "target_rise": 64.0,
+          "unfocused_minus_focused_outer_envelope": -48.64001473590581,
+          "union_width_relation": "focused_outer_envelope_wider"
+        },
+        {
+          "target_rise": 128.0,
+          "unfocused_minus_focused_outer_envelope": -48.2728415845542,
+          "union_width_relation": "focused_outer_envelope_wider"
+        },
+        {
+          "target_rise": 192.0,
+          "unfocused_minus_focused_outer_envelope": -56.66240505903362,
+          "union_width_relation": "focused_outer_envelope_wider"
+        }
+      ],
+      "focused_secondary": {
+        "coverage": [
+          {
+            "interval_count": 1,
+            "merged_enemy_point_center_x_intervals": [
+              [
+                -53.687599387500185,
+                53.687599387500185
+              ]
+            ],
+            "span_width": 107.37519877500037,
+            "target_rise": 64.0,
+            "union_width": 107.37519877500037
+          },
+          {
+            "interval_count": 1,
+            "merged_enemy_point_center_x_intervals": [
+              [
+                -57.882381124739894,
+                57.882381124739894
+              ]
+            ],
+            "span_width": 115.76476224947979,
+            "target_rise": 128.0,
+            "union_width": 115.76476224947979
+          },
+          {
+            "interval_count": 1,
+            "merged_enemy_point_center_x_intervals": [
+              [
+                -62.077162861979595,
+                62.077162861979595
+              ]
+            ],
+            "span_width": 124.15432572395919,
+            "target_rise": 192.0,
+            "union_width": 124.15432572395919
+          }
+        ],
+        "empty_pool_timer_cycle": {
+          "callback_rng_u16_calls": 20,
+          "emissions": 17,
+          "emissions_by_cadence": [
+            5,
+            0,
+            0,
+            1,
+            0,
+            2,
+            1,
+            0,
+            0,
+            1,
+            2,
+            0,
+            1,
+            0,
+            0,
+            3,
+            0,
+            0,
+            1,
+            0
+          ],
+          "nominal_base_damage": 395,
+          "nominal_base_damage_by_cadence": [
+            125,
+            0,
+            0,
+            25,
+            0,
+            40,
+            25,
+            0,
+            0,
+            25,
+            40,
+            0,
+            25,
+            0,
+            0,
+            65,
+            0,
+            0,
+            25,
+            0
+          ]
+        },
+        "level": 2,
+        "record_count": 5
+      },
+      "power_interval": {
+        "lower_inclusive": 24,
+        "upper_exclusive": 48
+      },
+      "unfocused_primary": {
+        "coverage": [
+          {
+            "interval_count": 1,
+            "merged_enemy_point_center_x_intervals": [
+              [
+                -29.367590593315985,
+                29.36759344577858
+              ]
+            ],
+            "span_width": 58.73518403909456,
+            "target_rise": 64.0,
+            "union_width": 58.73518403909456
+          },
+          {
+            "interval_count": 3,
+            "merged_enemy_point_center_x_intervals": [
+              [
+                -38.36220193390943,
+                -13.616243428464347
+              ],
+              [
+                -9.00000664413129,
+                8.999995454015433
+              ],
+              [
+                13.616246799556507,
+                38.36220686089028
+              ]
+            ],
+            "span_width": 76.72440879479971,
+            "target_rise": 128.0,
+            "union_width": 67.49192066492559
+          },
+          {
+            "interval_count": 3,
+            "merged_enemy_point_center_x_intervals": [
+              [
+                -47.35681327450287,
+                -22.61085476905779
+              ],
+              [
+                -9.000009441660254,
+                8.99999265648647
+              ],
+              [
+                22.610860214668204,
+                47.35682027600198
+              ]
+            ],
+            "span_width": 94.71363355050485,
+            "target_rise": 192.0,
+            "union_width": 67.49192066492557
+          }
+        ],
+        "empty_pool_timer_cycle": {
+          "callback_rng_u16_calls": 0,
+          "emissions": 12,
+          "emissions_by_cadence": [
+            3,
+            0,
+            0,
+            0,
+            0,
+            1,
+            2,
+            0,
+            0,
+            0,
+            1,
+            0,
+            2,
+            0,
+            0,
+            1,
+            0,
+            0,
+            2,
+            0
+          ],
+          "nominal_base_damage": 312,
+          "nominal_base_damage_by_cadence": [
+            78,
+            0,
+            0,
+            0,
+            0,
+            32,
+            46,
+            0,
+            0,
+            0,
+            32,
+            0,
+            46,
+            0,
+            0,
+            32,
+            0,
+            0,
+            46,
+            0
+          ]
+        },
+        "level": 2,
+        "record_count": 3
+      }
+    },
+    {
+      "comparison": [
+        {
+          "target_rise": 64.0,
+          "unfocused_minus_focused_outer_envelope": -48.64001473590581,
+          "union_width_relation": "focused_outer_envelope_wider"
+        },
+        {
+          "target_rise": 128.0,
+          "unfocused_minus_focused_outer_envelope": -39.04035345468007,
+          "union_width_relation": "focused_outer_envelope_wider"
+        },
+        {
+          "target_rise": 192.0,
+          "unfocused_minus_focused_outer_envelope": -29.440692173454337,
+          "union_width_relation": "focused_outer_envelope_wider"
+        }
+      ],
+      "focused_secondary": {
+        "coverage": [
+          {
+            "interval_count": 1,
+            "merged_enemy_point_center_x_intervals": [
+              [
+                -53.687599387500185,
+                53.687599387500185
+              ]
+            ],
+            "span_width": 107.37519877500037,
+            "target_rise": 64.0,
+            "union_width": 107.37519877500037
+          },
+          {
+            "interval_count": 1,
+            "merged_enemy_point_center_x_intervals": [
+              [
+                -57.882381124739894,
+                57.882381124739894
+              ]
+            ],
+            "span_width": 115.76476224947979,
+            "target_rise": 128.0,
+            "union_width": 115.76476224947979
+          },
+          {
+            "interval_count": 1,
+            "merged_enemy_point_center_x_intervals": [
+              [
+                -62.077162861979595,
+                62.077162861979595
+              ]
+            ],
+            "span_width": 124.15432572395919,
+            "target_rise": 192.0,
+            "union_width": 124.15432572395919
+          }
+        ],
+        "empty_pool_timer_cycle": {
+          "callback_rng_u16_calls": 24,
+          "emissions": 19,
+          "emissions_by_cadence": [
+            5,
+            0,
+            0,
+            1,
+            0,
+            2,
+            1,
+            0,
+            0,
+            1,
+            2,
+            0,
+            1,
+            0,
+            0,
+            5,
+            0,
+            0,
+            1,
+            0
+          ],
+          "nominal_base_damage": 427,
+          "nominal_base_damage_by_cadence": [
+            111,
+            0,
+            0,
+            25,
+            0,
+            40,
+            25,
+            0,
+            0,
+            25,
+            40,
+            0,
+            25,
+            0,
+            0,
+            111,
+            0,
+            0,
+            25,
+            0
+          ]
+        },
+        "level": 3,
+        "record_count": 5
+      },
+      "power_interval": {
+        "lower_inclusive": 48,
+        "upper_exclusive": 80
+      },
+      "unfocused_primary": {
+        "coverage": [
+          {
+            "interval_count": 1,
+            "merged_enemy_point_center_x_intervals": [
+              [
+                -29.367590593315985,
+                29.36759344577858
+              ]
+            ],
+            "span_width": 58.73518403909456,
+            "target_rise": 64.0,
+            "union_width": 58.73518403909456
+          },
+          {
+            "interval_count": 1,
+            "merged_enemy_point_center_x_intervals": [
+              [
+                -38.36220193390943,
+                38.36220686089028
+              ]
+            ],
+            "span_width": 76.72440879479971,
+            "target_rise": 128.0,
+            "union_width": 76.72440879479971
+          },
+          {
+            "interval_count": 1,
+            "merged_enemy_point_center_x_intervals": [
+              [
+                -47.35681327450287,
+                47.35682027600198
+              ]
+            ],
+            "span_width": 94.71363355050485,
+            "target_rise": 192.0,
+            "union_width": 94.71363355050485
+          }
+        ],
+        "empty_pool_timer_cycle": {
+          "callback_rng_u16_calls": 0,
+          "emissions": 16,
+          "emissions_by_cadence": [
+            5,
+            0,
+            0,
+            0,
+            0,
+            3,
+            0,
+            0,
+            0,
+            0,
+            3,
+            0,
+            0,
+            0,
+            0,
+            5,
+            0,
+            0,
+            0,
+            0
+          ],
+          "nominal_base_damage": 400,
+          "nominal_base_damage_by_cadence": [
+            116,
+            0,
+            0,
+            0,
+            0,
+            84,
+            0,
+            0,
+            0,
+            0,
+            84,
+            0,
+            0,
+            0,
+            0,
+            116,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        "level": 3,
+        "record_count": 5
+      }
+    },
+    {
+      "comparison": [
+        {
+          "target_rise": 64.0,
+          "unfocused_minus_focused_outer_envelope": -6.908005616991176,
+          "union_width_relation": "focused_outer_envelope_wider"
+        },
+        {
+          "target_rise": 128.0,
+          "unfocused_minus_focused_outer_envelope": 21.405844114354267,
+          "union_width_relation": "unfocused_primary_wider"
+        },
+        {
+          "target_rise": 192.0,
+          "unfocused_minus_focused_outer_envelope": 34.08686773091431,
+          "union_width_relation": "unfocused_primary_wider"
+        }
+      ],
+      "focused_secondary": {
+        "coverage": [
+          {
+            "interval_count": 1,
+            "merged_enemy_point_center_x_intervals": [
+              [
+                -53.687599387500185,
+                53.687599387500185
+              ]
+            ],
+            "span_width": 107.37519877500037,
+            "target_rise": 64.0,
+            "union_width": 107.37519877500037
+          },
+          {
+            "interval_count": 1,
+            "merged_enemy_point_center_x_intervals": [
+              [
+                -57.882381124739894,
+                57.882381124739894
+              ]
+            ],
+            "span_width": 115.76476224947979,
+            "target_rise": 128.0,
+            "union_width": 115.76476224947979
+          },
+          {
+            "interval_count": 1,
+            "merged_enemy_point_center_x_intervals": [
+              [
+                -62.077162861979595,
+                62.077162861979595
+              ]
+            ],
+            "span_width": 124.15432572395919,
+            "target_rise": 192.0,
+            "union_width": 124.15432572395919
+          }
+        ],
+        "empty_pool_timer_cycle": {
+          "callback_rng_u16_calls": 24,
+          "emissions": 19,
+          "emissions_by_cadence": [
+            3,
+            0,
+            0,
+            1,
+            0,
+            4,
+            1,
+            0,
+            0,
+            1,
+            2,
+            0,
+            1,
+            0,
+            0,
+            5,
+            0,
+            0,
+            1,
+            0
+          ],
+          "nominal_base_damage": 431,
+          "nominal_base_damage_by_cadence": [
+            67,
+            0,
+            0,
+            25,
+            0,
+            86,
+            25,
+            0,
+            0,
+            25,
+            42,
+            0,
+            25,
+            0,
+            0,
+            111,
+            0,
+            0,
+            25,
+            0
+          ]
+        },
+        "level": 4,
+        "record_count": 5
+      },
+      "power_interval": {
+        "lower_inclusive": 80,
+        "upper_exclusive": 128
+      },
+      "unfocused_primary": {
+        "coverage": [
+          {
+            "interval_count": 1,
+            "merged_enemy_point_center_x_intervals": [
+              [
+                -50.23359506540066,
+                50.23359809260853
+              ]
+            ],
+            "span_width": 100.4671931580092,
+            "target_rise": 64.0,
+            "union_width": 100.4671931580092
+          },
+          {
+            "interval_count": 1,
+            "merged_enemy_point_center_x_intervals": [
+              [
+                -68.58530056751022,
+                68.58530579632382
+              ]
+            ],
+            "span_width": 137.17060636383405,
+            "target_rise": 128.0,
+            "union_width": 137.17060636383405
+          },
+          {
+            "interval_count": 3,
+            "merged_enemy_point_center_x_intervals": [
+              [
+                -86.9370060696198,
+                -55.173226943037605
+              ],
+              [
+                -47.35681327450287,
+                47.35682027600198
+              ],
+              [
+                55.17323272225265,
+                86.93701350003911
+              ]
+            ],
+            "span_width": 173.8740195696589,
+            "target_rise": 192.0,
+            "union_width": 158.2411934548735
+          }
+        ],
+        "empty_pool_timer_cycle": {
+          "callback_rng_u16_calls": 0,
+          "emissions": 20,
+          "emissions_by_cadence": [
+            7,
+            0,
+            0,
+            0,
+            0,
+            3,
+            0,
+            0,
+            0,
+            0,
+            3,
+            0,
+            0,
+            0,
+            0,
+            7,
+            0,
+            0,
+            0,
+            0
+          ],
+          "nominal_base_damage": 492,
+          "nominal_base_damage_by_cadence": [
+            162,
+            0,
+            0,
+            0,
+            0,
+            84,
+            0,
+            0,
+            0,
+            0,
+            84,
+            0,
+            0,
+            0,
+            0,
+            162,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        "level": 4,
+        "record_count": 7
+      }
+    },
+    {
+      "comparison": [
+        {
+          "target_rise": 64.0,
+          "unfocused_minus_focused_outer_envelope": -6.908005616991176,
+          "union_width_relation": "focused_outer_envelope_wider"
+        },
+        {
+          "target_rise": 128.0,
+          "unfocused_minus_focused_outer_envelope": 21.405844114354267,
+          "union_width_relation": "unfocused_primary_wider"
+        },
+        {
+          "target_rise": 192.0,
+          "unfocused_minus_focused_outer_envelope": 34.08686773091431,
+          "union_width_relation": "unfocused_primary_wider"
+        }
+      ],
+      "focused_secondary": {
+        "coverage": [
+          {
+            "interval_count": 1,
+            "merged_enemy_point_center_x_intervals": [
+              [
+                -53.687599387500185,
+                53.687599387500185
+              ]
+            ],
+            "span_width": 107.37519877500037,
+            "target_rise": 64.0,
+            "union_width": 107.37519877500037
+          },
+          {
+            "interval_count": 1,
+            "merged_enemy_point_center_x_intervals": [
+              [
+                -57.882381124739894,
+                57.882381124739894
+              ]
+            ],
+            "span_width": 115.76476224947979,
+            "target_rise": 128.0,
+            "union_width": 115.76476224947979
+          },
+          {
+            "interval_count": 1,
+            "merged_enemy_point_center_x_intervals": [
+              [
+                -62.077162861979595,
+                62.077162861979595
+              ]
+            ],
+            "span_width": 124.15432572395919,
+            "target_rise": 192.0,
+            "union_width": 124.15432572395919
+          }
+        ],
+        "empty_pool_timer_cycle": {
+          "callback_rng_u16_calls": 32,
+          "emissions": 30,
+          "emissions_by_cadence": [
+            4,
+            0,
+            0,
+            4,
+            0,
+            2,
+            2,
+            0,
+            2,
+            2,
+            2,
+            0,
+            2,
+            2,
+            0,
+            4,
+            0,
+            0,
+            4,
+            0
+          ],
+          "nominal_base_damage": 616,
+          "nominal_base_damage_by_cadence": [
+            82,
+            0,
+            0,
+            82,
+            0,
+            42,
+            40,
+            0,
+            42,
+            40,
+            42,
+            0,
+            40,
+            42,
+            0,
+            82,
+            0,
+            0,
+            82,
+            0
+          ]
+        },
+        "level": 5,
+        "record_count": 6
+      },
+      "power_interval": {
+        "lower_inclusive": 128,
+        "upper_exclusive": 999
+      },
+      "unfocused_primary": {
+        "coverage": [
+          {
+            "interval_count": 1,
+            "merged_enemy_point_center_x_intervals": [
+              [
+                -50.23359506540066,
+                50.23359809260853
+              ]
+            ],
+            "span_width": 100.4671931580092,
+            "target_rise": 64.0,
+            "union_width": 100.4671931580092
+          },
+          {
+            "interval_count": 1,
+            "merged_enemy_point_center_x_intervals": [
+              [
+                -68.58530056751022,
+                68.58530579632382
+              ]
+            ],
+            "span_width": 137.17060636383405,
+            "target_rise": 128.0,
+            "union_width": 137.17060636383405
+          },
+          {
+            "interval_count": 3,
+            "merged_enemy_point_center_x_intervals": [
+              [
+                -86.9370060696198,
+                -55.173226943037605
+              ],
+              [
+                -47.35681327450287,
+                47.35682027600198
+              ],
+              [
+                55.17323272225265,
+                86.93701350003911
+              ]
+            ],
+            "span_width": 173.8740195696589,
+            "target_rise": 192.0,
+            "union_width": 158.2411934548735
+          }
+        ],
+        "empty_pool_timer_cycle": {
+          "callback_rng_u16_calls": 0,
+          "emissions": 24,
+          "emissions_by_cadence": [
+            7,
+            0,
+            0,
+            0,
+            0,
+            5,
+            0,
+            0,
+            0,
+            0,
+            7,
+            0,
+            0,
+            0,
+            0,
+            5,
+            0,
+            0,
+            0,
+            0
+          ],
+          "nominal_base_damage": 572,
+          "nominal_base_damage_by_cadence": [
+            156,
+            0,
+            0,
+            0,
+            0,
+            130,
+            0,
+            0,
+            0,
+            0,
+            156,
+            0,
+            0,
+            0,
+            0,
+            130,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        "level": 5,
+        "record_count": 7
+      }
+    }
+  ],
+  "promotion": {
+    "combat_fast_01_status": "static_action_conditioned_foundation",
+    "live_focus_ranking_enabled": false,
+    "next_gate": "join immutable native roots to enemy generation, HP delta, shot timer/pool, target motion, and exact viable actions"
+  },
+  "schema": "th08-route2-normal-shot-coverage-atlas-v1"
+}

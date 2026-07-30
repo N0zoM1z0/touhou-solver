@@ -7,6 +7,16 @@ import struct
 from dataclasses import asdict, dataclass
 from typing import Protocol
 
+from th08_enemy_damage_model import (
+    ENEMY_ACTIVE_FLAG,
+    ENEMY_DAMAGE_BLOCKING_FLAGS,
+    ENEMY_FLAGS2_UPDATE_BLOCKED,
+    ENEMY_HP_SUBTRACTION_FLAG,
+    ENEMY_PLAYER_SHOT_DAMAGE_FLAG,
+    EnemyPlayerShotDamageContext,
+    EnemyPlayerShotDamageGate,
+    evaluate_enemy_player_shot_damage_gate,
+)
 from touhou_control.phase_progress import PhaseProgressState
 
 
@@ -28,12 +38,8 @@ ENEMY_HEALTH_THRESHOLDS_OFFSET = 0x3358
 ENEMY_TIMEOUT_FRAME_OFFSET = 0x3378
 ENEMY_CONTROL_WINDOW_SIZE = 0x58
 
-ENEMY_ACTIVE_FLAG = 0x00000001
 # ECL opcode 0x53 writes bit index 2: the concrete mask is 1 << 2.
 ENEMY_BOSS_FLAG2 = 0x00000004
-ENEMY_PLAYER_SHOT_DAMAGE_FLAG = 0x00000040
-ENEMY_DAMAGE_BLOCKING_FLAGS = 0x00000830
-ENEMY_FLAGS2_UPDATE_BLOCKED = 0x00000080
 
 
 class MemoryReader(Protocol):
@@ -87,7 +93,16 @@ class BossPhaseSnapshot:
         *,
         context: object | None = None,
         bomb_active: bool = False,
+        player_transition_state: int = 0,
+        spell_active: bool = False,
+        active_spell_owner: bool = False,
     ) -> PhaseProgressState:
+        damage_gate = self.player_shot_damage_gate(
+            bomb_active=bomb_active,
+            player_transition_state=player_transition_state,
+            spell_active=spell_active,
+            active_spell_owner=active_spell_owner,
+        )
         return PhaseProgressState(
             key=(
                 context,
@@ -102,12 +117,31 @@ class BossPhaseSnapshot:
             phase_end_health=self.phase_end_health,
             elapsed_frames=self.elapsed_frames,
             timeout_frames=self.timeout_frame,
-            damageable=(
-                self.native_damage_gate_open
-                and not bomb_active
-                and self.stable
-            ),
+            damageable=damage_gate.hp_subtraction_open and self.stable,
             stable=self.stable,
+        )
+
+    def player_shot_damage_gate(
+        self,
+        *,
+        bomb_active: bool,
+        player_transition_state: int,
+        spell_active: bool = False,
+        active_spell_owner: bool = False,
+        damage_tick_due: bool = True,
+    ) -> EnemyPlayerShotDamageGate:
+        """Evaluate native manager gates for this captured boss state."""
+
+        return evaluate_enemy_player_shot_damage_gate(
+            EnemyPlayerShotDamageContext(
+                flags=self.flags,
+                flags2=self.flags2,
+                bomb_active=bomb_active,
+                player_transition_state=player_transition_state,
+                damage_tick_due=damage_tick_due,
+                spell_active=spell_active,
+                active_spell_owner=active_spell_owner,
+            )
         )
 
 
@@ -182,7 +216,9 @@ def _decode_snapshot(
         flags=flags,
         flags2=flags2,
         native_damage_gate_open=bool(
-            flags & ENEMY_PLAYER_SHOT_DAMAGE_FLAG
+            flags & ENEMY_ACTIVE_FLAG
+            and flags & ENEMY_HP_SUBTRACTION_FLAG
+            and flags & ENEMY_PLAYER_SHOT_DAMAGE_FLAG
             and not flags & ENEMY_DAMAGE_BLOCKING_FLAGS
             and not flags2 & ENEMY_FLAGS2_UPDATE_BLOCKED
         ),

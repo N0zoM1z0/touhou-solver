@@ -1728,13 +1728,15 @@ first.
   still reduce dangerous exposure. Normal-route Power collection begins with
   Stage 1 at Power 0 and may help only inside viability; post-death recovery
   is a separate diagnostic.
-- **Unfocused-width hypothesis:** when no precise micro-dodge is required and
-  hard survival margin is unchanged, releasing Focus/Shift may use Sakuya's
-  wider unfocused shot coverage to remove distributed nonspell enemies
-  earlier. Re-enter focused control before dense geometry or margin loss.
-  First verify native team/shot state, target coverage, damage/kill timing,
-  and survival-equivalent eligibility; do not encode this as an unconditional
-  focus toggle.
+- **Target-specific Focus hypothesis:** when no precise micro-dodge is
+  required and hard survival margin is unchanged, a profile switch may improve
+  target-specific damage opportunity. The shipped static atlas rejects the
+  coarse assumption that releasing Focus/Shift is generally wider: focused
+  callback-7/option outer support is wider in 14/18 Power-height rows, while
+  unfocused scalar support is wider in 4/18. Re-enter focused control before
+  dense geometry or margin loss. First verify native team/shot state, target
+  coverage, damage/kill timing, and survival-equivalent eligibility; do not
+  encode either Focus direction as an unconditional toggle.
 - **Observed semantic foundation (2026-07-31):** native Focus-logic profile
   selection, Power thresholds, shot cadence identity, 128-slot
   capacity/record order, and normal callback-7 RNG consumption are now
@@ -1743,6 +1745,15 @@ first.
   prefix is compatible with a focused option-shot pair but is not unique
   causal proof because its v3 capsule omitted those fields. This changes no
   S18 status or live ranking authority.
+- **Observed damageability/coverage foundation (2026-07-31):** the native
+  manager-to-HP path is now executable as four separate gates: manager update,
+  damage block, shot collision, and HP subtraction. This corrects the boss
+  progress projection's missing flags-bit-`0x08` and player-transition gates
+  and its blanket no-Bomb approximation. The static atlas spans all six normal
+  Power partitions at three target heights. Its fixed callback-0 paths are
+  scalar projections; focused callback-7/option geometry is an optimistic
+  continuous outer envelope. Nominal SHT damage and width are non-monotone in
+  Focus/Power, so an immutable target/state join is required before ranking.
 - **Observed end-semantics limit (2026-07-31):** the immutable accepted
   Stage-5 trace yields 1,823 observation-presence episodes. All 1,789 ended
   episodes were last seen with positive HP and defeat mode 0; 17 were
@@ -1815,10 +1826,12 @@ first.
   `notes/research/stage5_combat/STAGE5_ENEMY_PRESENCE_EPISODE_AUDIT_CONTRACT_20260731.md`, and
   `notes/research/stage5_combat/ROUTE2_ENEMY_END_SEMANTICS_CONTRACT_20260731.md`, and
   `notes/research/stage5_combat/ORDINARY_ENEMY_LIFECYCLE_EVENT_RING_CONTRACT_20260731.md`, and
+  `notes/research/stage5_combat/ROUTE2_DAMAGEABILITY_AND_STATIC_SHOT_COVERAGE_CONTRACT_20260731.md`, and
   `notes/research/route_resources/POWER0_CLEAN_PREFIX_AUDIT_CONTRACT_20260731.md`.
   The raw first-64 inventory now has physical trace-only observation
   authority. The Power-0 audit has first-hit-bounded route observation
   authority. The lifecycle ring has offline/synthetic implementation
+  authority only. The damageability/coverage atlas has offline semantic/static
   authority only. Runtime generation/end tracking, exposure causality, causal
   collection, targeting, and S18 live action authority remain none.
 

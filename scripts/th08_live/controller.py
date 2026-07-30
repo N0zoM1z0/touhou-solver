@@ -2995,6 +2995,15 @@ def _run_live_session(
                         bomb_active=bool(
                             state["player"]["bomb_active"]
                         ),
+                        player_transition_state=int(
+                            state["player"]["phase"]
+                        ),
+                        spell_active=bool(state["spell"]["active"]),
+                        active_spell_owner=bool(
+                            state["spell"]["active"]
+                            and int(state["spell"]["enemy_pointer"])
+                            == boss_phase_snapshot.pointer
+                        ),
                     )
                     if boss_phase_snapshot is not None
                     else None

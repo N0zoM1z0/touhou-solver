@@ -40,7 +40,7 @@ PIERCING_SHOT_TYPES = frozenset((4, 5, 6))
 
 
 class UnsupportedPlayerShotCallback(ValueError):
-    """Raised when an SHT emission callback lacks executable semantics."""
+    """Raised when an SHT callback/collision branch lacks semantics."""
 
 
 @dataclass(frozen=True)
@@ -56,6 +56,8 @@ class PlayerShot:
     shot_type: int
     source_index: int
     record_offset: int
+    update_callback_index: int = 0
+    hit_callback_index: int = 0
     state: int = 1
     active: bool = True
 
@@ -209,6 +211,8 @@ def spawn_player_shot(
         shot_type=record.shot_type,
         source_index=record.source_index,
         record_offset=record.offset,
+        update_callback_index=record.callback_1_index,
+        hit_callback_index=record.callback_3_index,
     )
 
 
@@ -301,6 +305,11 @@ def step_player_shot(shot: PlayerShot, *, time_scale: float = 1.0) -> PlayerShot
         raise ValueError("time scale must be finite and non-negative")
     if not shot.active:
         return shot
+    if shot.update_callback_index:
+        raise UnsupportedPlayerShotCallback(
+            "player-shot update callback "
+            f"{shot.update_callback_index} lacks executable semantics"
+        )
     return replace(
         shot,
         x=shot.x + shot.velocity_x * time_scale,
@@ -315,14 +324,29 @@ def player_shot_overlaps_enemy(
     enemy_y: float,
     enemy_width: float,
     enemy_height: float,
+    type45_collision_suppressed: bool | None = None,
 ) -> bool:
-    """Use the inclusive center/size AABB test at 0x00451740."""
+    """Use the native pre-gates and inclusive center/size AABB test.
 
-    if not shot.active or shot.state != 1:
+    Active state-1 shots are eligible, as are active type-3 shots in any
+    state. Types 4 and 5 additionally depend on the native mode-2 predicate;
+    callers must supply it for those types. A nonzero hit callback is invoked
+    only after geometric overlap and can veto the hit, so unsupported
+    callbacks fail closed at that point.
+    """
+
+    if not shot.active or (shot.state != 1 and shot.shot_type != 3):
         return False
     if enemy_width < 0.0 or enemy_height < 0.0:
         raise ValueError("enemy dimensions cannot be negative")
-    return (
+    if shot.shot_type in (4, 5):
+        if type45_collision_suppressed is None:
+            raise UnsupportedPlayerShotCallback(
+                "shot types 4/5 require the native mode-2 collision predicate"
+            )
+        if type45_collision_suppressed:
+            return False
+    overlaps = (
         shot.x + shot.hitbox_width / 2.0
         >= enemy_x - enemy_width / 2.0
         and shot.x - shot.hitbox_width / 2.0
@@ -332,6 +356,12 @@ def player_shot_overlaps_enemy(
         and shot.y - shot.hitbox_height / 2.0
         <= enemy_y + enemy_height / 2.0
     )
+    if overlaps and shot.hit_callback_index:
+        raise UnsupportedPlayerShotCallback(
+            "player-shot hit callback "
+            f"{shot.hit_callback_index} lacks executable semantics"
+        )
+    return overlaps
 
 
 def shot_damage_contribution(base_damage: int, *, bomb_active: bool) -> int:
@@ -352,6 +382,7 @@ def resolve_default_shot_damage(
     enemy_width: float,
     enemy_height: float,
     bomb_active: bool,
+    type45_collision_suppressed: bool | None = None,
 ) -> tuple[tuple[PlayerShot, ...], int]:
     """Resolve one enemy collision pass and the shared 50-damage shot cap.
 
@@ -369,6 +400,7 @@ def resolve_default_shot_damage(
             enemy_y=enemy_y,
             enemy_width=enemy_width,
             enemy_height=enemy_height,
+            type45_collision_suppressed=type45_collision_suppressed,
         ):
             updated.append(shot)
             continue
@@ -380,8 +412,16 @@ def resolve_default_shot_damage(
                 replace(
                     shot,
                     state=2,
-                    velocity_x=shot.velocity_x / 8.0,
-                    velocity_y=shot.velocity_y / 8.0,
+                    velocity_x=(
+                        shot.velocity_x
+                        if shot.shot_type == 3
+                        else shot.velocity_x / 8.0
+                    ),
+                    velocity_y=(
+                        shot.velocity_y
+                        if shot.shot_type == 3
+                        else shot.velocity_y / 8.0
+                    ),
                 )
             )
     return tuple(updated), min(total, PLAYER_SHOT_FRAME_DAMAGE_CAP)

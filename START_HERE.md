@@ -21,11 +21,12 @@ historical handoff.
   (`Build causal native snapshot policy search`).
 - The WS-H route-2 Focus/Shot foundation, Stage-5 presence-episode audit,
   first-hit-bounded natural Power-0 audit, forced-HP-zero/end-semantics
-  correction, default-off native lifecycle event ring, `CONTENT-01` shipped
-  content manifest, and `CONTENT-02` static mandatory-event atlas are the
-  current repository checkpoint; no new physical trial was run.
-- Complete Linux discovery passes 1,414 tests in 13.197 seconds.
-- Complete Windows UNC discovery passes 1,414 tests in 28.768 seconds with
+  correction, default-off native lifecycle event ring, native damageability/
+  HP gate, action-conditioned static shot atlas, `CONTENT-01` shipped content
+  manifest, and `CONTENT-02` static mandatory-event atlas are the current
+  repository checkpoint; no new physical trial was run.
+- Complete Linux discovery passes 1,430 tests in 13.398 seconds.
+- Complete Windows UNC discovery passes 1,430 tests in 28.178 seconds with
   the three existing skips.
 - No TH08, controller, supervisor, native-replay runner, or Windows test
   process is intentionally left running.
@@ -85,6 +86,27 @@ historical handoff.
 - Detailed lifecycle-ring contract:
   `notes/research/stage5_combat/ORDINARY_ENEMY_LIFECYCLE_EVENT_RING_CONTRACT_20260731.md`.
   The old active-only observer must not be repeated.
+- `COMBAT-FAST-01` now has an executable native-ordered player-shot damage
+  gate. It separates full manager update, damage block, shot collision, and
+  the distinct flags-bit-`0x08` HP subtraction. Boss progress now includes
+  player transition, Bomb, spell-active, and active-spell-owner state instead
+  of treating flags bit `0x40` plus blanket no-Bomb as damageability.
+- The shipped Route-2 normal-shot static atlas rejects the general
+  “unfocused is wider” rule. Across six Power partitions and target rises
+  64/128/192, focused option outer support is wider in 14/18 comparisons and
+  unfocused scalar support in 4/18. Focused geometry is an optimistic
+  continuous callback-7/orbit envelope, so neither direction is live policy
+  authority.
+- Empty-pool nominal 20-tick damage also changes non-monotonically by profile:
+  unfocused exceeds focused only at Power 80..127; focused is higher in the
+  other five partitions. These are raw SHT opportunities, not delivered HP
+  damage.
+- Retained atlas:
+  `artifacts/runtime_reports/th08_route2_normal_shot_coverage_atlas_20260731.json`,
+  SHA-256
+  `2d62726829fd18a3f0df94f1f37862cdbd5a4e02eb7d3834269548bea97f73f4`.
+  Detailed boundary:
+  `notes/research/stage5_combat/ROUTE2_DAMAGEABILITY_AND_STATIC_SHOT_COVERAGE_CONTRACT_20260731.md`.
 - `POWER-ROUTE-01` now has a deterministic audit of two accepted natural
   Route-2/Lunatic Game Start prefixes, strictly before each first native hit.
   The prefixes observe `Power 0 -> 5` over 789 decisions and `Power 0 -> 0`
@@ -384,9 +406,12 @@ historical handoff.
   default-off trace bracketed by full-pool snapshots, proving exact ordered
   allocation/retirement/forced-zero agreement without changing sensing or
   actions. Until that authorization exists, continue the offline WS-H
-  foundations: damageability/HP attribution, shot coverage, drop/Power
-  thresholds, and source-lifetime-to-emission linkage. Do not infer events
-  across ring overflow or install the probe as a live issue-time consumer.
+  foundations. Damageability and static shot coverage are now retained; the
+  next causal combat gate must join an immutable root to enemy generation,
+  HP delta, shot/option/RNG state, target motion, and viable actions.
+  Drop/Power thresholds and source-lifetime-to-emission linkage remain open.
+  Do not infer events across ring overflow or install the probe as a live
+  issue-time consumer.
 - A supervised warm wind-tunnel service remains deferred. If later branch
   throughput becomes the bottleneck, it must preserve a single writer,
   immutable session/root IDs, branch-level root/FX/stack/thread/map checks,

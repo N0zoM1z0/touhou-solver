@@ -292,6 +292,8 @@ class PlayerShotModelTests(unittest.TestCase):
         self.assertEqual((player_shot.x, player_shot.y), (100.0, 200.0))
         self.assertAlmostEqual(player_shot.velocity_x, -math.sqrt(200.0), places=5)
         self.assertAlmostEqual(player_shot.velocity_y, -math.sqrt(200.0), places=5)
+        self.assertEqual(player_shot.update_callback_index, 0)
+        self.assertEqual(player_shot.hit_callback_index, 0)
 
     def test_motion_and_inclusive_aabb_boundary(self) -> None:
         shot = spawn_player_shot(
@@ -331,6 +333,86 @@ class PlayerShotModelTests(unittest.TestCase):
         )
         self.assertEqual(damage, 50)
         self.assertTrue(all(shot.state == 1 and shot.active for shot in updated))
+
+    def test_native_type3_state_and_type45_mode_gates(self) -> None:
+        base = spawn_player_shot(
+            self.normal.shots[8],
+            player_position=(0.0, 0.0),
+            option_positions=((0.0, 0.0),) * 4,
+        )
+        type3 = replace(
+            base,
+            shot_type=3,
+            state=2,
+            velocity_x=8.0,
+            velocity_y=-16.0,
+        )
+        self.assertTrue(
+            player_shot_overlaps_enemy(
+                type3,
+                enemy_x=0.0,
+                enemy_y=0.0,
+                enemy_width=2.0,
+                enemy_height=2.0,
+            )
+        )
+        updated, _damage = resolve_default_shot_damage(
+            (type3,),
+            enemy_x=0.0,
+            enemy_y=0.0,
+            enemy_width=2.0,
+            enemy_height=2.0,
+            bomb_active=False,
+        )
+        self.assertEqual(updated[0].state, 2)
+        self.assertEqual(updated[0].velocity_x, 8.0)
+        self.assertEqual(updated[0].velocity_y, -16.0)
+
+        type4 = replace(base, shot_type=4)
+        with self.assertRaisesRegex(
+            UnsupportedPlayerShotCallback,
+            "mode-2",
+        ):
+            player_shot_overlaps_enemy(
+                type4,
+                enemy_x=0.0,
+                enemy_y=0.0,
+                enemy_width=2.0,
+                enemy_height=2.0,
+            )
+        self.assertFalse(
+            player_shot_overlaps_enemy(
+                type4,
+                enemy_x=0.0,
+                enemy_y=0.0,
+                enemy_width=2.0,
+                enemy_height=2.0,
+                type45_collision_suppressed=True,
+            )
+        )
+
+    def test_unknown_update_and_hit_callbacks_fail_closed(self) -> None:
+        base = spawn_player_shot(
+            self.normal.shots[8],
+            player_position=(0.0, 0.0),
+            option_positions=((0.0, 0.0),) * 4,
+        )
+        with self.assertRaisesRegex(
+            UnsupportedPlayerShotCallback,
+            "update callback",
+        ):
+            step_player_shot(replace(base, update_callback_index=5))
+        with self.assertRaisesRegex(
+            UnsupportedPlayerShotCallback,
+            "hit callback",
+        ):
+            player_shot_overlaps_enemy(
+                replace(base, hit_callback_index=9),
+                enemy_x=0.0,
+                enemy_y=0.0,
+                enemy_width=2.0,
+                enemy_height=2.0,
+            )
 
 
 if __name__ == "__main__":

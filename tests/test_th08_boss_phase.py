@@ -17,11 +17,15 @@ from th08_boss_phase import (
     ENEMY_FRAME_DAMAGE_OFFSET,
     ENEMY_HEALTH_THRESHOLDS_OFFSET,
     ENEMY_HEALTH_WINDOW_SIZE,
+    ENEMY_HP_SUBTRACTION_FLAG,
     ENEMY_PHASE_TIMER_ELAPSED_OFFSET,
     ENEMY_PHASE_TIMER_FRACTION_OFFSET,
     ENEMY_PLAYER_SHOT_DAMAGE_FLAG,
     ENEMY_TIMEOUT_FRAME_OFFSET,
     capture_boss_phase_snapshot,
+)
+from th08_enemy_damage_model import (
+    ENEMY_PAUSE_DURING_BOMB_OR_TRANSITION_FLAG,
 )
 
 
@@ -47,7 +51,11 @@ class Reader:
             "<II",
             self.control,
             0,
-            ENEMY_ACTIVE_FLAG | ENEMY_PLAYER_SHOT_DAMAGE_FLAG,
+            (
+                ENEMY_ACTIVE_FLAG
+                | ENEMY_HP_SUBTRACTION_FLAG
+                | ENEMY_PLAYER_SHOT_DAMAGE_FLAG
+            ),
             ENEMY_BOSS_FLAG2,
         )
         struct.pack_into(
@@ -102,6 +110,33 @@ class BossPhaseTests(unittest.TestCase):
         self.assertEqual(snapshot.elapsed_frames, 125.5)
         self.assertEqual(snapshot.frame_damage, 12)
         self.assertTrue(snapshot.native_damage_gate_open)
+        self.assertTrue(
+            snapshot.as_progress_state(
+                player_transition_state=0,
+            ).damageable
+        )
+
+    def test_progress_damage_gate_includes_player_transition_state(self) -> None:
+        reader = Reader(0x57D2F0)
+        flags = struct.unpack_from("<I", reader.control, 0)[0]
+        struct.pack_into(
+            "<I",
+            reader.control,
+            0,
+            flags | ENEMY_PAUSE_DURING_BOMB_OR_TRANSITION_FLAG,
+        )
+        snapshot = capture_boss_phase_snapshot(reader)
+        self.assertIsNotNone(snapshot)
+        self.assertTrue(
+            snapshot.as_progress_state(
+                player_transition_state=0,
+            ).damageable
+        )
+        self.assertFalse(
+            snapshot.as_progress_state(
+                player_transition_state=3,
+            ).damageable
+        )
 
 
 if __name__ == "__main__":

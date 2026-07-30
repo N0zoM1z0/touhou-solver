@@ -704,6 +704,24 @@ probe failure. Eighty-six focused tests pass; complete Linux/Windows
 discovery passes 1,226 tests in 14.104/30.564 seconds, with the three existing
 Windows skips.
 
+**2026-07-30 CE-0194 physical preflight correction:** probe-only attempt
+`082428` installed and cleaned the hook correctly but stopped at gameplay
+frame 1 with `time_scale_authority_unknown`, before any decision. It also
+exposed a trace bug: an early pre-issue exit could advance the local probe
+cursor without retaining the captured event.
+
+The priority-17 observer may now explicitly pair with the existing
+`--diagnostic-continue-root-only-scale` whole-stage continuation. That proxy
+remains unknown-direction and grants no survival or scale authority; it is
+necessary only to prevent the diagnostic from fail-closing at frame 1. Probe
+batch reads now occur after every pre-issue early exit, and their serial cursor
+is committed only after the containing decision row is flushed. The corrected
+physical gate must use both flags, finish the whole stage, and retain
+baseline-to-final serial coverage or explicit unknown intervals. CE-0194 is
+not a survival sample. Focused tests pass; complete Linux/Windows discovery
+passes 1,226 tests in 14.851/30.813 seconds, with three existing Windows
+skips.
+
 The amendment and CE-0183/0184 override the numbered historical backlog
 below until the semantic correction/model-version gate is complete. Those
 rows retain evidence/status history; they are not permission to resume G5

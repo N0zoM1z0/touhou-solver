@@ -162,11 +162,15 @@ def build_long_run_arguments(
         )
     if (
         diagnostic_continue_root_only_scale
-        and not trace_enemy_mode_transitions
+        and not (
+            trace_enemy_mode_transitions
+            or trace_priority17_publications
+        )
     ):
         raise ValueError(
             "diagnostic root-only scale continuation is scoped to the "
-            "whole-stage enemy-mode observer"
+            "whole-stage enemy-mode observer or priority-17 publication "
+            "observer"
         )
     if trace_auxiliary_ecl_events and not trace_auxiliary_vm_batches:
         raise ValueError(

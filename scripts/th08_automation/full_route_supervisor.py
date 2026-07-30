@@ -757,11 +757,15 @@ def main(argv: list[str] | None = None) -> int:
         )
     if (
         args.diagnostic_continue_root_only_scale
-        and not args.trace_enemy_mode_transitions
+        and not (
+            args.trace_enemy_mode_transitions
+            or args.trace_priority17_publications
+        )
     ):
         raise ValueError(
             "diagnostic root-only scale continuation is scoped to the "
-            "whole-route enemy-mode observer"
+            "whole-route enemy-mode observer or priority-17 publication "
+            "observer"
         )
     if (
         args.diagnostic_continue_root_only_scale

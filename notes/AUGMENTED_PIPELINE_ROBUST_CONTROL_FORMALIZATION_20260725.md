@@ -364,7 +364,9 @@ Passing claim 1 does not establish claims 2--4.
   overflow, unstable reads, and read errors mark intervals unknown without
   changing the action. Installation/cleanup suspend all target threads and
   verify no instruction pointer can consume the trampoline or remote stub
-  before restoring/freeing executable memory.
+  before restoring/freeing executable memory. A batch cursor advances only
+  after the decision row containing that batch is flushed; pre-issue early
+  exits cannot consume unpublished ring evidence.
 - `th08_priority17_publication_report.py` accepts a negative publication
   claim only when every serial in the interval is retained. It separately
   counts native callback exits during a dispatch, intermediate ordered masks,

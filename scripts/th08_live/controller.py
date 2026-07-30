@@ -2698,19 +2698,6 @@ def _run_live_session(
             priority17_publication_batch: (
                 Priority17PublicationBatch | None
             ) = None
-            if priority17_probe is not None:
-                priority17_publication_batch = (
-                    priority17_probe.read_since(
-                        priority17_probe_last_serial
-                    )
-                )
-                if (
-                    priority17_publication_batch.observed_serial
-                    is not None
-                ):
-                    priority17_probe_last_serial = (
-                        priority17_publication_batch.observed_serial
-                    )
             if state["route_id"] != 2:
                 termination_reason = "gameplay_ended"
                 break
@@ -4207,6 +4194,15 @@ def _run_live_session(
                 candidate_publication_ms = (
                     time.perf_counter() - candidate_publication_started
                 ) * 1000.0
+            # Read only after every pre-issue early exit. Commit the observed
+            # serial after the decision row is flushed so an exception cannot
+            # consume ring evidence without retaining it.
+            if priority17_probe is not None:
+                priority17_publication_batch = (
+                    priority17_probe.read_since(
+                        priority17_probe_last_serial
+                    )
+                )
             physical_issue = commit_physical_issue(
                 PhysicalIssueRequest(
                     capture=captured_iteration,
@@ -4861,6 +4857,13 @@ def _run_live_session(
                     record,
                     flush=True,
                     measure=True,
+                )
+            if (
+                priority17_publication_batch is not None
+                and priority17_publication_batch.observed_serial is not None
+            ):
+                priority17_probe_last_serial = (
+                    priority17_publication_batch.observed_serial
                 )
             if previous_counter is not None:
                 decision_delta = counter_at_action - previous_counter

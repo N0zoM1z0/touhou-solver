@@ -245,6 +245,26 @@ class AgentHotkeyTests(unittest.TestCase):
         self.assertEqual(parsed.stop_after_hits, 0)
         self.assertTrue(parsed.no_bomb)
 
+        publication_arguments = build_long_run_arguments(
+            output=Path("trial.jsonl"),
+            stop_file=Path("trial.stop"),
+            pid=1234,
+            difficulty=3,
+            trace_priority17_publications=True,
+            diagnostic_continue_root_only_scale=True,
+        )
+        publication_parsed = build_parser().parse_args(
+            publication_arguments
+        )
+        self.assertTrue(
+            publication_parsed.trace_priority17_publications
+        )
+        self.assertTrue(
+            publication_parsed.diagnostic_continue_root_only_scale
+        )
+        self.assertEqual(publication_parsed.stop_after_hits, 0)
+        self.assertTrue(publication_parsed.no_bomb)
+
         with self.assertRaisesRegex(ValueError, "enemy-mode observer"):
             build_long_run_arguments(
                 output=Path("trial.jsonl"),

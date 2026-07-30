@@ -1128,11 +1128,25 @@ identity, final-drain phase, hard no-Bomb, cleanup, and route completion.
 Practice/full-route supervisors retain it automatically under the explicit
 diagnostic flag. This checkpoint has implementation/preflight authority
 only. Next run exactly one complete original-game Lunatic Stage-5 workload
-with the probe enabled, no hit stop, and no Bomb; retain the full stage even
-if the probe becomes unavailable. Do not use THPRAC, named-spell activation,
-or manager-frame inference. Eighty-six focused tests pass; complete
+with the probe enabled, explicit diagnostic constant-root scale continuation,
+no hit stop, and no Bomb; retain the full stage even if the probe becomes
+unavailable. The scale proxy is unknown-direction and supplies no survival
+authority. Do not use THPRAC, named-spell activation, or manager-frame
+inference. Eighty-six focused tests pass; complete
 Linux/Windows discovery passes 1,226 tests in 14.104/30.564 seconds, with
 three existing Windows skips.
+
+The first physical preflight `082428` is CE-0194, not a stage result. It
+installed the hook and reached gameplay frame 1, then the root-only scale
+authority check terminated before any decision. It also proved that reading
+the ring before later pre-issue exits could advance a local cursor without
+retaining the batch. The correction allows the explicit root-scale
+continuation under the priority-17 observer, moves the read after all
+pre-issue exits, and commits its serial only after the decision record is
+flushed. Repeat the same whole-stage unit with both flags; do not count
+CE-0194 as physical survival evidence. Complete Linux/Windows discovery after
+the correction passes 1,226 tests in 14.851/30.813 seconds, with three
+existing Windows skips.
 
 ### Phase 2 — Repair collision geometry and lifecycle
 

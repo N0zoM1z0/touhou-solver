@@ -95,8 +95,8 @@ describe the same decision. Python/C++ parity is not physical correctness.
 ### Exact state
 
 - Branch: `main`.
-- Latest retained research checkpoint: `229ab86`
-  (`Implement asynchronous ordered-input parity`).
+- Latest retained research checkpoint: `fc7c021`
+  (`Add immutable future body schedule boundary`).
 - Latest pre-trial repository/live code checkpoint: `b2e1eff`
   (`Fix priority-17 physical preflight`).
 - The code at `3f0e56f` was physically exercised by the whole Stage-6B C5-2
@@ -377,12 +377,12 @@ Focused, strict-compiler, and Linux sanitizer gates pass. Complete
 Linux/Windows discovery passes 1,247/1,247 in 14.990/30.874 seconds, with
 three existing Windows skips.
 
-The next finite SEM-MODE-C boundary is now implemented offline. An immutable
-schedule set binds root physical update, exact clock identity, source SHA,
-equal-horizon hidden branches, sorted body identities, mode-independent
-flags, and canonical binary32 geometry into one digest. The asynchronous
-composition carries that digest through every branch and forces the exact
-projected body flags/geometry visible at the next decision into its
+Checkpoint `fc7c021` implements the next finite SEM-MODE-C boundary offline.
+An immutable schedule set binds root physical update, exact clock identity,
+source SHA, equal-horizon hidden branches, sorted body identities,
+mode-independent flags, and canonical binary32 geometry into one digest. The
+asynchronous composition carries that digest through every branch and forces
+the exact projected body flags/geometry visible at the next decision into its
 observation key. Thus different observed geometry cannot be merged by an
 incomplete caller observation, while hidden histories that converge before
 the next observation still merge non-clairvoyantly.

@@ -23,16 +23,17 @@ historical handoff.
   first-hit-bounded natural Power-0 audit, forced-HP-zero/end-semantics
   correction, default-off native lifecycle event ring, native damageability/
   HP gate, action-conditioned static shot atlas, corrected item-pool
-  recurrence/static Power ledger, exact bounded Boss HP/timeout transition
-  prefix and five-successor stable capture, route-wide static Boss
+  recurrence/static Power ledger, executable enemy defeat-drop recurrence and
+  route-wide item/drop opportunity atlas, exact bounded Boss HP/timeout
+  transition prefix and five-successor stable capture, route-wide static Boss
   phase-configuration atlas, route-wide static source/emission candidate
   atlas, exact lifecycle ring diagnostic transport and fail-closed
   generation/end lowerer,
   `CONTENT-01` shipped content manifest, and `CONTENT-02` static
   mandatory-event atlas are the current repository checkpoint; no new
   physical trial was run.
-- Complete Linux discovery passes 1,471 tests in 14.568 seconds.
-- Complete Windows UNC discovery passes 1,471 tests in 30.340 seconds with
+- Complete Linux discovery passes 1,484 tests in 14.807 seconds.
+- Complete Windows UNC discovery passes 1,484 tests in 30.415 seconds with
   the three existing skips.
 - No TH08, controller, supervisor, native-replay runner, or Windows test
   process is intentionally left running.
@@ -158,6 +159,29 @@ historical handoff.
   `06a12eb6f2de97823286613322f6da9fbeac7abec490099ee3298bc6acf1dcf9`.
   Detailed boundary:
   `notes/research/route_resources/POWER_PICKUP_CAPABILITY_LEDGER_CONTRACT_20260731.md`.
+- `POWER-ROUTE-01` and `COMBAT-KILL-01` now share an executable native-ordered
+  enemy defeat-drop recurrence. Fresh revalidation shows that the zeroed enemy
+  template defaults to one primary type-0 small-Power request; modes 0..2 call
+  the helper, mode 3 bypasses it, extra Power/point counts follow the primary,
+  and only the primary becomes homing under Bomb-related damage. Direct ECL
+  `0x8E` differs: below full Power it requests one large then remaining small
+  Power items at independently randomized positions.
+- The pinned six-stage atlas retains 60 route-reachable literal item/drop
+  sites (`0x8D`: 3, `0x8E`: 8, `0x90`: 41, `0xA8`: 8), zero reachable
+  `0x8F` primary overrides, 151 allocation-origin programs, and 56
+  ordinary-compatible default-small-Power candidates. Every site maps to a
+  program root and all route CFGs have zero unresolved dynamic subroutine
+  edges.
+- This joins kill, Focus-conditioned homing, collection, Power thresholds,
+  and later shot capability into one experiment family, but remains a static
+  opportunity index. Runtime instruction execution, enemy end reason, item
+  allocation/pickup, safe collection, and later combat benefit are unobserved.
+  Retained atlas:
+  `artifacts/runtime_reports/th08_route2_item_drop_opportunity_atlas_20260731.json`,
+  SHA-256
+  `0692985c579a3040def4e635115a3399c0e4323a338d5f03427c4930821dc0b0`.
+  Detailed boundary:
+  `notes/research/route_resources/ROUTE2_ITEM_DROP_OPPORTUNITY_ATLAS_CONTRACT_20260731.md`.
 - CE-0221 corrects Boss progress after a same-update HP-threshold overshoot.
   Native checks HP/timeout transitions before player-shot damage, so a stable
   post-damage sample may sit below a retained threshold until the next
@@ -499,8 +523,10 @@ historical handoff.
   foundations. Damageability and static shot coverage are now retained; the
   next causal combat gate must join an immutable root to enemy generation,
   HP delta, shot/option/RNG state, target motion, and viable actions.
-  The drop/Power static ledger is now complete, but same-update physical item
-  identity, pickup attribution, and carried later benefit remain open.
+  The drop/Power static ledger, native defeat-drop recurrence, and route-wide
+  item/drop opportunity index are now complete for their declared boundaries,
+  but runtime instruction/end joins, same-update item allocation identity,
+  pickup attribution, and carried later benefit remain open.
   The bounded Boss HP/timeout transition model and five-successor capture
   schema are complete, but no runtime successor sample is retained; stable
   engine mode/ECL PC, causal action-to-HP delta, successor effects, and
@@ -585,6 +611,12 @@ historical handoff.
   retain the ordinary-source active gate, ECL-before-player-damage order,
   positive-HP staged-periodic gate, and persistence of already-live
   projectiles after mode-0 source retirement.
+- `0x00429E00` is now `enemy_manager_initialize_template_and_pool`, and
+  `0x0042BEA0` is now `enemy_spawn_configured_defeat_items`. Comments at
+  `0x00429E5C`, `0x0041D601`, `0x0041D24D`, `0x0041D18F`, `0x0041D1D3`,
+  `0x0041D380`, `0x0042BEBB`, and `0x0042D8EE` retain template defaults,
+  exact `0x8D/0x8E/0x8F/0x90/0xA8` item semantics, native request order,
+  count clearing, the every-third schedule, and no-Bomb primary free motion.
 
 ## Read In This Order
 

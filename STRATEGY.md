@@ -1851,6 +1851,18 @@ first.
   Power pickup to both Focus-conditioned SHT capability bands. This closes
   finite resource arithmetic, not physical pickup identity, safe collection,
   or later causal benefit.
+- **Native defeat-drop recurrence and route opportunity atlas (2026-07-31):**
+  shipped initialization gives ordinary enemy templates one primary small-
+  Power request by default. Modes 0..2 consume the configured primary,
+  extra-Power, and extra-point fields in that order; mode 3 bypasses the
+  helper. A tested recurrence retains primary-only Bomb-related homing,
+  full-Power conversion, the every-third global schedule, count clearing, and
+  exact RNG order. Across the six pinned Route-2 files, all 60 reachable
+  literal item/drop sites map to program roots, no reachable `0x8F` overrides
+  the primary, and 56 ordinary-compatible allocation programs retain the
+  default-small-Power candidate. This statically couples kill, Focus/homing,
+  pickup, Power threshold, and later combat, but grants no execution, end-
+  reason, allocation, pickup, survival benefit, ranking, or action authority.
 - **Boundary:** first revalidate native HP/damageability/end-reason/drop
   semantics, retain trace-only exposure and damage attribution, and separate
   kill, timeout, scripted despawn, and unknown. Any shadow target may rank
@@ -1892,13 +1904,15 @@ first.
   `notes/research/stage5_combat/ROUTE2_SOURCE_EMISSION_PROGRAM_ATLAS_CONTRACT_20260731.md`, and
   `notes/research/stage5_combat/ROUTE2_BOSS_PHASE_CONFIGURATION_ATLAS_CONTRACT_20260731.md`, and
   `notes/research/route_resources/POWER0_CLEAN_PREFIX_AUDIT_CONTRACT_20260731.md`, and
-  `notes/research/route_resources/POWER_PICKUP_CAPABILITY_LEDGER_CONTRACT_20260731.md`.
+  `notes/research/route_resources/POWER_PICKUP_CAPABILITY_LEDGER_CONTRACT_20260731.md`, and
+  `notes/research/route_resources/ROUTE2_ITEM_DROP_OPPORTUNITY_ATLAS_CONTRACT_20260731.md`.
   The raw first-64 inventory now has physical trace-only observation
   authority. The Power-0 audit has first-hit-bounded route observation
   authority. The lifecycle ring has offline/synthetic implementation
   authority only. The damageability/coverage atlas has offline semantic/static
   authority only. The source/emission atlas has shipped-content/static
-  candidate authority only. The Boss configuration atlas has
+  candidate authority only. The item/drop atlas has shipped-native
+  recurrence/static opportunity authority only. The Boss configuration atlas has
   shipped-content/native-static full-configuration-mode authority only.
   Runtime generation/end tracking, instruction execution, phase sequence,
   exposure causality, causal collection, targeting, and S18 live action

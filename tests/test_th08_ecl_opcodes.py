@@ -100,6 +100,13 @@ class Th08EclOpcodeTests(unittest.TestCase):
         self.assertEqual(opcode_spec(0xB4).confidence, "observed")
         self.assertEqual(opcode_spec(0xB5).confidence, "observed")
 
+    def test_item_configuration_and_spawn_handlers_are_observed(self) -> None:
+        for opcode in (0x8D, 0x8E, 0x8F, 0x90, 0xA8):
+            self.assertEqual(opcode_spec(opcode).confidence, "observed")
+        self.assertIn("+0x3304", opcode_spec(0x8F).description)
+        self.assertIn("+0x3308", opcode_spec(0x90).description)
+        self.assertIn("+0x330C", opcode_spec(0x90).description)
+
 
 if __name__ == "__main__":
     unittest.main()

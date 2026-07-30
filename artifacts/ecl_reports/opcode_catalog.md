@@ -146,10 +146,10 @@ Confidence values keep observed behavior separate from provisional naming and un
 | `0x8a` | `set_enemy_bytes` | enemy | unknown | 0 | - | Set three adjacent enemy state bytes at +0x3310..+0x3312. |
 | `0x8b` | `spawn_effect` | effect | inferred | 404 | 24 | Spawn one or more typed effect-manager objects at enemy position. |
 | `0x8c` | `spawn_effect_with_vector` | effect | inferred | 1093 | 36 | Spawn typed effect objects with an additional vector. |
-| `0x8d` | `spawn_item` | item | observed | 17 | 16 | Spawn one item of the supplied type at enemy position. |
-| `0x8e` | `spawn_item_bundle` | item | inferred | 22 | 16 | Spawn a randomized item bundle, with type depending on collection state. |
-| `0x8f` | `set_drop_type` | item | inferred | 0 | - | Set a single enemy drop-type field. |
-| `0x90` | `set_drop_counts` | item | inferred | 121 | 20 | Set two enemy drop-count/type fields consumed on death. |
+| `0x8d` | `spawn_item` | item | observed | 17 | 16 | Request one free-motion item of the supplied type at enemy position. |
+| `0x8e` | `spawn_item_bundle` | item | observed | 22 | 16 | Request a randomized +/-64 item bundle: one large then small Power below 128 Power, or all point items at full Power. |
+| `0x8f` | `set_drop_type` | item | observed | 0 | - | Set enemy primary defeat-item type at +0x3304. |
+| `0x90` | `set_drop_counts` | item | observed | 121 | 20 | Set enemy extra point-item count at +0x3308 and Power-item count at +0x330C. |
 | `0x91` | `enable_enemy_animation_script_refresh` | animation | observed | 107 | 16 | Assign the flag that reapplies saved ANM script IDs to the main enemy animation and trail nodes in the render callback; every shipped use enables it. |
 | `0x92` | `set_global_vm_value` | global | unknown | 0 | - | Pass an integer value to helper 0x41FDF0. |
 | `0x93` | `write_unreferenced_global_4ea290` | validation | observed | 41 | 16 | Assign global dword 0x004EA290. Static xrefs contain this writer and no direct reader, so it is excluded from solver state pending a runtime watchpoint. |
@@ -173,7 +173,7 @@ Confidence values keep observed behavior separate from provisional naming and un
 | `0xa5` | `set_enemy_z_rotation` | animation | inferred | 28 | 16 | Set enemy animation/object float at +0x14. |
 | `0xa6` | `set_vector_from_polar_alt` | math | observed | 0 | - | Write two float lvalues from angle and magnitude in alternate order. |
 | `0xa7` | `set_laser_angle` | laser | observed | 10 | 20 | Set selected laser angle without normalization. |
-| `0xa8` | `spawn_point_items` | item | inferred | 22 | 16 | Spawn randomized point-item instances around enemy position. |
+| `0xa8` | `spawn_point_items` | item | observed | 22 | 16 | Request the supplied count of free-motion point items at independently randomized +/-64 positions around the enemy. |
 | `0xa9` | `set_side_aware_angle` | math | inferred | 0 | - | Choose an angle based on enemy x and playfield side. |
 | `0xaa` | `set_laser_collision_flag` | laser | inferred | 0 | - | Set selected laser byte +0x599 used by collision/graze runtime. |
 | `0xab` | `set_laser_max_length` | laser | observed | 0 | - | Set selected laser maximum length. |

@@ -3703,7 +3703,7 @@
     "category": "item",
     "confidence": "observed",
     "corpus_count": 17,
-    "description": "Spawn one item of the supplied type at enemy position.",
+    "description": "Request one free-motion item of the supplied type at enemy position.",
     "files": [
       "ecldata3.ecl",
       "ecldata3sp.ecl",
@@ -3724,9 +3724,9 @@
   },
   {
     "category": "item",
-    "confidence": "inferred",
+    "confidence": "observed",
     "corpus_count": 22,
-    "description": "Spawn a randomized item bundle, with type depending on collection state.",
+    "description": "Request a randomized +/-64 item bundle: one large then small Power below 128 Power, or all point items at full Power.",
     "files": [
       "ecldata2.ecl",
       "ecldata2sp.ecl",
@@ -3752,9 +3752,9 @@
   },
   {
     "category": "item",
-    "confidence": "inferred",
+    "confidence": "observed",
     "corpus_count": 0,
-    "description": "Set a single enemy drop-type field.",
+    "description": "Set enemy primary defeat-item type at +0x3304.",
     "files": [],
     "instruction_sizes": {},
     "name": "set_drop_type",
@@ -3763,9 +3763,9 @@
   },
   {
     "category": "item",
-    "confidence": "inferred",
+    "confidence": "observed",
     "corpus_count": 121,
-    "description": "Set two enemy drop-count/type fields consumed on death.",
+    "description": "Set enemy extra point-item count at +0x3308 and Power-item count at +0x330C.",
     "files": [
       "ecldata1.ecl",
       "ecldata1sp.ecl",
@@ -4245,9 +4245,9 @@
   },
   {
     "category": "item",
-    "confidence": "inferred",
+    "confidence": "observed",
     "corpus_count": 22,
-    "description": "Spawn randomized point-item instances around enemy position.",
+    "description": "Request the supplied count of free-motion point items at independently randomized +/-64 positions around the enemy.",
     "files": [
       "ecldata2.ecl",
       "ecldata2sp.ecl",

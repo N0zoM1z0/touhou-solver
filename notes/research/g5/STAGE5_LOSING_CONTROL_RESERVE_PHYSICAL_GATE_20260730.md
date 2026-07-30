@@ -63,11 +63,30 @@ screened, first-loss-relevant fallback receives the next whole-stage gate.
 - Start: daemon warm before menu confirmation.
 - Stop: route completion, supervisor failure, or user intervention only.
   Native hits must not fail-close or terminate the stage.
+- Scale continuation: explicitly pass
+  `--diagnostic-continue-root-only-scale`. This prevents the known
+  frame-1 `root_only` scale gate from aborting the stage, but remains an
+  unknown-direction constant-current-root proxy with no hard scale
+  authority.
 - Input: hard no-Bomb; every issued mask must keep bit `0x02` clear.
 - Sensing: native game state; no screenshots for gameplay.
 - Evidence: executable hash/patch, exact code checkpoint, full trace/session,
   resources/Power, transitions, first hit, all hits, policy health, timing,
   and native replay only if the original game naturally saves one.
+
+The exact corrected launch is:
+
+```bash
+/mnt/c/Windows/System32/cmd.exe /d /c call \
+  '\\wsl.localhost\ubuntu\home\pentester\coding\codex_ida\th08\run_th08_practice_agent.bat' \
+  --stage 5 --status-seconds 15 --stall-timeout 120 \
+  --diagnostic-continue-root-only-scale
+```
+
+CE-0199 retains the rejected no-extra-flag attempt `20260730_124635`. It
+entered Stage 5 but fail-closed on `time_scale_authority_unknown` at frame 1,
+before any decision. Its zero hits are not evidence and do not consume this
+gate.
 
 ## Preregistered Interpretation
 
@@ -81,8 +100,9 @@ The nearest observer-off controls are:
 The retained historical best band is eight to ten hits, with first hits at
 11,504 and 12,324 in the two eight-hit samples.
 
-One RNG-distinct run cannot prove causality. For this first physical
-falsifier:
+One RNG-distinct run cannot prove causality. The explicit scale proxy also
+prevents this run from gaining hard scale/model authority. For this first
+physical falsifier:
 
 - **strong favorable signal:** complete at `<=8` hits, or no contact before
   the historical 11,504-frame boundary;

@@ -2743,12 +2743,16 @@ Practice:
 ```bash
 /mnt/c/Windows/System32/cmd.exe /d /c call \
   '\\wsl.localhost\ubuntu\home\pentester\coding\codex_ida\th08\run_th08_practice_agent.bat' \
-  --stage 5 --status-seconds 15 --stall-timeout 120
+  --stage 5 --status-seconds 15 --stall-timeout 120 \
+  --diagnostic-continue-root-only-scale
 ```
 
-This is the canonical observer-off Stage-5 rebaseline command. CE-0183 blocks
-another unchanged launch now; reuse it only after an immutable correction
-contract, without adding trace, combat, Power, Focus/unfocused, or planner
+This is the corrected Stage-5 reserve falsifier command. CE-0199 rejects the
+no-extra-flag form because it reaches stage route 5 and then fail-closes at
+frame 1 on `time_scale_authority_unknown` before any decision. The explicit
+continuation is an unknown-direction constant-current-root proxy with no hard
+scale/model authority; it is required to satisfy the no-fail-close evidence
+contract. Do not add trace, combat, Power, Focus/unfocused, or other planner
 flags.
 
 The retained SEM-MODE-B whole-stage observer command was:

@@ -53,9 +53,29 @@ arithmetic. Its result is normally divided by 1.7, or by 6.5 for Routes 3 and
 11, unless the second call reports Bomb-region overlap. Later spell/phase
 scaling and timeout/transition arithmetic remain outside the pure gate model.
 
-Nine durable IDA comments were added at `0x0042A1FA`, `0x0042C936`,
+The later arithmetic is now separately executable in
+`resolve_enemy_hp_damage`:
+
+- each primary/alternate `player_compute_damage_to_enemy` return first applies
+  optional signed integer `106 * damage / 100`;
+- absent a Bomb-region overlap signal, alternate damage is combined through
+  truncating division by 6.5 for route byte 3/11 or 1.7 otherwise;
+- combined positive damage is capped at 70;
+- opaque special-enemy state can reduce no-overlap damage to
+  `max(1, damage / 7)`, or on Bomb-region overlap either block it or use
+  `max(1, trunc(damage / 2.5))`; and
+- an active enemy `+0x5354` timer finally divides by 9 when flags bit 1 is set,
+  otherwise it blocks damage, before HP `+0x2DFC` subtraction and frame-damage
+  `+0x3354` publication.
+
+The arithmetic is **observed**; the physical meanings and current values of
+the `sub_406D70`, `sub_4178A0`, `sub_42DFF0`, `sub_41FD20`, and timer
+predicates remain explicit inputs rather than guessed labels.
+
+Fourteen durable IDA comments were added at `0x0042A1FA`, `0x0042C936`,
 `0x0042C95D`, `0x0042CF47`, `0x0042D08B`, `0x0042D275`, `0x004516A9`,
-`0x004518DC`, and `0x004519A3`.
+`0x004518DC`, `0x004519A3`, `0x00451CB5`, `0x0042D135`, `0x0042D23E`,
+`0x0042D289`, and `0x0042D33A`.
 
 ## Executable Boundary
 

@@ -1927,6 +1927,10 @@ first.
   V4 also retains all 192 player damage-region records and evaluates the
   native active/due/geometry/accumulated-cap pass without assigning combat
   benefit.
+  The subsequent pure resolver implements late alternate, 106/100, cap-70,
+  special-enemy, timer, and final HP arithmetic only when all opaque native
+  predicates are supplied explicitly; it does not infer them from spell or
+  boss labels.
   Rolling v6 and causal-search v4 retain that identity at roots and ticks; the
   lowerer refuses to apply normal-content closure to any special or unknown
   source. No new native corpus exists. This grants loaded-content and source-
@@ -1992,7 +1996,9 @@ first.
   only. The uncapped ordinary return versus capped feedback split has shipped-
   instruction/static-dataflow authority only. Damage-region roots have
   offline exact-capture and synthetic scalar authority only; later enemy
-  scaling remains outside the numeric projection. The source/emission atlas has
+  scaling has shipped-instruction/synthetic arithmetic authority but remains
+  outside exact-root projection until its predicates are captured. The
+  source/emission atlas has
   shipped-content/static
   candidate authority only. The item/drop atlas has shipped-native
   recurrence/static opportunity authority only. The cross-atlas board has

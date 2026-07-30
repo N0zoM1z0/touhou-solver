@@ -10,7 +10,9 @@ from th08_enemy_damage_model import (
     ENEMY_PAUSE_DURING_BOMB_OR_TRANSITION_FLAG,
     ENEMY_PLAYER_SHOT_DAMAGE_FLAG,
     EnemyPlayerShotDamageContext,
+    EnemyResolvedDamageContext,
     evaluate_enemy_player_shot_damage_gate,
+    resolve_enemy_hp_damage,
 )
 
 
@@ -45,6 +47,76 @@ def _gate(
 
 
 class EnemyDamageModelTests(unittest.TestCase):
+    def test_resolved_damage_bonus_alternate_and_frame_cap(self) -> None:
+        result = resolve_enemy_hp_damage(
+            EnemyResolvedDamageContext(
+                primary_return_damage=60,
+                alternate_return_damage=34,
+                alternate_enabled=True,
+                route_id=0,
+                player_damage_bonus_active=True,
+            )
+        )
+        self.assertEqual(result.primary_after_player_bonus, 63)
+        self.assertEqual(result.alternate_after_player_bonus, 36)
+        self.assertEqual(result.after_alternate_combination, 84)
+        self.assertEqual(result.after_frame_cap, 70)
+        self.assertEqual(result.hp_damage, 70)
+
+    def test_bomb_overlap_skips_alternate_and_selects_special_path(self) -> None:
+        blocked = resolve_enemy_hp_damage(
+            EnemyResolvedDamageContext(
+                primary_return_damage=20,
+                alternate_return_damage=70,
+                alternate_enabled=True,
+                bomb_region_overlap=True,
+                special_enemy_damage_mode_active=True,
+            )
+        )
+        self.assertEqual(blocked.after_alternate_combination, 20)
+        self.assertEqual(blocked.hp_damage, 0)
+        self.assertEqual(blocked.blocked_reason, "bomb_region_damage_blocked")
+
+        allowed = resolve_enemy_hp_damage(
+            EnemyResolvedDamageContext(
+                primary_return_damage=20,
+                bomb_region_overlap=True,
+                special_enemy_damage_mode_active=True,
+                bomb_region_damage_allowed=True,
+            )
+        )
+        self.assertEqual(allowed.hp_damage, 8)
+
+    def test_special_and_post_timer_integer_reductions(self) -> None:
+        special = resolve_enemy_hp_damage(
+            EnemyResolvedDamageContext(
+                primary_return_damage=70,
+                special_enemy_damage_mode_active=True,
+            )
+        )
+        self.assertEqual(special.hp_damage, 10)
+
+        timer = resolve_enemy_hp_damage(
+            EnemyResolvedDamageContext(
+                primary_return_damage=70,
+                post_damage_timer_active=True,
+                post_damage_timer_reduction_enabled=True,
+            )
+        )
+        self.assertEqual(timer.hp_damage, 7)
+
+        blocked = resolve_enemy_hp_damage(
+            EnemyResolvedDamageContext(
+                primary_return_damage=70,
+                post_damage_timer_active=True,
+            )
+        )
+        self.assertEqual(blocked.hp_damage, 0)
+        self.assertEqual(
+            blocked.blocked_reason,
+            "post_damage_timer_blocks_damage",
+        )
+
     def test_complete_native_gate_opens_only_with_hp_write_flag(self) -> None:
         gate = _gate()
         self.assertTrue(gate.manager_update_open)

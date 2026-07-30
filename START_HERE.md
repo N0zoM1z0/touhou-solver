@@ -38,8 +38,8 @@ historical handoff.
   `CONTENT-01` shipped content manifest, and `CONTENT-02` static
   mandatory-event atlas are the current repository checkpoint; no new
   physical trial was run.
-- Complete Linux discovery passes 1,519 tests in 14.216 seconds.
-- Complete Windows UNC discovery passes 1,519 tests in 31.472 seconds with
+- Complete Linux discovery passes 1,522 tests in 14.857 seconds.
+- Complete Windows UNC discovery passes 1,522 tests in 30.869 seconds with
   the three existing skips.
 - No TH08, controller, supervisor, native-replay runner, or Windows test
   process is intentionally left running.
@@ -94,9 +94,12 @@ historical handoff.
   The branch lowerer checks root plus every tick and preserves any special or
   unknown source as non-normal; no v5/v3 artifact is reinterpreted and no
   no v7/v5 corpus has been captured.
-- The next general WS-H semantic checkpoint is the later native character,
-  alternate, spell/Boss, and HP-write scaling arithmetic. Do not reuse the old
-  50-damage assumption in route, Power, or kill estimates.
+- The shipped later-damage arithmetic is now executable with opaque predicates:
+  optional per-call 106/100, route 3/11 alternate divisor 6.5 versus 1.7,
+  actual resolved-damage cap 70, special-enemy `/7` or Bomb-region `/2.5`
+  branches, optional post-timer `/9` or block, and final HP/frame-damage write.
+  The next general WS-H boundary is capturing/revalidating those opaque
+  predicates without guessing their physical labels.
 - Root 2,129's old four-u16 pre-hostile prefix is compatible with a due
   focused level-5 option pair, but the retained v3 capsule lacks timer/pool
   fields, so this remains inferred rather than observed. Hostile birth 1220

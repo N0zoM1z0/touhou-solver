@@ -268,8 +268,8 @@ It grants no:
 
 Six focused projection tests, six focused report tests, three loaded-SHT
 provenance tests, twelve rolling snapshot tests, and four causal-search tests
-pass. Complete discovery passes 1,519 tests in 14.216 seconds on Linux and
-31.472 seconds through the Windows UNC loader, with the three existing skips.
+pass. Complete discovery passes 1,522 tests in 14.857 seconds on Linux and
+30.869 seconds through the Windows UNC loader, with the three existing skips.
 
 The next authorized causal gate is a small immutable-root corpus spanning
 focused, unfocused, and dynamic-refocus complete-mask schedules. Each branch

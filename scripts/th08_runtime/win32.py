@@ -17,6 +17,7 @@ from th08_runtime.game_state import (
 
 PROCESS_VM_READ = 0x0010
 PROCESS_QUERY_LIMITED_INFORMATION = 0x1000
+PROCESS_SUSPEND_RESUME = 0x0800
 TH32CS_SNAPPROCESS = 0x00000002
 INVALID_HANDLE_VALUE = wintypes.HANDLE(-1).value
 
@@ -97,6 +98,7 @@ class Win32:
     def __init__(self) -> None:
         require_windows()
         self.kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)
+        self.ntdll = ctypes.WinDLL("ntdll", use_last_error=True)
         self.user32 = ctypes.WinDLL("user32", use_last_error=True)
         self.kernel32.CreateToolhelp32Snapshot.argtypes = [
             wintypes.DWORD,
@@ -135,6 +137,10 @@ class Win32:
         ]
         self.kernel32.QueryFullProcessImageNameW.restype = wintypes.BOOL
         self.kernel32.CloseHandle.argtypes = [wintypes.HANDLE]
+        self.ntdll.NtSuspendProcess.argtypes = [wintypes.HANDLE]
+        self.ntdll.NtSuspendProcess.restype = wintypes.LONG
+        self.ntdll.NtResumeProcess.argtypes = [wintypes.HANDLE]
+        self.ntdll.NtResumeProcess.restype = wintypes.LONG
         self.user32.SendInput.argtypes = [
             wintypes.UINT,
             ctypes.POINTER(INPUT),
@@ -198,6 +204,71 @@ class Win32:
         window = self.user32.GetForegroundWindow()
         self.user32.GetWindowThreadProcessId(window, ctypes.byref(pid))
         return int(pid.value)
+
+    def suspend_process(self, pid: int) -> "ProcessSuspension":
+        return ProcessSuspension(self, pid)
+
+
+class ProcessSuspension:
+    """Fail-closed, bounded whole-process suspension for atomic root reads."""
+
+    def __init__(self, api: Win32, pid: int) -> None:
+        if type(pid) is not int or pid <= 0:
+            raise ValueError("process suspension requires a positive PID")
+        self.api = api
+        self.pid = pid
+        self.handle = None
+        self.suspended_at: float | None = None
+        self.resumed_at: float | None = None
+
+    def __enter__(self) -> "ProcessSuspension":
+        import time
+
+        access = PROCESS_SUSPEND_RESUME | PROCESS_QUERY_LIMITED_INFORMATION
+        self.handle = self.api.kernel32.OpenProcess(
+            access,
+            False,
+            self.pid,
+        )
+        if not self.handle:
+            raise win_error("OpenProcess(process suspension)")
+        status = int(self.api.ntdll.NtSuspendProcess(self.handle))
+        if status < 0:
+            self.api.kernel32.CloseHandle(self.handle)
+            self.handle = None
+            raise RuntimeError(
+                f"NtSuspendProcess failed with NTSTATUS {status:#010x}"
+            )
+        self.suspended_at = time.perf_counter()
+        return self
+
+    def __exit__(self, exc_type, exc, traceback) -> bool:
+        import time
+
+        if not self.handle:
+            return False
+        status = int(self.api.ntdll.NtResumeProcess(self.handle))
+        self.resumed_at = time.perf_counter()
+        self.api.kernel32.CloseHandle(self.handle)
+        self.handle = None
+        if status < 0:
+            raise RuntimeError(
+                f"NtResumeProcess failed with NTSTATUS {status:#010x}"
+            ) from exc
+        return False
+
+    def record(self) -> dict[str, object]:
+        if self.suspended_at is None or self.resumed_at is None:
+            raise RuntimeError("process suspension interval is incomplete")
+        return {
+            "mechanism": "NtSuspendProcess/NtResumeProcess",
+            "pid": self.pid,
+            "duration_ms": (
+                self.resumed_at - self.suspended_at
+            )
+            * 1000.0,
+            "resume_verified": True,
+        }
 
 
 class ProcessReader:

@@ -177,6 +177,17 @@ class PracticeSupervisorTests(unittest.TestCase):
         self.assertFalse(args.trace_auxiliary_ecl_events)
         self.assertFalse(args.enable_finalb_scale_source_authority)
 
+    def test_replay_save_slot_is_explicit_and_bounded(self) -> None:
+        args = supervisor.build_parser().parse_args(
+            ["--stage", "5", "--save-replay-slot", "15"]
+        )
+        self.assertEqual(args.save_replay_slot, 15)
+        self.assertEqual(args.replay_save_timeout, 20.0)
+        with self.assertRaises(SystemExit):
+            supervisor.build_parser().parse_args(
+                ["--save-replay-slot", "16"]
+            )
+
     def test_parser_accepts_explicit_runtime_ecl_identity(self) -> None:
         args = build_parser().parse_args(
             [

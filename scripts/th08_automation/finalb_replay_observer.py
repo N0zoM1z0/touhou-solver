@@ -37,7 +37,7 @@ FINAL_B_STAGE_ROUTE_INDEX = 7
 
 
 @dataclass(frozen=True)
-class FinalBReplayContract:
+class NativeReplayStageContract:
     slot: int
     compact_index: int
     path: Path
@@ -66,13 +66,17 @@ def _sha256(path: Path) -> str:
     return digest.hexdigest()
 
 
-def validate_finalb_replay(
+def validate_native_stage_replay(
     game_dir: Path,
     *,
     slot: int,
     expected_sha256: str,
-) -> FinalBReplayContract:
-    """Bind one fixed replay slot to an exact zero-Bomb Final-B practice."""
+    expected_route_id: int,
+    expected_difficulty_index: int,
+    expected_stage_route_index: int,
+    require_single_stage: bool = True,
+) -> NativeReplayStageContract:
+    """Bind one fixed replay slot to one exact zero-Bomb native stage."""
 
     if not 1 <= slot <= REPLAY_FIXED_SLOT_COUNT:
         raise ValueError(
@@ -119,29 +123,37 @@ def validate_finalb_replay(
         )
     if target_metadata.sha256 != actual_sha256:
         raise RuntimeError("replay decoder/file SHA-256 disagreement")
-    if target_metadata.route_id != FINAL_B_ROUTE_ID:
+    if target_metadata.route_id != expected_route_id:
         raise RuntimeError(
-            f"target replay route is {target_metadata.route_id}, expected 2"
+            "target replay route is "
+            f"{target_metadata.route_id}, expected {expected_route_id}"
         )
-    if target_metadata.difficulty_index != FINAL_B_DIFFICULTY_INDEX:
+    if target_metadata.difficulty_index != expected_difficulty_index:
         raise RuntimeError(
             "target replay difficulty is "
-            f"{target_metadata.difficulty_index}, expected Lunatic 3"
+            f"{target_metadata.difficulty_index}, "
+            f"expected {expected_difficulty_index}"
         )
-    if tuple(stage.stage_index for stage in target_metadata.stages) != (
-        FINAL_B_STAGE_ROUTE_INDEX,
-    ):
+    matching_stages = tuple(
+        stage
+        for stage in target_metadata.stages
+        if stage.stage_index == expected_stage_route_index
+    )
+    if len(matching_stages) != 1:
         raise RuntimeError(
-            "target replay must contain only Final-B stage index 7"
+            "target replay must contain exactly one requested stage "
+            f"index {expected_stage_route_index}"
         )
-    stage = target_metadata.stages[0]
+    if require_single_stage and len(target_metadata.stages) != 1:
+        raise RuntimeError("target replay must contain only the requested stage")
+    stage = matching_stages[0]
     if stage.frame_count <= 0:
-        raise RuntimeError("target replay Final-B stage has no input frames")
+        raise RuntimeError("target replay stage has no input frames")
     if stage.bomb_press_frames:
         raise RuntimeError(
             "target replay contains Bomb presses and cannot drive this gate"
         )
-    return FinalBReplayContract(
+    return NativeReplayStageContract(
         slot=slot,
         compact_index=slot - 1,
         path=target_path,
@@ -153,6 +165,34 @@ def validate_finalb_replay(
         stage_input_sha256=stage.input_sha256,
         stage_bomb_press_frames=stage.bomb_press_frames,
     )
+
+
+FinalBReplayContract = NativeReplayStageContract
+
+
+def validate_finalb_replay(
+    game_dir: Path,
+    *,
+    slot: int,
+    expected_sha256: str,
+) -> FinalBReplayContract:
+    """Bind one fixed replay slot to an exact zero-Bomb Final-B practice."""
+
+    try:
+        return validate_native_stage_replay(
+            game_dir,
+            slot=slot,
+            expected_sha256=expected_sha256,
+            expected_route_id=FINAL_B_ROUTE_ID,
+            expected_difficulty_index=FINAL_B_DIFFICULTY_INDEX,
+            expected_stage_route_index=FINAL_B_STAGE_ROUTE_INDEX,
+        )
+    except RuntimeError as exc:
+        if str(exc) == "target replay must contain only the requested stage":
+            raise RuntimeError(
+                "target replay must contain only Final-B stage index 7"
+            ) from exc
+        raise
 
 
 def read_replay_menu_state(api: Win32, pid: int) -> dict[str, int]:
@@ -289,11 +329,11 @@ def _navigate_replay_substate_cursor(
     )
 
 
-def drive_finalb_replay_menu(
+def drive_native_stage_replay_menu(
     api: Win32,
     pid: int,
     *,
-    contract: FinalBReplayContract,
+    contract: NativeReplayStageContract,
     hold_ms: int,
     tap_gap_ms: int,
     screen_settle_ms: int,
@@ -390,7 +430,9 @@ def drive_finalb_replay_menu(
         substate=REPLAY_SUBSTATE_STAGE,
         target=contract.stage_route_index,
         option_count=9,
-        purpose="select Final-B replay stage",
+        purpose=(
+            f"select replay stage {contract.stage_route_index}"
+        ),
         hold_ms=hold_ms,
         tap_gap_ms=tap_gap_ms,
         timeout_seconds=timeout_seconds,
@@ -417,7 +459,10 @@ def drive_finalb_replay_menu(
 
     final_tap = MenuTap(
         "confirm",
-        "start native-verified Final-B replay",
+        (
+            "start native-verified stage "
+            f"{contract.stage_route_index} replay"
+        ),
         screen_settle_ms,
     )
     drive_menu_plan(api, pid, (final_tap,), hold_ms=hold_ms)
@@ -434,11 +479,32 @@ def drive_finalb_replay_menu(
     return tuple(trace)
 
 
-def wait_for_bound_replay_gameplay(
+def drive_finalb_replay_menu(
     api: Win32,
     pid: int,
     *,
     contract: FinalBReplayContract,
+    hold_ms: int,
+    tap_gap_ms: int,
+    screen_settle_ms: int,
+    timeout_seconds: float,
+) -> tuple[dict[str, object], ...]:
+    return drive_native_stage_replay_menu(
+        api,
+        pid,
+        contract=contract,
+        hold_ms=hold_ms,
+        tap_gap_ms=tap_gap_ms,
+        screen_settle_ms=screen_settle_ms,
+        timeout_seconds=timeout_seconds,
+    )
+
+
+def wait_for_bound_replay_gameplay(
+    api: Win32,
+    pid: int,
+    *,
+    contract: NativeReplayStageContract,
     timeout_seconds: float,
 ) -> tuple[ProcessReader, dict[str, object]]:
     reader = ProcessReader(api, pid)
@@ -471,7 +537,7 @@ def wait_for_bound_replay_gameplay(
                 )
             return reader, last
         raise TimeoutError(
-            f"bound Final-B replay did not enter gameplay; last={last}"
+            f"bound native replay did not enter gameplay; last={last}"
         )
     except Exception:
         reader.close()
@@ -484,6 +550,7 @@ __all__ = [
     "FINAL_B_ROUTE_ID",
     "FINAL_B_STAGE_ROUTE_INDEX",
     "FinalBReplayContract",
+    "NativeReplayStageContract",
     "REPLAY_ENTRY_COUNT_OFFSET",
     "REPLAY_FIXED_SLOT_COUNT",
     "REPLAY_PLAYBACK_FLAG",
@@ -493,9 +560,11 @@ __all__ = [
     "REPLAY_SUBSTATE_LIST",
     "REPLAY_SUBSTATE_STAGE",
     "TITLE_MODE_REPLAY",
+    "drive_native_stage_replay_menu",
     "drive_finalb_replay_menu",
     "read_replay_menu_state",
     "validate_finalb_replay",
+    "validate_native_stage_replay",
     "wait_for_bound_replay_gameplay",
     "wait_for_replay_substate",
 ]

@@ -65,6 +65,12 @@ class _Reader:
 
 
 class Route2NativeFutureBodyRootTests(unittest.TestCase):
+    def test_revalidated_inventory_is_capture_canonical(self) -> None:
+        specs = route2_revalidated_native_root_component_specs()
+        names = tuple(spec.name for spec in specs)
+        self.assertEqual(names, tuple(sorted(names)))
+        self.assertEqual(len(names), len(set(names)))
+
     def test_stable_capture_is_content_addressed_but_not_predictive(
         self,
     ) -> None:
@@ -256,7 +262,7 @@ class Route2NativeFutureBodyRootTests(unittest.TestCase):
                 flags,
             )
         spec = _spec(
-            "ordinary_enemy_pool",
+            "ordinary_enemy_template_and_pool",
             0x005826C0,
             len(pool),
             (
@@ -273,6 +279,36 @@ class Route2NativeFutureBodyRootTests(unittest.TestCase):
         self.assertEqual(
             decode_route2_ordinary_pool_active_slots((component,)),
             (0, 17),
+        )
+
+    def test_product_template_plus_pool_decoder_skips_template(self) -> None:
+        region = bytearray((ENEMY_POOL_SIZE + 1) * ENEMY_STRIDE)
+        for slot in (2, 479):
+            struct.pack_into(
+                "<I",
+                region,
+                ENEMY_STRIDE
+                + slot * ENEMY_STRIDE
+                + ENEMY_FLAGS_OFFSET,
+                1,
+            )
+        spec = _spec(
+            "ordinary_enemy_template_and_pool",
+            TH08_ENEMY_MANAGER_TEMPLATE_BASE,
+            len(region),
+            (
+                "motion_flag_and_lifecycle_state",
+                "ordinary_enemy_template_and_pool",
+            ),
+        )
+        component = Route2NativeRootComponentCapture(
+            spec=spec,
+            data=bytes(region),
+        )
+
+        self.assertEqual(
+            decode_route2_ordinary_pool_active_slots((component,)),
+            (2, 479),
         )
 
     def test_component_bytes_change_root_version(self) -> None:

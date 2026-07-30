@@ -79,7 +79,13 @@ def wait_for_title_menu(
     deadline = time.perf_counter() + timeout_seconds
     last: dict[str, int] | None = None
     while time.perf_counter() < deadline:
-        last = read_title_menu_state(api, pid)
+        try:
+            last = read_title_menu_state(api, pid)
+        except RuntimeError as exc:
+            if str(exc) != "title menu manager is not allocated":
+                raise
+            time.sleep(0.02)
+            continue
         if last["mode"] == mode and last["substate"] == 1:
             return last
         time.sleep(0.02)

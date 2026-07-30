@@ -303,7 +303,7 @@ def _read_exact(
 def decode_route2_ordinary_pool_active_slots(
     components: tuple[Route2NativeRootComponentCapture, ...],
     *,
-    component_name: str = "ordinary_enemy_pool",
+    component_name: str = "ordinary_enemy_template_and_pool",
 ) -> tuple[int, ...]:
     """Decode exact native active bit0 from one full ordinary-pool component."""
 
@@ -314,11 +314,23 @@ def decode_route2_ordinary_pool_active_slots(
     )
     if len(matches) != 1:
         raise ValueError("native root requires exactly one ordinary-pool component")
-    data = matches[0].data
+    component = matches[0]
+    data = component.data
     expected_size = ENEMY_POOL_SIZE * ENEMY_STRIDE
-    if len(data) != expected_size:
+    if (
+        component.spec.address == ENEMY_POOL_BASE
+        and len(data) == expected_size
+    ):
+        pool_offset = 0
+    elif (
+        component.spec.address == TH08_ENEMY_MANAGER_TEMPLATE_BASE
+        and len(data) == expected_size + ENEMY_STRIDE
+    ):
+        pool_offset = ENEMY_STRIDE
+    else:
         raise ValueError(
-            "ordinary-pool component must contain all 480 native slots"
+            "ordinary-pool component must be the exact 480-slot pool or "
+            "the revalidated template-plus-pool region"
         )
     return tuple(
         slot
@@ -327,7 +339,7 @@ def decode_route2_ordinary_pool_active_slots(
             struct.unpack_from(
                 "<I",
                 data,
-                slot * ENEMY_STRIDE + ENEMY_FLAGS_OFFSET,
+                pool_offset + slot * ENEMY_STRIDE + ENEMY_FLAGS_OFFSET,
             )[0]
             & ENEMY_ACTIVE_FLAG
         )
@@ -343,7 +355,7 @@ def route2_revalidated_native_root_component_specs(
     regions must still be captured in the same transaction.
     """
 
-    return (
+    specs = (
         Route2NativeRootComponentSpec(
             name="ordinary_enemy_template_and_pool",
             address=TH08_ENEMY_MANAGER_TEMPLATE_BASE,
@@ -521,6 +533,7 @@ def route2_revalidated_native_root_component_specs(
             complete_requirement_coverage=False,
         ),
     )
+    return tuple(sorted(specs, key=lambda spec: spec.name))
 
 
 def capture_route2_native_future_body_root_slice(

@@ -9,6 +9,11 @@ import unittest
 from unittest.mock import patch
 
 import th08_runtime_agent
+from th08_runtime.win32 import (
+    PROCESS_QUERY_LIMITED_INFORMATION,
+    PROCESS_SUSPEND_RESUME,
+    ProcessSuspension,
+)
 
 
 class _InputClockReader:
@@ -101,6 +106,57 @@ class _InputClockReader:
 
 
 class Th08RuntimeAgentTests(unittest.TestCase):
+    def test_process_suspension_always_resumes_and_closes(self) -> None:
+        calls: list[tuple[object, ...]] = []
+
+        class Kernel32:
+            @staticmethod
+            def OpenProcess(access, inherit, pid):
+                calls.append(("open", access, inherit, pid))
+                return 77
+
+            @staticmethod
+            def CloseHandle(handle):
+                calls.append(("close", handle))
+                return 1
+
+        class Ntdll:
+            @staticmethod
+            def NtSuspendProcess(handle):
+                calls.append(("suspend", handle))
+                return 0
+
+            @staticmethod
+            def NtResumeProcess(handle):
+                calls.append(("resume", handle))
+                return 0
+
+        api = type(
+            "Api",
+            (),
+            {"kernel32": Kernel32(), "ntdll": Ntdll()},
+        )()
+        with self.assertRaisesRegex(RuntimeError, "fixture"):
+            with ProcessSuspension(api, 123) as suspension:
+                raise RuntimeError("fixture")
+
+        self.assertEqual(
+            calls,
+            [
+                (
+                    "open",
+                    PROCESS_SUSPEND_RESUME
+                    | PROCESS_QUERY_LIMITED_INFORMATION,
+                    False,
+                    123,
+                ),
+                ("suspend", 77),
+                ("resume", 77),
+                ("close", 77),
+            ],
+        )
+        self.assertTrue(suspension.record()["resume_verified"])
+
     def test_time_scale_root_capture_is_frame_bracketed(self) -> None:
         stable = th08_runtime_agent.capture_time_scale_root(
             _InputClockReader(

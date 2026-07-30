@@ -16,7 +16,11 @@ import sys
 from dataclasses import asdict, dataclass
 from pathlib import Path
 
-from th08_pbgz import PbgzError, lzss_decompress
+from th08_pbgz import (
+    PbgzError,
+    lzss_compress_literals,
+    lzss_decompress,
+)
 
 
 MAGIC = b"T8RP"
@@ -105,6 +109,85 @@ def extract_stage_inputs(
         struct.unpack_from("<H", decoded, offset)[0]
         for offset in range(start, end, stride)
     )
+
+
+def replace_stage_inputs(
+    decoded: bytes,
+    stage: ReplayStage,
+    *,
+    start_frame: int,
+    input_masks: tuple[int, ...],
+) -> bytes:
+    """Replace an exact replay input interval without touching future state.
+
+    Only replay command words are changed.  Extended-record payloads, stage
+    roots, content, and later input commands remain byte-identical.
+    """
+
+    if type(decoded) is not bytes:
+        raise ValueError("decoded replay must be exact bytes")
+    if type(stage) is not ReplayStage:
+        raise ValueError("stage must be decoded replay metadata")
+    if type(start_frame) is not int or start_frame < 0:
+        raise ValueError("replay replacement start must be nonnegative")
+    if type(input_masks) is not tuple or any(
+        type(mask) is not int or not 0 <= mask <= 0xFFFF
+        for mask in input_masks
+    ):
+        raise ValueError("replay replacements must be an exact u16 tuple")
+    if start_frame + len(input_masks) > stage.frame_count:
+        raise ValueError("replay replacement exceeds the stage input extent")
+
+    stride = stage.input_record_stride
+    if stride not in (2, 6):
+        raise ReplayError(f"unsupported replay input stride {stride}")
+    mutated = bytearray(decoded)
+    first_offset = stage.data_offset + 36 + start_frame * stride
+    for index, mask in enumerate(input_masks):
+        struct.pack_into("<H", mutated, first_offset + index * stride, mask)
+    return bytes(mutated)
+
+
+def encode_replay(decoded: bytes) -> bytes:
+    """Encode a decoded TH08 replay into a game-loadable byte stream.
+
+    The payload compressor is deliberately literal-only.  The resulting file
+    is larger than the original but decodes to the exact supplied bytes and
+    retains the original trailing replay metadata.
+    """
+
+    if type(decoded) is not bytes or len(decoded) < HEADER_SIZE:
+        raise ValueError("decoded replay is smaller than its header")
+    if decoded[:4] != MAGIC:
+        raise ReplayError("decoded replay has invalid magic")
+    if struct.unpack_from("<H", decoded, 4)[0] != VERSION:
+        raise ReplayError("decoded replay has unsupported version")
+
+    uncompressed_size = _u32(decoded, 28)
+    payload_end = HEADER_SIZE + uncompressed_size
+    if payload_end > len(decoded):
+        raise ReplayError("decoded replay payload is truncated")
+    payload = decoded[HEADER_SIZE:payload_end]
+    trailing = decoded[payload_end:]
+    compressed = lzss_compress_literals(payload)
+
+    main = bytearray(decoded[:HEADER_SIZE])
+    encoded_main_size = HEADER_SIZE + len(compressed)
+    struct.pack_into("<I", main, 12, encoded_main_size)
+    struct.pack_into("<I", main, 24, len(compressed))
+    struct.pack_into("<I", main, 28, uncompressed_size)
+    main.extend(compressed)
+    checksum = (
+        CHECKSUM_INITIAL + sum(main[21:encoded_main_size])
+    ) & 0xFFFFFFFF
+    struct.pack_into("<I", main, 16, checksum)
+
+    encoded = bytearray(main)
+    key = encoded[21]
+    for offset in range(24, encoded_main_size):
+        encoded[offset] = (encoded[offset] + key) & 0xFF
+        key = (key + 7) & 0xFF
+    return bytes(encoded) + trailing
 
 
 def compress_input_runs(inputs: tuple[int, ...]) -> tuple[ReplayInputRun, ...]:

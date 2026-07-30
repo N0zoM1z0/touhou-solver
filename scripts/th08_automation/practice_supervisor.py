@@ -45,6 +45,9 @@ from th08_automation.practice_monitor import (  # noqa: F401
     progress_text as _progress_text,
     read_last_json_record,
 )
+from th08_automation.practice_replay_save import (
+    save_completed_practice_replay,
+)
 from th08_automation.practice_native_menu import (  # noqa: F401
     ADDR_PRACTICE_STAGE_AVAILABILITY,
     ADDR_TITLE_DIFFICULTY_CURSOR,
@@ -87,6 +90,7 @@ from th08_live.scale_source_trace import FINAL_B_ECL_STATIC_SHA256
 ROOT = Path(__file__).resolve().parents[2]
 RUNTIME_REPORT_DIR = ROOT / "artifacts" / "runtime_reports"
 RUN_NOTE_DIR = ROOT / "notes" / "runs"
+REPLAY_ARCHIVE_DIR = ROOT / "artifacts" / "replays" / "archive"
 FINALB_SCALE_DELIVERY_AUTO_STOP = False
 DEFAULT_GAME_DIR = (
     Path("D:/Entertainment/Game/Touhou")
@@ -327,6 +331,8 @@ def run_trial(
         "local_hazard_backend": args.local_hazard_backend,
         "local_beam_reducer": args.local_beam_reducer,
         "bullet_decode_backend": args.bullet_decode_backend,
+        "save_replay_slot": args.save_replay_slot,
+        "replay_save_timeout": args.replay_save_timeout,
         "started_at": datetime.now().astimezone().isoformat(),
     }
     batch_process: subprocess.Popen[bytes] | None = None
@@ -626,7 +632,31 @@ def run_trial(
             else "complete_practice_stage"
         )
         if not args.leave_game_running:
-            if accepted and not args.enable_finalb_scale_source_authority:
+            if (
+                accepted
+                and args.save_replay_slot is not None
+                and not args.enable_finalb_scale_source_authority
+            ):
+                session["post_stage_replay_save"] = (
+                    save_completed_practice_replay(
+                        api,
+                        pid,
+                        game_dir=game_dir,
+                        slot=args.save_replay_slot,
+                        archive_dir=REPLAY_ARCHIVE_DIR,
+                        expected_route_id=2,
+                        expected_difficulty_index=difficulty.menu_index,
+                        expected_stage_route_index=stage.route_index,
+                        hold_ms=args.tap_hold_ms,
+                        tap_gap_ms=args.tap_gap_ms,
+                        timeout_seconds=args.replay_save_timeout,
+                    )
+                )
+                session["post_stage_no_save"] = {
+                    "attempted": False,
+                    "reason": "accepted replay was saved and verified",
+                }
+            elif accepted and not args.enable_finalb_scale_source_authority:
                 session["post_stage_no_save"] = (
                     select_no_save_before_termination(
                         api,
@@ -741,6 +771,12 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--tap-hold-ms", type=int, default=65)
     parser.add_argument("--tap-gap-ms", type=int, default=180)
     parser.add_argument("--screen-settle-ms", type=int, default=700)
+    parser.add_argument(
+        "--replay-save-timeout",
+        type=float,
+        default=20.0,
+        help="native-state wait deadline for an accepted replay save",
+    )
     parser.add_argument("--trial-timeout", type=float, default=4500.0)
     parser.add_argument(
         "--stall-timeout",
@@ -982,6 +1018,16 @@ def build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument("--leave-game-running", action="store_true")
     parser.add_argument(
+        "--save-replay-slot",
+        type=int,
+        choices=range(1, 16),
+        metavar="1..15",
+        help=(
+            "after one accepted complete practice, archive and overwrite the "
+            "exact replay slot, then decode/identity/no-Bomb verify it"
+        ),
+    )
+    parser.add_argument(
         "--armed",
         action="store_true",
         help="required acknowledgement for unattended physical input/process control",
@@ -998,6 +1044,22 @@ def main(argv: list[str] | None = None) -> int:
         raise RuntimeError("unattended physical control requires --armed")
     if args.repeat <= 0:
         raise ValueError("--repeat must be positive")
+    if args.replay_save_timeout <= 0.0:
+        raise ValueError("--replay-save-timeout must be positive")
+    if args.save_replay_slot is not None and (
+        args.leave_game_running or args.forever or args.repeat != 1
+    ):
+        raise ValueError(
+            "--save-replay-slot requires one supervised iteration and cannot "
+            "be combined with --leave-game-running or --forever"
+        )
+    if (
+        args.save_replay_slot is not None
+        and args.enable_finalb_scale_source_authority
+    ):
+        raise ValueError(
+            "--save-replay-slot requires a complete accepted practice stage"
+        )
     if args.safety_value_horizon < 0:
         raise ValueError("--safety-value-horizon cannot be negative")
     if args.input_clock_shadow_sample_ms <= 0.0:

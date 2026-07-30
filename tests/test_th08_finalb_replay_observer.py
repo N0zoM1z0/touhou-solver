@@ -163,6 +163,36 @@ class FinalBReplayValidationTests(unittest.TestCase):
                     expected_sha256=EXPECTED_SHA256,
                 )
 
+    def test_generic_stage5_contract_binds_exact_single_stage(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            self._fixed_slots(root, 1)
+            metadata = _metadata(
+                "th8_01.rpy",
+                stages=(_stage(stage_index=5),),
+            )
+            with (
+                patch.object(
+                    replay_observer,
+                    "decode_replay",
+                    return_value=(metadata, b"decoded"),
+                ),
+                patch.object(
+                    replay_observer,
+                    "_sha256",
+                    return_value=EXPECTED_SHA256,
+                ),
+            ):
+                contract = replay_observer.validate_native_stage_replay(
+                    root,
+                    slot=1,
+                    expected_sha256=EXPECTED_SHA256,
+                    expected_route_id=2,
+                    expected_difficulty_index=3,
+                    expected_stage_route_index=5,
+                )
+        self.assertEqual(contract.stage_route_index, 5)
+
 
 class ReplayMenuStateTests(unittest.TestCase):
     def test_native_replay_offsets_are_read_from_title_manager(self) -> None:

@@ -100,6 +100,49 @@ class _MsbBitReader:
         return value
 
 
+class _MsbBitWriter:
+    """Small MSB-first writer used by the literal-only oracle encoder."""
+
+    def __init__(self) -> None:
+        self.data = bytearray()
+        self.bit_offset = 0
+
+    def write(self, value: int, count: int) -> None:
+        if count < 0 or value < 0 or value >= (1 << count):
+            raise ValueError("bit field does not fit its declared width")
+        for shift in range(count - 1, -1, -1):
+            byte_offset = self.bit_offset >> 3
+            if byte_offset == len(self.data):
+                self.data.append(0)
+            bit_in_byte = 7 - (self.bit_offset & 7)
+            self.data[byte_offset] |= (
+                ((value >> shift) & 1) << bit_in_byte
+            )
+            self.bit_offset += 1
+
+    def finish(self) -> bytes:
+        return bytes(self.data)
+
+
+def lzss_compress_literals(data: bytes) -> bytes:
+    """Return a valid TH08 LZSS stream without back-reference heuristics.
+
+    This intentionally simple encoder is for deterministic replay mutation,
+    not archive-size optimization.  Every byte is encoded as one literal and
+    the stream ends with the native zero back-reference sentinel.
+    """
+
+    if type(data) is not bytes:
+        raise ValueError("literal LZSS input must be exact bytes")
+    bits = _MsbBitWriter()
+    for value in data:
+        bits.write(1, 1)
+        bits.write(value, 8)
+    bits.write(0, 1)
+    bits.write(0, 13)
+    return bits.finish()
+
+
 def lzss_decompress(data: bytes, expected_size: int) -> bytes:
     """Reproduce TH08's 0x2000-byte-ring, MSB-first LZSS decoder."""
     if expected_size < 0:

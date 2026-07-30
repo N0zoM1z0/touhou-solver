@@ -100,8 +100,8 @@ describe the same decision. Python/C++ parity is not physical correctness.
 ### Exact state
 
 - Branch: `main`.
-- Latest retained research checkpoint: `22f002a`
-  (`Connect timeline spawn lifecycles and arm Stage 5 reserve gate`).
+- Latest retained research checkpoint: `02c1f89`
+  (`Retain Stage 5 scale fail-close preflight`).
 - Latest pre-trial repository/live code checkpoint: `22f002a`.
 - The code at `3f0e56f` was physically exercised by the whole Stage-6B C5-2
   workload below. Its nested exact schedule-delivery gate passes, while the
@@ -115,8 +115,10 @@ describe the same decision. Python/C++ parity is not physical correctness.
   and eleven CE-0196 hit edges. It is not observer-off survival, a Power-0
   route, or NMNB.
 - Latest physical attempt:
-  `lunatic_route2_stage5_unattended_20260730_083416`, the complete workload
-  above. CE-0194's preceding frame-1 attempt is physically revalidated.
+  `lunatic_route2_stage5_unattended_20260730_124635`. CE-0199 retains this
+  failed preflight: it entered Stage 5 but fail-closed on root-only scale at
+  frame 1 before any decision. Its zero hits are not survival evidence; the
+  corrected command below adds explicit diagnostic continuation.
 - No TH08, controller, practice supervisor, full-route supervisor, or test
   process is intentionally left running.
 - `audits/` is untracked user input. Never stage it.

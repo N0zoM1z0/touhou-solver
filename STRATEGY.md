@@ -1795,6 +1795,14 @@ first.
   lifecycle probes cannot share a trial; an unsafe activation or cleanup
   terminates the exact verified target. The batches do not enter sensing,
   ranking, viability, or issue authority.
+- **Implemented lifecycle lowerer (2026-07-31):** an offline report tool now
+  accepts only a continuous zero-drop post-baseline uint32 serial chain.
+  Nonadvancing read/race failures can be recovered by a later exact batch;
+  overflow or malformed advancement cuts the authoritative prefix. It creates
+  per-slot observed generations, keeps baseline-active enemies as partial
+  starts, and reuses the forced-zero/lethal-damage classifier. Seven
+  adversarial tests pass, but no runtime batch has been observed and no source
+  program, prevented birth, exposure, strategy, or action claim is promoted.
 - **Static source/emission candidate atlas (2026-07-31):** pinned Route-2
   Lunatic Final-B ECL across Stages 1/2/3/4A/5/Final B contains 991 eligible
   timeline spawns and 70 unique root programs. Conservative source ownership
@@ -1862,6 +1870,7 @@ first.
   `notes/research/stage5_combat/STAGE5_ENEMY_PRESENCE_EPISODE_AUDIT_CONTRACT_20260731.md`, and
   `notes/research/stage5_combat/ROUTE2_ENEMY_END_SEMANTICS_CONTRACT_20260731.md`, and
   `notes/research/stage5_combat/ORDINARY_ENEMY_LIFECYCLE_EVENT_RING_CONTRACT_20260731.md`, and
+  `notes/research/stage5_combat/ROUTE2_ENEMY_LIFECYCLE_TRACE_LOWERING_CONTRACT_20260731.md`, and
   `notes/research/stage5_combat/ROUTE2_DAMAGEABILITY_AND_STATIC_SHOT_COVERAGE_CONTRACT_20260731.md`, and
   `notes/research/stage5_combat/ROUTE2_SOURCE_EMISSION_PROGRAM_ATLAS_CONTRACT_20260731.md`, and
   `notes/research/route_resources/POWER0_CLEAN_PREFIX_AUDIT_CONTRACT_20260731.md`, and

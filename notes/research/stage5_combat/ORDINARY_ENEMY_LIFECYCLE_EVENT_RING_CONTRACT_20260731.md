@@ -211,6 +211,7 @@ Before any strategy claim:
 1. on explicit runtime authorization, bracket one short native replay or
    diagnostic workload with full-pool snapshots;
 2. prove exact ordered agreement for allocation/retirement and forced zero;
-3. lower only exact, nonoverflow batches into generation/end evidence; and
+3. run the fail-closed lifecycle lowerer with `--require-complete` and compare
+   its generation/end output to that independent bracket; and
 4. then test whether an earlier verified kill actually prevents emissions or
    shortens exposure.

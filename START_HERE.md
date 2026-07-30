@@ -25,11 +25,12 @@ historical handoff.
   HP gate, action-conditioned static shot atlas, corrected item-pool
   recurrence/static Power ledger, exact bounded Boss HP/timeout transition
   prefix, route-wide static source/emission candidate atlas, exact lifecycle
-  ring diagnostic transport, `CONTENT-01` shipped content manifest, and
-  `CONTENT-02` static mandatory-event atlas are the current repository
-  checkpoint; no new physical trial was run.
-- Complete Linux discovery passes 1,454 tests in 13.774 seconds.
-- Complete Windows UNC discovery passes 1,454 tests in 29.844 seconds with
+  ring diagnostic transport and fail-closed generation/end lowerer,
+  `CONTENT-01` shipped content manifest, and `CONTENT-02` static
+  mandatory-event atlas are the current repository checkpoint; no new
+  physical trial was run.
+- Complete Linux discovery passes 1,461 tests in 13.569 seconds.
+- Complete Windows UNC discovery passes 1,461 tests in 28.447 seconds with
   the three existing skips.
 - No TH08, controller, supervisor, native-replay runner, or Windows test
   process is intentionally left running.
@@ -92,6 +93,15 @@ historical handoff.
   only after the row flush; a final batch follows key release. Invasive probes
   must use separate trials, and unsafe rollback terminates the exact verified
   TH08 image. The ring remains outside sensing, ranking, and issue authority.
+- `scripts/analysis/th08_enemy_lifecycle_trace_audit.py` now lowers only one
+  continuous, zero-drop uint32 serial prefix into per-slot observed
+  generations and reuses the fail-closed end classifier. Nonadvancing
+  read/race failures may be recovered by a later exact batch; overflow,
+  malformed advancement, or pointer/slot disagreement cuts authority.
+  Baseline-active enemies remain explicit partial starts. Seven deterministic
+  tests pass, but no runtime ring batch has been observed.
+- Detailed lowering boundary:
+  `notes/research/stage5_combat/ROUTE2_ENEMY_LIFECYCLE_TRACE_LOWERING_CONTRACT_20260731.md`.
 - Detailed lifecycle-ring contract:
   `notes/research/stage5_combat/ORDINARY_ENEMY_LIFECYCLE_EVENT_RING_CONTRACT_20260731.md`.
   The old active-only observer must not be repeated.

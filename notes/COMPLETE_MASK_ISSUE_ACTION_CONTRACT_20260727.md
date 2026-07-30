@@ -302,3 +302,30 @@ planner, actuator, input cadence, publication, damage objective, or strategy.
 Capture/issue-to-publication phase, physical delay support, optimized/native
 parity, immutable future body/geometry versions, and a whole-stage physical
 falsifier remain open.
+
+## Checkpoint D Physical Publication Amendment
+
+Original-game Stage-5 run `083416` physically observes priority-17 callback
+exit during 1,223 of 6,565 ordered write brackets. In 478 cases the callback's
+current mask is a non-final member of the same dispatch path. This proves that
+one controller action can cross the declared post-priority-17 boundary while
+its ordered dispatcher is still executing; issue is not an atomic event
+between two native publication steps.
+
+The same trace retains complete first-final prefixes with callback-step counts
+`1..5`, but one complete interval is superseded without observing its
+transient target. Four other long intervals contain explicit ring gaps.
+Consequently:
+
+- `completion_remaining` cannot be initialized from the current
+  enemy-manager-frame estimator;
+- a new issue may supersede an unobserved transient target, so the model must
+  not require every historical held target to become native-visible;
+- callbacks during dispatch must be represented before the next
+  observation-conditioned controller choice; and
+- an empirical `1..5` sample is proposed support, not a universal bound.
+
+Checkpoint D therefore closes physical existence of ordered publication
+prefixes and the asynchronous issue phase only as observed evidence. The
+causal recurrence, conservative completion-support contract, independent
+optimized parity, future geometry binding, and live authority remain open.

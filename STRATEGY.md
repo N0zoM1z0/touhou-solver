@@ -722,6 +722,51 @@ not a survival sample. Focused tests pass; complete Linux/Windows discovery
 passes 1,226 tests in 14.851/30.813 seconds, with three existing Windows
 skips.
 
+**2026-07-30 SEM-MODE-C priority-17 physical Stage-5 checkpoint:** corrected
+run `083416` completed the original-game whole Stage 5 through frame 43,376
+with 12,109 decisions, 11 hit edges, hard no-Bomb, `route_complete`, no-save,
+and exact target cleanup. The constant-root scale continuation and native
+hook are diagnostic perturbations with unknown direction, so this is not a
+survival comparison or promotion.
+
+The deterministic report retains 30,904 callback exits, 6,565 real writes,
+and 5,544 no-writes. All 6,565 issue brackets have complete retained
+pre/post serial intervals. Callback exit occurs during 1,223 writes; 478
+events directly observe a non-final mask on the ordered controller dispatch
+path. Consecutive retained events also contain 122 serial advances with no
+`enemy_manager_frame` advance. These are **observed physical** closure of the
+callback-in-dispatch and non-manager publication-clock questions.
+
+The first report attempt exposed CE-0195: interval selection treated every
+older retained serial as an illegal backward edge. The corrected selector
+ignores events outside the forward interval, and first-final timing is
+published only when the complete prefix through that event is retained.
+Five focused report tests pass. Four batches still have explicit overflow
+(`46/296/520/852` dropped), so global integrity remains false and all absence
+claims crossing those gaps remain unknown.
+
+Within complete prefixes, first observed final-mask callback steps are
+`{1:4893, 2:1648, 3:17, 4:2, 5:1}`. One exact one-step interval is replaced
+without observing its transient target (`0x05 -> 0x04`, followed by
+`0x04 -> 0x05`); this is valid overwrite censoring, not proof of a finite
+unconditional deadline. Therefore the estimator-to-oracle adapter is still
+**Offline/proposed**, not live. The next model must admit callback
+publication during dispatch, distinguish complete prefixes from gaps, and
+condition final completion on the latest command not being superseded.
+Manager-frame delay candidates remain ineligible for direct reuse.
+
+CE-0196 retains all 11 native hits. The canonical fresh hit is Stage-5
+nonspell frame 4,323 after robust-action exhaustion at frame 4,314; ten later
+contacts remain coupled discovery evidence. No unchanged physical repeat is
+authorized. First correct the asynchronous issue/publication recurrence and
+its censored support contract, then run independent scalar/optimized parity
+before future body/flag/geometry integration and SEM-MODE-D/E.
+
+The five focused report tests and complete 1,227-test Linux/Windows suites
+pass in 14.858/30.896 seconds, with three existing Windows skips. Fresh
+full-source regeneration is structurally identical to the retained compact
+report.
+
 The amendment and CE-0183/0184 override the numbered historical backlog
 below until the semantic correction/model-version gate is complete. Those
 rows retain evidence/status history; they are not permission to resume G5

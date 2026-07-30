@@ -370,9 +370,18 @@ Passing claim 1 does not establish claims 2--4.
 - `th08_priority17_publication_report.py` accepts a negative publication
   claim only when every serial in the interval is retained. It separately
   counts native callback exits during a dispatch, intermediate ordered masks,
-  and serial advances while `enemy_manager_frame` is unchanged. The probe
-  and report remain preflight until a complete physical Stage-5 trace exists;
-  they do not yet instantiate `r`.
+  and serial advances while `enemy_manager_frame` is unchanged. Physical
+  Stage-5 run `083416` retains 30,904 exits and 6,565 complete issue
+  brackets: 1,223 brackets contain a callback, 478 callbacks expose a
+  non-final ordered mask, and 122 consecutive callbacks advance without a
+  manager-frame advance. Four overflow batches remain explicit unknown
+  intervals.
+- Across complete serial prefixes, first observed final-mask publication
+  steps are `{1:4893, 2:1648, 3:17, 4:2, 5:1}`. One transaction is replaced
+  after one complete callback interval without its transient target being
+  observed. The physical trace therefore supplies positive support samples
+  and replacement censoring, but not a universal finite upper bound for
+  `r`.
 - Lookup-only version/root checks are exact.  In the first physical shadow,
   every root that was both covered and completed was consumed; miss delivery,
   not lookup corruption, caused the low hit rate.
@@ -389,9 +398,11 @@ Passing claim 1 does not establish claims 2--4.
 - Ordered prefix masks are physically necessary model states, but the
   current prefix/stutter support is conservative and its publication deadline
   is exact only relative to the oracle's abstract publication clock.
-- Mapping an asynchronous controller capture and issue to the declared
-  post-priority-17 root boundary remains open. Enemy-manager frame cannot
-  supply that mapping.
+- Callback publication during the asynchronous controller issue is now
+  physically observed. Mapping it into a causal decision transition remains
+  open: the transition must allow callbacks inside an ordered dispatch and
+  must not force a superseded transient target to become callback-visible.
+  Enemy-manager frame cannot supply that mapping.
 - Replacing recursive cadence by one robust public transition followed by a
   fixed interval has unknown direction.  It matched one small cohort but was
   optimistic on a retained wider ten-frame counterexample; “use only maximum
@@ -446,7 +457,10 @@ Before any losing-state value gains action authority:
 11. Before the ordered oracle consumes a physical delay support, identify
     priority-17 publications with a bounded native serial/event probe and
     derive a conservative post-issue callback-step support. A manager-frame
-    residual or first later capture is not that support.
+    residual or first later capture is not that support. Retained Stage-5
+    counts establish observed values `1..5`, not an upper bound: explicit
+    replacement censoring and trace gaps must remain branches or unresolved
+    evidence.
 
 ## 8. Performance Problem
 

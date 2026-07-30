@@ -336,15 +336,16 @@ def _events_in_interval(
     through: int,
 ) -> tuple[_Event, ...]:
     total = _serial_distance(through, after)
-    selected = [
-        event
+    selected_with_distance = [
+        (distance, event)
         for event in events.values()
-        if 0 < _serial_distance(event.serial, after) <= total
+        if 0 < (distance := (event.serial - after) & 0xFFFFFFFF) <= total
     ]
     return tuple(
-        sorted(
-            selected,
-            key=lambda event: _serial_distance(event.serial, after),
+        event
+        for _, event in sorted(
+            selected_with_distance,
+            key=lambda item: item[0],
         )
     )
 
@@ -567,8 +568,10 @@ def build_report(path: Path) -> dict[str, object]:
     incomplete_dispatch_intervals = 0
     native_intermediate_witness_count = 0
     final_observed_count = 0
+    final_observed_after_gap_count = 0
     final_publication_steps: Counter[str] = Counter()
     final_manager_deltas: Counter[str] = Counter()
+    retained_nonfinal_or_gapped_witnesses: list[dict[str, object]] = []
 
     for index, write in enumerate(writes):
         if (
@@ -645,18 +648,79 @@ def build_report(path: Path) -> dict[str, object]:
             None,
         )
         if first_final is not None:
-            outcome_counts[f"final_observed_before_{outcome_suffix}"] += 1
             final_observed_count += 1
-            final_publication_steps[
-                str(_serial_distance(first_final.serial, write.pre_serial))
-            ] += 1
-            final_manager_deltas[
-                str(first_final.manager_frame - write.frame)
-            ] += 1
+            distance_to_final = _serial_distance(
+                first_final.serial,
+                write.pre_serial,
+            )
+            retained_prefix_count = sum(
+                _serial_distance(event.serial, write.pre_serial)
+                <= distance_to_final
+                for event in candidates
+            )
+            if retained_prefix_count == distance_to_final:
+                outcome_counts[
+                    f"final_observed_before_{outcome_suffix}"
+                ] += 1
+                final_publication_steps[str(distance_to_final)] += 1
+                final_manager_deltas[
+                    str(first_final.manager_frame - write.frame)
+                ] += 1
+            else:
+                final_observed_after_gap_count += 1
+                outcome_counts[
+                    f"final_observed_after_gap_before_{outcome_suffix}"
+                ] += 1
+                if (
+                    len(retained_nonfinal_or_gapped_witnesses)
+                    < _MAX_RETAINED_WITNESSES
+                ):
+                    retained_nonfinal_or_gapped_witnesses.append(
+                        {
+                            "classification": (
+                                "final_observed_after_unretained_serial_gap"
+                            ),
+                            "transaction_ordinal": write.ordinal,
+                            "issue_line": write.line,
+                            "issue_frame": write.frame,
+                            "stage_route_index": write.stage_route_index,
+                            "mask_path": list(write.mask_path),
+                            "pre_serial": write.pre_serial,
+                            "interval_end_serial": interval_end,
+                            "interval_end_kind": outcome_suffix,
+                            "observed_event": first_final.compact_record(),
+                            "distance_to_observed_event": distance_to_final,
+                            "retained_prefix_event_count": (
+                                retained_prefix_count
+                            ),
+                        }
+                    )
         elif len(candidates) == _serial_distance(
             interval_end, write.pre_serial
         ):
             outcome_counts[f"final_not_observed_before_{outcome_suffix}"] += 1
+            if (
+                len(retained_nonfinal_or_gapped_witnesses)
+                < _MAX_RETAINED_WITNESSES
+            ):
+                retained_nonfinal_or_gapped_witnesses.append(
+                    {
+                        "classification": (
+                            "final_not_observed_in_complete_serial_interval"
+                        ),
+                        "transaction_ordinal": write.ordinal,
+                        "issue_line": write.line,
+                        "issue_frame": write.frame,
+                        "stage_route_index": write.stage_route_index,
+                        "mask_path": list(write.mask_path),
+                        "pre_serial": write.pre_serial,
+                        "interval_end_serial": interval_end,
+                        "interval_end_kind": outcome_suffix,
+                        "events": [
+                            event.compact_record() for event in candidates
+                        ],
+                    }
+                )
         else:
             outcome_counts["unknown_or_right_censored"] += 1
 
@@ -772,6 +836,9 @@ def build_report(path: Path) -> dict[str, object]:
                 native_intermediate_witness_count
             ),
             "final_observed_count": final_observed_count,
+            "final_observed_after_gap_count": (
+                final_observed_after_gap_count
+            ),
             "outcome_counts": dict(sorted(outcome_counts.items())),
             "first_final_publication_step_counts": dict(
                 sorted(
@@ -787,6 +854,9 @@ def build_report(path: Path) -> dict[str, object]:
         },
         "retained_native_intermediate_witnesses": (
             retained_intermediate_witnesses
+        ),
+        "retained_nonfinal_or_gapped_witnesses": (
+            retained_nonfinal_or_gapped_witnesses
         ),
         "integrity": {
             "passed": not any(integrity_errors.values()),

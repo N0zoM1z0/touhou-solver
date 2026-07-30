@@ -215,6 +215,104 @@ class Priority17PublicationReportTests(unittest.TestCase):
         self.assertEqual(witness["mask_path"], [0x65, 0x61, 0x41])
         self.assertEqual(witness["edge_position"], "1/2")
 
+    def test_later_transaction_ignores_events_before_its_serial_interval(
+        self,
+    ) -> None:
+        report = _report(
+            [
+                _decision(
+                    frame=100,
+                    previous=0x00,
+                    target=0x01,
+                    transitions=((0x01, True),),
+                    capture=_batch(
+                        "no_events",
+                        previous=10,
+                        observed=10,
+                    ),
+                    issue=_issue("complete", pre=10, post=10),
+                ),
+                _decision(
+                    frame=101,
+                    previous=0x01,
+                    target=0x01,
+                    transitions=(),
+                    capture=_batch(
+                        "exact",
+                        previous=10,
+                        observed=11,
+                        events=[
+                            _event(
+                                11,
+                                manager_frame=101,
+                                current=0x01,
+                                previous=0x00,
+                            )
+                        ],
+                    ),
+                    issue=_issue("no_write", pre=None, post=None),
+                ),
+                _decision(
+                    frame=102,
+                    previous=0x01,
+                    target=0x00,
+                    transitions=((0x01, False),),
+                    capture=_batch(
+                        "exact",
+                        previous=11,
+                        observed=12,
+                        events=[
+                            _event(
+                                12,
+                                manager_frame=102,
+                                current=0x01,
+                                previous=0x01,
+                            )
+                        ],
+                    ),
+                    issue=_issue("complete", pre=12, post=12),
+                ),
+                _decision(
+                    frame=103,
+                    previous=0x00,
+                    target=0x00,
+                    transitions=(),
+                    capture=_batch(
+                        "exact",
+                        previous=12,
+                        observed=13,
+                        events=[
+                            _event(
+                                13,
+                                manager_frame=103,
+                                current=0x00,
+                                previous=0x01,
+                            )
+                        ],
+                    ),
+                    issue=_issue("no_write", pre=None, post=None),
+                ),
+                {
+                    "kind": "priority17_publication_probe_final",
+                    "phase": "after_key_release",
+                    **_batch(
+                        "no_events",
+                        previous=13,
+                        observed=13,
+                    ),
+                },
+            ]
+        )
+
+        self.assertTrue(report["integrity"]["passed"])
+        self.assertEqual(
+            report["transactions"]["outcome_counts"],
+            {
+                "final_observed_before_replacement": 1,
+                "final_observed_before_trace_end": 1,
+            },
+        )
+
     def test_overflow_is_retained_as_incomplete_not_negative_evidence(
         self,
     ) -> None:
@@ -276,6 +374,20 @@ class Priority17PublicationReportTests(unittest.TestCase):
                 "unknown_or_overflow_capture_batches"
             ],
             1,
+        )
+        self.assertEqual(
+            report["transactions"]["outcome_counts"],
+            {"final_observed_after_gap_before_trace_end": 1},
+        )
+        self.assertEqual(
+            report["transactions"]["first_final_publication_step_counts"],
+            {},
+        )
+        self.assertEqual(
+            report["retained_nonfinal_or_gapped_witnesses"][0][
+                "classification"
+            ],
+            "final_observed_after_unretained_serial_gap",
         )
 
     def test_issue_read_error_does_not_masquerade_as_complete_bracket(

@@ -1148,6 +1148,66 @@ CE-0194 as physical survival evidence. Complete Linux/Windows discovery after
 the correction passes 1,226 tests in 14.851/30.813 seconds, with three
 existing Windows skips.
 
+The corrected physical Stage-5 unit `083416` completes frames `1..43376`
+with 12,109 decisions, 11 native hit edges, zero Bomb-mask/action violations,
+`route_complete`, no-save, and exact cleanup. It is a diagnostic
+constant-root/probe workload with unknown-direction timing perturbation, not
+an observer-off survival sample. CE-0196 retains the canonical fresh nonspell
+hit at frame 4,323 and the ten coupled later contacts.
+
+The repaired compact priority-17 report retains 30,904 callback exits across
+6,565 real ordered writes and 5,544 no-writes. Every pre/post-dispatch serial
+interval is complete. There are 1,223 writes with at least one callback exit
+during dispatch and 478 direct native observations of a non-final ordered
+mask. There are also 122 consecutive callback edges with an unchanged
+`enemy_manager_frame`. These observations close the existence of
+callback-in-dispatch publication and directly reject manager frame as the
+universal publication clock.
+
+CE-0195 records the initial report failure: interval lookup called the
+forward-only serial-distance validator on older retained events and falsely
+reported `21 -> 1` as a global rollback. The corrected report filters by
+unsigned forward distance and publishes a "first final" step only when the
+entire prefix through that event is retained. Its five focused regressions
+pass.
+
+Four explicit overflow batches drop `46/296/520/852` events across long
+non-decision gaps and the after-key-release final drain. Thus the report
+correctly remains globally incomplete. Fully retained prefixes observe the
+held final mask after callback-step counts
+`{1:4893, 2:1648, 3:17, 4:2, 5:1}`. One complete one-step interval is
+superseded without ever publishing its transient `0x04` target before the
+next `0x05` issue. This right-censoring means the sample does not establish an
+unconditional completion upper bound.
+
+Update the remaining SEM-MODE-C order accordingly:
+
+1. add a stage-neutral asynchronous issue/publication phase in which zero or
+   more priority-17 exits can sample monotone ordered masks while the
+   complete-mask dispatcher is still executing;
+2. retain the latest held desired mask separately from callback-visible
+   active input and let a newer real write supersede an unobserved transient
+   final target; do not force every historical target to become visible;
+3. represent publication support in callback-step coordinates, retain
+   replacement censoring and serial gaps explicitly, and keep the observed
+   `1..5` support proposal-only until a conservative upper contract is
+   justified across the physical Stage-3/4A/5/Final-B workloads;
+4. pass independent scalar/optimized differentials for multi-release/press,
+   Focus, Shot, reversal, overwrite, callbacks during dispatch, no-write,
+   and observation merging;
+5. only then bind an immutable future body/flag/geometry producer and proceed
+   to SEM-MODE-D/E and a new whole-stage falsifier.
+
+Do not rerun unchanged Stage 5 merely to improve an aggregate hit count or
+erase the four known gaps. A later stage-level physical gate must test a new
+immutable phase/adapter model, preserve no fail-close, and retain any
+naturally generated native replay for hypothesis review.
+
+Five focused report tests and complete 1,227-test Linux/Windows discovery
+pass in 14.858/30.896 seconds, with the three existing Windows skips.
+Regenerating the report from its full raw source is structurally identical to
+the retained JSON.
+
 ### Phase 2 — Repair collision geometry and lifecycle
 
 Implement as small, separately reviewable changes:

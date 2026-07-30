@@ -438,16 +438,26 @@ state.
 The default-off ring increments one serial per priority-17 callback exit and
 records contemporaneous manager frame plus raw/current/previous. Controller
 real writes retain pre/post-dispatch serial brackets, while no-write samples
-no serial and preserves normal actuation. The compact report will directly
-count consecutive serials whose manager-frame delta is zero. Such an event
-is an observed callback-publication edge during a manager-frame freeze; its
-absence is meaningful only when the entire serial interval is retained.
+no serial and preserves normal actuation.
 
 Overflow, unstable reads, or read failure remain unknown trace evidence and
 must not stop a whole stage. The hook is diagnostic and perturbing, so even a
-complete report cannot by itself promote hard survival. No physical trace
-has yet exercised this preflight; CE-0120 remains open and manager frame
-remains unauthorized as a universal input clock.
+complete report cannot by itself promote hard survival.
+
+Corrected Stage-5 run `083416` physically exercises the observer through
+normal route completion. Its report retains 30,904 callback exits. Among
+consecutive retained events, 122 advance the callback serial while
+`enemy_manager_frame` is unchanged. The replay-recording counter likewise
+has 31 zero-delta consecutive edges. This is direct **observed physical**
+evidence that priority-17 publication and the manager counter are distinct
+clocks, not merely an inference from asynchronous controller captures.
+
+The same report contains four explicit overflow batches, so absence across
+the whole stage remains unknown. This does not weaken the positive 122-edge
+witness. CE-0120 is therefore physically closed against
+`enemy_manager_frame` as a universal input-publication clock, while the
+replacement physical clock/automaton and all live actuation consequences
+remain open.
 
 ## Formal Review
 

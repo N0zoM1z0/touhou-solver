@@ -24,13 +24,14 @@ historical handoff.
   correction, default-off native lifecycle event ring, native damageability/
   HP gate, action-conditioned static shot atlas, corrected item-pool
   recurrence/static Power ledger, exact bounded Boss HP/timeout transition
-  prefix, route-wide static source/emission candidate atlas, exact lifecycle
-  ring diagnostic transport and fail-closed generation/end lowerer,
+  prefix, route-wide static Boss phase-configuration atlas, route-wide static
+  source/emission candidate atlas, exact lifecycle ring diagnostic transport
+  and fail-closed generation/end lowerer,
   `CONTENT-01` shipped content manifest, and `CONTENT-02` static
   mandatory-event atlas are the current repository checkpoint; no new
   physical trial was run.
-- Complete Linux discovery passes 1,461 tests in 13.569 seconds.
-- Complete Windows UNC discovery passes 1,461 tests in 28.447 seconds with
+- Complete Linux discovery passes 1,470 tests in 14.450 seconds.
+- Complete Windows UNC discovery passes 1,470 tests in 30.425 seconds with
   the three existing skips.
 - No TH08, controller, supervisor, native-replay runner, or Windows test
   process is intentionally left running.
@@ -168,6 +169,25 @@ historical handoff.
   causal phase-duration benefit remain unknown.
 - Detailed Boss boundary:
   `notes/research/stage5_combat/BOSS_PHASE_TRANSITION_MODEL_CONTRACT_20260731.md`.
+- The route-wide Boss phase configuration atlas now joins that recurrence to
+  all six pinned Route-2/Lunatic Final-B ECL files. It retains 189 eligible
+  `0x83..0x86` sites, 180 CFG-reachable sites, 103 literal transition edges,
+  and 22 Boss roots; all phase-control operands are literal.
+- Fresh handler revalidation promotes opcode `0x84` from inferred to observed
+  and corrects an omitted engine-mode gate. Opcodes `0x85/0x86` always write
+  threshold/timeout, but update the successor only when engine bit `0x4000`
+  is clear or mode bits `7..8` are zero. The suppressed branch retains the
+  prior successor, so content alone cannot recover runtime phase sequence.
+- Four phase subroutines have partially shared HP/timeout literal successor
+  sets (Stage 2 sub 29; Stage 3 subs 35 and 38; Stage 5 sub 56). This proves
+  multi-boundary configuration, not that damage selects a different eventual
+  route or improves survival.
+- Retained Boss configuration atlas:
+  `artifacts/runtime_reports/th08_route2_boss_phase_configuration_atlas_20260731.json`,
+  SHA-256
+  `95e872a31085b64e9660d9e488ffba16983a3cdb3d26e76a051a174e983bc837`.
+  Detailed boundary:
+  `notes/research/stage5_combat/ROUTE2_BOSS_PHASE_CONFIGURATION_ATLAS_CONTRACT_20260731.md`.
 - `COMBAT-KILL-01` now has a pinned static source/emission program atlas for
   all six Route-2/Lunatic Final-B stages. It partitions same-enemy
   call/interrupt/auxiliary components from child, cross-enemy, and phase-exit

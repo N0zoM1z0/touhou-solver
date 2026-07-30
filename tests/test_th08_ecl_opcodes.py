@@ -27,6 +27,16 @@ class Th08EclOpcodeTests(unittest.TestCase):
         self.assertEqual(spec.category, "boss")
         self.assertEqual(spec.confidence, "observed")
 
+    def test_boss_phase_configuration_opcodes_retain_mode_gate(self) -> None:
+        timer = opcode_spec(0x84)
+        health = opcode_spec(0x85)
+        timeout = opcode_spec(0x86)
+        self.assertEqual(timer.confidence, "observed")
+        self.assertIn("phase timer's elapsed value", timer.description)
+        self.assertIn("engine-mode gate suppresses", health.description)
+        self.assertIn("conditionally set", timeout.description)
+        self.assertIn("reset the phase timer", timeout.description)
+
     def test_defeat_mode_is_not_a_render_mode(self) -> None:
         spec = opcode_spec(0x81)
         self.assertEqual(spec.name, "set_enemy_defeat_mode")

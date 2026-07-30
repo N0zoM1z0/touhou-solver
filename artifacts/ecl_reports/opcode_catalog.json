@@ -3402,9 +3402,9 @@
   },
   {
     "category": "boss",
-    "confidence": "inferred",
+    "confidence": "observed",
     "corpus_count": 153,
-    "description": "Set/reset a phase timer from an integer operand.",
+    "description": "Set the phase timer's elapsed value from one evaluated integer operand.",
     "files": [
       "ecldata1.ecl",
       "ecldata1sp.ecl",
@@ -3442,7 +3442,7 @@
     "category": "boss",
     "confidence": "observed",
     "corpus_count": 113,
-    "description": "Set indexed health threshold and the ECL subroutine started when health crosses it.",
+    "description": "Set indexed health threshold and, unless the special engine-mode gate suppresses the write, its successor ECL subroutine.",
     "files": [
       "ecldata1.ecl",
       "ecldata1sp.ecl",
@@ -3480,7 +3480,7 @@
     "category": "boss",
     "confidence": "observed",
     "corpus_count": 353,
-    "description": "Set timeout frame and the ECL subroutine started when the phase timer reaches it.",
+    "description": "Set timeout frame, conditionally set its successor ECL subroutine under the engine-mode gate, and reset the phase timer.",
     "files": [
       "ecldata1.ecl",
       "ecldata1sp.ecl",

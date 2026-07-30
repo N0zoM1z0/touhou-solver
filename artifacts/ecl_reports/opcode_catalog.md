@@ -137,9 +137,9 @@ Confidence values keep observed behavior separate from provisional naming and un
 | `0x81` | `set_enemy_defeat_mode` | enemy | observed | 368 | 16 | Set the three-bit mode dispatched when enemy health reaches zero. Shipped values 0..3 select distinct deactivation, cleanup, phase, score, effect, and player-state consequences. |
 | `0x82` | `set_enemy_end_subroutine` | control | observed | 357 | 16 | Set the ECL subroutine started by enemy-manager cleanup when the current enemy or phase ends. |
 | `0x83` | `set_health` | boss | observed | 252 | 16 | Set current, maximum, and phase health to one integer value. |
-| `0x84` | `set_timer_current` | boss | inferred | 153 | 16 | Set/reset a phase timer from an integer operand. |
-| `0x85` | `set_health_phase_transition` | boss | observed | 113 | 24 | Set indexed health threshold and the ECL subroutine started when health crosses it. |
-| `0x86` | `set_timeout_phase_transition` | boss | observed | 353 | 20 | Set timeout frame and the ECL subroutine started when the phase timer reaches it. |
+| `0x84` | `set_timer_current` | boss | observed | 153 | 16 | Set the phase timer's elapsed value from one evaluated integer operand. |
+| `0x85` | `set_health_phase_transition` | boss | observed | 113 | 24 | Set indexed health threshold and, unless the special engine-mode gate suppresses the write, its successor ECL subroutine. |
+| `0x86` | `set_timeout_phase_transition` | boss | observed | 353 | 20 | Set timeout frame, conditionally set its successor ECL subroutine under the engine-mode gate, and reset the phase timer. |
 | `0x87` | `start_interrupt_subroutine` | control | observed | 625 | 20 | Replace an indexed auxiliary VM context and start a subroutine in it. |
 | `0x88` | `invoke_enemy_callback` | enemy | observed | 182 | 20 | Invoke an indexed built-in callback from the 32-entry table referenced at 0x41D4F4. |
 | `0x89` | `set_enemy_callback` | enemy | observed | 95 | 20 | Install or clear an indexed built-in per-frame enemy callback from the same 32-entry table. |

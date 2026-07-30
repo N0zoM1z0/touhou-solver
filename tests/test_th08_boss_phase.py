@@ -22,6 +22,7 @@ from th08_boss_phase import (
     ENEMY_PHASE_TIMER_FRACTION_OFFSET,
     ENEMY_PLAYER_SHOT_DAMAGE_FLAG,
     ENEMY_TIMEOUT_FRAME_OFFSET,
+    boss_phase_successor_write_enabled,
     capture_boss_phase_snapshot,
     project_boss_phase_transition_prefix,
 )
@@ -101,6 +102,16 @@ class Reader:
 
 
 class BossPhaseTests(unittest.TestCase):
+    def test_phase_successor_write_gate_matches_native_engine_modes(self) -> None:
+        self.assertTrue(boss_phase_successor_write_enabled(0x0000))
+        self.assertTrue(boss_phase_successor_write_enabled(0x0180))
+        self.assertTrue(boss_phase_successor_write_enabled(0x4000))
+        self.assertFalse(boss_phase_successor_write_enabled(0x4080))
+        self.assertFalse(boss_phase_successor_write_enabled(0x4100))
+        self.assertFalse(boss_phase_successor_write_enabled(0x4180))
+        with self.assertRaises(ValueError):
+            boss_phase_successor_write_enabled(-1)
+
     def test_capture_decodes_threshold_timer_and_damage_gate(self) -> None:
         snapshot = capture_boss_phase_snapshot(Reader(0x57D2F0))
         self.assertIsNotNone(snapshot)

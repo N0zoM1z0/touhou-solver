@@ -40,12 +40,26 @@ ENEMY_CONTROL_WINDOW_SIZE = 0x58
 
 # ECL opcode 0x53 writes bit index 2: the concrete mask is 1 << 2.
 ENEMY_BOSS_FLAG2 = 0x00000004
+BOSS_PHASE_SUCCESSOR_SPECIAL_MODE_FLAG = 0x00004000
+BOSS_PHASE_SUCCESSOR_MODE_BITS_MASK = 0x00000180
 
 
 class MemoryReader(Protocol):
     def read(self, address: int, size: int) -> bytes: ...
 
     def u32(self, address: int) -> int: ...
+
+
+def boss_phase_successor_write_enabled(engine_flags: int) -> bool:
+    """Return whether ECL 0x85/0x86 overwrite their successor register."""
+
+    if not 0 <= engine_flags <= 0xFFFFFFFF:
+        raise ValueError("engine_flags must be a uint32")
+    special_mode = bool(
+        engine_flags & BOSS_PHASE_SUCCESSOR_SPECIAL_MODE_FLAG
+        and engine_flags & BOSS_PHASE_SUCCESSOR_MODE_BITS_MASK
+    )
+    return not special_mode
 
 
 @dataclass(frozen=True)

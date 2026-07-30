@@ -1814,6 +1814,16 @@ first.
   timers are not kill deadlines, runtime execution/generation/end reason are
   absent, and already-live projectiles persist. No prevented-birth, exposure,
   strategy, or action claim is promoted.
+- **Static Boss phase-configuration atlas (2026-07-31):** all six pinned
+  Route-2/Lunatic Final-B ECL files contain 189 eligible `0x83..0x86` sites,
+  180 CFG-reachable literal sites, 103 transition operands, and 22 Boss roots.
+  Four subroutines have partially shared HP/timeout successor sets, exposing
+  exact multi-boundary content. Fresh native revalidation also corrects the
+  omitted engine-mode gate: `0x85/0x86` successor writes occur only when
+  engine bit `0x4000` is clear or mode bits `7..8` are zero; otherwise the old
+  successor remains. The atlas is a full-configuration-mode static index, not
+  runtime execution, eventual route divergence, damage benefit, or action
+  authority.
 - **Observed route-resource limit (2026-07-31):** two accepted natural
   Route-2/Lunatic Game Start prefixes, bounded strictly before their first
   native hits, retain `Power 0 -> 5` across 789 decisions and `Power 0 -> 0`
@@ -1873,6 +1883,7 @@ first.
   `notes/research/stage5_combat/ROUTE2_ENEMY_LIFECYCLE_TRACE_LOWERING_CONTRACT_20260731.md`, and
   `notes/research/stage5_combat/ROUTE2_DAMAGEABILITY_AND_STATIC_SHOT_COVERAGE_CONTRACT_20260731.md`, and
   `notes/research/stage5_combat/ROUTE2_SOURCE_EMISSION_PROGRAM_ATLAS_CONTRACT_20260731.md`, and
+  `notes/research/stage5_combat/ROUTE2_BOSS_PHASE_CONFIGURATION_ATLAS_CONTRACT_20260731.md`, and
   `notes/research/route_resources/POWER0_CLEAN_PREFIX_AUDIT_CONTRACT_20260731.md`, and
   `notes/research/route_resources/POWER_PICKUP_CAPABILITY_LEDGER_CONTRACT_20260731.md`.
   The raw first-64 inventory now has physical trace-only observation
@@ -1880,9 +1891,11 @@ first.
   authority. The lifecycle ring has offline/synthetic implementation
   authority only. The damageability/coverage atlas has offline semantic/static
   authority only. The source/emission atlas has shipped-content/static
-  candidate authority only. Runtime generation/end tracking, instruction
-  execution, exposure causality, causal collection, targeting, and S18 live
-  action authority remain none.
+  candidate authority only. The Boss configuration atlas has
+  shipped-content/native-static full-configuration-mode authority only.
+  Runtime generation/end tracking, instruction execution, phase sequence,
+  exposure causality, causal collection, targeting, and S18 live action
+  authority remain none.
 
 ## Adding Or Changing A Strategy
 

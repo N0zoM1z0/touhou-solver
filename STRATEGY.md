@@ -1374,8 +1374,9 @@ first.
 
 ### S05 — Empty-Kernel Endpoint Recovery And Boundary Reserve
 
-- **Status:** Recovery distance is live; losing-state boundary reserve is
-  enabled for a versioned Stage-5 physical falsifier, not as a certificate.
+- **Status:** Recovery distance is live; the losing-state boundary-reserve
+  physical falsifier is rejected as unactivated by CE-0200. Unguided reserve
+  is proposed offline only.
 - **Model:** after Boolean exhaustion, choose among fresh-hard-equivalent
   actions using recovery/boundary reserve.
 - **Observed:** retained Hard replay changed 28/400 actions with equal hard
@@ -1385,8 +1386,12 @@ first.
 - **Limitation:** it cannot relabel the root viable, prove unrestricted
   survival, override immediate hard ordering, or prove a prevented hit from
   single-step trace replay. `--no-losing-control-reserve` is the exact
-  rollback. Promotion requires complete original-game Stage-5 evidence and
-  then two consecutive `<=10` controls.
+  rollback. Physical run `20260730_130219` completed with 12 hits but zero
+  corridor queries or reserve activations, so it measures neither direction.
+  The separately versioned unguided candidate requires fixed-trace first-hit
+  and full-hit hard-vector/timing gates before physical use. Promotion still
+  requires complete original-game Stage-5 evidence and then two consecutive
+  `<=10` controls.
 - **Evidence:** `notes/LOSING_STATE_ROOT_CAUSE_20260725.md` and
   `notes/research/g5/STAGE5_LOSING_CONTROL_RESERVE_PHYSICAL_GATE_20260730.md`.
 

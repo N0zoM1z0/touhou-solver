@@ -1446,6 +1446,22 @@ routed back into the fixed-root/event-coverage loop. A favorable result begins
 the existing two-consecutive `<=10` confirmation gate; it does not complete
 NMNB promotion.
 
+CE-0200 closes that transition gate as an **activation failure**, not a
+strategy comparison. Run `20260730_130219` completes Stage 5 with 12 hits and
+hard no-Bomb, but diagnostic scale continuation supplies zero corridor
+policies/queries and the losing-state reserve activates zero times. The
+canonical first contact is frame 2,220 at the left boundary, earlier than the
+2,524-frame failed control.
+
+This is the first concrete test of the new iteration method: the physical
+witness invalidated the experiment seam, and the next edit is not sent
+straight back to a new RNG run. A separately versioned unguided boundary
+reserve must first replay the exact frame-2,220 and all-hit windows, change a
+pre-contact action, improve reserve on every changed row, preserve every
+declared hard vector, and meet the timing gate. Physical evidence must then
+show a nonzero activation count. This method itself is promoted as useful
+only after that offline-to-physical loop closes.
+
 Revised implementation priority:
 
 1. finish the complete one-frame native root and explicit coverage result;

@@ -109,17 +109,13 @@ describe the same decision. Python/C++ parity is not physical correctness.
 - Latest native-semantic correction checkpoint: `ca69ace`. The original
   review baseline remains `f28e13ca853280acec585f6296d947aafcabcaad`.
 - Latest complete physical workload:
-  `lunatic_route2_stage5_unattended_20260730_083416`. It is a complete
-  original-game hard-no-Bomb Lunatic Sakuya/Remilia Stage-5 priority-17
-  diagnostic trace: frames `1..43376`, 12,109 decisions, `route_complete`,
-  and eleven CE-0196 hit edges. It is not observer-off survival, a Power-0
-  route, or NMNB.
+  `lunatic_route2_stage5_unattended_20260730_130219`. It is a complete
+  original-game hard-no-Bomb Lunatic Sakuya/Remilia Stage-5 diagnostic:
+  frames `2..42835`, 12,281 decisions, `route_complete`, and 12 CE-0200 hit
+  edges. Its configured losing-state reserve had zero reachable activations.
 - Latest physical attempt:
-  `lunatic_route2_stage5_unattended_20260730_125502`. CE-0199 retains this
-  second failed preflight: it launched/patched the game and reached the
-  verified Stage-5 selection, but a duplicated nested agent-contract rule
-  rejected before final confirmation or any decision. Its zero decisions are
-  not survival evidence; cleanup completed.
+  `lunatic_route2_stage5_unattended_20260730_130219`, the complete workload
+  above. Cleanup completed and no game/controller process remains.
 - No TH08, controller, practice supervisor, full-route supervisor, or test
   process is intentionally left running.
 - `audits/` is untracked user input. Never stage it.
@@ -848,13 +844,13 @@ Do not resume broad G5 work first.
    route. C5 exact delivery is closed for its declared source-local contract;
    the two failed workloads already supply their reachability, resource, and
    non-aborting evidence.
-2. First close the preregistered changed Stage-5
-   `losing_control_reserve` falsifier. It is enabled only after Boolean
-   exhaustion, preserves the screened fresh hard vector, and has exact
-   rollback `--no-losing-control-reserve`. Run the complete original-game
-   stage without THPRAC or fail-close. Treat the first fresh contact as the
-   canonical causal witness. A failed/inconclusive result returns to offline
-   fixed-root/event analysis; do not blindly repeat unrelated RNG samples.
+2. CE-0200 closes the preregistered `losing_control_reserve` run as physically
+   inert: Stage 5 completed with 12 hits, but diagnostic scale continuation
+   produced zero corridor queries and zero reserve activations. Do not repeat
+   it. Use canonical frame 2,220 and the full hit-window corpus to screen the
+   separately versioned unguided boundary reserve. It must change a
+   pre-contact action, reduce reserve deficit, preserve every hard vector,
+   and pass timing before one new complete original-game Stage-5 falsifier.
 3. Continue `SEM-MODE-C` after the asynchronous scalar/native checkpoint.
    Callback-in-dispatch issue, superseded transient targets, no-write, and
    exact bounded scalar/native parity are now implemented offline. The
@@ -2431,7 +2427,7 @@ global-planning objective.
 | shadow | explicit complete-mask active/held/pending certificate | Canonical trace identity and a 36-action scalar/native recurrence exist. CE-0134 is corrected offline; future-event unknown coverage, CE-0120, performance/publication, and physical integration block live ranking. |
 | shadow | restricted losing-root candidate verifier/publication | May prove a declared finite candidate and retain its witness; cannot claim unrestricted losing/optimality or change input. |
 | offline/shadow | belief lower bounds, revealed-delay upper, resumable refinement | Feasibility/optimality research; too slow or optimistic for current live authority. |
-| live, versioned falsifier | losing-state control reserve | Ranks fresh-hard-equivalent actions after Boolean exhaustion for one preregistered Stage-5 gate; it cannot relabel viability or override hard safety. `--no-losing-control-reserve` is exact rollback and physical effect remains unmeasured. |
+| rejected physical gate / offline retained | losing-state control reserve | CE-0200 completed Stage 5 with zero corridor queries and zero reserve activations, so the run was inert. The exact rollback remains; unguided reserve is a separate offline proposal requiring fixed-trace hard-vector/timing gates. |
 | proposal-only | final-only continuation and width-4 supplemental lane | Preserves hard membership and the historical incumbent in finite replay; no live CLI or delivery authority. |
 | rejected | repair-aware shared beam pruning | CE-0129 terminal-hard regressions. |
 | rejected | synchronous native supplemental delivery | End-to-end Windows latency gate failed. |

@@ -2,7 +2,8 @@
 
 Date: 2026-07-30 (Asia/Singapore)
 
-Status: **preregistered physical falsifier; result pending**
+Status: **physical activation failed (CE-0200); 12-hit workload retained;
+unguided fixed-trace successor gate pending**
 
 ## Intervention
 
@@ -138,3 +139,37 @@ Native replay, when naturally available, is stronger for reconstructing the
 same recorded physical history and testing observer/model hypotheses. It
 still replays recorded input and is not evidence that a new policy would have
 survived. Fresh original-game play remains the acceptance gate.
+
+## Physical Result
+
+Run `lunatic_route2_stage5_unattended_20260730_130219` completed frames
+`2..42835` with 12,281 decisions, 12 hits, hard no-Bomb, automatic transition
+confirmation, `route_complete`, and exact cleanup. Hit frames are:
+
+```text
+2220, 11712, 23564, 24225, 26979, 30521,
+34613, 37210, 39251, 40225, 41113, 42146
+```
+
+The canonical frame-2,220 contact is earlier than the 2,524-frame failed
+control. It is a committed-prefix bullet collision at `(8.000, 422.343)`
+after `up_left_fast`. Nine of 12 contacts have a playfield-boundary
+contributor. The result is neither the `<=10` useful threshold nor a
+first-contact improvement.
+
+The intended intervention was also physically inert: diagnostic scale
+continuation produced zero corridor policies/queries, zero repair/recovery
+guidance, and zero reserve selections. Merely setting
+`losing_control_reserve=true` did not make its empty-kernel activation state
+reachable. CE-0200 rejects this as a physical reserve result.
+
+The next candidate is separately versioned **unguided boundary reserve**. It
+may activate only when global guidance is unavailable and may reorder only
+endpoints that preserve the existing local/issue/terminal hard vector. Before
+another game launch, retained frame-2,220 and full-hit windows must show:
+
+- at least one changed pre-contact action;
+- strictly reduced reserve deficit for every changed action;
+- zero hard-vector regressions;
+- bounded timing; and
+- an explicit nonzero runtime activation counter.

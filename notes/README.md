@@ -21,6 +21,10 @@ This is the navigation index for repository evidence. It does not replace
 - [Lunatic NMNB review and roadmap](review/LUNATIC_NMNB_PROGRAM_REVIEW_AND_ROADMAP_20260729.md):
   reconciled current status, authority impact, implementation dependencies,
   and physical acceptance ladder.
+- [Lunatic NMNB research taskbook](review/TH08_LUNATIC_NMNB_RESEARCH_TASKBOOK_20260730.md):
+  iteration-first task cards, closed-loop research gates, and prioritized
+  backlog; this is a planning artifact and does not override the current
+  handoff, strategy ledger, formal contracts, or retained evidence.
 - [Native replay wind tunnel and replay-save contract](architecture/NATIVE_REPLAY_CAUSAL_WIND_TUNNEL_AND_REPLAY_SAVE_CONTRACT_20260730.md):
   current canonical replay/root identity, all-action result, authority
   boundary, and explicit-root executor handoff.

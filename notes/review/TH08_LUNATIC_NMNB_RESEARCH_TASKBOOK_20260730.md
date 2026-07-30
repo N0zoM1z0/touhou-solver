@@ -1065,6 +1065,12 @@ Current execution checkpoint, 2026-07-31:
 - native roots now expose incompatible active slots, so this content closure
   applies only to exact Route-2, zero-Bomb, no-hit histories whose root and
   future slots stay compatible;
+- combat projection v2 now reverses the complete loaded-SHT relocation and
+  requires both pinned byte identities; rolling v6/causal-search v4 classify
+  every active source pointer as exact normal, Bomb-only special, or unknown
+  at the root and every future tick;
+- field-compatible but unowned pointers remain explicit unknowns in the
+  non-ranking branch report; no v6/v4 native corpus has been observed;
 - no runtime v4 event has been observed, so target-motion/action attribution,
   no v5/v3 combat corpus has been captured, and generation-safe kill,
   prevented hostile births, safe collection, later benefit, and every exit

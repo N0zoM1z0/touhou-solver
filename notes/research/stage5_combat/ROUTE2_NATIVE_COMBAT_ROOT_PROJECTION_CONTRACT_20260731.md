@@ -62,7 +62,9 @@ it supplies no shot lifecycle, callback, collision, or damage authority.
 ## Implemented Projection
 
 `scripts/th08_runtime/native_combat_projection.py` implements
-`th08-native-combat-root-projection-v1`.
+`th08-native-combat-root-projection-v2`. V1 established the complete
+shot/target projection; V2 adds normalized loaded-SHT identity and exact
+source-record provenance.
 
 For every exact root or future tick it retains:
 
@@ -106,7 +108,7 @@ contaminated roots still fail closed.
 ## Rolling And Causal Integration
 
 `scripts/tools/th08_native_snapshot_trial.py` schema
-`th08-native-snapshot-rolling-trial-v5` now:
+`th08-native-snapshot-rolling-trial-v6` now:
 
 - captures the combat projection at the root and every tick;
 - requires its SHA to agree in same-action replay and all-36 repeated-root
@@ -116,7 +118,7 @@ contaminated roots still fail closed.
 - retains compact combat summaries in the portfolio output.
 
 `scripts/tools/th08_native_snapshot_causal_search.py` schema
-`th08-native-snapshot-causal-secondary-search-v3` carries the same projection
+`th08-native-snapshot-causal-secondary-search-v4` carries the same projection
 through the origin, promoted subroots, future ticks, and parent-repeat
 transaction.
 
@@ -234,16 +236,17 @@ This checkpoint grants:
 
 It grants no:
 
-- observed v5/v3 runtime sample;
+- observed v6/v4 runtime sample;
 - generation-safe HP delta or kill/end classification;
 - target-selection, Focus-switch, damage-ranking, or resource-ranking
   authority;
 - prevented hostile birth or shortened exposure claim;
 - physical predictive, shadow, or live action authority.
 
-Four focused projection tests, five focused report tests, twelve rolling
-snapshot tests, and four causal-search tests pass. Ruff and diff checks pass.
-Complete discovery passes 1,512 tests in 13.868 seconds on Linux and 31.165
+Five focused projection tests, six focused report tests, three loaded-SHT
+provenance tests, twelve rolling snapshot tests, and four causal-search tests
+pass. Ruff and diff checks pass. Complete discovery passes 1,517 tests in
+14.241 seconds on Linux and 31.181
 seconds through the Windows UNC loader, with the three existing skips.
 
 The next authorized causal gate is a small immutable-root corpus spanning

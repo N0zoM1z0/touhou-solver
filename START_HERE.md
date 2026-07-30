@@ -38,8 +38,8 @@ historical handoff.
   `CONTENT-01` shipped content manifest, and `CONTENT-02` static
   mandatory-event atlas are the current repository checkpoint; no new
   physical trial was run.
-- Complete Linux discovery passes 1,512 tests in 13.868 seconds.
-- Complete Windows UNC discovery passes 1,512 tests in 31.165 seconds with
+- Complete Linux discovery passes 1,517 tests in 14.241 seconds.
+- Complete Windows UNC discovery passes 1,517 tests in 31.181 seconds with
   the three existing skips.
 - No TH08, controller, supervisor, native-replay runner, or Windows test
   process is intentionally left running.
@@ -63,8 +63,8 @@ historical handoff.
   damage/state/type/callbacks, both emission and damage timers, active enemy
   HP/hitboxes/gates, and supported instantaneous ordinary-shot overlaps.
   Causal-search schema v3 carries the same projection through origins,
-  subroots, futures, and parent repeats. No v5/v3 native corpus has been
-  captured.
+  subroots, futures, and parent repeats. No v5/v3 native corpus was captured
+  before loaded-SHT provenance superseded those schemas below.
 - The strict offline combat branch report accepts only completed deterministic
   transactions, treats native player phase 2 as a hard survival rejection,
   and retains native frame damage, supported overlap, and positive-HP-sum
@@ -80,6 +80,15 @@ historical handoff.
   `artifacts/runtime_reports/th08_route2_normal_shot_content_audit_20260731.json`,
   SHA-256
   `4361ec2814a8885dd6c4dd17bd42039f5a9bb38bccbeebcb8c43b6816df6d4e1`.
+- Combat projection v2 now reverses the shipped SHT loader relocation for the
+  complete 1,584-byte primary and 3,568-byte secondary heap images and
+  requires both normalized SHA-256 identities. Every active slot's exact
+  `source_record_pointer` is classified into 53 normal, 34 Bomb-only special,
+  or unknown records. Field-compatible but unowned pointers remain unknown.
+- This identity change bumps rolling snapshot to v6 and causal search to v4.
+  The branch lowerer checks root plus every tick and preserves any special or
+  unknown source as non-normal; no v5/v3 artifact is reinterpreted and no
+  v6/v4 corpus has been captured.
 - Root 2,129's old four-u16 pre-hostile prefix is compatible with a due
   focused level-5 option pair, but the retained v3 capsule lacks timer/pool
   fields, so this remains inferred rather than observed. Hostile birth 1220
@@ -172,6 +181,8 @@ historical handoff.
   pool/slot layout, and update-callback trajectory boundary.
   Comments at `0x00451015` and `0x004510EE` retain the Route-2 normal versus
   Bomb-only level boundary and relocated SHT callback-field mapping.
+  Comments at `0x0044DE07` and `0x00450F83` retain exact callback relocation
+  reversal and player primary/secondary loaded-SHT base ownership.
   Comments at `0x0044044D`, `0x00440991`, `0x00440A39`, and `0x00440C1E`
   retain the successful item allocation, cull, and pickup transaction
   boundaries.
@@ -184,6 +195,8 @@ historical handoff.
   `notes/research/stage5_combat/ROUTE2_NATIVE_COMBAT_ROOT_PROJECTION_CONTRACT_20260731.md`.
 - Detailed Route-2 normal-shot content closure:
   `notes/research/stage5_combat/ROUTE2_NORMAL_SHOT_CONTENT_CLOSURE_CONTRACT_20260731.md`.
+- Detailed loaded-SHT/source-record provenance:
+  `notes/research/stage5_combat/ROUTE2_LOADED_SHT_PROVENANCE_CONTRACT_20260731.md`.
 - Detailed item-allocation/pickup boundary:
   `notes/research/route_resources/ROUTE2_ITEM_ALLOCATION_PICKUP_TRACE_CONTRACT_20260731.md`.
 - `COMBAT-FAST-01` now has an executable native-ordered player-shot damage
@@ -621,11 +634,12 @@ historical handoff.
   authorization exists, continue the offline WS-H
   foundations. Damageability and static shot coverage are now retained. The
   immutable-root shot/target/gate projection and survival-filtered branch
-  lowerer are implemented in rolling v5/causal-search v3, but have no
+  lowerer are implemented in rolling v6/causal-search v4, but have no
   retained runtime sample. The pinned normal SHT corpus also proves that
   type-4/5 and nonzero update/hit callbacks are unreachable from the normal
-  no-Bomb selector, provided every root/tick active slot satisfies the new
-  compatibility check. The next causal combat gate must join those branches
+  no-Bomb selector. Projection v2 now additionally requires the loaded heap
+  images to normalize to the pinned bytes and every root/tick source pointer
+  to map to a normal record. The next causal combat gate must join those branches
   to enemy generation, the now-exact v4 HP transaction,
   shot/option/RNG state, target-motion history, and viable actions.
   The drop/Power static ledger, native defeat-drop recurrence, and route-wide
@@ -1578,10 +1592,10 @@ Do not resume broad G5 work first.
    survival-feasible collection branches, an observed Power-threshold
    crossing, and a later damage/kill/survival join. Continue another
    high-ROI offline WS-H task while runtime evidence is unauthorized. A later
-   explicitly authorized v5/v3 native-root corpus may compare focused,
+   explicitly authorized v6/v4 native-root corpus may compare focused,
    unfocused, and causal refocus schedules only inside the unchanged
    survival-feasible set. Every root/tick must also satisfy the pinned normal
-   SHT runtime-slot compatibility condition, then join the v4 lifecycle
+   SHT runtime-slot and exact source-provenance conditions, then join the v4 lifecycle
    generation/damage stream before calling any HP change a kill.
    Do not launch a physical trial merely to fill any capture debt.
    `CONTENT-01` is closed for shipped byte identity. `CONTENT-02` may now

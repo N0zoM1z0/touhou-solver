@@ -89,7 +89,7 @@ clean no-Bomb history. A root is compatible with this closure only when:
    `type == 0`, update-callback pointer zero, and hit-callback pointer zero;
 4. neither the root nor any branch tick is native player phase 2.
 
-`th08-native-combat-root-projection-v1` now marks every active slot against
+`th08-native-combat-root-projection-v2` marks every active slot against
 those damage-path criteria and reports compatible/incompatible counts.
 `th08-native-combat-branch-comparison-v1` carries the root plus tick counts.
 An incompatible active slot keeps the branch explicitly
@@ -129,13 +129,13 @@ boundary. This avoids spending reverse-engineering effort on unreachable
 normal type-4/5 and hit-callback cases. It does not remove fail-closed handling
 for arbitrary or contaminated roots.
 
-Three focused content-audit tests, four projection tests, and five combat-
-report tests pass. Ruff and diff checks pass. Complete discovery passes 1,512
-tests in 13.868 seconds on Linux and 31.165 seconds through the Windows UNC
+Three focused content-audit tests, five projection tests, and six combat-
+report tests pass. Ruff and diff checks pass. Complete discovery passes 1,517
+tests in 14.241 seconds on Linux and 31.181 seconds through the Windows UNC
 loader, with the three existing skips. No TH08, replay, controller, native
 runner, or physical trial was launched.
 
-The next explicitly authorized v5/v3 corpus must verify that every root/tick
+The next explicitly authorized v6/v4 corpus must verify that every root/tick
 used by `COMBAT-FAST-01` satisfies the runtime compatibility conditions, then
 join v4 generation-safe damage before any damage or kill benefit is promoted.
 Without runtime authorization, continue the next general WS-H semantic

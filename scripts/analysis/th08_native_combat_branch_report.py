@@ -11,8 +11,8 @@ from typing import Any
 
 
 SCHEMA = "th08-native-combat-branch-comparison-v1"
-ROLLING_SCHEMA = "th08-native-snapshot-rolling-trial-v5"
-CAUSAL_SEARCH_SCHEMA = "th08-native-snapshot-causal-secondary-search-v3"
+ROLLING_SCHEMA = "th08-native-snapshot-rolling-trial-v6"
+CAUSAL_SEARCH_SCHEMA = "th08-native-snapshot-causal-secondary-search-v4"
 ROLLING_ACCEPTED_STATUS = "rolling_native_projection_snapshot_passed"
 CAUSAL_ACCEPTED_STATUS = "causal_secondary_search_passed"
 
@@ -130,6 +130,13 @@ def _summarize_branch(
         )
         for summary in (root_summary, *summaries)
     )
+    route2_non_normal_or_unknown_source_active_shot_ticks = sum(
+        _integer(
+            summary,
+            "route2_non_normal_or_unknown_source_active_shot_count",
+        )
+        for summary in (root_summary, *summaries)
+    )
     candidate_status = (
         "rejected_hard_survival"
         if not survived
@@ -137,9 +144,13 @@ def _summarize_branch(
             "survival_filtered_proxy_only_with_unresolved_overlap"
             if unresolved_target_ticks
             else (
-                "survival_filtered_proxy_only_non_normal_shot_content"
-                if route2_normal_incompatible_active_shot_ticks
-                else "survival_filtered_proxy_only"
+                "survival_filtered_proxy_only_non_normal_or_unknown_shot_source"
+                if route2_non_normal_or_unknown_source_active_shot_ticks
+                else (
+                    "survival_filtered_proxy_only_non_normal_shot_content"
+                    if route2_normal_incompatible_active_shot_ticks
+                    else "survival_filtered_proxy_only"
+                )
             )
         )
     )
@@ -209,6 +220,9 @@ def _summarize_branch(
             "route2_normal_damage_path_incompatible_active_shot_ticks": (
                 route2_normal_incompatible_active_shot_ticks
             ),
+            "route2_non_normal_or_unknown_source_active_shot_ticks": (
+                route2_non_normal_or_unknown_source_active_shot_ticks
+            ),
         },
         "authority": {
             "hard_survival_filter": "observed_native_player_phase_over_branch",
@@ -223,6 +237,9 @@ def _summarize_branch(
             ),
             "route2_normal_damage_path_content_compatible": (
                 route2_normal_incompatible_active_shot_ticks == 0
+            ),
+            "route2_exact_normal_source_provenance": (
+                route2_non_normal_or_unknown_source_active_shot_ticks == 0
             ),
             "combat_benefit_authority": False,
             "live_ranking_authority": False,

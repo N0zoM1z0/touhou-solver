@@ -52,10 +52,13 @@ from th08_runtime.game_state import (
     PLAYER_SHOT_TIMER_OFFSET,
     SPELL_STATE_CAPTURE_SIZE,
 )
+from th08_runtime.route2_sht_provenance import (
+    capture_loaded_route2_sht_state,
+)
 from th08_runtime.sensing import decode_spell_state
 
 
-NATIVE_COMBAT_PROJECTION_SCHEMA = "th08-native-combat-root-projection-v1"
+NATIVE_COMBAT_PROJECTION_SCHEMA = "th08-native-combat-root-projection-v2"
 PLAYER_SHOT_COMBAT_STATE_SCHEMA = "th08-player-shot-combat-state-v1"
 ENEMY_DAMAGE_TARGET_STATE_SCHEMA = "th08-enemy-damage-target-state-v1"
 SUPPORTED_SHOT_PASS_SCHEMA = "th08-supported-ordinary-shot-pass-v1"
@@ -762,6 +765,22 @@ def capture_native_combat_projection(
         struct.unpack_from("<I", player_context, PLAYER_BOMB_ACTIVE_OFFSET)[0]
     )
     targets = decode_enemy_damage_targets(native_root_projection)
+    loaded_sht_state = capture_loaded_route2_sht_state(reader)
+    shot_source_provenance = []
+    for shot in shot_state.slots:
+        provenance = loaded_sht_state.provenance_for_pointer(
+            shot.source_record_pointer
+        )
+        shot_source_provenance.append(
+            {
+                "slot": shot.slot,
+                "source_record_pointer": shot.source_record_pointer,
+                "exact_loaded_sht_record": provenance is not None,
+                "provenance": (
+                    None if provenance is None else provenance.record()
+                ),
+            }
+        )
     target_records = [
         _target_combat_record(
             target,
@@ -786,6 +805,8 @@ def capture_native_combat_projection(
             "spell_id": int(spell["spell_id"]) if spell["active"] else None,
         },
         "player_shots": shot_state.record(),
+        "loaded_route2_sht": loaded_sht_state.record(),
+        "player_shot_source_provenance": shot_source_provenance,
         "enemy_targets": target_records,
         "scope": {
             "root_identity": (
@@ -823,6 +844,20 @@ def capture_native_combat_projection(
         "route2_normal_damage_path_incompatible_active_shot_count": sum(
             not slot.route2_normal_damage_path_compatible
             for slot in shot_state.slots
+        ),
+        "route2_exact_normal_source_active_shot_count": sum(
+            bool(
+                row["provenance"] is not None
+                and row["provenance"]["normal_selector_reachable"]
+            )
+            for row in shot_source_provenance
+        ),
+        "route2_non_normal_or_unknown_source_active_shot_count": sum(
+            not bool(
+                row["provenance"] is not None
+                and row["provenance"]["normal_selector_reachable"]
+            )
+            for row in shot_source_provenance
         ),
         "active_enemy_target_count": len(targets),
         "positive_hp_target_count": sum(target.hitpoints > 0 for target in targets),

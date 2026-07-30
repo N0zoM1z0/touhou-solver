@@ -19,6 +19,8 @@ def _summary(frame: int, *, hp: int = 100, damage: int = 0) -> dict[str, int]:
         "hit_state_shot_count": 1,
         "route2_normal_damage_path_compatible_active_shot_count": 3,
         "route2_normal_damage_path_incompatible_active_shot_count": 0,
+        "route2_exact_normal_source_active_shot_count": 3,
+        "route2_non_normal_or_unknown_source_active_shot_count": 0,
         "active_enemy_target_count": 1,
         "positive_hp_target_count": 1,
         "positive_hp_sum": hp,
@@ -180,6 +182,54 @@ class NativeCombatBranchReportTests(unittest.TestCase):
             all(
                 not row["authority"][
                     "route2_normal_damage_path_content_compatible"
+                ]
+                for row in report["branches"]
+            )
+        )
+
+    def test_unknown_shot_source_keeps_exact_provenance_open(self) -> None:
+        source = {
+            "schema": ROLLING_SCHEMA,
+            "result": {
+                "status": ROLLING_ACCEPTED_STATUS,
+                "root_native_combat_projection": _projection(100),
+                "root_compact_state": {"player_phase": 0},
+                "branches": {
+                    branch_id: {
+                        "ticks": [_tick(101, action=0x05)]
+                    }
+                    for branch_id in ("a1", "a2", "b")
+                },
+            },
+        }
+        root_summary = source["result"]["root_native_combat_projection"][
+            "summary"
+        ]
+        root_summary["route2_exact_normal_source_active_shot_count"] = 2
+        root_summary[
+            "route2_non_normal_or_unknown_source_active_shot_count"
+        ] = 1
+
+        report = build_report(
+            source,
+            source_path="fixture.json",
+            source_sha256="f" * 64,
+        )
+
+        self.assertTrue(
+            all(
+                row["candidate_status"]
+                == (
+                    "survival_filtered_proxy_only_"
+                    "non_normal_or_unknown_shot_source"
+                )
+                for row in report["branches"]
+            )
+        )
+        self.assertTrue(
+            all(
+                not row["authority"][
+                    "route2_exact_normal_source_provenance"
                 ]
                 for row in report["branches"]
             )

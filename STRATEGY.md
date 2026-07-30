@@ -1916,6 +1916,16 @@ first.
   proof. Closure requires exact Route 2, zero-Bomb history/actions, compatible
   root/tick slots, and no player phase 2. It grants no delivered-damage,
   generation, benefit, ranking, or live authority.
+- **Loaded Route-2 SHT provenance (2026-07-31, Offline):** combat projection
+  v2 reads both loaded SHT heap images, reverses level-pointer and callback
+  relocation, and requires the normalized bytes to equal the pinned primary/
+  secondary SHA-256 identities. Its exact 87-record pointer map separates 53
+  normal records, 34 Bomb-only special records, and foreign/unknown pointers.
+  Rolling v6 and causal-search v4 retain that identity at roots and ticks; the
+  lowerer refuses to apply normal-content closure to any special or unknown
+  source. No new native corpus exists. This grants loaded-content and source-
+  ownership authority only, not damage, generation, combat benefit, ranking,
+  physical prediction, or live authority.
 - **Boundary:** first revalidate native HP/damageability/end-reason/drop
   semantics, retain trace-only exposure and damage attribution, and separate
   kill, timeout, scripted despawn, and unknown. Any shadow target may rank
@@ -1956,6 +1966,7 @@ first.
   `notes/research/stage5_combat/ROUTE2_DAMAGEABILITY_AND_STATIC_SHOT_COVERAGE_CONTRACT_20260731.md`, and
   `notes/research/stage5_combat/ROUTE2_NATIVE_COMBAT_ROOT_PROJECTION_CONTRACT_20260731.md`, and
   `notes/research/stage5_combat/ROUTE2_NORMAL_SHOT_CONTENT_CLOSURE_CONTRACT_20260731.md`, and
+  `notes/research/stage5_combat/ROUTE2_LOADED_SHT_PROVENANCE_CONTRACT_20260731.md`, and
   `notes/research/stage5_combat/ROUTE2_SOURCE_EMISSION_PROGRAM_ATLAS_CONTRACT_20260731.md`, and
   `notes/research/stage5_combat/ROUTE2_BOSS_PHASE_CONFIGURATION_ATLAS_CONTRACT_20260731.md`, and
   `notes/research/route_resources/POWER0_CLEAN_PREFIX_AUDIT_CONTRACT_20260731.md`, and
@@ -1970,7 +1981,9 @@ first.
   atlas has offline semantic/static
   authority only. The native combat projection has offline exact-root and
   synthetic supported-overlap authority only. The normal-shot closure has
-  pinned shipped-content/native-selector authority only. The source/emission atlas has
+  pinned shipped-content/native-selector authority only. Loaded-SHT
+  provenance has offline exact normalized-content/source-ownership authority
+  only. The source/emission atlas has
   shipped-content/static
   candidate authority only. The item/drop atlas has shipped-native
   recurrence/static opportunity authority only. The cross-atlas board has

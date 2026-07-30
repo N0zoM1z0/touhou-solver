@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import struct
 import unittest
+from pathlib import Path
 from types import SimpleNamespace
 
 from th08_live.enemy_sensor import (
@@ -15,6 +16,7 @@ from th08_runtime.game_state import (
     ADDR_SPELL_CARD_STATE,
     PLAYER_BOMB_ACTIVE_OFFSET,
     PLAYER_DAMAGE_TIMER_OFFSET,
+    PLAYER_PRIMARY_SHT_POINTER_OFFSET,
     PLAYER_SHOT_POOL_OFFSET,
     PLAYER_SHOT_SLOT_ANGLE_OFFSET,
     PLAYER_SHOT_SLOT_DAMAGE_OFFSET,
@@ -47,6 +49,59 @@ from th08_runtime.native_combat_projection import (
     capture_player_shot_combat_state,
     decode_player_shot_pool,
 )
+from th08_runtime.route2_sht_provenance import (
+    RANDOM_SPREAD_CALLBACK_POINTER,
+    SHT_CALLBACK_OFFSETS,
+    SHT_FIXED_HEADER_SIZE,
+    SHT_LEVEL_ENTRY_SIZE,
+    SHT_SHOT_RECORD_SIZE,
+)
+
+
+ROOT = Path(__file__).resolve().parents[1]
+PRIMARY_SHT = ROOT / "artifacts" / "decoded" / "ply02a.sht"
+SECONDARY_SHT = ROOT / "artifacts" / "decoded" / "ply02as.sht"
+PRIMARY_SHT_BASE = 0x03000000
+SECONDARY_SHT_BASE = 0x03100000
+PRIMARY_FIRST_RECORD_POINTER = PRIMARY_SHT_BASE + 0x68
+
+
+def _relocate_sht(path: Path, *, base_pointer: int) -> bytes:
+    data = bytearray(path.read_bytes())
+    level_count = struct.unpack_from("<H", data, 2)[0]
+    level_offsets = []
+    for level in range(level_count):
+        table_offset = SHT_FIXED_HEADER_SIZE + level * SHT_LEVEL_ENTRY_SIZE
+        record_offset = struct.unpack_from("<I", data, table_offset)[0]
+        level_offsets.append(record_offset)
+        struct.pack_into("<I", data, table_offset, base_pointer + record_offset)
+    level_ends = (*level_offsets[1:], len(data))
+    for start, end in zip(level_offsets, level_ends, strict=True):
+        cursor = start
+        while cursor < end:
+            if struct.unpack_from("<h", data, cursor)[0] < 0:
+                break
+            for callback_slot, callback_offset in enumerate(
+                SHT_CALLBACK_OFFSETS
+            ):
+                index = struct.unpack_from(
+                    "<I",
+                    data,
+                    cursor + callback_offset,
+                )[0]
+                pointer = (
+                    RANDOM_SPREAD_CALLBACK_POINTER
+                    if callback_slot == 0 and index == 7
+                    else 0
+                )
+                struct.pack_into(
+                    "<I",
+                    data,
+                    cursor + callback_offset,
+                    pointer,
+                )
+            cursor += SHT_SHOT_RECORD_SIZE
+    return bytes(data)
 
 
 def _install_shot(
@@ -57,6 +112,7 @@ def _install_shot(
     shot_type: int = 0,
     damage: int = 20,
     hit_callback: int = 0,
+    source_record_pointer: int = PRIMARY_FIRST_RECORD_POINTER,
 ) -> None:
     base = slot * PLAYER_SHOT_SLOT_STRIDE
     struct.pack_into(
@@ -125,7 +181,7 @@ def _install_shot(
         "<I",
         pool,
         base + PLAYER_SHOT_SLOT_SOURCE_RECORD_OFFSET,
-        0x00610000 + slot * 0x38,
+        source_record_pointer,
     )
 
 
@@ -165,7 +221,25 @@ class _Reader:
             ): damage_timer,
             (ADDR_SPELL_CARD_STATE, len(spell)): spell,
             (ADDR_PLAYER, len(player_context)): player_context,
+            (
+                ADDR_PLAYER + PLAYER_PRIMARY_SHT_POINTER_OFFSET,
+                8,
+            ): struct.pack(
+                "<II",
+                PRIMARY_SHT_BASE,
+                SECONDARY_SHT_BASE,
+            ),
         }
+        primary_sht = _relocate_sht(
+            PRIMARY_SHT,
+            base_pointer=PRIMARY_SHT_BASE,
+        )
+        secondary_sht = _relocate_sht(
+            SECONDARY_SHT,
+            base_pointer=SECONDARY_SHT_BASE,
+        )
+        self._memory[(PRIMARY_SHT_BASE, len(primary_sht))] = primary_sht
+        self._memory[(SECONDARY_SHT_BASE, len(secondary_sht))] = secondary_sht
 
     def read(self, address: int, size: int) -> bytes:
         try:
@@ -198,7 +272,10 @@ class NativeCombatProjectionTests(unittest.TestCase):
         self.assertEqual(slot.damage, 11)
         self.assertEqual(slot.shot_type, 3)
         self.assertEqual(slot.focus_logic_at_birth, 1)
-        self.assertEqual(slot.source_record_pointer, 0x00610000 + 7 * 0x38)
+        self.assertEqual(
+            slot.source_record_pointer,
+            PRIMARY_FIRST_RECORD_POINTER,
+        )
         record = state.record()
         self.assertEqual(record["schema"], PLAYER_SHOT_COMBAT_STATE_SCHEMA)
         self.assertEqual(record["pool"]["occupied_count"], 1)
@@ -313,6 +390,18 @@ class NativeCombatProjectionTests(unittest.TestCase):
             ],
             3,
         )
+        self.assertEqual(
+            projection.summary[
+                "route2_exact_normal_source_active_shot_count"
+            ],
+            4,
+        )
+        self.assertEqual(
+            projection.summary[
+                "route2_non_normal_or_unknown_source_active_shot_count"
+            ],
+            0,
+        )
         self.assertEqual(projection.summary["active_enemy_target_count"], 1)
         self.assertEqual(projection.summary["open_hp_gate_target_count"], 1)
         self.assertEqual(projection.summary["positive_hp_sum"], 100)
@@ -360,6 +449,47 @@ class NativeCombatProjectionTests(unittest.TestCase):
 
         with self.assertRaisesRegex(ValueError, "not finite"):
             decode_player_shot_pool(bytes(pool))
+
+    def test_unknown_source_record_remains_explicit(self) -> None:
+        pool = bytearray(PLAYER_SHOT_POOL_BYTES)
+        _install_shot(
+            pool,
+            5,
+            source_record_pointer=0xDEADBEEF,
+        )
+        enemy_component = bytes((ENEMY_POOL_SIZE + 1) * ENEMY_STRIDE)
+
+        projection = capture_native_combat_projection(
+            _Reader(
+                pool=bytes(pool),
+                emission_timer=struct.pack("<iIi", 4, 0, 5),
+                damage_timer=struct.pack("<iIi", 8, 0, 9),
+                spell=bytes(SPELL_STATE_CAPTURE_SIZE),
+                player_context=bytes(PLAYER_BOMB_ACTIVE_OFFSET + 4),
+            ),
+            native_root_projection=_native_root(enemy_component),
+            compact_state={
+                "manager_frame": 100,
+                "input_current": 0x05,
+                "focus_logic": 0,
+            },
+        )
+
+        self.assertEqual(
+            projection.summary[
+                "route2_exact_normal_source_active_shot_count"
+            ],
+            0,
+        )
+        self.assertEqual(
+            projection.summary[
+                "route2_non_normal_or_unknown_source_active_shot_count"
+            ],
+            1,
+        )
+        source = projection.payload["player_shot_source_provenance"][0]
+        self.assertFalse(source["exact_loaded_sht_record"])
+        self.assertIsNone(source["provenance"])
 
 
 if __name__ == "__main__":

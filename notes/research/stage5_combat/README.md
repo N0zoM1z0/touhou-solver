@@ -21,12 +21,14 @@ Read in order:
 13. [Boss phase-configuration atlas contract](ROUTE2_BOSS_PHASE_CONFIGURATION_ATLAS_CONTRACT_20260731.md)
 14. [native combat root-projection contract](ROUTE2_NATIVE_COMBAT_ROOT_PROJECTION_CONTRACT_20260731.md)
 15. [Route-2 normal-shot content closure](ROUTE2_NORMAL_SHOT_CONTENT_CLOSURE_CONTRACT_20260731.md)
+16. [loaded Route-2 SHT provenance](ROUTE2_LOADED_SHT_PROVENANCE_CONTRACT_20260731.md)
 
 The raw first-64 observer is physically accepted for trace-only use. The v4
 lifecycle ring/lowerer has synthetic authority for exact generation,
 resolved-damage, end, item, and pickup/resource joins, but has never been
-installed. Rolling v5 and causal-search v3 now retain a complete native
-player-shot pool identity plus active enemy damage-target projection and
+installed. Rolling v6 and causal-search v4 now retain a complete native
+player-shot pool identity, normalized loaded-SHT identity, exact active
+source-record ownership, active enemy damage-target projection, and
 survival-filtered offline branch summaries, but no new runtime sample was
 captured. Runtime kill-versus-despawn, target-motion/action attribution,
 exposure causality, Power strategy, target selection, and action authority

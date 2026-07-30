@@ -16,6 +16,11 @@ import struct
 from dataclasses import dataclass, replace
 from typing import Any, Iterable
 
+from th08_attack_model import (
+    AttackRegion,
+    apply_damage_region,
+    damage_region_overlaps_enemy,
+)
 from th08_enemy_damage_model import (
     EnemyPlayerShotDamageContext,
     evaluate_enemy_player_shot_damage_gate,
@@ -58,15 +63,23 @@ from th08_runtime.route2_sht_provenance import (
 from th08_runtime.sensing import decode_spell_state
 
 
-NATIVE_COMBAT_PROJECTION_SCHEMA = "th08-native-combat-root-projection-v3"
+NATIVE_COMBAT_PROJECTION_SCHEMA = "th08-native-combat-root-projection-v4"
 PLAYER_SHOT_COMBAT_STATE_SCHEMA = "th08-player-shot-combat-state-v1"
+PLAYER_DAMAGE_REGION_STATE_SCHEMA = "th08-player-damage-region-state-v1"
 ENEMY_DAMAGE_TARGET_STATE_SCHEMA = "th08-enemy-damage-target-state-v1"
 SUPPORTED_SHOT_PASS_SCHEMA = "th08-supported-ordinary-shot-pass-v2"
+SUPPORTED_DAMAGE_REGION_PASS_SCHEMA = "th08-supported-damage-region-pass-v1"
 
 TH08_TIMER_SIZE = 12
 PLAYER_SHOT_POOL_BYTES = PLAYER_SHOT_POOL_SIZE * PLAYER_SHOT_SLOT_STRIDE
 PLAYER_SHOT_FEEDBACK_INCREMENT_CAP = 50
 PIERCING_SHOT_TYPES = frozenset((4, 5, 6))
+PLAYER_DAMAGE_REGION_POOL_OFFSET = 0xB8834
+PLAYER_DAMAGE_REGION_POOL_SIZE = 192
+PLAYER_DAMAGE_REGION_SLOT_STRIDE = 0x40
+PLAYER_DAMAGE_REGION_POOL_BYTES = (
+    PLAYER_DAMAGE_REGION_POOL_SIZE * PLAYER_DAMAGE_REGION_SLOT_STRIDE
+)
 
 ENEMY_DAMAGE_HITBOX_OFFSET = 0x2D70
 ENEMY_ALTERNATE_HITBOX_OFFSET = 0x2D7C
@@ -131,6 +144,175 @@ class Th08TimerIdentity:
             "current": self.current,
             "integer_changed": self.integer_changed,
         }
+
+
+@dataclass(frozen=True)
+class PlayerDamageRegionSlot:
+    slot: int
+    region: AttackRegion
+    suppress_hit_effect: bool
+    raw_sha256: str
+
+    def __post_init__(self) -> None:
+        if not 0 <= self.slot < PLAYER_DAMAGE_REGION_POOL_SIZE:
+            raise ValueError("damage-region slot is outside the native pool")
+        if self.region.active:
+            geometry = (
+                self.region.center_x,
+                self.region.center_y,
+                self.region.radius,
+                self.region.radius_delta,
+                self.region.width,
+                self.region.height,
+                self.region.width_delta,
+                self.region.height_delta,
+                self.region.angle,
+            )
+            if not all(math.isfinite(value) for value in geometry):
+                raise ValueError(
+                    f"active damage-region slot {self.slot} is not finite"
+                )
+            if self.region.tick_interval <= 0:
+                raise ValueError(
+                    f"active damage-region slot {self.slot} has invalid "
+                    f"tick interval {self.region.tick_interval}"
+                )
+            if (
+                self.region.damage < 0
+                or self.region.accumulated < 0
+                or self.region.damage_cap < 0
+            ):
+                raise ValueError(
+                    f"active damage-region slot {self.slot} has unsupported "
+                    "negative damage accounting"
+                )
+            if (
+                self.region.damage_cap > 0
+                and self.region.accumulated >= self.region.damage_cap
+                and self.region.damage != 0
+            ):
+                raise ValueError(
+                    f"active damage-region slot {self.slot} violates the "
+                    "native exhausted-cap invariant"
+                )
+
+    def record(self) -> dict[str, object]:
+        region = self.region
+        return {
+            "slot": self.slot,
+            "center": [region.center_x, region.center_y],
+            "radius": region.radius,
+            "radius_delta": region.radius_delta,
+            "size": [region.width, region.height],
+            "size_delta": [region.width_delta, region.height_delta],
+            "angle": region.angle,
+            "frames_remaining": region.frames_remaining,
+            "cancel_code": region.cancel_code,
+            "damage": region.damage,
+            "accumulated_damage": region.accumulated,
+            "damage_cap": region.damage_cap,
+            "tick_interval": region.tick_interval,
+            "active": region.active,
+            "suppress_hit_effect": self.suppress_hit_effect,
+            "raw_sha256": self.raw_sha256,
+        }
+
+
+@dataclass(frozen=True)
+class PlayerDamageRegionState:
+    pool_sha256: str
+    slots: tuple[PlayerDamageRegionSlot, ...]
+
+    def record(self) -> dict[str, object]:
+        return {
+            "schema": PLAYER_DAMAGE_REGION_STATE_SCHEMA,
+            "pool": {
+                "address": ADDR_PLAYER + PLAYER_DAMAGE_REGION_POOL_OFFSET,
+                "slot_count": PLAYER_DAMAGE_REGION_POOL_SIZE,
+                "slot_stride": PLAYER_DAMAGE_REGION_SLOT_STRIDE,
+                "bytes": PLAYER_DAMAGE_REGION_POOL_BYTES,
+                "sha256": self.pool_sha256,
+                "active_count": len(self.slots),
+                "active_slots": [slot.record() for slot in self.slots],
+            },
+        }
+
+
+def decode_player_damage_region_pool(
+    data: bytes,
+) -> tuple[PlayerDamageRegionSlot, ...]:
+    if len(data) != PLAYER_DAMAGE_REGION_POOL_BYTES:
+        raise ValueError(
+            "player damage-region pool requires "
+            f"{PLAYER_DAMAGE_REGION_POOL_BYTES:#x} exact bytes"
+        )
+    slots = []
+    for slot in range(PLAYER_DAMAGE_REGION_POOL_SIZE):
+        offset = slot * PLAYER_DAMAGE_REGION_SLOT_STRIDE
+        raw = data[offset : offset + PLAYER_DAMAGE_REGION_SLOT_STRIDE]
+        active = bool(raw[0x3C])
+        if not active:
+            continue
+        (
+            center_x,
+            center_y,
+            radius,
+            radius_delta,
+            width,
+            height,
+            width_delta,
+            height_delta,
+            angle,
+        ) = struct.unpack_from("<fffffffff", raw)
+        (
+            frames_remaining,
+            cancel_code,
+            damage,
+            accumulated,
+            damage_cap,
+            tick_interval,
+        ) = struct.unpack_from("<iiiiii", raw, 0x24)
+        slots.append(
+            PlayerDamageRegionSlot(
+                slot=slot,
+                region=AttackRegion(
+                    center_x=center_x,
+                    center_y=center_y,
+                    radius=radius,
+                    radius_delta=radius_delta,
+                    width=width,
+                    height=height,
+                    width_delta=width_delta,
+                    height_delta=height_delta,
+                    angle=angle,
+                    frames_remaining=frames_remaining,
+                    cancel_code=cancel_code,
+                    damage=damage,
+                    accumulated=accumulated,
+                    damage_cap=damage_cap,
+                    tick_interval=tick_interval,
+                    active=True,
+                ),
+                suppress_hit_effect=bool(raw[0x3D]),
+                raw_sha256=_sha256(raw),
+            )
+        )
+    return tuple(slots)
+
+
+def capture_player_damage_region_state(
+    reader: Any,
+) -> PlayerDamageRegionState:
+    data = _read_exact(
+        reader,
+        ADDR_PLAYER + PLAYER_DAMAGE_REGION_POOL_OFFSET,
+        PLAYER_DAMAGE_REGION_POOL_BYTES,
+        field="player damage-region pool",
+    )
+    return PlayerDamageRegionState(
+        pool_sha256=_sha256(data),
+        slots=decode_player_damage_region_pool(data),
+    )
 
 
 @dataclass(frozen=True)
@@ -669,9 +851,68 @@ def _supported_shot_pass(
     )
 
 
+def _supported_damage_region_pass(
+    slots: Iterable[PlayerDamageRegionSlot],
+    target: EnemyDamageTarget,
+    *,
+    width: float,
+    height: float,
+    bomb_active: bool,
+    pass_name: str,
+) -> tuple[
+    dict[str, object],
+    tuple[PlayerDamageRegionSlot, ...],
+]:
+    hit_slots = []
+    contribution = 0
+    bomb_overlap = False
+    updated = []
+    for slot in slots:
+        hit = (
+            slot.region.active
+            and slot.region.frames_remaining % slot.region.tick_interval == 0
+            and damage_region_overlaps_enemy(
+                slot.region,
+                enemy_x=target.x,
+                enemy_y=target.y,
+                enemy_width=width,
+                enemy_height=height,
+            )
+        )
+        next_region, slot_contribution = apply_damage_region(
+            slot.region,
+            enemy_x=target.x,
+            enemy_y=target.y,
+            enemy_width=width,
+            enemy_height=height,
+        )
+        updated.append(replace(slot, region=next_region))
+        if not hit:
+            continue
+        hit_slots.append(slot.slot)
+        contribution += slot_contribution
+        bomb_overlap = bomb_overlap or bomb_active
+    return (
+        {
+            "schema": SUPPORTED_DAMAGE_REGION_PASS_SCHEMA,
+            "pass": pass_name,
+            "hitbox": {"width": width, "height": height},
+            "hit_slots": hit_slots,
+            "return_damage_contribution": contribution,
+            "bomb_region_overlap_signal": bomb_overlap,
+            "numeric_authority": (
+                "target_local_supported_active_due_overlap_and_per_region_"
+                "cap_before_cross_target_and_late_enemy_scaling"
+            ),
+        },
+        tuple(updated),
+    )
+
+
 def _target_combat_record(
     target: EnemyDamageTarget,
     shot_state: PlayerShotCombatState,
+    damage_region_state: PlayerDamageRegionState,
     *,
     bomb_active: bool,
     player_state: int,
@@ -699,7 +940,16 @@ def _target_combat_record(
         bomb_active=bomb_active,
         pass_name="primary",
     )
+    primary_regions, after_primary_regions = _supported_damage_region_pass(
+        damage_region_state.slots,
+        target,
+        width=target.primary_width,
+        height=target.primary_height,
+        bomb_active=bomb_active,
+        pass_name="primary",
+    )
     alternate = None
+    alternate_regions = None
     if target.alternate_enabled:
         alternate, _after_alternate = _supported_shot_pass(
             after_primary,
@@ -709,12 +959,26 @@ def _target_combat_record(
             bomb_active=bomb_active,
             pass_name="alternate_after_supported_primary_mutation",
         )
+        alternate_regions, _after_alternate_regions = (
+            _supported_damage_region_pass(
+                after_primary_regions,
+                target,
+                width=target.alternate_width,
+                height=target.alternate_height,
+                bomb_active=bomb_active,
+                pass_name="alternate_after_primary_region_mutation",
+            )
+        )
     return {
         **target.record(),
         "damage_gate": gate.record(),
         "ordinary_shot_passes": {
             "primary": primary,
             "alternate": alternate,
+        },
+        "damage_region_passes": {
+            "primary": primary_regions,
+            "alternate": alternate_regions,
         },
     }
 
@@ -751,6 +1015,7 @@ def capture_native_combat_projection(
     """Capture one exact-root combat projection without another enemy read."""
 
     shot_state = capture_player_shot_combat_state(reader)
+    damage_region_state = capture_player_damage_region_state(reader)
     spell = decode_spell_state(
         _read_exact(
             reader,
@@ -790,6 +1055,7 @@ def capture_native_combat_projection(
         _target_combat_record(
             target,
             shot_state,
+            damage_region_state,
             bomb_active=bomb_active,
             player_state=player_state,
             spell_active=bool(spell["active"]),
@@ -810,12 +1076,14 @@ def capture_native_combat_projection(
             "spell_id": int(spell["spell_id"]) if spell["active"] else None,
         },
         "player_shots": shot_state.record(),
+        "player_damage_regions": damage_region_state.record(),
         "loaded_route2_sht": loaded_sht_state.record(),
         "player_shot_source_provenance": shot_source_provenance,
         "enemy_targets": target_records,
         "scope": {
             "root_identity": (
                 "full_player_shot_pool_digest_plus_active_slot_fields_"
+                "full_player_damage_region_pool_digest_"
                 "and_active_enemy_causal_tail_digests"
             ),
             "pass_projection": (
@@ -824,9 +1092,9 @@ def capture_native_combat_projection(
             "omitted": [
                 "future_action_delivery_and_focus_transition",
                 "future_player_shot_update_callbacks",
+                "cross_target_damage_region_mutation_order",
                 "type45_mode_predicate",
                 "nonzero_hit_callback_semantics",
-                "attack_region_damage",
                 "alternate_route_scaling",
                 "spell_boss_timeout_and_phase_scaling",
                 "generation_safe_cross_frame_hp_attribution",
@@ -865,6 +1133,7 @@ def capture_native_combat_projection(
             for row in shot_source_provenance
         ),
         "active_enemy_target_count": len(targets),
+        "active_damage_region_count": len(damage_region_state.slots),
         "positive_hp_target_count": sum(target.hitpoints > 0 for target in targets),
         "positive_hp_sum": sum(
             max(target.hitpoints, 0) for target in targets
@@ -935,6 +1204,25 @@ def capture_native_combat_projection(
             is not None
         ),
         "player_shot_pool_sha256": shot_state.pool_sha256,
+        "player_damage_region_pool_sha256": (
+            damage_region_state.pool_sha256
+        ),
+        "supported_primary_damage_region_contribution_sum": sum(
+            int(
+                record["damage_region_passes"]["primary"][
+                    "return_damage_contribution"
+                ]
+            )
+            for record in target_records
+        ),
+        "supported_alternate_damage_region_contribution_sum": sum(
+            int(alternate["return_damage_contribution"])
+            for record in target_records
+            if (
+                alternate := record["damage_region_passes"]["alternate"]
+            )
+            is not None
+        ),
     }
     return NativeCombatProjection(
         payload=payload,
@@ -970,17 +1258,27 @@ __all__ = [
     "ENEMY_DAMAGE_HITBOX_OFFSET",
     "ENEMY_DAMAGE_TARGET_STATE_SCHEMA",
     "NATIVE_COMBAT_PROJECTION_SCHEMA",
+    "PLAYER_DAMAGE_REGION_POOL_BYTES",
+    "PLAYER_DAMAGE_REGION_POOL_OFFSET",
+    "PLAYER_DAMAGE_REGION_POOL_SIZE",
+    "PLAYER_DAMAGE_REGION_SLOT_STRIDE",
+    "PLAYER_DAMAGE_REGION_STATE_SCHEMA",
     "PLAYER_SHOT_COMBAT_STATE_SCHEMA",
     "PLAYER_SHOT_POOL_BYTES",
     "SUPPORTED_SHOT_PASS_SCHEMA",
+    "SUPPORTED_DAMAGE_REGION_PASS_SCHEMA",
     "EnemyDamageTarget",
     "NativeCombatProjection",
+    "PlayerDamageRegionSlot",
+    "PlayerDamageRegionState",
     "PlayerShotCombatSlot",
     "PlayerShotCombatState",
     "Th08TimerIdentity",
     "capture_native_combat_projection",
+    "capture_player_damage_region_state",
     "capture_player_shot_combat_state",
     "decode_enemy_damage_targets",
+    "decode_player_damage_region_pool",
     "decode_player_shot_pool",
     "native_combat_projection_changes",
 ]

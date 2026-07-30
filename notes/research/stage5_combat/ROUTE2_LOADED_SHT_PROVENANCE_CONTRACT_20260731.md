@@ -89,6 +89,10 @@ snapshot schema is now `th08-native-snapshot-rolling-trial-v6` and causal
 search schema is `th08-native-snapshot-causal-secondary-search-v4`.
 No v5/v3 artifact is silently reinterpreted.
 
+**Superseded later on 2026-07-31:** combat projection v4 adds the complete
+damage-region pool, so the current immutable wrappers are rolling v7 and causal
+v5. No v6/v4 artifact is silently reinterpreted as carrying damage regions.
+
 `th08-native-combat-branch-comparison-v1` checks the root and every tick. Any
 special or unknown active source keeps status
 `survival_filtered_proxy_only_non_normal_or_unknown_shot_source`. This status

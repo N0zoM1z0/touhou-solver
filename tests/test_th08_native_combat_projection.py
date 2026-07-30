@@ -43,9 +43,14 @@ from th08_runtime.native_combat_projection import (
     ENEMY_MAIN_VM_TIMER_CURRENT_OFFSET,
     ENEMY_POSITION_OFFSET,
     NATIVE_COMBAT_PROJECTION_SCHEMA,
+    PLAYER_DAMAGE_REGION_POOL_BYTES,
+    PLAYER_DAMAGE_REGION_POOL_OFFSET,
+    PLAYER_DAMAGE_REGION_SLOT_STRIDE,
+    PLAYER_DAMAGE_REGION_STATE_SCHEMA,
     PLAYER_SHOT_COMBAT_STATE_SCHEMA,
     PLAYER_SHOT_POOL_BYTES,
     capture_native_combat_projection,
+    capture_player_damage_region_state,
     capture_player_shot_combat_state,
     decode_player_shot_pool,
 )
@@ -185,6 +190,47 @@ def _install_shot(
     )
 
 
+def _install_damage_region(
+    pool: bytearray,
+    slot: int,
+    *,
+    center: tuple[float, float] = (100.0, 50.0),
+    radius: float = 16.0,
+    frames_remaining: int = 8,
+    damage: int = 30,
+    accumulated: int = 0,
+    damage_cap: int = 0,
+    tick_interval: int = 1,
+) -> None:
+    base = slot * PLAYER_DAMAGE_REGION_SLOT_STRIDE
+    struct.pack_into(
+        "<fffffffff",
+        pool,
+        base,
+        center[0],
+        center[1],
+        radius,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+    )
+    struct.pack_into(
+        "<iiiiii",
+        pool,
+        base + 0x24,
+        frames_remaining,
+        0,
+        damage,
+        accumulated,
+        damage_cap,
+        tick_interval,
+    )
+    pool[base + 0x3C] = 1
+
+
 def _native_root(enemy_component: bytes) -> object:
     return SimpleNamespace(
         components=(
@@ -208,6 +254,7 @@ class _Reader:
         damage_timer: bytes,
         spell: bytes,
         player_context: bytes,
+        damage_regions: bytes = bytes(PLAYER_DAMAGE_REGION_POOL_BYTES),
     ) -> None:
         self._memory = {
             (ADDR_PLAYER + PLAYER_SHOT_POOL_OFFSET, len(pool)): pool,
@@ -221,6 +268,10 @@ class _Reader:
             ): damage_timer,
             (ADDR_SPELL_CARD_STATE, len(spell)): spell,
             (ADDR_PLAYER, len(player_context)): player_context,
+            (
+                ADDR_PLAYER + PLAYER_DAMAGE_REGION_POOL_OFFSET,
+                len(damage_regions),
+            ): damage_regions,
             (
                 ADDR_PLAYER + PLAYER_PRIMARY_SHT_POINTER_OFFSET,
                 8,
@@ -249,6 +300,31 @@ class _Reader:
 
 
 class NativeCombatProjectionTests(unittest.TestCase):
+    def test_damage_region_pool_decode_and_cap_contribution(self) -> None:
+        pool = bytearray(PLAYER_DAMAGE_REGION_POOL_BYTES)
+        _install_damage_region(
+            pool,
+            9,
+            damage=7,
+            accumulated=8,
+            damage_cap=12,
+        )
+        state = capture_player_damage_region_state(
+            _Reader(
+                pool=bytes(PLAYER_SHOT_POOL_BYTES),
+                emission_timer=bytes(12),
+                damage_timer=bytes(12),
+                spell=bytes(SPELL_STATE_CAPTURE_SIZE),
+                player_context=bytes(PLAYER_BOMB_ACTIVE_OFFSET + 4),
+                damage_regions=bytes(pool),
+            )
+        )
+        self.assertEqual(state.record()["schema"], PLAYER_DAMAGE_REGION_STATE_SCHEMA)
+        self.assertEqual(len(state.slots), 1)
+        self.assertEqual(state.slots[0].slot, 9)
+        self.assertEqual(state.slots[0].region.damage, 7)
+        self.assertEqual(state.slots[0].region.damage_cap, 12)
+
     def test_full_player_shot_pool_retains_causal_and_decoded_identity(
         self,
     ) -> None:
@@ -304,6 +380,14 @@ class NativeCombatProjectionTests(unittest.TestCase):
         _install_shot(pool, 1, state=2, shot_type=3, damage=10)
         _install_shot(pool, 2, shot_type=4, damage=7)
         _install_shot(pool, 3, damage=9, hit_callback=0x00450100)
+        damage_regions = bytearray(PLAYER_DAMAGE_REGION_POOL_BYTES)
+        _install_damage_region(
+            damage_regions,
+            4,
+            damage=7,
+            accumulated=8,
+            damage_cap=12,
+        )
 
         enemy_component = bytearray((ENEMY_POOL_SIZE + 1) * ENEMY_STRIDE)
         base = ENEMY_STRIDE
@@ -366,6 +450,7 @@ class NativeCombatProjectionTests(unittest.TestCase):
                 damage_timer=struct.pack("<iIi", 8, 0, 9),
                 spell=bytes(spell),
                 player_context=bytes(player_context),
+                damage_regions=bytes(damage_regions),
             ),
             native_root_projection=_native_root(bytes(enemy_component)),
             compact_state={
@@ -403,6 +488,7 @@ class NativeCombatProjectionTests(unittest.TestCase):
             0,
         )
         self.assertEqual(projection.summary["active_enemy_target_count"], 1)
+        self.assertEqual(projection.summary["active_damage_region_count"], 1)
         self.assertEqual(projection.summary["open_hp_gate_target_count"], 1)
         self.assertEqual(projection.summary["positive_hp_sum"], 100)
         self.assertEqual(
@@ -420,6 +506,18 @@ class NativeCombatProjectionTests(unittest.TestCase):
             10,
         )
         self.assertEqual(
+            projection.summary[
+                "supported_primary_damage_region_contribution_sum"
+            ],
+            4,
+        )
+        self.assertEqual(
+            projection.summary[
+                "supported_alternate_damage_region_contribution_sum"
+            ],
+            0,
+        )
+        self.assertEqual(
             projection.summary["supported_primary_overlap_target_count"],
             1,
         )
@@ -430,6 +528,8 @@ class NativeCombatProjectionTests(unittest.TestCase):
         self.assertTrue(target["damage_gate"]["hp_subtraction_open"])
         primary = target["ordinary_shot_passes"]["primary"]
         alternate = target["ordinary_shot_passes"]["alternate"]
+        primary_regions = target["damage_region_passes"]["primary"]
+        alternate_regions = target["damage_region_passes"]["alternate"]
         self.assertEqual(primary["supported_hit_slots"], [0, 1])
         self.assertEqual(primary["supported_return_damage_subtotal"], 30)
         self.assertEqual(
@@ -440,6 +540,10 @@ class NativeCombatProjectionTests(unittest.TestCase):
         self.assertEqual(primary["callback_dependent_overlap_slots"], [3])
         self.assertEqual(alternate["supported_hit_slots"], [1])
         self.assertEqual(alternate["supported_return_damage_subtotal"], 10)
+        self.assertEqual(primary_regions["hit_slots"], [4])
+        self.assertEqual(primary_regions["return_damage_contribution"], 4)
+        self.assertEqual(alternate_regions["hit_slots"], [4])
+        self.assertEqual(alternate_regions["return_damage_contribution"], 0)
 
     def test_nonfinite_active_shot_fails_closed(self) -> None:
         pool = bytearray(PLAYER_SHOT_POOL_BYTES)

@@ -11,8 +11,8 @@ from typing import Any
 
 
 SCHEMA = "th08-native-combat-branch-comparison-v1"
-ROLLING_SCHEMA = "th08-native-snapshot-rolling-trial-v6"
-CAUSAL_SEARCH_SCHEMA = "th08-native-snapshot-causal-secondary-search-v4"
+ROLLING_SCHEMA = "th08-native-snapshot-rolling-trial-v7"
+CAUSAL_SEARCH_SCHEMA = "th08-native-snapshot-causal-secondary-search-v5"
 ROLLING_ACCEPTED_STATUS = "rolling_native_projection_snapshot_passed"
 CAUSAL_ACCEPTED_STATUS = "causal_secondary_search_passed"
 
@@ -193,6 +193,20 @@ def _summarize_branch(
                 _integer(summary, "supported_alternate_contribution_sum")
                 for summary in summaries
             ),
+            "supported_primary_damage_region_contribution_tick_sum": sum(
+                _integer(
+                    summary,
+                    "supported_primary_damage_region_contribution_sum",
+                )
+                for summary in summaries
+            ),
+            "supported_alternate_damage_region_contribution_tick_sum": sum(
+                _integer(
+                    summary,
+                    "supported_alternate_damage_region_contribution_sum",
+                )
+                for summary in summaries
+            ),
             "open_hp_gate_target_ticks": sum(
                 _integer(summary, "open_hp_gate_target_count")
                 for summary in summaries
@@ -230,7 +244,8 @@ def _summarize_branch(
                 "observed_native_enemy_frame_damage_field_at_endpoint_seams"
             ),
             "supported_contribution": (
-                "instantaneous_supported_ordinary_shot_subtotal_proxy"
+                "instantaneous_supported_ordinary_shot_and_damage_region_"
+                "subtotal_proxy_before_late_enemy_scaling"
             ),
             "positive_hp_sum": (
                 "cross_slot_aggregate_not_generation_safe_or_birth_normalized"

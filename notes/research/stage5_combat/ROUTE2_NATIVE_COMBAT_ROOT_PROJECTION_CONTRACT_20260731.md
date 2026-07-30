@@ -67,10 +67,11 @@ it supplies no shot lifecycle, callback, collision, or damage authority.
 ## Implemented Projection
 
 `scripts/th08_runtime/native_combat_projection.py` implements
-`th08-native-combat-root-projection-v3`. V1 established the complete
+`th08-native-combat-root-projection-v4`. V1 established the complete
 shot/target projection; V2 added normalized loaded-SHT identity and exact
 source-record provenance; V3 separates uncapped returned damage from the
-capped hit-feedback accumulator increment.
+capped hit-feedback accumulator increment; V4 adds the complete player
+damage-region pool and native-ordered supported pass.
 
 For every exact root or future tick it retains:
 
@@ -78,6 +79,9 @@ For every exact root or future tick it retains:
   stale bytes that may still distinguish a future initializer/callback state;
 - decoded fields and per-slot raw identity for every active shot;
 - both player shot timers;
+- a SHA-256 identity of all `192 * 0x40` player damage-region bytes plus every
+  active slot's circle/rectangle geometry, lifetime, damage, accumulated
+  damage, cap, tick interval, and effect-suppression byte;
 - every active enemy target decoded from the already-retained
   `ordinary_enemy_template_and_pool` component, without a second enemy-pool
   read;
@@ -85,6 +89,9 @@ For every exact root or future tick it retains:
   spell-active, and spell-owner context;
 - native primary overlap and, after supported primary state mutation, the
   optional alternate overlap;
+- native damage-region active/due/overlap/cap arithmetic, with primary region
+  mutation carried into the optional alternate pass and Bomb-region overlap
+  retained separately for each target-local projection;
 - a numeric subtotal only for eligible, overlapping shots whose type and
   zero hit callback are supported; and
 - explicit unresolved slot lists for type-4/5 and nonzero-hit-callback
@@ -93,16 +100,25 @@ For every exact root or future tick it retains:
 The supported ordinary subtotal applies the native Bomb reduction, piercing
 set `{4, 5, 6}`, and nonpiercing state-2 transition. It reports the uncapped
 return subtotal separately from the `min(subtotal, 50)` feedback-accumulator
-increment. Because type 4/5 overlap remains unresolved, those types never
-contribute to the numeric subtotal in this projection. Attack regions, later
-alternate-route scaling, spell/Boss/timeout scaling, and the final HP write
-are outside this subtotal.
+increment. The damage-region subtotal follows active, signed remainder-zero
+tick due, inclusive circle/rectangle overlap, accumulated-damage update, and
+positive-cap clipping order. Because type 4/5 overlap remains unresolved,
+those types never
+contribute to the numeric subtotal in this projection. Later alternate-route
+combination, character/spell/Boss/timeout scaling, and the final HP write are
+outside this subtotal.
 
 The full pool digest is deliberately stricter than the decoded active list.
 An inactive byte difference can reject deterministic equality even when no
 active shot differs. This may produce a fail-closed false negative, but it
 does not merge roots whose later initialization or callback behavior is not
 proved control-equivalent.
+
+The target records are instantaneous target-local projections from one
+captured pool state. They do not replay manager-wide enemy iteration, so a
+region consumed or capped by an earlier enemy is not propagated into a later
+target record. That omitted cross-target order has unknown directional error
+and remains outside delivered-damage, kill, and ranking authority.
 
 The subsequent pinned-content audit closes the normal Route-2 SHT subset:
 all 53 Power-selector-reachable records are type 0 with zero update and hit
@@ -115,7 +131,7 @@ contaminated roots still fail closed.
 ## Rolling And Causal Integration
 
 `scripts/tools/th08_native_snapshot_trial.py` schema
-`th08-native-snapshot-rolling-trial-v6` now:
+`th08-native-snapshot-rolling-trial-v7` now:
 
 - captures the combat projection at the root and every tick;
 - requires its SHA to agree in same-action replay and all-36 repeated-root
@@ -125,7 +141,7 @@ contaminated roots still fail closed.
 - retains compact combat summaries in the portfolio output.
 
 `scripts/tools/th08_native_snapshot_causal_search.py` schema
-`th08-native-snapshot-causal-secondary-search-v4` carries the same projection
+`th08-native-snapshot-causal-secondary-search-v5` carries the same projection
 through the origin, promoted subroots, future ticks, and parent-repeat
 transaction.
 
@@ -133,13 +149,13 @@ The older collision projection remains schema v7 and unchanged. Combat state
 is an independent projection so this checkpoint does not rewrite or weaken
 the retained H1/H8/H32 collision evidence boundary.
 
-`scripts/analysis/th08_native_combat_branch_report.py` lowers only accepted v5
-rolling transactions or accepted v3 causal-search transactions into
+`scripts/analysis/th08_native_combat_branch_report.py` lowers only accepted v7
+rolling transactions or accepted v5 causal-search transactions into
 `th08-native-combat-branch-comparison-v1`. It:
 
 - rejects every branch whose native compact history enters player phase 2;
-- reports native published frame damage and instantaneous supported overlap
-  subtotals;
+- reports native published frame damage and instantaneous supported ordinary
+  plus damage-region overlap subtotals;
 - reports unresolved-overlap counts rather than hiding them;
 - exposes cross-slot positive-HP change only as a non-generation-safe proxy;
   and
@@ -243,17 +259,17 @@ This checkpoint grants:
 
 It grants no:
 
-- observed v6/v4 runtime sample;
+- observed v7/v5 runtime sample;
 - generation-safe HP delta or kill/end classification;
 - target-selection, Focus-switch, damage-ranking, or resource-ranking
   authority;
 - prevented hostile birth or shortened exposure claim;
 - physical predictive, shadow, or live action authority.
 
-Five focused projection tests, six focused report tests, three loaded-SHT
+Six focused projection tests, six focused report tests, three loaded-SHT
 provenance tests, twelve rolling snapshot tests, and four causal-search tests
-pass. Complete discovery passes 1,518 tests in 15.670 seconds on Linux and
-31.282 seconds through the Windows UNC loader, with the three existing skips.
+pass. Complete discovery passes 1,519 tests in 14.216 seconds on Linux and
+31.472 seconds through the Windows UNC loader, with the three existing skips.
 
 The next authorized causal gate is a small immutable-root corpus spanning
 focused, unfocused, and dynamic-refocus complete-mask schedules. Each branch

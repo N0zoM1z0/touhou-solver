@@ -38,8 +38,8 @@ historical handoff.
   `CONTENT-01` shipped content manifest, and `CONTENT-02` static
   mandatory-event atlas are the current repository checkpoint; no new
   physical trial was run.
-- Complete Linux discovery passes 1,518 tests in 15.670 seconds.
-- Complete Windows UNC discovery passes 1,518 tests in 31.282 seconds with
+- Complete Linux discovery passes 1,519 tests in 14.216 seconds.
+- Complete Windows UNC discovery passes 1,519 tests in 31.472 seconds with
   the three existing skips.
 - No TH08, controller, supervisor, native-replay runner, or Windows test
   process is intentionally left running.
@@ -80,20 +80,23 @@ historical handoff.
   `artifacts/runtime_reports/th08_route2_normal_shot_content_audit_20260731.json`,
   SHA-256
   `4361ec2814a8885dd6c4dd17bd42039f5a9bb38bccbeebcb8c43b6816df6d4e1`.
-- Combat projection v3 now reverses the shipped SHT loader relocation for the
+- Combat projection v4 now reverses the shipped SHT loader relocation for the
   complete 1,584-byte primary and 3,568-byte secondary heap images and
   requires both normalized SHA-256 identities. Every active slot's exact
   `source_record_pointer` is classified into 53 normal, 34 Bomb-only special,
   or unknown records. Field-compatible but unowned pointers remain unknown.
-  V3 also corrects CE-0226: returned ordinary-shot damage is uncapped, while
+  V3 corrected CE-0226: returned ordinary-shot damage is uncapped, while
   only the distinct enemy `+0x2E10` hit-feedback increment is capped at 50.
-- This identity change bumps rolling snapshot to v6 and causal search to v4.
+  V4 adds the complete 192-slot player damage-region pool, exact active/due
+  circle/rectangle overlap, accumulated cap arithmetic, and primary-to-
+  alternate mutation order.
+- This identity change bumps rolling snapshot to v7 and causal search to v5.
   The branch lowerer checks root plus every tick and preserves any special or
   unknown source as non-normal; no v5/v3 artifact is reinterpreted and no
-  v6/v4 corpus has been captured.
-- The next general WS-H semantic checkpoint is the existing 192-slot player
-  damage-region pass and the later native enemy scaling/HP arithmetic. Do not
-  reuse the old 50-damage assumption in route, Power, or kill estimates.
+  no v7/v5 corpus has been captured.
+- The next general WS-H semantic checkpoint is the later native character,
+  alternate, spell/Boss, and HP-write scaling arithmetic. Do not reuse the old
+  50-damage assumption in route, Power, or kill estimates.
 - Root 2,129's old four-u16 pre-hostile prefix is compatible with a due
   focused level-5 option pair, but the retained v3 capsule lacks timer/pool
   fields, so this remains inferred rather than observed. Hostile birth 1220

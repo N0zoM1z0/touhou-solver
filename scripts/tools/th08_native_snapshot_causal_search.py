@@ -82,7 +82,7 @@ from tools.th08_native_snapshot_trial import (  # noqa: E402
 )
 
 
-SCHEMA = "th08-native-snapshot-causal-secondary-search-v4"
+SCHEMA = "th08-native-snapshot-causal-secondary-search-v5"
 DEFAULT_PREFIX_MASKS = (0x14, 0x15, 0x90, 0x91, 0x94, 0x95)
 DEFAULT_PREFIX_HORIZON = 8
 DEFAULT_SECONDARY_HORIZON = 8

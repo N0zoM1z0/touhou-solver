@@ -1407,15 +1407,16 @@ first.
 6. Reopen supplemental delivery only with a genuinely earlier causal
    hazard/policy version or isolated execution resources, followed by the
    unchanged Windows gate.
-7. Investigate Stage-5 nonspell exposure, verified kill/despawn time, Power,
-   and boss damage as a separate trace-only line. All ten retained canonical
-   first hits are nonspell at Power 128, but exposure-normalized nonspell hit
-   rate is lower than the combined spells. The raw combat-progress observer
-   now passes physically; next establish generation/end semantics and test
-   the more specific kill-before-saturation hypothesis. Normal full-route
-   play begins from Power 0, unlike max-Power practice, and post-death recovery
-   is a separate diagnostic rather than final no-miss authority. Do not turn
-   any count into a generic aggression weight. Rank only inside the unchanged
+7. Investigate mandatory-route nonspell exposure, verified kill/despawn time,
+   Power, and boss damage as a separate trace-only line. The default-off
+   lifecycle ring now has offline/synthetic implementation authority for the
+   two allocations, five exact active clears, and forced-HP-zero ordering, but
+   no TH08 runtime observation yet. Next establish an exact nonoverflow
+   generation/end trace, then link source lifetime to future emissions and
+   test the specific kill-before-saturation hypothesis. Normal full-route play
+   begins from Power 0, unlike max-Power practice, and post-death recovery is
+   a separate diagnostic rather than final no-miss authority. Do not turn any
+   count into a generic aggression weight. Rank only inside the unchanged
    viable and issue-safe set.
 
 ## Strategy Summary
@@ -1758,6 +1759,15 @@ first.
   atlas, and IDA names. A fail-closed offline classifier now distinguishes
   VM end, offscreen cull, forced-zero defeat, exact lethal player-shot damage,
   and unattributed HP defeat, but no ordered runtime capture exists yet.
+- **Implemented trace foundation (2026-07-31):** a default-off 256-entry
+  native event ring now covers both ordinary-pool allocations, all five
+  revalidated active-bit retirements, and the distinct forced-HP-zero write.
+  It retains ordered before/after flags and HP, resolved frame damage, and the
+  four shipped forced-zero callers. Full-ring overwrite, overflow, unstable
+  reads, multi-site activation rollback, reverse cleanup, and unsafe restore
+  behavior pass 14 focused tests on Linux and Windows. This is synthetic
+  implementation authority only; no TH08 process has installed it and no
+  generation, kill, emission, strategy, or action claim is promoted.
 - **Observed route-resource limit (2026-07-31):** two accepted natural
   Route-2/Lunatic Game Start prefixes, bounded strictly before their first
   native hits, retain `Power 0 -> 5` across 789 decisions and `Power 0 -> 0`
@@ -1804,11 +1814,13 @@ first.
   `notes/research/stage5_combat/ROUTE2_FOCUS_SHOT_EMISSION_CONTRACT_20260731.md`, and
   `notes/research/stage5_combat/STAGE5_ENEMY_PRESENCE_EPISODE_AUDIT_CONTRACT_20260731.md`, and
   `notes/research/stage5_combat/ROUTE2_ENEMY_END_SEMANTICS_CONTRACT_20260731.md`, and
+  `notes/research/stage5_combat/ORDINARY_ENEMY_LIFECYCLE_EVENT_RING_CONTRACT_20260731.md`, and
   `notes/research/route_resources/POWER0_CLEAN_PREFIX_AUDIT_CONTRACT_20260731.md`.
   The raw first-64 inventory now has physical trace-only observation
   authority. The Power-0 audit has first-hit-bounded route observation
-  authority. Generation/end tracking, exposure causality, causal collection,
-  targeting, and S18 live action authority remain none.
+  authority. The lifecycle ring has offline/synthetic implementation
+  authority only. Runtime generation/end tracking, exposure causality, causal
+  collection, targeting, and S18 live action authority remain none.
 
 ## Adding Or Changing A Strategy
 

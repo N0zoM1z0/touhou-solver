@@ -21,11 +21,11 @@ historical handoff.
   (`Build causal native snapshot policy search`).
 - The WS-H route-2 Focus/Shot foundation, Stage-5 presence-episode audit,
   first-hit-bounded natural Power-0 audit, forced-HP-zero/end-semantics
-  correction, `CONTENT-01` shipped content manifest, and `CONTENT-02` static
-  mandatory-event atlas are the current repository checkpoint; no new
-  physical trial was run.
-- Complete Linux discovery passes 1,400 tests in 12.956 seconds.
-- Complete Windows UNC discovery passes 1,400 tests in 27.9 seconds with
+  correction, default-off native lifecycle event ring, `CONTENT-01` shipped
+  content manifest, and `CONTENT-02` static mandatory-event atlas are the
+  current repository checkpoint; no new physical trial was run.
+- Complete Linux discovery passes 1,414 tests in 13.197 seconds.
+- Complete Windows UNC discovery passes 1,414 tests in 28.768 seconds with
   the three existing skips.
 - No TH08, controller, supervisor, native-replay runner, or Windows test
   process is intentionally left running.
@@ -69,8 +69,22 @@ historical handoff.
 - The fail-closed offline end classifier accepts only revalidated allocation
   and active-clear control edges. It promotes player-shot kill only from
   exact pre-HP/damage/post-HP arithmetic, absence of preceding forced zero,
-  defeat mode 0, and the ordered active clear. Runtime event-ring capture
-  remains open; the old active-only observer must not be repeated.
+  defeat mode 0, and the ordered active clear.
+- `scripts/th08_runtime/enemy_lifecycle_probe.py` now implements the missing
+  default-off trace transport over two allocation edges, five exact
+  active-clear retirements, and the distinct forced-HP-zero write. Its
+  256-entry ring records before/after flags and HP, resolved frame damage,
+  and the forced-zero caller; overflow and unstable reads are explicit
+  `UNKNOWN`.
+- Fourteen focused tests pass on Linux and Windows, including activation
+  quiescence before replacing an in-flight instruction span, full-ring
+  overwrite invalidation, multi-site activation rollback, reverse-order
+  cleanup, and unsafe restore retention. This is implementation/synthetic
+  authority only: it has not been installed in TH08, is not wired into live
+  sensing, and grants no kill, generation, strategy, or action authority.
+- Detailed lifecycle-ring contract:
+  `notes/research/stage5_combat/ORDINARY_ENEMY_LIFECYCLE_EVENT_RING_CONTRACT_20260731.md`.
+  The old active-only observer must not be repeated.
 - `POWER-ROUTE-01` now has a deterministic audit of two accepted natural
   Route-2/Lunatic Game Start prefixes, strictly before each first native hit.
   The prefixes observe `Power 0 -> 5` over 789 decisions and `Power 0 -> 0`
@@ -363,14 +377,16 @@ historical handoff.
   player-mechanics layer, the slot-45 constant-velocity fixture, and the
   observed state-2 lifecycle cohort. It does not establish full hazard,
   collision, solver, or planner parity.
-- The next useful semantic gate is now narrower: identify the
-  pre-enemy/pre-aux execution path that consumes RNG pair 0 and emits birth
-  1220 using pair 1. Timeline, active periodic emitters, installed callbacks,
-  the due main prefix, and the six observed auxiliary fires are already
-  closed for this root. Once the missing prefix and removals are
-  model-consumable, replay the real planner decision against the same
-  immutable root. Do not broaden to another all-36 portfolio or a longer
-  horizon merely to collect more state.
+- The root-2,129 pre-enemy/pre-aux RNG consumer and birth 1220 remain a
+  focused producer debt, but the user has explicitly placed that individual
+  hit detail behind general WS-H route/combat/resource work.
+- The next lifecycle gate requiring runtime authorization is one short,
+  default-off trace bracketed by full-pool snapshots, proving exact ordered
+  allocation/retirement/forced-zero agreement without changing sensing or
+  actions. Until that authorization exists, continue the offline WS-H
+  foundations: damageability/HP attribution, shot coverage, drop/Power
+  thresholds, and source-lifetime-to-emission linkage. Do not infer events
+  across ring overflow or install the probe as a live issue-time consumer.
 - A supervised warm wind-tunnel service remains deferred. If later branch
   throughput becomes the bottleneck, it must preserve a single writer,
   immutable session/root IDs, branch-level root/FX/stack/thread/map checks,
@@ -434,6 +450,11 @@ historical handoff.
 - The comment at `0x004231AD` records the revalidated post-main/aux-VM
   periodic-emitter descriptor/period/timer/HP gate and the observation that
   root 2,129 has zero enabled emitters.
+- Comments at `0x0042A55F`, `0x0042A6FF`, `0x0042A5F5`, `0x0042A787`,
+  `0x0042C9B1`, `0x0042CDFE`, `0x0042D899`, and `0x0042F039` record the
+  exact ordinary-enemy allocation, retirement, damage, and forced-zero
+  event-ring boundaries. They document a default-off trace design, not an
+  installed hook or action authority.
 
 ## Read In This Order
 

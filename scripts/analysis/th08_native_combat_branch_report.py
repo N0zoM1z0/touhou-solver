@@ -11,8 +11,8 @@ from typing import Any
 
 
 SCHEMA = "th08-native-combat-branch-comparison-v1"
-ROLLING_SCHEMA = "th08-native-snapshot-rolling-trial-v7"
-CAUSAL_SEARCH_SCHEMA = "th08-native-snapshot-causal-secondary-search-v5"
+ROLLING_SCHEMA = "th08-native-snapshot-rolling-trial-v8"
+CAUSAL_SEARCH_SCHEMA = "th08-native-snapshot-causal-secondary-search-v6"
 ROLLING_ACCEPTED_STATUS = "rolling_native_projection_snapshot_passed"
 CAUSAL_ACCEPTED_STATUS = "causal_secondary_search_passed"
 
@@ -205,6 +205,10 @@ def _summarize_branch(
                     summary,
                     "supported_alternate_damage_region_contribution_sum",
                 )
+                for summary in summaries
+            ),
+            "supported_resolved_hp_damage_tick_sum": sum(
+                _integer(summary, "supported_resolved_hp_damage_sum")
                 for summary in summaries
             ),
             "open_hp_gate_target_ticks": sum(

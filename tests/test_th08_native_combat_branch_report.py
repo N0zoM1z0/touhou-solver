@@ -33,6 +33,7 @@ def _summary(frame: int, *, hp: int = 100, damage: int = 0) -> dict[str, int]:
         "supported_alternate_contribution_sum": 0,
         "supported_primary_damage_region_contribution_sum": 3,
         "supported_alternate_damage_region_contribution_sum": 1,
+        "supported_resolved_hp_damage_sum": 24,
     }
 
 

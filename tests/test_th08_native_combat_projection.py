@@ -34,6 +34,9 @@ from th08_runtime.game_state import (
     SPELL_STATE_CAPTURE_SIZE,
 )
 from th08_runtime.native_combat_projection import (
+    ADDR_GLOBAL_DAMAGE_MODE_FLAGS,
+    ADDR_GLOBAL_MODE_MANAGER,
+    ADDR_ROUTE_ID,
     ENEMY_ALTERNATE_HITBOX_OFFSET,
     ENEMY_DAMAGE_HITBOX_OFFSET,
     ENEMY_FLAGS2_OFFSET,
@@ -47,6 +50,9 @@ from th08_runtime.native_combat_projection import (
     PLAYER_DAMAGE_REGION_POOL_OFFSET,
     PLAYER_DAMAGE_REGION_SLOT_STRIDE,
     PLAYER_DAMAGE_REGION_STATE_SCHEMA,
+    GLOBAL_MODE_STATE_POINTER_OFFSET,
+    GLOBAL_MODE_STATE_VALUE_OFFSET,
+    GLOBAL_PLAYER_DAMAGE_BONUS_THRESHOLD_OFFSET,
     PLAYER_SHOT_COMBAT_STATE_SCHEMA,
     PLAYER_SHOT_POOL_BYTES,
     capture_native_combat_projection,
@@ -256,6 +262,7 @@ class _Reader:
         player_context: bytes,
         damage_regions: bytes = bytes(PLAYER_DAMAGE_REGION_POOL_BYTES),
     ) -> None:
+        global_mode_state_pointer = 0x02000000
         self._memory = {
             (ADDR_PLAYER + PLAYER_SHOT_POOL_OFFSET, len(pool)): pool,
             (
@@ -272,6 +279,21 @@ class _Reader:
                 ADDR_PLAYER + PLAYER_DAMAGE_REGION_POOL_OFFSET,
                 len(damage_regions),
             ): damage_regions,
+            (ADDR_GLOBAL_DAMAGE_MODE_FLAGS, 4): bytes(4),
+            (ADDR_ROUTE_ID, 1): bytes(1),
+            (
+                ADDR_GLOBAL_MODE_MANAGER + GLOBAL_MODE_STATE_POINTER_OFFSET,
+                4,
+            ): struct.pack("<I", global_mode_state_pointer),
+            (
+                global_mode_state_pointer + GLOBAL_MODE_STATE_VALUE_OFFSET,
+                2,
+            ): struct.pack("<h", 0),
+            (
+                ADDR_GLOBAL_MODE_MANAGER
+                + GLOBAL_PLAYER_DAMAGE_BONUS_THRESHOLD_OFFSET,
+                2,
+            ): struct.pack("<h", 1),
             (
                 ADDR_PLAYER + PLAYER_PRIMARY_SHT_POINTER_OFFSET,
                 8,
@@ -518,6 +540,10 @@ class NativeCombatProjectionTests(unittest.TestCase):
             0,
         )
         self.assertEqual(
+            projection.summary["supported_resolved_hp_damage_sum"],
+            39,
+        )
+        self.assertEqual(
             projection.summary["supported_primary_overlap_target_count"],
             1,
         )
@@ -544,6 +570,10 @@ class NativeCombatProjectionTests(unittest.TestCase):
         self.assertEqual(primary_regions["return_damage_contribution"], 4)
         self.assertEqual(alternate_regions["hit_slots"], [4])
         self.assertEqual(alternate_regions["return_damage_contribution"], 0)
+        self.assertEqual(
+            target["supported_resolved_hp_damage"]["hp_damage"],
+            39,
+        )
 
     def test_nonfinite_active_shot_fails_closed(self) -> None:
         pool = bytearray(PLAYER_SHOT_POOL_BYTES)

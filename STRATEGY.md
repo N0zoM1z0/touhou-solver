@@ -1917,7 +1917,7 @@ first.
   root/tick slots, and no player phase 2. It grants no delivered-damage,
   generation, benefit, ranking, or live authority.
 - **Loaded Route-2 SHT provenance (2026-07-31, Offline):** combat projection
-  v4 reads both loaded SHT heap images, reverses level-pointer and callback
+  v5 reads both loaded SHT heap images, reverses level-pointer and callback
   relocation, and requires the normalized bytes to equal the pinned primary/
   secondary SHA-256 identities. Its exact 87-record pointer map separates 53
   normal records, 34 Bomb-only special records, and foreign/unknown pointers.
@@ -1931,6 +1931,8 @@ first.
   special-enemy, timer, and final HP arithmetic only when all opaque native
   predicates are supplied explicitly; it does not infer them from spell or
   boss labels.
+  V5 captures the exact raw mode bits, signed threshold operands, enemy
+  blocker/timer fields, and publishes only a supported resolved HP subtotal.
   Rolling v6 and causal-search v4 retain that identity at roots and ticks; the
   lowerer refuses to apply normal-content closure to any special or unknown
   source. No new native corpus exists. This grants loaded-content and source-

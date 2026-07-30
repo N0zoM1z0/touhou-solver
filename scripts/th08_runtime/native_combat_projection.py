@@ -23,7 +23,9 @@ from th08_attack_model import (
 )
 from th08_enemy_damage_model import (
     EnemyPlayerShotDamageContext,
+    EnemyResolvedDamageContext,
     evaluate_enemy_player_shot_damage_gate,
+    resolve_enemy_hp_damage,
 )
 from th08_live.enemy_sensor import (
     ENEMY_ACTIVE_FLAG,
@@ -63,7 +65,7 @@ from th08_runtime.route2_sht_provenance import (
 from th08_runtime.sensing import decode_spell_state
 
 
-NATIVE_COMBAT_PROJECTION_SCHEMA = "th08-native-combat-root-projection-v4"
+NATIVE_COMBAT_PROJECTION_SCHEMA = "th08-native-combat-root-projection-v5"
 PLAYER_SHOT_COMBAT_STATE_SCHEMA = "th08-player-shot-combat-state-v1"
 PLAYER_DAMAGE_REGION_STATE_SCHEMA = "th08-player-damage-region-state-v1"
 ENEMY_DAMAGE_TARGET_STATE_SCHEMA = "th08-enemy-damage-target-state-v1"
@@ -90,7 +92,15 @@ ENEMY_MAIN_VM_OFFSET = 0x7F8
 ENEMY_MAIN_VM_TIMER_CURRENT_OFFSET = ENEMY_MAIN_VM_OFFSET + 0x0C
 ENEMY_FLAGS2_OFFSET = 0x3328
 ENEMY_FRAME_DAMAGE_OFFSET = 0x3354
+ENEMY_SPECIAL_DAMAGE_BLOCKER_OFFSET = 0x2DA4
+ENEMY_POST_DAMAGE_TIMER_CURRENT_OFFSET = 0x535C
 ENEMY_CAUSAL_TAIL_OFFSET = 0x7F8
+ADDR_GLOBAL_DAMAGE_MODE_FLAGS = 0x004EA670
+ADDR_ROUTE_ID = 0x0164D0B1
+ADDR_GLOBAL_MODE_MANAGER = 0x0160F508
+GLOBAL_MODE_STATE_POINTER_OFFSET = 0x08
+GLOBAL_MODE_STATE_VALUE_OFFSET = 0x22
+GLOBAL_PLAYER_DAMAGE_BONUS_THRESHOLD_OFFSET = 0x3DDFE
 
 _ENEMY_COMPONENT_NAME = "ordinary_enemy_template_and_pool"
 
@@ -598,6 +608,8 @@ class EnemyDamageTarget:
     alternate_height: float
     main_vm_pc: int
     main_vm_timer_current: int
+    special_damage_blocker: int
+    post_damage_timer_current: int
     causal_tail_sha256: str
 
     def __post_init__(self) -> None:
@@ -654,6 +666,8 @@ class EnemyDamageTarget:
             },
             "main_vm_pc": self.main_vm_pc,
             "main_vm_timer_current": self.main_vm_timer_current,
+            "special_damage_blocker": self.special_damage_blocker,
+            "post_damage_timer_current": self.post_damage_timer_current,
             "causal_tail_sha256": self.causal_tail_sha256,
         }
 
@@ -757,6 +771,16 @@ def decode_enemy_damage_targets(
                     "<i",
                     data,
                     base + ENEMY_MAIN_VM_TIMER_CURRENT_OFFSET,
+                )[0],
+                special_damage_blocker=struct.unpack_from(
+                    "<i",
+                    data,
+                    base + ENEMY_SPECIAL_DAMAGE_BLOCKER_OFFSET,
+                )[0],
+                post_damage_timer_current=struct.unpack_from(
+                    "<i",
+                    data,
+                    base + ENEMY_POST_DAMAGE_TIMER_CURRENT_OFFSET,
                 )[0],
                 causal_tail_sha256=_sha256(
                     data[
@@ -918,6 +942,9 @@ def _target_combat_record(
     player_state: int,
     spell_active: bool,
     spell_enemy_pointer: int,
+    route_id: int,
+    global_damage_mode_flags: int,
+    player_damage_bonus_active: bool,
 ) -> dict[str, object]:
     gate = evaluate_enemy_player_shot_damage_gate(
         EnemyPlayerShotDamageContext(
@@ -969,6 +996,43 @@ def _target_combat_record(
                 pass_name="alternate_after_primary_region_mutation",
             )
         )
+    primary_supported = (
+        int(primary["supported_return_damage_subtotal"])
+        + int(primary_regions["return_damage_contribution"])
+    )
+    alternate_supported = 0
+    if alternate is not None and alternate_regions is not None:
+        alternate_supported = (
+            int(alternate["supported_return_damage_subtotal"])
+            + int(alternate_regions["return_damage_contribution"])
+        )
+    bomb_region_overlap = bool(
+        primary_regions["bomb_region_overlap_signal"]
+        or (
+            alternate_regions is not None
+            and alternate_regions["bomb_region_overlap_signal"]
+        )
+    )
+    resolved = resolve_enemy_hp_damage(
+        EnemyResolvedDamageContext(
+            primary_return_damage=primary_supported,
+            alternate_return_damage=alternate_supported,
+            alternate_enabled=target.alternate_enabled,
+            bomb_region_overlap=bomb_region_overlap,
+            route_id=route_id,
+            player_damage_bonus_active=player_damage_bonus_active,
+            hp_subtraction_open=gate.hp_subtraction_open,
+            special_enemy_damage_mode_active=bool(
+                global_damage_mode_flags & 0x01
+            ),
+            bomb_region_damage_allowed=bool(
+                global_damage_mode_flags & 0x80
+                and target.special_damage_blocker == 0
+            ),
+            post_damage_timer_active=target.post_damage_timer_current > 0,
+            post_damage_timer_reduction_enabled=bool(target.flags & 0x02),
+        )
+    )
     return {
         **target.record(),
         "damage_gate": gate.record(),
@@ -979,6 +1043,13 @@ def _target_combat_record(
         "damage_region_passes": {
             "primary": primary_regions,
             "alternate": alternate_regions,
+        },
+        "supported_resolved_hp_damage": {
+            **resolved.record(),
+            "authority": (
+                "supported_slots_and_target_local_regions_only_"
+                "unknown_direction_if_unresolved_or_cross_target_overlap"
+            ),
         },
     }
 
@@ -1035,6 +1106,54 @@ def capture_native_combat_projection(
         struct.unpack_from("<I", player_context, PLAYER_BOMB_ACTIVE_OFFSET)[0]
     )
     targets = decode_enemy_damage_targets(native_root_projection)
+    global_damage_mode_flags = struct.unpack(
+        "<I",
+        _read_exact(
+            reader,
+            ADDR_GLOBAL_DAMAGE_MODE_FLAGS,
+            4,
+            field="global damage mode flags",
+        ),
+    )[0]
+    route_id = _read_exact(
+        reader,
+        ADDR_ROUTE_ID,
+        1,
+        field="route id",
+    )[0]
+    global_mode_state_pointer = struct.unpack(
+        "<I",
+        _read_exact(
+            reader,
+            ADDR_GLOBAL_MODE_MANAGER + GLOBAL_MODE_STATE_POINTER_OFFSET,
+            4,
+            field="global mode state pointer",
+        ),
+    )[0]
+    global_mode_state_value = struct.unpack(
+        "<h",
+        _read_exact(
+            reader,
+            global_mode_state_pointer + GLOBAL_MODE_STATE_VALUE_OFFSET,
+            2,
+            field="global mode state value",
+        ),
+    )[0]
+    player_damage_bonus_threshold = struct.unpack(
+        "<h",
+        _read_exact(
+            reader,
+            (
+                ADDR_GLOBAL_MODE_MANAGER
+                + GLOBAL_PLAYER_DAMAGE_BONUS_THRESHOLD_OFFSET
+            ),
+            2,
+            field="player damage bonus threshold",
+        ),
+    )[0]
+    player_damage_bonus_active = (
+        global_mode_state_value >= player_damage_bonus_threshold
+    )
     loaded_sht_state = capture_loaded_route2_sht_state(reader)
     shot_source_provenance = []
     for shot in shot_state.slots:
@@ -1060,6 +1179,9 @@ def capture_native_combat_projection(
             player_state=player_state,
             spell_active=bool(spell["active"]),
             spell_enemy_pointer=int(spell["enemy_pointer"]),
+            route_id=route_id,
+            global_damage_mode_flags=global_damage_mode_flags,
+            player_damage_bonus_active=player_damage_bonus_active,
         )
         for target in targets
     ]
@@ -1070,6 +1192,14 @@ def capture_native_combat_projection(
         "focus_logic": int(compact_state["focus_logic"]),
         "player_state": player_state,
         "bomb_active": bomb_active,
+        "resolved_damage_context": {
+            "route_id": route_id,
+            "global_damage_mode_flags": global_damage_mode_flags,
+            "global_mode_state_pointer": global_mode_state_pointer,
+            "global_mode_state_value": global_mode_state_value,
+            "player_damage_bonus_threshold": player_damage_bonus_threshold,
+            "player_damage_bonus_active": player_damage_bonus_active,
+        },
         "spell": {
             "active": bool(spell["active"]),
             "enemy_pointer": int(spell["enemy_pointer"]),
@@ -1095,8 +1225,7 @@ def capture_native_combat_projection(
                 "cross_target_damage_region_mutation_order",
                 "type45_mode_predicate",
                 "nonzero_hit_callback_semantics",
-                "alternate_route_scaling",
-                "spell_boss_timeout_and_phase_scaling",
+                "unresolved_ordinary_shot_callbacks",
                 "generation_safe_cross_frame_hp_attribution",
                 "hostile_birth_prevention",
                 "survival_feasibility",
@@ -1222,6 +1351,10 @@ def capture_native_combat_projection(
                 alternate := record["damage_region_passes"]["alternate"]
             )
             is not None
+        ),
+        "supported_resolved_hp_damage_sum": sum(
+            int(record["supported_resolved_hp_damage"]["hp_damage"])
+            for record in target_records
         ),
     }
     return NativeCombatProjection(

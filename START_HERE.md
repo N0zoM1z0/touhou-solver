@@ -38,8 +38,8 @@ historical handoff.
   `CONTENT-01` shipped content manifest, and `CONTENT-02` static
   mandatory-event atlas are the current repository checkpoint; no new
   physical trial was run.
-- Complete Linux discovery passes 1,522 tests in 14.857 seconds.
-- Complete Windows UNC discovery passes 1,522 tests in 30.869 seconds with
+- Complete Linux discovery passes 1,522 tests in 14.637 seconds.
+- Complete Windows UNC discovery passes 1,522 tests in 31.108 seconds with
   the three existing skips.
 - No TH08, controller, supervisor, native-replay runner, or Windows test
   process is intentionally left running.
@@ -80,7 +80,7 @@ historical handoff.
   `artifacts/runtime_reports/th08_route2_normal_shot_content_audit_20260731.json`,
   SHA-256
   `4361ec2814a8885dd6c4dd17bd42039f5a9bb38bccbeebcb8c43b6816df6d4e1`.
-- Combat projection v4 now reverses the shipped SHT loader relocation for the
+- Combat projection v5 now reverses the shipped SHT loader relocation for the
   complete 1,584-byte primary and 3,568-byte secondary heap images and
   requires both normalized SHA-256 identities. Every active slot's exact
   `source_record_pointer` is classified into 53 normal, 34 Bomb-only special,
@@ -90,16 +90,19 @@ historical handoff.
   V4 adds the complete 192-slot player damage-region pool, exact active/due
   circle/rectangle overlap, accumulated cap arithmetic, and primary-to-
   alternate mutation order.
-- This identity change bumps rolling snapshot to v7 and causal search to v5.
+  V5 captures the raw late-damage mode bits, threshold comparison, enemy
+  blocker/timer fields, and supported resolved HP damage.
+- This identity change bumps rolling snapshot to v8 and causal search to v6.
   The branch lowerer checks root plus every tick and preserves any special or
   unknown source as non-normal; no v5/v3 artifact is reinterpreted and no
-  no v7/v5 corpus has been captured.
+  no v8/v6 corpus has been captured.
 - The shipped later-damage arithmetic is now executable with opaque predicates:
   optional per-call 106/100, route 3/11 alternate divisor 6.5 versus 1.7,
   actual resolved-damage cap 70, special-enemy `/7` or Bomb-region `/2.5`
   branches, optional post-timer `/9` or block, and final HP/frame-damage write.
-  The next general WS-H boundary is capturing/revalidating those opaque
-  predicates without guessing their physical labels.
+  Combat v5 now captures those raw predicates without guessing their physical
+  labels. The next general WS-H boundary is cross-target region ordering and
+  generation-safe runtime comparison before any combat ranking.
 - Root 2,129's old four-u16 pre-hostile prefix is compatible with a due
   focused level-5 option pair, but the retained v3 capsule lacks timer/pool
   fields, so this remains inferred rather than observed. Hostile birth 1220

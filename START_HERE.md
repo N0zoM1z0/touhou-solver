@@ -7,6 +7,12 @@ and design/run notes retain derivations and history.
 `notes/README.md` is the short topology index when a referenced note must be
 located; it does not change the authority order below.
 
+The canonical prioritized execution backlog is
+`notes/review/TH08_LUNATIC_NMNB_RESEARCH_TASKBOOK.md`. It is a planning
+artifact subordinate to this handoff, `STRATEGY.md`, formal contracts, code,
+and retained evidence. The former `/tmp/thsolver_taskbook.md` working copy was
+reconciled into that stable path on 2026-07-31.
+
 ## Current Handoff — Rolling Native Snapshot Fast Iteration
 
 This section supersedes older checkpoint/next-gate prose later in this

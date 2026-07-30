@@ -21,7 +21,7 @@ This is the navigation index for repository evidence. It does not replace
 - [Lunatic NMNB review and roadmap](review/LUNATIC_NMNB_PROGRAM_REVIEW_AND_ROADMAP_20260729.md):
   reconciled current status, authority impact, implementation dependencies,
   and physical acceptance ladder.
-- [Lunatic NMNB research taskbook](review/TH08_LUNATIC_NMNB_RESEARCH_TASKBOOK_20260730.md):
+- [Lunatic NMNB research taskbook](review/TH08_LUNATIC_NMNB_RESEARCH_TASKBOOK.md):
   iteration-first task cards, closed-loop research gates, and prioritized
   backlog; this is a planning artifact and does not override the current
   handoff, strategy ledger, formal contracts, or retained evidence.

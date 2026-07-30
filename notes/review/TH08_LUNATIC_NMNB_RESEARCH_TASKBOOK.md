@@ -1029,6 +1029,24 @@ Deliverables:
 - safe progress objectives only within exact viability;
 - route-prefix capsules from Stage-1 Power-0 history.
 
+Current semantic correction (2026-07-31):
+
+- CE-0226 rejects the inherited 50-damage return cap. The native ordinary-shot
+  return subtotal is uncapped; 50 limits only the distinct enemy hit-feedback
+  accumulator increment. Damage-region and final enemy-scaling work must build
+  on this corrected split.
+- Combat projection v4 now retains and evaluates the complete 192-slot
+  damage-region pass. Rolling v7 / causal v5 preserve that immutable identity;
+  later character/alternate/spell/Boss/HP scaling remains next.
+- The late arithmetic skeleton is now executable through the final HP value,
+  but its five opaque native predicates are not yet captured or semantically
+  renamed. Keep them explicit until caller/dataflow/runtime evidence closes
+  their physical meaning.
+- Combat projection v5 now captures those raw predicate operands at exact
+  roots and reports supported resolved HP damage. Rolling v8 / causal v6 bind
+  the new identity; cross-target region ordering and runtime generation joins
+  still bound authority.
+
 Exit gate:
 
 - fixed-root ablations distinguish pure evasion, focused fire, and dynamic

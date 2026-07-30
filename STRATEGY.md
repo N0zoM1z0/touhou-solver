@@ -136,12 +136,25 @@ observations across a focused H8 native/natural gate. The timer-9 completion
 update performs a separately rounded half-step and ordinary full step in the
 same manager call.
 
-This grants exact authority only to those declared layers on this root.
-Integrated hazard/collision/planner parity remains `UNKNOWN` at H1's seven
-births and four removals. The next iteration target is the smallest causal
-active-enemy ECL VM/current-instruction producer for those events, followed
-by same-root planner replay. Longer horizons, all-36 portfolios, and physical
-play are not routine gates.
+Projection v7 closes the next bounded source inventory without using endpoint
+births as model input. It retains the exact stage-timeline clock/PC/current
+record, active main and auxiliary ECL contexts/current instructions,
+installed callback identities/arguments, and enabled post-VM periodic
+emitters. At root 2,129 the timeline executes no event and consumes no RNG,
+no periodic emitter or installed callback is active, due main slot 8 reaches
+a child-spawn boundary without direct fire, and six auxiliary sub-30
+contexts each execute one direct fire before resetting their timer to two.
+
+The source differential still returns `UNKNOWN`, but at a narrower first
+mismatch. Retrospective RNG pairs 2..7 align with births `1221..1226` and
+auxiliary slots `0/1/2/4/6/7`; pair 0 is consumed before those fires and
+birth 1220 uses pair 1. That alignment is diagnostic only. Skipping pair 0 or
+conditioning on endpoint births would create false causal closure
+(CE-0214). The next iteration target is the pre-enemy/pre-aux producer for
+that prefix, then removal closure and same-root planner replay. Longer
+horizons, all-36 portfolios, and physical play are not routine gates. The
+deterministic report is
+`artifacts/runtime_reports/th08_native_h1_ecl_source_differential_root2129_20260730.json`.
 
 The executor gains no live authority until the integrated hazard/planner
 solver is bound to a model-consumable retained root/schedule, additional
@@ -149,6 +162,12 @@ event-class roots pass, complete causal coverage and delivery preflight hold,
 and focused physical validation passes. Physical is considered only after
 the wind tunnel first demonstrates that an immutable engine/planner change
 fixes its retained mismatch or improves its declared decision metric.
+
+Two explicit user-authorized handoff baselines do not change that boundary:
+the complete Lunatic route `20260730_222529` retained 68 hits with stage
+counts `2/3/5/20/15/23`, and Stage-5 practice `20260730_232102` retained
+19 hits plus a verified no-Bomb replay. They establish workloads only and
+cause no strategy promotion.
 
 The deferred performance proposal is a supervised warm wind-tunnel service
 with a single-writer queue, immutable session/root IDs, branch-level

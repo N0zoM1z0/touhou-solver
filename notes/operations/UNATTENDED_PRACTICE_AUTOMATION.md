@@ -16,9 +16,10 @@ Start flow without thprac:
    move right twice to accept the third Sakuya/Remilia team, and move to the
    requested stage.
 7. Start the prewarmed no-Bomb agent before sending the final stage confirm.
-8. Monitor progress, move the completed-stage save prompt right to "do not
-   save", terminate the verified game process, materialize compact practice
-   artifacts, and optionally repeat.
+8. Monitor progress, then either choose "do not save" or, for one accepted
+   complete practice with `--save-replay-slot`, archive/overwrite and verify
+   the declared replay slot before terminating the verified game process and
+   materializing compact practice artifacts.
 
 Screenshots are not a gameplay sensor. The menu sequence is a bounded bootstrap
 action from a fresh process. After final confirm, the agent fails closed unless
@@ -62,6 +63,20 @@ Continuous same-build regression:
 \\wsl.localhost\ubuntu\home\pentester\coding\codex_ida\th08\run_th08_practice_agent.bat --stage 4a --forever
 ```
 
+Save one accepted complete practice replay with:
+
+```bat
+run_th08_practice_agent.bat --stage 5 --save-replay-slot 15
+```
+
+Replay saving requires exactly one complete practice and cannot be combined
+with `--forever`, `--repeat` other than one, `--leave-game-running`, or the
+focused Final-B scale-source early-stop gate. The saver resolves the dynamic
+`ResultSysInf`, archives an occupied slot by content SHA-256, traverses native
+states `10 -> 12 -> 14 -> 13 -> 2`, and decodes the written replay to verify
+route, difficulty, exact single stage, and no Bomb press. A failed overwrite
+restores the archived prior replay.
+
 `Ctrl+C` stops the supervisor. The cleanup path requests an agent stop,
 releases every injected gameplay key, and terminates only the verified TH08
 image. `--leave-game-running` disables the final game termination.
@@ -87,7 +102,9 @@ Each attempt writes:
 - tracked session manifest and raw summary;
 - dossier JSON/Markdown, death CSV, and executable regression cases;
 - comparison JSON when an earlier unattended run exists for the same stage;
-- a human-readable copy under `notes/runs/`.
+- a human-readable copy under `notes/runs/`;
+- when requested and accepted, the replay plus a decoded manifest under
+  `artifacts/replays/archive/`.
 
 Failed bootstrap attempts still write a session manifest containing the menu
 plan, target identity if available, and exact exception. They must not be used
@@ -115,6 +132,16 @@ no-Bomb audit across 6,306 decisions.
 ## Current Evidence Boundary
 
 The corrected team selection, final confirm, auto-dialogue progression,
-terminal unload, artifact generation, and verified process cleanup have passed
-one complete Stage-1 physical trial. Other stage rows and repeated/forever
-recycling still require physical coverage.
+terminal unload, artifact generation, and verified process cleanup have
+passed complete Stage-1 and Stage-5 physical trials. Dynamic replay saving has
+passed both, including occupied-slot archive/overwrite on Stage 5. The latest
+accepted replay is
+`th8_15_4a31f868c2214235bde019d17c47f733236c16dc7cbf89db3fd073f6c1b783de.rpy`.
+Other stage rows and repeated/forever recycling still require physical
+coverage.
+
+This practice boundary does not apply to a complete Game Start route:
+Final-B terminal unload precedes a long ending/result sequence and no replay
+object is live yet (CE-0215). Use the full-route supervisor's accepted
+`--leave-game-running` handoff and save manually until that ending automaton
+is separately specified.

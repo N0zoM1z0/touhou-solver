@@ -1,0 +1,378 @@
+{
+  "authority": {
+    "kind": "offline_native_snapshot_first_mismatch_differential",
+    "physical_predictive_authority": false,
+    "physical_trial_run": false,
+    "planner_action_authority": false,
+    "uses_endpoint_as_model_input": false
+  },
+  "causal_root_layers": {
+    "auxiliary_vm": {
+      "direct_fire_count": 6,
+      "numeric_descriptor_authority": "not_causal_after_first_unknown_rng_consumer",
+      "rows": [
+        {
+          "auxiliary_index": 0,
+          "direct_fire_count": 1,
+          "direct_fire_static_offset": 11752,
+          "root_static_offset": 11960,
+          "slot": 0,
+          "stop_reason": "timer_reset_to_two"
+        },
+        {
+          "auxiliary_index": 0,
+          "direct_fire_count": 1,
+          "direct_fire_static_offset": 11900,
+          "root_static_offset": 11812,
+          "slot": 1,
+          "stop_reason": "timer_reset_to_two"
+        },
+        {
+          "auxiliary_index": 0,
+          "direct_fire_count": 1,
+          "direct_fire_static_offset": 11752,
+          "root_static_offset": 11960,
+          "slot": 2,
+          "stop_reason": "timer_reset_to_two"
+        },
+        {
+          "auxiliary_index": 0,
+          "direct_fire_count": 1,
+          "direct_fire_static_offset": 11752,
+          "root_static_offset": 11960,
+          "slot": 4,
+          "stop_reason": "timer_reset_to_two"
+        },
+        {
+          "auxiliary_index": 0,
+          "direct_fire_count": 1,
+          "direct_fire_static_offset": 11900,
+          "root_static_offset": 11812,
+          "slot": 6,
+          "stop_reason": "timer_reset_to_two"
+        },
+        {
+          "auxiliary_index": 0,
+          "direct_fire_count": 1,
+          "direct_fire_static_offset": 11900,
+          "root_static_offset": 11812,
+          "slot": 7,
+          "stop_reason": "timer_reset_to_two"
+        }
+      ],
+      "status": "exact_control_flow_one_direct_fire_each"
+    },
+    "due_main_vm": {
+      "closure": "stops_at_opcode_0x5c_child_spawn_boundary_no_direct_fire_in_prefix",
+      "rows": [
+        {
+          "contains_direct_fire": false,
+          "instructions": [
+            {
+              "opcode": 65,
+              "static_offset": 12908
+            },
+            {
+              "opcode": 7,
+              "static_offset": 12928
+            },
+            {
+              "opcode": 7,
+              "static_offset": 12948
+            },
+            {
+              "opcode": 92,
+              "static_offset": 12968
+            }
+          ],
+          "slot": 8,
+          "timer_elapsed": 50
+        }
+      ],
+      "status": "exact_literal_due_prefix"
+    },
+    "installed_callbacks": {
+      "auxiliary_nonzero_count": 0,
+      "main_nonzero_count": 0,
+      "status": "exact_no_installed_callback"
+    },
+    "periodic_emitter": {
+      "active_enemy_rows": 12,
+      "enabled_count": 0,
+      "status": "exact_no_enabled_emitter"
+    },
+    "timeline": {
+      "engine_event_count": 0,
+      "field_write_count": 0,
+      "rng_calls_after": 22684,
+      "rng_calls_before": 22684,
+      "root_clocks": [
+        {
+          "current_instruction_time": 260,
+          "current_static_offset": 42612,
+          "elapsed": 0,
+          "instruction_index": 0,
+          "timeline_index": 0
+        }
+      ],
+      "spawn_count": 0,
+      "status": "exact_no_event",
+      "timeline_count": 1
+    }
+  },
+  "first_mismatch": {
+    "excluded_root_sources": [
+      "stage_timeline_exact_no_event",
+      "active_enemy_periodic_emitter_exact_none",
+      "main_and_aux_installed_callback_exact_none",
+      "due_main_slot8_literal_prefix_contains_no_direct_fire"
+    ],
+    "first_birth_without_causal_root_producer": 1220,
+    "known_suffix": {
+      "auxiliary_slots_in_native_order": [
+        0,
+        1,
+        2,
+        4,
+        6,
+        7
+      ],
+      "birth_slots": [
+        1221,
+        1222,
+        1223,
+        1224,
+        1225,
+        1226
+      ],
+      "classification": "retrospective_alignment_after_unknown_prefix_not_predictive_authority",
+      "rng_pair_indices": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ]
+    },
+    "reason": "the first RNG pair is consumed before the six causally lowered auxiliary fires, and birth 1220 uses the next pair; no retained covered root producer explains that prefix",
+    "rng_calls_before_unknown": 22684,
+    "status": "UNKNOWN",
+    "unknown_pair_index": 0
+  },
+  "inputs": {
+    "decoded_ecl_path": "artifacts/decoded/ecldata5.ecl",
+    "decoded_ecl_sha256": "3148f45faf78bd8211a956edcdc353be73d2781995d3dadd36bdca8132f8fe19",
+    "raw_path": "artifacts/native_snapshot_rolling/raw/th08_model_capsule_h1_94_callbacks_20260730.json",
+    "raw_sha256": "55148ce34a37a52f0e4129edc8bc4ad74058d5ae2ce6c839f504f614394c0c41",
+    "runtime_ecl_file_base": 186384456,
+    "runtime_ecl_static_data_end_offset": 47224
+  },
+  "native_acceptance": {
+    "a1_a2_collision_control_exact": true,
+    "a1_a2_full_endpoint_exact": true,
+    "action": 148,
+    "horizon": 1,
+    "manager_frame": 2129,
+    "natural_reference_status": "natural_frame_differential_passed",
+    "status": "rolling_native_projection_snapshot_passed"
+  },
+  "native_endpoint": {
+    "birth_slots": [
+      1220,
+      1221,
+      1222,
+      1223,
+      1224,
+      1225,
+      1226
+    ],
+    "births": [
+      {
+        "angle": -0.5780540108680725,
+        "original_flags": 515,
+        "slot": 1220,
+        "speed": 0.9987534284591675,
+        "speed_bits": 1065332302,
+        "state": 2,
+        "velocity_x": 0.8364834785461426,
+        "velocity_y": -0.5457140207290649,
+        "x": 57.128562927246094,
+        "y": 33.90999984741211
+      },
+      {
+        "angle": 0.6803081631660461,
+        "original_flags": 515,
+        "slot": 1221,
+        "speed": 1.8943283557891846,
+        "speed_bits": 1072855386,
+        "state": 2,
+        "velocity_x": 1.4726109504699707,
+        "velocity_y": 1.1915943622589111,
+        "x": 45.55574035644531,
+        "y": 59.82942199707031
+      },
+      {
+        "angle": 2.023353338241577,
+        "original_flags": 515,
+        "slot": 1222,
+        "speed": 1.1563938856124878,
+        "speed_bits": 1066665143,
+        "state": 2,
+        "velocity_x": -0.5056523680686951,
+        "velocity_y": 1.0399819612503052,
+        "x": 128.8615264892578,
+        "y": 92.36006164550781
+      },
+      {
+        "angle": 1.5671147108078003,
+        "original_flags": 515,
+        "slot": 1223,
+        "speed": 1.2838727235794067,
+        "speed_bits": 1067734513,
+        "state": 2,
+        "velocity_x": 0.004726715851575136,
+        "velocity_y": 1.2838640213012695,
+        "x": 151.52796936035156,
+        "y": 123.50647735595703
+      },
+      {
+        "angle": 0.19043385982513428,
+        "original_flags": 515,
+        "slot": 1224,
+        "speed": 1.1203123331069946,
+        "speed_bits": 1066362469,
+        "state": 2,
+        "velocity_x": 1.1000595092773438,
+        "velocity_y": 0.21205824613571167,
+        "x": -18.774024963378906,
+        "y": -9.380223274230957
+      },
+      {
+        "angle": -0.09218466281890869,
+        "original_flags": 515,
+        "slot": 1225,
+        "speed": 1.7414411306381226,
+        "speed_bits": 1071572875,
+        "state": 2,
+        "velocity_x": 1.7340469360351562,
+        "velocity_y": -0.1603068858385086,
+        "x": 36.82972717285156,
+        "y": 55.860694885253906
+      },
+      {
+        "angle": -0.7646710276603699,
+        "original_flags": 515,
+        "slot": 1226,
+        "speed": 1.7299515008926392,
+        "speed_bits": 1071476493,
+        "state": 2,
+        "velocity_x": 1.2483505010604858,
+        "velocity_y": -1.197644829750061,
+        "x": 90.16191101074219,
+        "y": 164.19175720214844
+      }
+    ],
+    "removal_slots": [
+      87,
+      120,
+      545,
+      710
+    ]
+  },
+  "promotion": {
+    "integrated_h1_status": "UNKNOWN",
+    "next_minimum_closure": "identify the pre-enemy-or-pre-aux producer that consumes RNG pair 0 and emits birth 1220; do not skip RNG calls or condition on endpoint births",
+    "physical_gate_authorized": false
+  },
+  "retrospective_rng_alignment": {
+    "authority": "retrospective_endpoint_alignment_only_not_a_causal_root_input",
+    "endpoint_calls": 22716,
+    "pairs": [
+      {
+        "matching_birth_slot": null,
+        "pair_index": 0,
+        "rank_adjusted_speed": 1.4298604726791382,
+        "rank_adjusted_speed_bits": 1068959147,
+        "rng_calls_after": 22688,
+        "rng_calls_before": 22684,
+        "signed_unit": 0.973818426951766,
+        "unit": 0.4673605572897941
+      },
+      {
+        "matching_birth_slot": 1220,
+        "pair_index": 1,
+        "rank_adjusted_speed": 0.9987534284591675,
+        "rank_adjusted_speed_bits": 1065332302,
+        "rng_calls_after": 22692,
+        "rng_calls_before": 22688,
+        "signed_unit": -0.941140940412879,
+        "unit": 0.03625348582863808
+      },
+      {
+        "matching_birth_slot": 1221,
+        "pair_index": 2,
+        "rank_adjusted_speed": 1.8943283557891846,
+        "rank_adjusted_speed_bits": 1072855386,
+        "rng_calls_after": 22696,
+        "rng_calls_before": 22692,
+        "signed_unit": -0.20934405643492937,
+        "unit": 0.9318283582106233
+      },
+      {
+        "matching_birth_slot": 1222,
+        "pair_index": 3,
+        "rank_adjusted_speed": 1.1563938856124878,
+        "rank_adjusted_speed_bits": 1066665143,
+        "rng_calls_after": 22700,
+        "rng_calls_before": 22696,
+        "signed_unit": 0.6954850605688989,
+        "unit": 0.19389396929182112
+      },
+      {
+        "matching_birth_slot": 1223,
+        "pair_index": 4,
+        "rank_adjusted_speed": 1.2838727235794067,
+        "rank_adjusted_speed_bits": 1067734513,
+        "rng_calls_after": 22704,
+        "rng_calls_before": 22700,
+        "signed_unit": 0.8083553109318018,
+        "unit": 0.32137277931906283
+      },
+      {
+        "matching_birth_slot": 1224,
+        "pair_index": 5,
+        "rank_adjusted_speed": 1.1203123331069946,
+        "rank_adjusted_speed_bits": 1066362469,
+        "rng_calls_after": 22708,
+        "rng_calls_before": 22704,
+        "signed_unit": -0.8312233258038759,
+        "unit": 0.1578123599756509
+      },
+      {
+        "matching_birth_slot": 1225,
+        "pair_index": 6,
+        "rank_adjusted_speed": 1.7414411306381226,
+        "rank_adjusted_speed_bits": 1071572875,
+        "rng_calls_after": 22712,
+        "rng_calls_before": 22708,
+        "signed_unit": -0.5963743790052831,
+        "unit": 0.7789411598350853
+      },
+      {
+        "matching_birth_slot": 1226,
+        "pair_index": 7,
+        "rank_adjusted_speed": 1.7299515008926392,
+        "rank_adjusted_speed_bits": 1071476493,
+        "rng_calls_after": 22716,
+        "rng_calls_before": 22712,
+        "signed_unit": -0.9740066230297089,
+        "unit": 0.7674515142571181
+      }
+    ],
+    "root_calls": 22684,
+    "root_state": 45644,
+    "u16_calls_consumed": 32
+  },
+  "schema": "th08-native-h1-ecl-source-differential-v1"
+}

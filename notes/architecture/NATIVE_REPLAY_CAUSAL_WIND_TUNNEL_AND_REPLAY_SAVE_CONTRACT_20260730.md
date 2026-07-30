@@ -97,9 +97,27 @@ replay, and saved the current canonical Stage-5 replay
 The original game slot and the isolated wind-tunnel slot were restored to
 that canonical SHA after every branch trial.
 
-The 19-hit aggregate is not rollback evidence. Its RNG seed and canonical
-first hit differ from earlier Stage-5 runs, and the only new behavior occurred
-after stage completion in the save menu.
+**Observed:** handoff Stage-5 run
+`lunatic_route2_stage5_unattended_20260730_232102` also completed with
+19 hits and hard no-Bomb. It archived the prior slot-15 replay, traversed
+`10 -> 12 -> 14 -> 13 -> 2`, and retained the new focus replay
+`4a31f868c2214235bde019d17c47f733236c16dc7cbf89db3fd073f6c1b783de`.
+It is Route 2/Lunatic/single Stage 5, RNG seed 38,179, 33,728 frames, and has
+no Bomb press. The older `de1e4e...` replay remains the immutable source of
+the root-2,129 wind-tunnel evidence.
+
+**Observed CE-0215:** complete-route `route_complete` is too early for this
+practice-save routine. Run `lunatic_route2_fullrun_unattended_20260730_222529`
+reached Final-B terminal unload before its long ending/result sequence.
+Immediate dynamic-object resolution therefore found no live `ResultSysInf`
+and failed closed before menu input. The experimental full-route save entry
+was removed. Full-route replay retention remains manual through the existing
+accepted `--leave-game-running` handoff until a native ending-state contract
+is separately established.
+
+Neither 19-hit aggregate is rollback evidence. Their RNG seeds and first-hit
+roots differ from other Stage-5 runs, and replay-save behavior occurs only
+after stage completion.
 
 ## Native Replay As An Implicit Root
 
@@ -554,6 +572,50 @@ root enemy blob, followed only by the current instruction/program bytes
 needed to explain or reject those births. A broader horizon is not evidence
 for that missing producer.
 
+### H1 ECL-source closure and first unknown producer
+
+Projection schema v7 adds the bounded native producer state required at this
+root:
+
+- exact runtime stage-timeline clocks, PC/current record, spawn/message gates,
+  difficulty, stage flag, and indexed-enemy activity;
+- active main VM and dereferenced auxiliary ECL contexts, including call
+  depth, locals, current instruction, and installed callback identity and
+  arguments; and
+- the fixed post-VM periodic-emitter descriptor, period, timer, and HP gate.
+
+Disabled stale periodic descriptor bytes are not active evidence. The
+projection decodes a descriptor only when HP and period enable that source.
+A future non-null indexed-enemy registry still fails closed until its
+`field_2d30` semantics are retained; the current root has no such registry
+entry.
+
+`scripts/analysis/th08_native_h1_ecl_source_differential.py` SHA-pins the
+projection-v7 raw input and uses only causal root state plus immutable decoded
+`ecldata5`. It observes:
+
+- one timeline whose next record time is 260 while elapsed is 0, so the H1
+  step has no timeline event, write, spawn, or RNG call;
+- zero enabled periodic emitters and zero installed main/aux callbacks;
+- due main slot 8 executing literal opcodes
+  `0x41,0x07,0x07,0x5c`, with no direct fire before the child-spawn closure;
+  and
+- six auxiliary sub-30 contexts, each executing one direct fire and then
+  resetting its timer to two.
+
+Endpoint RNG alignment is retrospective only. Pair 0 has no matching birth;
+pair 1 matches birth 1220, and pairs 2..7 match births `1221..1226`.
+The causally lowered six auxiliary fires correspond only to the latter
+suffix. Therefore the first mismatch remains `UNKNOWN`: an uncovered
+pre-enemy/pre-aux producer consumes pair 0 and emits birth 1220 using pair 1.
+Skipping pair 0 or using endpoint births as forecast input is CE-0214.
+
+The deterministic report is
+`artifacts/runtime_reports/th08_native_h1_ecl_source_differential_root2129_20260730.json`,
+SHA-256
+`2df0b9b011e63a75894f1dbc8b4060b0abea6df32d4fc03265c922162162e22c`.
+It authorizes neither a planner action nor a physical gate.
+
 ### Warm-session lifecycle
 
 The current CLI already amortizes one replay bootstrap across a batch; it
@@ -615,7 +677,9 @@ Evidence-backed changes made on 2026-07-30:
 - commented `0x00431306` to record the timer-9 state-2 completion followed by
   ordinary movement in the same manager call; and
 - commented `0x0042FC43` to record original-flags bit `0x2` selecting
-  state 2 at spawn.
+  state 2 at spawn; and
+- commented `0x004231AD` with the post-main/aux-VM periodic-emitter
+  descriptor/period/timer/HP gate and the root-2,129 exact-none observation.
 
 These annotations are native/menu semantics only. They grant no solver action
 or survival authority.

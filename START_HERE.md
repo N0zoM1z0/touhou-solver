@@ -19,10 +19,10 @@ historical handoff.
   (`Build rolling native snapshot iteration loop`).
 - H=32 causal-search checkpoint: `3d15953`
   (`Build causal native snapshot policy search`).
-- The model-consumable lifecycle/state2 differential checkpoint is the
-  current repository HEAD.
-- Complete Linux discovery passes 1,365 tests in 14.638 seconds.
-- Complete Windows UNC discovery passes 1,365 tests in 30.548 seconds with
+- The projection-v7 H1 ECL-source differential and the two user-authorized
+  physical baselines are the current repository HEAD.
+- Complete Linux discovery passes 1,371 tests in 13.925 seconds.
+- Complete Windows UNC discovery passes 1,371 tests in 28.485 seconds with
   the three existing skips.
 - No TH08, controller, supervisor, native-replay runner, or Windows test
   process is intentionally left running.
@@ -31,21 +31,31 @@ historical handoff.
 ### Latest physical and replay evidence
 
 - Latest complete physical trial:
-  `lunatic_route2_stage5_unattended_20260730_144830`.
+  `lunatic_route2_stage5_unattended_20260730_232102`.
   It completed original-game Lunatic Sakuya/Remilia Stage 5, hard no-Bomb,
   `route_complete`, 19 hits, accepted replay saving, and exact cleanup.
-- The aggregate 19 is not a regression/rollback result: the RNG and first-hit
-  root differ, and the new automation runs only after stage completion.
+- Its first hit is frame 3,493. Spell 107 and its following transition are
+  the densest retained loss cluster. The aggregate 19 is a new workload
+  baseline, not a regression/rollback result or strategy promotion.
+- User-authorized complete-route hit baseline
+  `lunatic_route2_fullrun_unattended_20260730_222529` reached
+  `route_complete` with 68 hits, zero Bombs, and per-stage hits
+  `2/3/5/20/15/23` for Stage 1/2/3/4A/5/Final-B. Compact artifacts were
+  materialized after the run. Replay saving was not accepted: Final-B
+  terminal unload precedes the long ending/result sequence, so no live
+  `ResultSysInf` existed at the attempted handoff. CE-0215 retains the
+  fail-closed result; do not rerun solely to obtain that replay.
 - Stage-1 run `lunatic_route2_stage1_unattended_20260730_144256` first
   physically validated dynamic result-menu resolution and the complete
   `10 -> 12 -> 14 -> 13 -> 2` replay-save state chain.
 - Current canonical Stage-5 replay:
-  `artifacts/replays/archive/th8_15_de1e4e941adc8c2899eb3ae1bedd2b4faaf14362d4ce2af984d1c9e5a32da613.rpy`.
-  It is Route 2/Lunatic/single Stage 5, RNG seed 59,590, 34,267 frames, and no
+  `artifacts/replays/archive/th8_15_4a31f868c2214235bde019d17c47f733236c16dc7cbf89db3fd073f6c1b783de.rpy`.
+  It is Route 2/Lunatic/single Stage 5, RNG seed 38,179, 33,728 frames, and no
   Bomb press.
-- Original and isolated wind-tunnel slot 15 both hash to
+- The prior wind-tunnel replay remains immutable at
   `de1e4e941adc8c2899eb3ae1bedd2b4faaf14362d4ce2af984d1c9e5a32da613`.
-  All three archived replays decode and match their manifests.
+  Existing root-2,129 reports SHA-pin that older workload. Both old and new
+  Stage-5 replays decode and match their content-addressed manifests.
 
 ### Canonical first-hit result
 
@@ -203,6 +213,26 @@ historical handoff.
   are reported, not filled from the native future. Current enemy bodies do
   not causally define the ECL instruction/program state that produced the
   births.
+- Projection schema v7 now retains exact stage-timeline state, active main
+  and auxiliary ECL contexts/current instructions, installed callback
+  identities/arguments, and enabled post-VM periodic-emitter state. Disabled
+  stale descriptor bytes are not decoded as active source evidence.
+- The SHA-pinned H1 source differential executes only causal root state plus
+  immutable decoded `ecldata5`. It observes: timeline exact no-event/no-RNG;
+  zero enabled periodic emitters; zero installed main/aux callbacks; a due
+  main slot-8 literal prefix `0x41,0x07,0x07,0x5c` with no direct fire before
+  its child-spawn boundary; and six auxiliary sub-30 contexts, each with one
+  exact direct fire followed by timer reset to two.
+- Retrospective RNG alignment explains only the suffix: RNG pairs 2..7 match
+  births `1221..1226` and auxiliary slots `0/1/2/4/6/7`. Pair 0 is consumed
+  before those six fires, while birth 1220 uses pair 1. The missing
+  pre-enemy/pre-aux producer is therefore the first causal mismatch. Skipping
+  pair 0 or conditioning on endpoint births is rejected by CE-0214.
+- Compact report:
+  `artifacts/runtime_reports/th08_native_h1_ecl_source_differential_root2129_20260730.json`,
+  SHA-256
+  `2df0b9b011e63a75894f1dbc8b4060b0abea6df32d4fc03265c922162162e22c`.
+  Integrated H1 remains `UNKNOWN` and the report authorizes no physical gate.
 - Synthetic 2,000-bullet projection including tuple packing measures H32
   median `1.213 ms` and p95 `1.347 ms`; no warm-service work is justified by
   this corrected kernel.
@@ -230,12 +260,13 @@ historical handoff.
   player-mechanics layer, the slot-45 constant-velocity fixture, and the
   observed state-2 lifecycle cohort. It does not establish full hazard,
   collision, solver, or planner parity.
-- The next useful semantic gate is the smallest causal producer for H1's
-  seven births: first retain the already decoded active-enemy ECL VM
-  inventory in the root capsule, then add only the current instruction/program
-  bytes needed to reproduce or explicitly reject that event. Once births and
-  removals are model-consumable, replay the real planner decision against the
-  same immutable root. Do not broaden to another all-36 portfolio or a longer
+- The next useful semantic gate is now narrower: identify the
+  pre-enemy/pre-aux execution path that consumes RNG pair 0 and emits birth
+  1220 using pair 1. Timeline, active periodic emitters, installed callbacks,
+  the due main prefix, and the six observed auxiliary fires are already
+  closed for this root. Once the missing prefix and removals are
+  model-consumable, replay the real planner decision against the same
+  immutable root. Do not broaden to another all-36 portfolio or a longer
   horizon merely to collect more state.
 - A supervised warm wind-tunnel service remains deferred. If later branch
   throughput becomes the bottleneck, it must preserve a single writer,
@@ -249,9 +280,11 @@ historical handoff.
   falsifier only after the offline wind tunnel shows that an immutable
   engine/planner version fixes its retained mismatch or improves its declared
   decision metric, and after integration/event/delivery gates pass.
-- Do not run another unchanged Stage-5 physical trial or another exhaustive
-  replay-prefix portfolio. No THPRAC/exact-spell automation is assumed; the
-  physical research unit remains a complete selected stage.
+- The complete-route and Stage-5 runs above were explicit user-authorized
+  baselines before handoff and do not change that rule. Do not run another
+  unchanged Stage-5 physical trial or another exhaustive replay-prefix
+  portfolio. No THPRAC/exact-spell automation is assumed; the physical
+  research unit remains a complete selected stage.
 - Detailed contract and evidence:
   `notes/architecture/NATIVE_REPLAY_CAUSAL_WIND_TUNNEL_AND_REPLAY_SAVE_CONTRACT_20260730.md`.
 
@@ -266,7 +299,10 @@ historical handoff.
 - Rolling snapshot raw bundles are under
   `artifacts/native_snapshot_rolling/raw/`. They are local and ignored; the
   compact causal/timing reports above are tracked. The focused lifecycle
-  inputs are SHA-pinned by their compact H1/H8 reports.
+  inputs are SHA-pinned by their compact H1/H8 reports. The accepted
+  projection-v7 H1 input is
+  `th08_model_capsule_h1_94_callbacks_20260730.json`, SHA-256
+  `55148ce34a37a52f0e4129edc8bc4ad74058d5ae2ce6c839f504f614394c0c41`.
 - Four large native-root byte directories remain local/ignored under
   `artifacts/runtime_reports/*.root/`; compact root reports are retained.
 - The isolated local game directory is
@@ -292,6 +328,9 @@ historical handoff.
   and original-flags bit-`0x2` state selection respectively. These are
   native lifecycle semantics only; they grant no integrated planner or
   physical authority.
+- The comment at `0x004231AD` records the revalidated post-main/aux-VM
+  periodic-emitter descriptor/period/timer/HP gate and the observation that
+  root 2,129 has zero enabled emitters.
 
 ## Read In This Order
 
@@ -3040,7 +3079,7 @@ Practice:
 /mnt/c/Windows/System32/cmd.exe /d /c call \
   '\\wsl.localhost\ubuntu\home\pentester\coding\codex_ida\th08\run_th08_practice_agent.bat' \
   --stage 5 --status-seconds 15 --stall-timeout 120 \
-  --diagnostic-continue-root-only-scale
+  --diagnostic-continue-root-only-scale --save-replay-slot 15
 ```
 
 This is the corrected Stage-5 reserve falsifier command. CE-0199 rejects the
@@ -3049,7 +3088,9 @@ frame 1 on `time_scale_authority_unknown` before any decision. The explicit
 continuation is an unknown-direction constant-current-root proxy with no hard
 scale/model authority; it is required to satisfy the no-fail-close evidence
 contract. Do not add trace, combat, Power, Focus/unfocused, or other planner
-flags.
+flags. `--save-replay-slot 15` is only for one accepted complete practice:
+it archives the prior slot before overwrite and verifies replay identity and
+no-Bomb after writing. Omit it when a replay is not part of the named gate.
 
 The retained SEM-MODE-B whole-stage observer command was:
 
@@ -3128,6 +3169,9 @@ Add `--leave-game-running` only for an accepted run that must remain for
 manual replay save and while the agent remains present. The switch never
 chooses save/no-save and cannot preserve a failed run. Route-2 practice stages
 are `1 2 3 4a 5 6b`; 4B and 6A are route-locked.
+CE-0215 proves that Final-B terminal unload precedes the long ending/result
+sequence and dynamic replay-save object. There is no automatic full-route
+save option; use this accepted handoff and save manually.
 
 Operational rules:
 

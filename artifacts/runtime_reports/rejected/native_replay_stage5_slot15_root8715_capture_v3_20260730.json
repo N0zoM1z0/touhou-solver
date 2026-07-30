@@ -1,0 +1,316 @@
+{
+  "changes_gameplay_input": false,
+  "executable_identity": {
+    "image_path": "D:\\Entertainment\\Game\\Touhou\\[th08] 东方永夜抄 (日文版)\\th08.exe",
+    "pid": 71060,
+    "runtime_patch": {
+      "address": 4509946,
+      "byte": 0,
+      "no_life_decrement": true
+    },
+    "sha256": "330fbdbf58a710829d65277b4f312cfbb38d5448b3df523e79350b879213d924"
+  },
+  "finished_at": "2026-07-30T13:56:24.451654+08:00",
+  "gameplay_input": "native_replay_only",
+  "initial_gameplay_state": {
+    "difficulty_index": 3,
+    "enemy_manager_frame": 0,
+    "engine_flags": 98316,
+    "gameplay_active": true,
+    "input_current": 0,
+    "input_previous": 0,
+    "input_raw": 0,
+    "player": {
+      "bomb_active": 0,
+      "bomb_index": 0,
+      "bomb_lockout": 0,
+      "bomb_timer": 0,
+      "deathbomb": 0,
+      "focus_logic": 2,
+      "focus_transition_counter": 0,
+      "forced_bomb": 0,
+      "phase": 1,
+      "predeath_counter": 10,
+      "secondary_character_active": false,
+      "x": 192.0,
+      "y": 384.0
+    },
+    "resources": {
+      "bombs": 3.0,
+      "lives": 8.0,
+      "power": 128.0
+    },
+    "rng_calls": 92,
+    "rng_state": 30550,
+    "route_id": 2,
+    "spell": {
+      "active": false,
+      "enemy_pointer": 0,
+      "flags": 0,
+      "name": "",
+      "spell_id": 0,
+      "timer_elapsed": 0
+    },
+    "stage_route_index": 5,
+    "time_scale_bits": 1065353216,
+    "wall_time_ns": 1785390838924745200
+  },
+  "menu_trace": [
+    {
+      "label": "replay_main_entry_selected",
+      "state": {
+        "cursor": 4,
+        "difficulty_cursor": 3,
+        "difficulty_index": 0,
+        "manager": 186821608,
+        "mode": 0,
+        "practice_stage_availability_mask": 1,
+        "route_id": 0,
+        "screen_age": 79,
+        "stage_route_index": 0,
+        "substate": 1
+      },
+      "taps": [
+        {
+          "key": "down",
+          "purpose": "select Replay feedback step 1",
+          "wait_after_ms": 180
+        },
+        {
+          "key": "down",
+          "purpose": "select Replay feedback step 2",
+          "wait_after_ms": 180
+        },
+        {
+          "key": "down",
+          "purpose": "select Replay feedback step 3",
+          "wait_after_ms": 180
+        },
+        {
+          "key": "down",
+          "purpose": "select Replay feedback step 4",
+          "wait_after_ms": 180
+        }
+      ]
+    },
+    {
+      "label": "replay_list_entered",
+      "state": {
+        "cursor": 0,
+        "difficulty_cursor": 3,
+        "difficulty_index": 0,
+        "manager": 186821608,
+        "mode": 7,
+        "practice_stage_availability_mask": 1,
+        "replay_entry_count": 15,
+        "replay_selected_entry": 0,
+        "replay_selected_stage": 0,
+        "route_id": 0,
+        "screen_age": 39,
+        "stage_route_index": 0,
+        "substate": 1
+      },
+      "taps": [
+        {
+          "key": "confirm",
+          "purpose": "enter Replay",
+          "wait_after_ms": 700
+        }
+      ]
+    },
+    {
+      "label": "replay_entry_selected",
+      "state": {
+        "cursor": 14,
+        "difficulty_cursor": 3,
+        "difficulty_index": 0,
+        "manager": 186821608,
+        "mode": 7,
+        "practice_stage_availability_mask": 1,
+        "replay_entry_count": 15,
+        "replay_selected_entry": 14,
+        "replay_selected_stage": 0,
+        "route_id": 0,
+        "screen_age": 259,
+        "stage_route_index": 0,
+        "substate": 1
+      },
+      "taps": [
+        {
+          "key": "down",
+          "purpose": "select fixed replay slot 15 feedback step 1",
+          "wait_after_ms": 180
+        },
+        {
+          "key": "down",
+          "purpose": "select fixed replay slot 15 feedback step 2",
+          "wait_after_ms": 180
+        },
+        {
+          "key": "down",
+          "purpose": "select fixed replay slot 15 feedback step 3",
+          "wait_after_ms": 180
+        },
+        {
+          "key": "down",
+          "purpose": "select fixed replay slot 15 feedback step 4",
+          "wait_after_ms": 180
+        },
+        {
+          "key": "down",
+          "purpose": "select fixed replay slot 15 feedback step 5",
+          "wait_after_ms": 180
+        },
+        {
+          "key": "down",
+          "purpose": "select fixed replay slot 15 feedback step 6",
+          "wait_after_ms": 180
+        },
+        {
+          "key": "down",
+          "purpose": "select fixed replay slot 15 feedback step 7",
+          "wait_after_ms": 180
+        },
+        {
+          "key": "down",
+          "purpose": "select fixed replay slot 15 feedback step 8",
+          "wait_after_ms": 180
+        },
+        {
+          "key": "down",
+          "purpose": "select fixed replay slot 15 feedback step 9",
+          "wait_after_ms": 180
+        },
+        {
+          "key": "down",
+          "purpose": "select fixed replay slot 15 feedback step 10",
+          "wait_after_ms": 180
+        },
+        {
+          "key": "down",
+          "purpose": "select fixed replay slot 15 feedback step 11",
+          "wait_after_ms": 180
+        },
+        {
+          "key": "down",
+          "purpose": "select fixed replay slot 15 feedback step 12",
+          "wait_after_ms": 180
+        },
+        {
+          "key": "down",
+          "purpose": "select fixed replay slot 15 feedback step 13",
+          "wait_after_ms": 180
+        },
+        {
+          "key": "down",
+          "purpose": "select fixed replay slot 15 feedback step 14",
+          "wait_after_ms": 180
+        }
+      ]
+    },
+    {
+      "label": "replay_stage_list_entered",
+      "state": {
+        "cursor": 5,
+        "difficulty_cursor": 3,
+        "difficulty_index": 0,
+        "manager": 186821608,
+        "mode": 7,
+        "practice_stage_availability_mask": 1,
+        "replay_entry_count": 15,
+        "replay_selected_entry": 14,
+        "replay_selected_stage": 5,
+        "route_id": 0,
+        "screen_age": 305,
+        "stage_route_index": 0,
+        "substate": 2
+      },
+      "taps": [
+        {
+          "key": "confirm",
+          "purpose": "open fixed replay slot 15",
+          "wait_after_ms": 700
+        }
+      ]
+    },
+    {
+      "label": "replay_stage_selected",
+      "state": {
+        "cursor": 5,
+        "difficulty_cursor": 3,
+        "difficulty_index": 0,
+        "manager": 186821608,
+        "mode": 7,
+        "practice_stage_availability_mask": 1,
+        "replay_entry_count": 15,
+        "replay_selected_entry": 14,
+        "replay_selected_stage": 5,
+        "route_id": 0,
+        "screen_age": 305,
+        "stage_route_index": 0,
+        "substate": 2
+      },
+      "taps": []
+    },
+    {
+      "label": "replay_confirmation_entered",
+      "state": {
+        "cursor": 0,
+        "difficulty_cursor": 3,
+        "difficulty_index": 0,
+        "manager": 186821608,
+        "mode": 7,
+        "practice_stage_availability_mask": 1,
+        "replay_entry_count": 15,
+        "replay_selected_entry": 14,
+        "replay_selected_stage": 5,
+        "route_id": 0,
+        "screen_age": 352,
+        "stage_route_index": 0,
+        "substate": 3
+      },
+      "taps": [
+        {
+          "key": "confirm",
+          "purpose": "open replay confirmation",
+          "wait_after_ms": 700
+        }
+      ]
+    },
+    {
+      "label": "replay_launch_confirmed",
+      "state": {
+        "replay_selected_entry": 14,
+        "replay_selected_stage": 5
+      },
+      "taps": [
+        {
+          "key": "confirm",
+          "purpose": "start native-verified stage 5 replay",
+          "wait_after_ms": 700
+        }
+      ]
+    }
+  ],
+  "pid": 71060,
+  "recorded_future_world_reused": false,
+  "replay_contract": {
+    "compact_index": 14,
+    "difficulty_index": 3,
+    "path": "D:/Entertainment/Game/Touhou/[th08] 东方永夜抄 (日文版)/replay/th8_15.rpy",
+    "route_id": 2,
+    "sha256": "d83b98a23a2fd8f01c79c62f1aa824d56c05224449a5da1db2904f6022b68782",
+    "slot": 15,
+    "stage_bomb_press_frames": [],
+    "stage_frame_count": 30498,
+    "stage_input_sha256": "1ef1301cc4666d143b8b2499ae81a1ec0707c2cb7dba9ad9b6743ae9a1d3b751",
+    "stage_route_index": 5
+  },
+  "result": {
+    "error": "ordinary-pool component must contain all 480 native slots",
+    "error_type": "ValueError",
+    "status": "trial_error"
+  },
+  "schema": "th08-native-replay-first-hit-trial-v1",
+  "started_at": "2026-07-30T13:53:45.094001+08:00"
+}

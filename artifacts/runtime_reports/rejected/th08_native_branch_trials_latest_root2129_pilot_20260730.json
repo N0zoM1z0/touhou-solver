@@ -1,0 +1,48 @@
+{
+  "branch_count": 1,
+  "branches": [
+    {
+      "branch_replay_sha256": "c6e947aea78e2241162989d8da96196bb9103389babbd3babd56b6a47718ddf6",
+      "changes_gameplay_input": false,
+      "complete_mask": 0,
+      "endpoint": {
+        "focus_logic": 0,
+        "focus_transition_counter": 0,
+        "input_current": 81,
+        "input_previous": 5,
+        "manager_frame": 2136,
+        "player_phase": 0,
+        "player_x": 373.17156982421875,
+        "player_y": 429.17156982421875,
+        "rng_calls": 22794,
+        "rng_state": 38998,
+        "secondary_character_active": true,
+        "spell_id": null,
+        "time_scale_bits": 1065353216
+      },
+      "first_hit_manager_frame": null,
+      "movement_label": "stay_unfocused",
+      "recorded_future_world_reused": false,
+      "status": "stop_frame_reached_without_hit",
+      "stop_manager_frame": 2136,
+      "token": "th08_mask_00",
+      "trial_report": "//wsl.localhost/ubuntu/tmp/th08_native_branch_trials_latest_root2129_20260730/th08_mask_00.json"
+    }
+  ],
+  "canonical_slot_restore_sha256": "de1e4e941adc8c2899eb3ae1bedd2b4faaf14362d4ce2af984d1c9e5a32da613",
+  "corpus_report": "//wsl.localhost/ubuntu/home/pentester/coding/codex_ida/th08/artifacts/runtime_reports/th08_native_replay_causal_branch_corpus_latest_root2129_20260730.json",
+  "executor": "original_th08_executable_from_replay_prefix",
+  "explicit_native_root_executor": false,
+  "finished_at": "2026-07-30T15:11:53.510509+08:00",
+  "hold_frames": 3,
+  "no_hit_witnesses": [
+    "th08_mask_00"
+  ],
+  "physical_authority": false,
+  "root_frame": 2129,
+  "schema": "th08-native-replay-branch-corpus-trial-v1",
+  "source_sha256": "de1e4e941adc8c2899eb3ae1bedd2b4faaf14362d4ce2af984d1c9e5a32da613",
+  "started_at": "2026-07-30T15:10:52.117828+08:00",
+  "status": "completed",
+  "stop_manager_frame": 2136
+}

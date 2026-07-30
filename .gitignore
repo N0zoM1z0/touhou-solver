@@ -13,8 +13,14 @@ coverage.xml
 artifacts/runtime_reports/*.jsonl
 artifacts/runtime_reports/*.png
 artifacts/runtime_reports/*.log
+artifacts/runtime_reports/*.root/
 artifacts/menu_audit/*.png
 artifacts/viability_audit/raw/
+
+# Local, retained research inputs. Their tracked indexes record exact
+# provenance; nested repositories and raw native-wind-tunnel runs stay local.
+references/external/
+artifacts/native_replay_wind_tunnel/raw/
 
 # Raw extraction/decoding output. Existing retained fixtures remain tracked.
 artifacts/extracted/

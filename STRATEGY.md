@@ -66,6 +66,32 @@ history, and final repeated Lunatic/Extra acceptance. It is a sparse oracle
 and promotion gate, not the parser/model-debug inner loop. See
 `notes/review/TH08_OFFLINE_ITERATION_RESEARCH_20260730.md`.
 
+### Native replay wind-tunnel checkpoint
+
+**Offline/native diagnostic, not live:** accepted replay-save automation now
+produces content-addressed native Stage replays without THPRAC. The current
+Stage-5 replay has an exact replay-input/native-manager alignment and one
+canonical first-hit root. Original TH08 has executed all 36 no-Bomb
+three-frame action branches from the same implicit replay root.
+
+The corrected short fence yielded six apparent local no-hit candidates, but
+all six hit four to six frames later under a longer fence. There is no exact
+no-hit witness and no strategy promotion. A same-frame manager/collision
+observer race also rejects the earlier stop-at-hit-frame pilot.
+
+Exhaustive native replay-prefix branching is now **rejected as the primary
+inner loop** because it repeats the whole stage prefix for every action.
+Native replay remains an independent semantic oracle and sparse candidate
+validator. The **proposed** next research architecture is a fail-closed
+TH08-specific explicit-root restore-and-step executor. Its first gate is
+same-action determinism and declared-effect-point divergence over one native
+tick; it gains no live authority until complete causal coverage, native
+differential, delivery preflight, and focused physical validation pass.
+
+Accepted replay saving, explicit-root limits, branch evidence, and the next
+gate are in
+`notes/architecture/NATIVE_REPLAY_CAUSAL_WIND_TUNNEL_AND_REPLAY_SAVE_CONTRACT_20260730.md`.
+
 ### Current evidence
 
 **Observed:** Hard Stage-1 `175049` completed with zero hits, Bombs, and

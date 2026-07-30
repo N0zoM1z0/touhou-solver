@@ -7,6 +7,111 @@ and design/run notes retain derivations and history.
 `notes/README.md` is the short topology index when a referenced note must be
 located; it does not change the authority order below.
 
+## Current Handoff — Native Replay Wind-Tunnel Closure
+
+This section supersedes older checkpoint/next-gate prose later in this
+historical handoff.
+
+### Exact checkpoint
+
+- Branch: `main`.
+- Latest implementation checkpoint: `49747f2`
+  (`Build native replay wind tunnel and save automation`).
+- The following retention/documentation checkpoint is the current repository
+  HEAD.
+- Complete Linux discovery passes 1,315 tests in 15.066 seconds.
+- Complete Windows UNC discovery passes 1,315 tests in 32.243 seconds with
+  the three existing skips.
+- No TH08, controller, supervisor, native-replay runner, or Windows test
+  process is intentionally left running.
+- `audits/` is untracked user input. Never stage it.
+
+### Latest physical and replay evidence
+
+- Latest complete physical trial:
+  `lunatic_route2_stage5_unattended_20260730_144830`.
+  It completed original-game Lunatic Sakuya/Remilia Stage 5, hard no-Bomb,
+  `route_complete`, 19 hits, accepted replay saving, and exact cleanup.
+- The aggregate 19 is not a regression/rollback result: the RNG and first-hit
+  root differ, and the new automation runs only after stage completion.
+- Stage-1 run `lunatic_route2_stage1_unattended_20260730_144256` first
+  physically validated dynamic result-menu resolution and the complete
+  `10 -> 12 -> 14 -> 13 -> 2` replay-save state chain.
+- Current canonical Stage-5 replay:
+  `artifacts/replays/archive/th8_15_de1e4e941adc8c2899eb3ae1bedd2b4faaf14362d4ce2af984d1c9e5a32da613.rpy`.
+  It is Route 2/Lunatic/single Stage 5, RNG seed 59,590, 34,267 frames, and no
+  Bomb press.
+- Original and isolated wind-tunnel slot 15 both hash to
+  `de1e4e941adc8c2899eb3ae1bedd2b4faaf14362d4ce2af984d1c9e5a32da613`.
+  All three archived replays decode and match their manifests.
+
+### Canonical first-hit result
+
+- Native replay first hit: manager frame 2,136.
+- Exact input alignment: replay input frame `manager - 1`, matching
+  2,136/2,136 masks, 450/450 transitions, and a 64-frame suffix.
+- Current branch root: replay frame 2,129; exact byte capture at manager
+  2,130.
+- Atomic partial-root SHA-256:
+  `289da8a4daf80353ea98f0394ffc0b011b7a30e950007a41f47452bbf3ebeabb`,
+  bracket `[2130,2130]`. It has no restore executor and no predictive
+  authority.
+- Corrected all-36 original-engine replay branches at stop fence 2,137:
+  30 hit, six locally reached the fence.
+- Extending those six masks (`0x14/15/90/91/94/95`) to frame 2,257 produced
+  first hits at `2141/2142/2140/2140/2141/2141`.
+- There is no exact no-hit witness. The current three-frame intervention only
+  delays the contact.
+- Stop-at-2,136 pilot reports are rejected: manager priority advances before
+  same-frame collision, so an external observer must see a later fence.
+
+### Authority and next useful gate
+
+- Accepted replay saving and original-engine replay branching are
+  diagnostic/offline infrastructure. They do not change the live policy.
+- Native replay is retained as a same-seed semantic oracle and sparse
+  candidate validator. Repeating a whole replay prefix for all 36 actions is
+  rejected as the primary inner loop; the complete portfolio took roughly
+  half an hour.
+- The next decisive milestone is a TH08-specific one-tick explicit-root
+  restore-and-step executor at a revalidated input/scheduler boundary.
+- First prove `A -> restore -> A` fingerprint identity and
+  `A -> restore -> B` divergence only after the declared input effect.
+  Return `UNKNOWN` on unowned allocation, mapping, callback, thread, timer,
+  renderer/audio, transition, or external-state effects.
+- Grow exact horizons `1/2/4/8/16`, then run all 36 masks. Only an exact
+  causal no-hit witness returns to original replay and a focused complete
+  stage.
+- Do not run another unchanged Stage-5 physical trial or another exhaustive
+  replay-prefix portfolio. No THPRAC/exact-spell automation is assumed; the
+  physical research unit remains a complete selected stage.
+- Detailed contract and evidence:
+  `notes/architecture/NATIVE_REPLAY_CAUSAL_WIND_TUNNEL_AND_REPLAY_SAVE_CONTRACT_20260730.md`.
+
+### Retained local material
+
+- Six clean external reference clones, including matching `th08-decomp`,
+  `thtk`, and PyTouhou, are under `references/external/20260730/`. Exact
+  commits and authority limits are tracked in
+  `notes/review/EXTERNAL_REFERENCE_SNAPSHOT_INDEX_20260730.md`.
+- Current accepted/rejected/legacy replay branch raw bundles are under
+  `artifacts/native_replay_wind_tunnel/raw/`. They are local and ignored.
+- Four large native-root byte directories remain local/ignored under
+  `artifacts/runtime_reports/*.root/`; compact root reports are retained.
+- The isolated local game directory is
+  `D:/Entertainment/Game/Touhou/[th08] 东方永夜抄 (日文版)__codex_wind_tunnel`.
+- The former `/tmp/vc_sth.txt`, both read-only root/wind-tunnel reviews, and
+  the native-producer audit are retained under `notes/review/`. Current
+  handoff material no longer depends on `/tmp`.
+
+### IDA database changes
+
+- Existing `replay_save_menu_update` at `0x0045696F` is retained.
+- `0x004582A0` is now `result_menu_create_and_register`.
+- `0x004584B0` is now `result_menu_update_dispatch`.
+- Comments record the heap `ResultSysInf`, update-node/context chain, save
+  fields/states, and correction that `0x018B8A68` is not the object base.
+
 ## Read In This Order
 
 1. `AGENTS.md`
@@ -85,7 +190,9 @@ located; it does not change the authority order below.
 68. `notes/review/LUNATIC_NMNB_PROGRAM_REVIEW_AND_ROADMAP_20260729.md`,
     together with
     `notes/review/TH08_OFFLINE_ITERATION_RESEARCH_20260730.md` and
-    `notes/review/NMNB_FEASIBILITY_AND_FIRST_HIT_ITERATION_PERSPECTIVE_20260730.md`
+    `notes/review/NMNB_FEASIBILITY_AND_FIRST_HIT_ITERATION_PERSPECTIVE_20260730.md`,
+    plus the accepted implementation/evidence handoff
+    `notes/architecture/NATIVE_REPLAY_CAUSAL_WIND_TUNNEL_AND_REPLAY_SAVE_CONTRACT_20260730.md`
 69. `notes/architecture/TH08_NATIVE_ECL_TIMER_SEMANTICS_20260729.md`
 70. `notes/architecture/TH08_PLAYER_LASER_GLOBAL_TIME_SCALE_SEMANTICS_20260729.md`
 71. `notes/architecture/TH08_ACTION_CONDITIONED_PLAYER_ENEMY_MODE_SEMANTICS_20260730.md`

@@ -1894,3 +1894,63 @@ baseline and the ordered dependency chain above are part of the result.
   comments. C5-2 additionally renames/types `0x017CE758` as
   `g_game_timing_state: Th08GameTimingState` and comments the physical
   asynchronous-capture/terminal-restore evidence at `0x00424FB4`.
+
+## 2026-07-30 Wind-Tunnel Closure And Roadmap Update
+
+### Observed checkpoint
+
+- Accepted-practice replay saving is physically validated on complete
+  Lunatic Stage-1 and Stage-5 workloads without THPRAC or exact-spell
+  activation. The dynamic result-menu object and exact save state chain are
+  retained.
+- The current Stage-5 replay is content-addressed, no-Bomb, and exactly aligned
+  at replay input frame `manager - 1`. Its first native hit is manager frame
+  2,136.
+- A process-suspended root at manager 2,130 has a stable byte bracket and
+  content digest, but remains a partial inventory with no restore executor or
+  predictive authority.
+- Original TH08 executed all 36 no-Bomb masks from replay frame 2,129. Six
+  masks reached corrected fence 2,137 without a hit, but every one hit by
+  frame 2,142 when extended.
+- The original-game branch runner is therefore a useful same-seed semantic
+  oracle, not a fast solver loop. A complete 36-prefix portfolio took roughly
+  half an hour.
+
+### Corrected experiment protocol
+
+The inner-loop unit is one immutable first-hit root and first divergent
+native update, not a whole-stage aggregate. The promotion chain is:
+
+1. exact canonical root/version;
+2. complete causal one-tick executor or `UNKNOWN`;
+3. all-action offline branch and first-mismatch differential;
+4. exact no-hit witness with branch-specific causal continuation;
+5. original native replay reproduction;
+6. focused complete-stage physical delivery;
+7. repeated mandatory Stage 3/4A/5/Final-B scenes; then
+8. repeated Power-0 full-route Lunatic acceptance.
+
+Native replay prefix execution is retained for steps 3 and 5 as an independent
+oracle and sample validator. It is not the default all-action engine.
+
+### Next decisive milestone
+
+Build a TH08-specific in-process explicit-root restore-and-step executor at a
+revalidated input/scheduler boundary:
+
+- prove `A -> restore -> A` is fingerprint-identical;
+- prove `A -> restore -> B` diverges only after the declared input effect;
+- fail closed on unowned allocation, callback, thread, mapping, timer,
+  renderer/audio, transition, or external state;
+- grow exact horizons `1/2/4/8/16` before another 36-action portfolio; and
+- use native replay and focused physical work only after a deterministic
+  offline winner exists.
+
+The root must expand the existing ordered lifecycle ledger through timeline
+allocation, initial-VM `-1` retirement, child births, other retirement,
+ECL/motion/flags/damage, resource/Power, and shared RNG in native order.
+Stage/nonspell damage and Power/item collection remain state/resource
+constraints inside the viable set, not a reason to weaken survival.
+
+The full retained implementation/evidence boundary is
+`../architecture/NATIVE_REPLAY_CAUSAL_WIND_TUNNEL_AND_REPLAY_SAVE_CONTRACT_20260730.md`.

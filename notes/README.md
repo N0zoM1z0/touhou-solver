@@ -21,6 +21,9 @@ This is the navigation index for repository evidence. It does not replace
 - [Lunatic NMNB review and roadmap](review/LUNATIC_NMNB_PROGRAM_REVIEW_AND_ROADMAP_20260729.md):
   reconciled current status, authority impact, implementation dependencies,
   and physical acceptance ladder.
+- [Native replay wind tunnel and replay-save contract](architecture/NATIVE_REPLAY_CAUSAL_WIND_TUNNEL_AND_REPLAY_SAVE_CONTRACT_20260730.md):
+  current canonical replay/root identity, all-action result, authority
+  boundary, and explicit-root executor handoff.
 - [Notes migration plan](review/NOTES_INFORMATION_ARCHITECTURE_AND_MIGRATION_PLAN_20260728.md):
   topology rationale, preservation digests, and migration gates.
 - [Launch and UNC audit](review/LAUNCH_AND_UNC_WORKFLOW_AUDIT_20260729.md):

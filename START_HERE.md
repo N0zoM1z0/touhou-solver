@@ -100,9 +100,9 @@ describe the same decision. Python/C++ parity is not physical correctness.
 ### Exact state
 
 - Branch: `main`.
-- Latest retained research checkpoint: `ccb94eb`
-  (`Allow no-observer Stage 5 scale continuation`).
-- Latest pre-trial repository/live code checkpoint: `ccb94eb`.
+- Latest retained research checkpoint: `9905d46`
+  (`Decouple Stage 5 scale continuation from trace observers`).
+- Latest pre-trial repository/live code checkpoint: `9905d46`.
 - The code at `3f0e56f` was physically exercised by the whole Stage-6B C5-2
   workload below. Its nested exact schedule-delivery gate passes, while the
   complete stage remains a 22-hit survival failure.
@@ -115,10 +115,11 @@ describe the same decision. Python/C++ parity is not physical correctness.
   and eleven CE-0196 hit edges. It is not observer-off survival, a Power-0
   route, or NMNB.
 - Latest physical attempt:
-  `lunatic_route2_stage5_unattended_20260730_124635`. CE-0199 retains this
-  failed preflight: it entered Stage 5 but fail-closed on root-only scale at
-  frame 1 before any decision. Its zero hits are not survival evidence; the
-  corrected command below adds explicit diagnostic continuation.
+  `lunatic_route2_stage5_unattended_20260730_125502`. CE-0199 retains this
+  second failed preflight: it launched/patched the game and reached the
+  verified Stage-5 selection, but a duplicated nested agent-contract rule
+  rejected before final confirmation or any decision. Its zero decisions are
+  not survival evidence; cleanup completed.
 - No TH08, controller, practice supervisor, full-route supervisor, or test
   process is intentionally left running.
 - `audits/` is untracked user input. Never stage it.
@@ -482,14 +483,14 @@ exhaustion for one preregistered complete Stage-5 physical falsifier.
 fresh hard vectors but is not a viability certificate and has not yet been
 physically measured.
 
-CE-0199 then rejects the no-extra-flag launch: it entered Stage 5 but
-fail-closed at frame 1 before any decision because scale coverage was
-root-only. Checkpoint `ccb94eb` permits the explicit
-`--diagnostic-continue-root-only-scale` control without requiring an
-unrelated trace observer. The continuation remains unknown-direction with no
-hard scale/model authority. Focused supervisor discovery passes 33/33 on
-Linux and Windows; complete discovery passes 1,298 tests in 13.851/31.519
-seconds with the three existing Windows skips.
+CE-0199 rejects the no-extra-flag launch: it entered Stage 5 but fail-closed
+at frame 1 before any decision because scale coverage was root-only.
+Checkpoint `ccb94eb` removes the outer supervisor's observer coupling;
+checkpoint `9905d46` removes the duplicated shared agent-contract coupling.
+The explicit continuation remains unknown-direction with no hard scale/model
+authority. Focused supervisor discovery passes 33/33 and agent/hotkey
+discovery passes 19/19 on Linux and Windows. Complete discovery passes 1,298
+tests in 14.387/32.480 seconds with the three existing Windows skips.
 
 Checkpoint `e309c81` passes the `SEM-TIMER` offline semantic gate: 17/17
 product/raw-oracle/Linux-and-Windows-native cases per platform, a separate

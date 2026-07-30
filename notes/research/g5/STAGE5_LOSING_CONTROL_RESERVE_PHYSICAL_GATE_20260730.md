@@ -89,7 +89,9 @@ before any decision. Its zero hits are not evidence and do not consume this
 gate. The next prelaunch attempt exposed and removed a stale supervisor
 restriction that coupled this continuation to unrelated trace observers; the
 following prelaunch attempt exposed the same duplicated rule in the shared
-agent contract. Neither launched the game. Both restrictions are removed;
+agent contract. Run `20260730_125502` launched/patched the game and reached
+the verified Stage-5 selection, but rejected before final confirmation,
+agent arm, or any decision, then cleaned up. Both restrictions are removed;
 focused Linux/Windows supervisor and agent/hotkey discovery pass before the
 corrected physical retry. Complete discovery passes 1,298 tests in
 14.387/32.480 seconds with the three existing Windows skips.

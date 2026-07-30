@@ -32,6 +32,7 @@ BULLET_ANGLE_OFFSET = 0x0D74
 BULLET_TRANSFORM_FLAGS_OFFSET = 0x0DAC
 BULLET_ORIGINAL_TRANSFORM_FLAGS_OFFSET = 0x0DB0
 BULLET_STATE_OFFSET = 0x0DB8
+BULLET_STATE_TIMER_ELAPSED_OFFSET = 0x0D88
 BULLET_TRANSFORM_QUEUE_CURSOR_OFFSET = 0x0DCC
 BULLET_TRANSFORM_PROGRAM_OFFSET = 0x0DD0
 BULLET_STOP_TIMER_FRACTION_OFFSET = 0x1008
@@ -175,6 +176,16 @@ def decode_planning_bullets(
                         blob,
                         base + BULLET_ORIGINAL_TRANSFORM_FLAGS_OFFSET,
                     )[0],
+                    native_state=struct.unpack_from(
+                        "<H",
+                        blob,
+                        base + BULLET_STATE_OFFSET,
+                    )[0],
+                    native_state_timer_elapsed=struct.unpack_from(
+                        "<i",
+                        blob,
+                        base + BULLET_STATE_TIMER_ELAPSED_OFFSET,
+                    )[0],
                 )
             )
         return tuple(bullets)
@@ -207,6 +218,11 @@ def decode_planning_bullets(
         BULLET_CALLBACK_AUX_STATE_OFFSET,
         "u1",
     )[slots]
+    native_state = scalar_field(BULLET_STATE_OFFSET, "<u2")[slots]
+    native_state_timer_elapsed = scalar_field(
+        BULLET_STATE_TIMER_ELAPSED_OFFSET,
+        "<i4",
+    )[slots]
     half_size = np.abs(geometry) * 0.5
     return tuple(
         Bullet(
@@ -231,6 +247,8 @@ def decode_planning_bullets(
             callback_phase_state=int(phase),
             callback_aux_state=int(auxiliary),
             original_transform_flags=int(tag_flags),
+            native_state=int(state),
+            native_state_timer_elapsed=int(state_timer_elapsed),
         )
         for (
             slot,
@@ -243,6 +261,8 @@ def decode_planning_bullets(
             tag_flags,
             phase,
             auxiliary,
+            state,
+            state_timer_elapsed,
         ) in zip(
             slots,
             position,
@@ -254,6 +274,8 @@ def decode_planning_bullets(
             original_flags,
             callback_phase,
             callback_aux,
+            native_state,
+            native_state_timer_elapsed,
         )
     )
 
@@ -282,6 +304,20 @@ def decode_packed_bullets(
     )
     if decoded is None:
         raise RuntimeError("native packed bullet decoder is unavailable")
+    native_state = np.ndarray(
+        (BULLET_POOL_SIZE,),
+        dtype="<u2",
+        buffer=blob,
+        offset=BULLET_STATE_OFFSET,
+        strides=(BULLET_STRIDE,),
+    )[decoded.slots].copy()
+    native_state_timer_elapsed = np.ndarray(
+        (BULLET_POOL_SIZE,),
+        dtype="<i4",
+        buffer=blob,
+        offset=BULLET_STATE_TIMER_ELAPSED_OFFSET,
+        strides=(BULLET_STRIDE,),
+    )[decoded.slots].copy()
     return PackedBulletSnapshot(
         x=decoded.x,
         y=decoded.y,
@@ -296,6 +332,8 @@ def decode_packed_bullets(
         callback_phase=decoded.callback_phase,
         callback_aux=decoded.callback_aux,
         original_transform_flags=decoded.original_transform_flags,
+        native_state=native_state,
+        native_state_timer_elapsed=native_state_timer_elapsed,
     )
 
 
@@ -459,6 +497,12 @@ def decode_bullets(
                 callback_phase_state=callback_phase_state,
                 callback_aux_state=callback_aux_state,
                 original_transform_flags=original_transform_flags,
+                native_state=state,
+                native_state_timer_elapsed=struct.unpack_from(
+                    "<i",
+                    blob,
+                    base + BULLET_STATE_TIMER_ELAPSED_OFFSET,
+                )[0],
             )
         )
     return tuple(bullets)
@@ -534,6 +578,7 @@ __all__ = [
     "BULLET_POSITION_OFFSET",
     "BULLET_SPEED_OFFSET",
     "BULLET_STATE_OFFSET",
+    "BULLET_STATE_TIMER_ELAPSED_OFFSET",
     "BULLET_STOP_ANGLE_OPERAND_OFFSET",
     "BULLET_STOP_DURATION_OFFSET",
     "BULLET_STOP_REPEAT_COUNT_OFFSET",

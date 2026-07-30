@@ -126,14 +126,29 @@ forecast first differing by one x ULP at frame 2,132; the corrected
 per-update binary32 recurrence matches the independent oracle and retained
 native fixture.
 
+The next opt-in payload binds the same root to a model-consumable bullet
+inventory, lifecycle fields, and slot-keyed endpoint event ledger without
+duplicating full A1/A2 payloads. CE-0213 then exposes 28 state-2 bullets that
+the old full-velocity projection modeled incorrectly: it matches only
+`664/692` common H1 endpoints. The corrected production state-2 recurrence
+matches `692/692` H1 endpoints and `223/223` surviving position/state/timer
+observations across a focused H8 native/natural gate. The timer-9 completion
+update performs a separately rounded half-step and ordinary full step in the
+same manager call.
+
 This grants exact authority only to those declared layers on this root.
-Integrated hazard/collision/planner parity remains `UNKNOWN` until a
-model-consumable hostile inventory and event ledger exist.
+Integrated hazard/collision/planner parity remains `UNKNOWN` at H1's seven
+births and four removals. The next iteration target is the smallest causal
+active-enemy ECL VM/current-instruction producer for those events, followed
+by same-root planner replay. Longer horizons, all-36 portfolios, and physical
+play are not routine gates.
 
 The executor gains no live authority until the integrated hazard/planner
 solver is bound to a model-consumable retained root/schedule, additional
 event-class roots pass, complete causal coverage and delivery preflight hold,
-and focused physical validation passes.
+and focused physical validation passes. Physical is considered only after
+the wind tunnel first demonstrates that an immutable engine/planner change
+fixes its retained mismatch or improves its declared decision metric.
 
 The deferred performance proposal is a supervised warm wind-tunnel service
 with a single-writer queue, immutable session/root IDs, branch-level

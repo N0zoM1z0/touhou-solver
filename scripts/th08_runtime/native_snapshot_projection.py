@@ -12,10 +12,11 @@ from __future__ import annotations
 
 import hashlib
 import json
+import struct
 from dataclasses import asdict, dataclass
 from typing import Any, Iterable
 
-from th08_live.bullet_decode import decode_bullets
+from th08_live.bullet_decode import BULLET_STATE_OFFSET, decode_bullets
 from th08_live.enemy_sensor import (
     ENEMY_POOL_BASE,
     ENEMY_POOL_SIZE,
@@ -39,8 +40,29 @@ from th08_runtime.game_state import ADDR_PLAYER
 
 
 COLLISION_CONTROL_PROJECTION_SCHEMA = (
-    "th08-native-snapshot-collision-control-projection-v1"
+    "th08-native-snapshot-collision-control-projection-v2"
 )
+
+# Revalidated in bullet_manager_update (0x00431240).  These two adjacent
+# Th08Timer objects are advanced separately at the end of each active bullet
+# update.  Keep offset-based names here: +0xD8C/+0xD94 is used as the
+# collision-age gate, but the complete interpretation of both timers across
+# every spawn/fade state is not yet claimed.
+BULLET_TIMER_D80_OFFSET = 0x0D80
+BULLET_TIMER_D8C_OFFSET = 0x0D8C
+TH08_TIMER_FRACTION_OFFSET = 0x04
+TH08_TIMER_ELAPSED_OFFSET = 0x08
+
+# Native spawn-state motion before the ordinary state-1 update.  A finishing
+# ANM VM can transition to state 1 in the same manager call, so these divisors
+# alone are exact only while the spawn/fade state remains active.
+BULLET_STATE_MOTION_DIVISORS = {
+    1: 1.0,
+    2: 2.0,
+    3: 2.5,
+    4: 3.0,
+    5: 2.0,
+}
 
 # Revalidated native layout:
 # - enemy main ECL VM begins at +0x7F8; render/ANM state is before it;
@@ -225,14 +247,86 @@ def _nearest_bullet_summary(
     ]
 
 
+def _bullet_lifecycle_records(
+    bullet_blob: bytes | bytearray | memoryview,
+    bullets: Iterable[object],
+) -> list[dict[str, object]]:
+    """Retain lifecycle fields omitted by the legacy geometry trace.
+
+    The positional ``serialize_bullet_trace`` format predates native
+    ModelTrajectory work and intentionally remains stable.  The separate
+    slot-keyed ledger prevents spawn states 2..5 from being silently merged
+    with ordinary state 1 merely because geometry/velocity/transform fields
+    agree.
+    """
+
+    view = memoryview(bullet_blob)
+    expected_size = BULLET_POOL_SIZE * BULLET_STRIDE
+    if len(view) != expected_size:
+        raise ValueError(
+            "bullet lifecycle capture requires the complete native pool: "
+            f"expected {expected_size} bytes, got {len(view)}"
+        )
+    records: list[dict[str, object]] = []
+    for bullet in bullets:
+        slot = int(getattr(bullet, "slot"))
+        if not 0 <= slot < BULLET_POOL_SIZE:
+            raise ValueError(f"decoded bullet slot is outside native pool: {slot}")
+        base = slot * BULLET_STRIDE
+        state = struct.unpack_from(
+            "<H",
+            view,
+            base + BULLET_STATE_OFFSET,
+        )[0]
+        records.append(
+            {
+                "slot": slot,
+                "state": int(state),
+                "timer_d80_fraction_bits": struct.unpack_from(
+                    "<I",
+                    view,
+                    base
+                    + BULLET_TIMER_D80_OFFSET
+                    + TH08_TIMER_FRACTION_OFFSET,
+                )[0],
+                "timer_d80_elapsed": struct.unpack_from(
+                    "<i",
+                    view,
+                    base
+                    + BULLET_TIMER_D80_OFFSET
+                    + TH08_TIMER_ELAPSED_OFFSET,
+                )[0],
+                "timer_d8c_fraction_bits": struct.unpack_from(
+                    "<I",
+                    view,
+                    base
+                    + BULLET_TIMER_D8C_OFFSET
+                    + TH08_TIMER_FRACTION_OFFSET,
+                )[0],
+                "timer_d8c_elapsed": struct.unpack_from(
+                    "<i",
+                    view,
+                    base
+                    + BULLET_TIMER_D8C_OFFSET
+                    + TH08_TIMER_ELAPSED_OFFSET,
+                )[0],
+            }
+        )
+    return records
+
+
 @dataclass(frozen=True)
 class CollisionControlProjection:
     payload: dict[str, object]
     sha256: str
     summary: dict[str, object]
 
-    def record(self) -> dict[str, object]:
-        return {
+    def record(
+        self,
+        *,
+        include_model_payload: bool = False,
+    ) -> dict[str, object]:
+        record: dict[str, object] = {
             "schema": COLLISION_CONTROL_PROJECTION_SCHEMA,
             "sha256": self.sha256,
             "summary": self.summary,
@@ -240,6 +334,12 @@ class CollisionControlProjection:
                 "collision_control_equivalence_only_not_full_gameplay_identity"
             ),
         }
+        if include_model_payload:
+            record["model_payload"] = self.payload
+            record["model_payload_authority"] = (
+                "decoded_native_state_for_offline_model_differential_only"
+            )
+        return record
 
 
 def capture_collision_control_projection(
@@ -280,6 +380,17 @@ def capture_collision_control_projection(
         "player_lethal_aabb": _player_lethal_aabb(reader),
         "route2_option_causal_tails": list(_route2_option_causal_tails(reader)),
         "bullets": [serialize_bullet_trace(bullet) for bullet in bullets],
+        "bullet_lifecycle": _bullet_lifecycle_records(bullet_blob, bullets),
+        "bullet_lifecycle_semantics": {
+            "state_motion_divisors": {
+                str(state): divisor
+                for state, divisor in BULLET_STATE_MOTION_DIVISORS.items()
+            },
+            "transition_authority": (
+                "state-local motion observed; same-update ANM completion "
+                "remains UNKNOWN without the corresponding ANM VM"
+            ),
+        },
         "lasers": [asdict(laser) for laser in lasers],
         "enemy_bodies": [asdict(body) for body in enemy_bodies],
         "normalized_native_components": list(normalized_components),

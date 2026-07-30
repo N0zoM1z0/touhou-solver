@@ -14,6 +14,16 @@ from th08_laser_runtime import (
 from th08_live.models import Bullet, EnemyBody, Item, PackedBulletSnapshot
 from th08_live.movement import PLAYER_RADIUS
 from touhou_control import native_backend
+
+
+# Observed in the retained native root2129 H=8 lifecycle differential:
+# state 2 remains in its spawn ANM through timer 9.  Each non-completing
+# update adds velocity/2.  The timer-9 completion update first stores that
+# half-step, transitions to state 1, then stores the ordinary full step in the
+# same bullet-manager call.
+_STATE2_COMPLETION_TIMER = 9
+
+
 def _aabb_clearance(
     px: float, py: float, bullet_x: float, bullet_y: float, bullet: Bullet
 ) -> float:
@@ -122,6 +132,8 @@ def _build_bullet_frames(
         half_width = bullets.half_width
         half_height = bullets.half_height
         transformed = np.not_equal(bullets.transform_flags, 0)
+        native_state = bullets.native_state
+        native_state_timer_elapsed = bullets.native_state_timer_elapsed
     else:
         base_x = np.fromiter(
             (bullet.x for bullet in bullets),
@@ -167,6 +179,14 @@ def _build_bullet_frames(
             (bool(bullet.transform_flags) for bullet in bullets),
             dtype=np.bool_,
         )
+        native_state = np.fromiter(
+            (bullet.native_state for bullet in bullets),
+            dtype=np.uint16,
+        )
+        native_state_timer_elapsed = np.fromiter(
+            (bullet.native_state_timer_elapsed for bullet in bullets),
+            dtype=np.int32,
+        )
     event_indices: list[int] = []
     event_frames: list[int] = []
     event_velocity_x: list[float] = []
@@ -186,6 +206,8 @@ def _build_bullet_frames(
     projected_y = base_y.copy()
     current_velocity_x = velocity_x.copy()
     current_velocity_y = velocity_y.copy()
+    projected_native_state = native_state.copy()
+    projected_state_timer_elapsed = native_state_timer_elapsed.copy()
     projected_elapsed = 0
     for step in range(1, horizon + 1):
         elapsed = snapshot_lag + step
@@ -206,18 +228,53 @@ def _build_bullet_frames(
                         packed_event_velocity_y[active]
                     )
                 # Native bullet motion stores binary32 after every update.
-                # Keeping the recurrence iterative is observable after only
-                # three updates for retained counterexample bullet slot 45.
-                np.add(
-                    projected_x,
-                    current_velocity_x,
-                    out=projected_x,
-                )
-                np.add(
-                    projected_y,
-                    current_velocity_y,
-                    out=projected_y,
-                )
+                # State 2 is a distinct spawn-animation recurrence: a
+                # non-completing update takes one half-step, while completion
+                # takes a separately rounded half-step and full step.
+                state2 = projected_native_state == 2
+                ordinary = ~state2
+                if np.any(ordinary):
+                    projected_x[ordinary] = (
+                        projected_x[ordinary]
+                        + current_velocity_x[ordinary]
+                    )
+                    projected_y[ordinary] = (
+                        projected_y[ordinary]
+                        + current_velocity_y[ordinary]
+                    )
+                if np.any(state2):
+                    half_velocity_x = (
+                        current_velocity_x[state2] * np.float32(0.5)
+                    )
+                    half_velocity_y = (
+                        current_velocity_y[state2] * np.float32(0.5)
+                    )
+                    projected_x[state2] = (
+                        projected_x[state2] + half_velocity_x
+                    )
+                    projected_y[state2] = (
+                        projected_y[state2] + half_velocity_y
+                    )
+                    completing = (
+                        state2
+                        & (
+                            projected_state_timer_elapsed
+                            >= _STATE2_COMPLETION_TIMER
+                        )
+                    )
+                    if np.any(completing):
+                        projected_x[completing] = (
+                            projected_x[completing]
+                            + current_velocity_x[completing]
+                        )
+                        projected_y[completing] = (
+                            projected_y[completing]
+                            + current_velocity_y[completing]
+                        )
+                        projected_native_state[completing] = 1
+                        projected_state_timer_elapsed[completing] = 1
+                    continuing = state2 & ~completing
+                    projected_state_timer_elapsed[continuing] += 1
             frame_x = projected_x.copy()
             frame_y = projected_y.copy()
         frames.append(

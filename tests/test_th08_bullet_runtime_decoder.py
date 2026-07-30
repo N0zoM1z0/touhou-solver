@@ -20,6 +20,7 @@ from th08_bullet_transform_model import (
 )
 from th08_corridor_adapter import lower_bullets
 from th08_ecl_runtime import EclVmSnapshot, TaggedVelocityToggle
+from th08_live.bullet_decode import BULLET_STATE_TIMER_ELAPSED_OFFSET
 from th08_live_dodge_agent import (
     BULLET_ANGLE_OFFSET,
     BULLET_CALLBACK_AUX_STATE_OFFSET,
@@ -725,6 +726,89 @@ class BulletRuntimeDecoderTests(unittest.TestCase):
         self.assertEqual(
             [float(frame[1][0]) for frame in frames],
             [19.0, 18.0, 18.0, 18.0, 18.0],
+        )
+
+    def test_state2_spawn_motion_and_same_update_completion_are_exact(
+        self,
+    ) -> None:
+        bullet = Bullet(
+            0.0,
+            10.0,
+            2.0,
+            -1.0,
+            2.0,
+            3.0,
+            native_state=2,
+            native_state_timer_elapsed=8,
+        )
+
+        frames = _build_bullet_frames(
+            (bullet,),
+            horizon=4,
+            snapshot_lag=0,
+        )
+
+        # Timer 8 -> 9 takes one half-step.  Timer 9 completes on the next
+        # update: native stores a half-step, then a full state-1 step.
+        self.assertEqual(
+            [float(frame[0][0]) for frame in frames],
+            [1.0, 4.0, 6.0, 8.0],
+        )
+        self.assertEqual(
+            [float(frame[1][0]) for frame in frames],
+            [9.5, 8.0, 7.0, 6.0],
+        )
+
+    def test_python_and_packed_decoders_retain_native_lifecycle_state(
+        self,
+    ) -> None:
+        blob = bytearray(BULLET_POOL_SIZE * BULLET_STRIDE)
+        for slot in range(20):
+            base = slot * BULLET_STRIDE
+            struct.pack_into("<H", blob, base + BULLET_STATE_OFFSET, 2)
+            struct.pack_into(
+                "<i",
+                blob,
+                base + BULLET_STATE_TIMER_ELAPSED_OFFSET,
+                2 + slot % 4,
+            )
+            struct.pack_into(
+                "<ff",
+                blob,
+                base + BULLET_GEOMETRY_OFFSET,
+                4.0,
+                4.0,
+            )
+            struct.pack_into(
+                "<ff",
+                blob,
+                base + BULLET_POSITION_OFFSET,
+                float(slot),
+                20.0,
+            )
+            struct.pack_into(
+                "<ff",
+                blob,
+                base + BULLET_VELOCITY_OFFSET,
+                1.0,
+                0.0,
+            )
+
+        objects = decode_bullets(blob, retain_transform_runtime=False)
+        packed = decode_packed_bullets(blob)
+
+        self.assertEqual(
+            [bullet.native_state for bullet in objects],
+            [2] * 20,
+        )
+        self.assertEqual(
+            [bullet.native_state_timer_elapsed for bullet in objects],
+            [2 + slot % 4 for slot in range(20)],
+        )
+        np.testing.assert_array_equal(packed.native_state, np.full(20, 2))
+        np.testing.assert_array_equal(
+            packed.native_state_timer_elapsed,
+            np.asarray([2 + slot % 4 for slot in range(20)]),
         )
 
     def test_velocity_event_replaces_float32_value_without_delta_rounding(

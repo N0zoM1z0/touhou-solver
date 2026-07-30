@@ -787,6 +787,7 @@ def _rolling_branch(
     horizon: int,
     hold_frames: int,
     action_schedule: tuple[int | None, ...] | None = None,
+    retain_collision_control_payload: bool = False,
 ) -> tuple[
     NativeSnapshot,
     tuple[Route2NativeFutureBodyRootSlice, ...],
@@ -926,7 +927,11 @@ def _rolling_branch(
                 "endpoint_header": endpoint_header.record(),
                 "compact_state": compact_state,
                 "native_projection": projection.record(),
-                "collision_control_projection": (collision_control_projection.record()),
+                "collision_control_projection": (
+                    collision_control_projection.record(
+                        include_model_payload=retain_collision_control_payload,
+                    )
+                ),
                 "timing_ms": {
                     "step_wait": step_wait_ms,
                     "native_projection_capture": projection_capture_ms,
@@ -1312,6 +1317,7 @@ def _run_transaction(
     horizon: int,
     hold_frames: int,
     root_timeout_seconds: float,
+    retain_collision_control_payload: bool,
     reference_store: dict[str, object] | None = None,
 ) -> dict[str, object]:
     root_header = barrier.wait_for_root(
@@ -1409,6 +1415,11 @@ def _run_transaction(
             action_override=None,
             horizon=horizon,
             hold_frames=hold_frames,
+            # A1/A2 only establish restored same-action hash equality.
+            # Persisting their duplicate multi-megabyte decoded payloads adds
+            # no model evidence; the content-addressed root plus B/natural
+            # trajectory carry the bounded differential input.
+            retain_collision_control_payload=False,
         )
         restore_a1 = _restore_baseline(
             api,
@@ -1437,6 +1448,7 @@ def _run_transaction(
             action_override=None,
             horizon=horizon,
             hold_frames=hold_frames,
+            retain_collision_control_payload=False,
         )
         endpoint_aa_changes = changed_byte_addresses(
             endpoint_a1,
@@ -1494,7 +1506,9 @@ def _run_transaction(
                 },
                 "root_native_projection": root_projection.record(),
                 "root_collision_control_projection": (
-                    root_collision_control_projection.record()
+                    root_collision_control_projection.record(
+                        include_model_payload=retain_collision_control_payload,
+                    )
                 ),
                 "root_compact_state": root_compact_state,
                 "branches": {
@@ -1547,6 +1561,9 @@ def _run_transaction(
             horizon=horizon,
             hold_frames=hold_frames,
             action_schedule=action_schedule,
+            retain_collision_control_payload=(
+                retain_collision_control_payload
+            ),
         )
         endpoint_ab_changes = changed_byte_addresses(
             endpoint_a1,
@@ -1616,7 +1633,9 @@ def _run_transaction(
             },
             "root_native_projection": root_projection.record(),
             "root_collision_control_projection": (
-                root_collision_control_projection.record()
+                root_collision_control_projection.record(
+                    include_model_payload=retain_collision_control_payload,
+                )
             ),
             "root_compact_state": root_compact_state,
             "branches": {
@@ -1682,6 +1701,7 @@ def _run_natural_reference(
     expected_root_projection: Route2NativeFutureBodyRootSlice,
     expected_root_collision_control_projection: CollisionControlProjection,
     expected_root_compact_state: dict[str, object],
+    retain_collision_control_payload: bool,
 ) -> dict[str, object]:
     """Advance through the real frame pump and trap the next callsite seam."""
 
@@ -1893,7 +1913,11 @@ def _run_natural_reference(
                 },
                 "compact_state": compact_state,
                 "native_projection": projection.record(),
-                "collision_control_projection": (collision_control_projection.record()),
+                "collision_control_projection": (
+                    collision_control_projection.record(
+                        include_model_payload=retain_collision_control_payload,
+                    )
+                ),
                 "headless_broad_projection_exact": projection_exact,
                 "headless_collision_control_projection_exact": (
                     collision_control_exact
@@ -2007,6 +2031,15 @@ def build_parser() -> argparse.ArgumentParser:
             "through the real frame pump and trap each next calculation call"
         ),
     )
+    parser.add_argument(
+        "--retain-collision-control-payload",
+        action="store_true",
+        help=(
+            "persist full decoded hostile/player collision state for the root "
+            "and B/natural trajectory of a bounded offline model differential; "
+            "same-action A1/A2 retain hashes only; incompatible with all-36 mode"
+        ),
+    )
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--launch-timeout", type=float, default=30.0)
     parser.add_argument("--focus-timeout", type=float, default=10.0)
@@ -2045,6 +2078,10 @@ def main(argv: list[str] | None = None) -> int:
         raise ValueError("all-36 portfolio mode requires --natural-reference none")
     if args.portfolio_all36 and args.action_schedule is not None:
         raise ValueError("all-36 portfolio mode does not accept an action schedule")
+    if args.portfolio_all36 and args.retain_collision_control_payload:
+        raise ValueError(
+            "all-36 portfolio mode does not retain full collision payloads"
+        )
 
     game_dir = args.game_dir.resolve()
     expected_exe = game_dir / TARGET_EXE
@@ -2072,6 +2109,9 @@ def main(argv: list[str] | None = None) -> int:
         "compact_corpus_ticks": args.compact_corpus_ticks,
         "portfolio_all36": args.portfolio_all36,
         "portfolio_corpus": str(args.portfolio_corpus),
+        "retain_collision_control_payload": (
+            args.retain_collision_control_payload
+        ),
         "gameplay_input": "native_replay_with_explicit_root_action_word",
         "changes_gameplay_input": True,
         "result": {"status": "not_started"},
@@ -2155,6 +2195,9 @@ def main(argv: list[str] | None = None) -> int:
                 horizon=args.horizon,
                 hold_frames=args.hold_frames,
                 root_timeout_seconds=args.root_timeout,
+                retain_collision_control_payload=(
+                    args.retain_collision_control_payload
+                ),
                 reference_store=reference_store,
             )
         )
@@ -2240,6 +2283,9 @@ def main(argv: list[str] | None = None) -> int:
                     root_collision_control_projection
                 ),
                 expected_root_compact_state=root_compact_state,
+                retain_collision_control_payload=(
+                    args.retain_collision_control_payload
+                ),
             )
             transaction["natural_reference"] = natural_reference
             if natural_reference["status"] != "natural_frame_differential_passed":

@@ -502,6 +502,58 @@ model-consumable hostile inventory and event ledger. No physical run was
 used. The next semantic gate is persisting that causal state/event input and
 using it for integrated planner replay before any named physical falsifier.
 
+### Model-consumable lifecycle capsule
+
+The opt-in collision/control projection v2 adds a content-addressed,
+model-consumable root and endpoint payload. It retains a slot-keyed bullet
+lifecycle ledger separately from collision geometry:
+
+- native state;
+- state-timer elapsed and fractional float32 bits;
+- root/endpoint slot identity; and
+- explicit birth, removal, and common-slot sets.
+
+Full payloads are retained only for the root, changed B branch, and natural
+reference. Same-action A1/A2 retain projection hashes and summaries, which
+preserves the repeatability gate without triplicating multi-megabyte state.
+
+**Observed CE-0213:** at manager frame 2,129, slots `1192..1219` are 28
+state-2 bullets selected by original flags `0x203`. Their root timer groups
+are seven each at elapsed `8/6/4/2`. Treating every active bullet as state 1
+moves this cohort by full velocity and yields only `664/692` exact common
+H1 endpoints. The revalidated state-2 recurrence yields `692/692`:
+
+- pre-update timer `< 9`: one binary32 half-velocity position store and
+  timer increment;
+- pre-update timer `9`: one binary32 half-velocity store, ANM/state
+  completion, then a separately rounded ordinary full-velocity store in the
+  same manager call, entering state 1.
+
+The focused H8 native/natural replay matches collision/control payloads at
+all eight ticks. Production and an independent lifecycle recurrence both
+match position, state, and timer for all `223/223` surviving cohort
+observations. Slot `1217` is removed on its expected completion frame before
+a successor state can be observed.
+
+Tracked evidence:
+
+- H1
+  `artifacts/runtime_reports/th08_native_model_consumable_h1_root2129_20260730.json`,
+  SHA-256
+  `2a03160d88792004140d6d7dede2c36a33c3208bae0c371c6ae47890634545aa`;
+- H8
+  `artifacts/runtime_reports/th08_native_state2_lifecycle_root2129_h8_20260730.json`,
+  SHA-256
+  `79bab418906d07210817ce86d888e1cffadb4dc6bd7b5b5f207d076368257274`.
+
+Integrated H1 remains `UNKNOWN` at seven births in slots `1220..1226` and
+four removals in slots `87/120/545/710`. The capsule reports these events but
+does not substitute endpoint state as a causal forecast. The next bounded
+extension is the active-enemy ECL VM inventory already decodable from the
+root enemy blob, followed only by the current instruction/program bytes
+needed to explain or reject those births. A broader horizon is not evidence
+for that missing producer.
+
 ### Warm-session lifecycle
 
 The current CLI already amortizes one replay bootstrap across a batch; it
@@ -559,6 +611,11 @@ Evidence-backed changes made on 2026-07-30:
 - commented `0x004372A7` to record that FRScreen rendering consumes and
   decrements the two-bit resource-notification counters at root
   `+0x04..+0x07`.
+- commented `0x00431790` to record the state-2 half-velocity movement branch;
+- commented `0x00431306` to record the timer-9 state-2 completion followed by
+  ordinary movement in the same manager call; and
+- commented `0x0042FC43` to record original-flags bit `0x2` selecting
+  state 2 at spawn.
 
 These annotations are native/menu semantics only. They grant no solver action
 or survival authority.

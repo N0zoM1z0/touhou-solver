@@ -41,6 +41,8 @@ class Bullet:
     trajectory_uncertainty_x: float = 0.0
     trajectory_uncertainty_y: float = 0.0
     original_transform_flags: int = 0
+    native_state: int = 1
+    native_state_timer_elapsed: int = 0
 
 
 @dataclass(frozen=True)
@@ -60,6 +62,8 @@ class PackedBulletSnapshot:
     callback_phase: np.ndarray
     callback_aux: np.ndarray
     original_transform_flags: np.ndarray
+    native_state: np.ndarray
+    native_state_timer_elapsed: np.ndarray
 
     def __len__(self) -> int:
         return len(self.x)
@@ -82,6 +86,10 @@ class PackedBulletSnapshot:
             callback_aux_state=int(self.callback_aux[index]),
             original_transform_flags=int(
                 self.original_transform_flags[index]
+            ),
+            native_state=int(self.native_state[index]),
+            native_state_timer_elapsed=int(
+                self.native_state_timer_elapsed[index]
             ),
         )
 

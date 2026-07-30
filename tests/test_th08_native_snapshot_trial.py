@@ -42,6 +42,7 @@ class NativeSnapshotTrialCliTests(unittest.TestCase):
         self.assertEqual(arguments.horizon, DEFAULT_HORIZON)
         self.assertEqual(arguments.hold_frames, DEFAULT_HOLD_FRAMES)
         self.assertEqual(arguments.natural_reference, "a")
+        self.assertFalse(arguments.retain_collision_control_payload)
         self.assertFalse(arguments.portfolio_all36)
         self.assertEqual(
             arguments.portfolio_corpus,
@@ -86,6 +87,17 @@ class NativeSnapshotTrialCliTests(unittest.TestCase):
         self.assertEqual(arguments.horizon, 8)
         self.assertEqual(arguments.hold_frames, 3)
         self.assertEqual(arguments.natural_reference, "b")
+
+    def test_parser_accepts_explicit_model_payload_retention(self) -> None:
+        arguments = build_parser().parse_args(
+            [
+                "--output",
+                "native_snapshot.json",
+                "--retain-collision-control-payload",
+            ]
+        )
+
+        self.assertTrue(arguments.retain_collision_control_payload)
 
     def test_parser_accepts_exact_action_schedule_with_recorded_ticks(self) -> None:
         arguments = build_parser().parse_args(

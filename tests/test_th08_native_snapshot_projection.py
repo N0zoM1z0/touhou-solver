@@ -1,12 +1,22 @@
 from __future__ import annotations
 
+import struct
 import unittest
 from types import SimpleNamespace
 
+from th08_live.bullet_decode import BULLET_STATE_OFFSET
 from th08_live.enemy_sensor import ENEMY_STRIDE
+from th08_live.sensor import BULLET_POOL_SIZE, BULLET_STRIDE
 from th08_runtime.native_snapshot_projection import (
+    BULLET_TIMER_D80_OFFSET,
+    BULLET_TIMER_D8C_OFFSET,
+    COLLISION_CONTROL_PROJECTION_SCHEMA,
+    CollisionControlProjection,
     ENEMY_ANM_PREFIX_SIZE,
     FRSCREEN_NOTIFICATION_COUNTERS_OFFSET,
+    TH08_TIMER_ELAPSED_OFFSET,
+    TH08_TIMER_FRACTION_OFFSET,
+    _bullet_lifecycle_records,
     normalized_causal_component_records,
 )
 
@@ -19,6 +29,69 @@ def _component(name: str, data: bytes) -> object:
 
 
 class NativeSnapshotProjectionTests(unittest.TestCase):
+    def test_bullet_lifecycle_retains_state_and_both_native_timers(self) -> None:
+        blob = bytearray(BULLET_POOL_SIZE * BULLET_STRIDE)
+        slot = 1192
+        base = slot * BULLET_STRIDE
+        struct.pack_into("<H", blob, base + BULLET_STATE_OFFSET, 2)
+        struct.pack_into(
+            "<I",
+            blob,
+            base + BULLET_TIMER_D80_OFFSET + TH08_TIMER_FRACTION_OFFSET,
+            0x3F000000,
+        )
+        struct.pack_into(
+            "<i",
+            blob,
+            base + BULLET_TIMER_D80_OFFSET + TH08_TIMER_ELAPSED_OFFSET,
+            7,
+        )
+        struct.pack_into(
+            "<I",
+            blob,
+            base + BULLET_TIMER_D8C_OFFSET + TH08_TIMER_FRACTION_OFFSET,
+            0x3E800000,
+        )
+        struct.pack_into(
+            "<i",
+            blob,
+            base + BULLET_TIMER_D8C_OFFSET + TH08_TIMER_ELAPSED_OFFSET,
+            11,
+        )
+
+        records = _bullet_lifecycle_records(
+            blob,
+            [SimpleNamespace(slot=slot)],
+        )
+
+        self.assertEqual(
+            records,
+            [
+                {
+                    "slot": slot,
+                    "state": 2,
+                    "timer_d80_fraction_bits": 0x3F000000,
+                    "timer_d80_elapsed": 7,
+                    "timer_d8c_fraction_bits": 0x3E800000,
+                    "timer_d8c_elapsed": 11,
+                }
+            ],
+        )
+
+    def test_model_payload_is_explicit_opt_in(self) -> None:
+        projection = CollisionControlProjection(
+            payload={"schema": COLLISION_CONTROL_PROJECTION_SCHEMA, "bullets": []},
+            sha256="a" * 64,
+            summary={"bullet_count": 0},
+        )
+
+        compact = projection.record()
+        retained = projection.record(include_model_payload=True)
+
+        self.assertNotIn("model_payload", compact)
+        self.assertEqual(retained["model_payload"], projection.payload)
+        self.assertEqual(retained["sha256"], compact["sha256"])
+
     def test_enemy_render_prefix_does_not_change_causal_digest(self) -> None:
         left = bytearray(ENEMY_STRIDE)
         right = bytearray(left)

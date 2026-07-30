@@ -19,9 +19,10 @@ historical handoff.
   (`Build rolling native snapshot iteration loop`).
 - H=32 causal-search checkpoint: `3d15953`
   (`Build causal native snapshot policy search`).
-- The model/native differential checkpoint is the current repository HEAD.
-- Complete Linux discovery passes 1,351 tests in 13.760 seconds.
-- Complete Windows UNC discovery passes 1,351 tests in 28.592 seconds with
+- The model-consumable lifecycle/state2 differential checkpoint is the
+  current repository HEAD.
+- Complete Linux discovery passes 1,365 tests in 14.638 seconds.
+- Complete Windows UNC discovery passes 1,365 tests in 30.548 seconds with
   the three existing skips.
 - No TH08, controller, supervisor, native-replay runner, or Windows test
   process is intentionally left running.
@@ -173,10 +174,35 @@ historical handoff.
   oracle and the retained slot-45 native samples through the declared
   three-tick fixture. Existing packed/object, snapshot-lag, velocity-event,
   and local-certificate gates pass.
-- The full integrated collision/planner differential remains `UNKNOWN`
-  because the compact causal report persists collision summaries and hashes,
-  not a model-consumable full hostile inventory and event ledger. No defaults
-  or future native state were substituted.
+- The opt-in collision/control payload now retains a content-addressed,
+  model-consumable root, endpoint, slot-keyed event ledger, and bullet
+  lifecycle inventory. Same-action A1/A2 retain hashes rather than duplicate
+  multi-megabyte payloads; B and the natural reference retain the complete
+  payload.
+- **Observed CE-0213:** 28 root bullets in slots `1192..1219` were native
+  state 2 with original flags `0x203`, not ordinary state-1 bullets. The old
+  production trajectory moved them by full velocity and matched only
+  `664/692` common H1 endpoints. Capturing native state and timer and applying
+  the revalidated state-2 recurrence makes all `692/692` common endpoints
+  bit-exact.
+- A focused same-root H8 gate observes state 2 taking a binary32 half-step
+  while timer `< 9`. On the timer-9 completion update, native takes a
+  half-step, completes the ANM/state transition, and then takes a separately
+  rounded ordinary full step in the same manager call. Production position,
+  state, and timer match `223/223` surviving cohort observations.
+- Compact model-consumable H1 report:
+  `artifacts/runtime_reports/th08_native_model_consumable_h1_root2129_20260730.json`,
+  SHA-256
+  `2a03160d88792004140d6d7dede2c36a33c3208bae0c371c6ae47890634545aa`.
+- Compact state-2 H8 report:
+  `artifacts/runtime_reports/th08_native_state2_lifecycle_root2129_h8_20260730.json`,
+  SHA-256
+  `79bab418906d07210817ce86d888e1cffadb4dc6bd7b5b5f207d076368257274`.
+- Integrated H1 collision/planner parity remains `UNKNOWN` at seven bullet
+  births (`1220..1226`) and four removals (`87/120/545/710`). Those events
+  are reported, not filled from the native future. Current enemy bodies do
+  not causally define the ECL instruction/program state that produced the
+  births.
 - Synthetic 2,000-bullet projection including tuple packing measures H32
   median `1.213 ms` and p95 `1.347 ms`; no warm-service work is justified by
   this corrected kernel.
@@ -200,14 +226,17 @@ historical handoff.
 - Forty-two writable regions, external handle/device/audio/timer effects,
   and event classes outside this root remain unresolved. Preserve
   fail-closed `UNKNOWN` behavior on mapping/thread/stack/transition changes.
-- The first rebuilt-model binding gate is now complete for the explicit
-  player-mechanics layer and the slot-45 constant-velocity hazard fixture.
-  It does not establish full hazard, collision, solver, or planner parity.
-- The next useful semantic gate is a model-consumable hostile-state capsule
-  with an explicit birth/redirect/transform/laser event ledger. It must drive
-  a causal hazard trajectory and planner replay to a real first mismatch or
-  explicit `UNKNOWN`; only then should focused native branches test a proposed
-  engine/planner improvement.
+- The rebuilt-model binding gate is now complete for the explicit
+  player-mechanics layer, the slot-45 constant-velocity fixture, and the
+  observed state-2 lifecycle cohort. It does not establish full hazard,
+  collision, solver, or planner parity.
+- The next useful semantic gate is the smallest causal producer for H1's
+  seven births: first retain the already decoded active-enemy ECL VM
+  inventory in the root capsule, then add only the current instruction/program
+  bytes needed to reproduce or explicitly reject that event. Once births and
+  removals are model-consumable, replay the real planner decision against the
+  same immutable root. Do not broaden to another all-36 portfolio or a longer
+  horizon merely to collect more state.
 - A supervised warm wind-tunnel service remains deferred. If later branch
   throughput becomes the bottleneck, it must preserve a single writer,
   immutable session/root IDs, branch-level root/FX/stack/thread/map checks,
@@ -236,7 +265,8 @@ historical handoff.
   `artifacts/native_replay_wind_tunnel/raw/`. They are local and ignored.
 - Rolling snapshot raw bundles are under
   `artifacts/native_snapshot_rolling/raw/`. They are local and ignored; the
-  compact causal/timing report above is tracked.
+  compact causal/timing reports above are tracked. The focused lifecycle
+  inputs are SHA-pinned by their compact H1/H8 reports.
 - Four large native-root byte directories remain local/ignored under
   `artifacts/runtime_reports/*.root/`; compact root reports are retained.
 - The isolated local game directory is
@@ -257,6 +287,11 @@ historical handoff.
   records the render-consumed/decremented HUD notification counters. CE-0208
   uses this revalidation to exclude only root `+0x04..+0x07` from
   collision/control equivalence.
+- Comments at `0x00431790`, `0x00431306`, and `0x0042FC43` record the
+  revalidated state-2 half-step, timer-9 same-call half-plus-full completion,
+  and original-flags bit-`0x2` state selection respectively. These are
+  native lifecycle semantics only; they grant no integrated planner or
+  physical authority.
 
 ## Read In This Order
 

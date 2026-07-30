@@ -70,6 +70,23 @@ def _projection(
     }
 
 
+def _compact_state(
+    *,
+    player_phase: int = 0,
+    lives: float = 3.0,
+    bombs: float = 3.0,
+    power: float = 64.0,
+) -> dict[str, object]:
+    return {
+        "player_phase": player_phase,
+        "resources": {
+            "lives": lives,
+            "bombs": bombs,
+            "power": power,
+        },
+    }
+
+
 def _tick(
     frame: int,
     *,
@@ -80,12 +97,20 @@ def _tick(
     route_id: int = 2,
     bomb_active: bool = False,
     active_input: int = 0x05,
+    lives: float = 3.0,
+    bombs: float = 3.0,
+    power: float = 64.0,
 ) -> dict[str, object]:
     return {
         "selected_action": action,
         "compact_state": {
             "manager_frame": frame,
-            "player_phase": player_phase,
+            **_compact_state(
+                player_phase=player_phase,
+                lives=lives,
+                bombs=bombs,
+                power=power,
+            ),
         },
         "native_combat_projection": _projection(
             frame,
@@ -105,7 +130,7 @@ class NativeCombatBranchReportTests(unittest.TestCase):
             "result": {
                 "status": ROLLING_ACCEPTED_STATUS,
                 "root_native_combat_projection": _projection(100, hp=120),
-                "root_compact_state": {"player_phase": 0},
+                "root_compact_state": _compact_state(),
                 "branches": {
                     "a1": {"ticks": [_tick(101, action=0x05, hp=110, damage=10)]},
                     "a2": {"ticks": [_tick(101, action=0x05, hp=110, damage=10)]},
@@ -153,7 +178,7 @@ class NativeCombatBranchReportTests(unittest.TestCase):
             "result": {
                 "status": ROLLING_ACCEPTED_STATUS,
                 "root_native_combat_projection": _projection(100),
-                "root_compact_state": {"player_phase": 2},
+                "root_compact_state": _compact_state(player_phase=2),
                 "branches": {
                     branch_id: {
                         "ticks": [_tick(101, action=0x05)]
@@ -183,7 +208,7 @@ class NativeCombatBranchReportTests(unittest.TestCase):
             "result": {
                 "status": ROLLING_ACCEPTED_STATUS,
                 "root_native_combat_projection": _projection(100),
-                "root_compact_state": {"player_phase": 0},
+                "root_compact_state": _compact_state(),
                 "branches": {
                     "a1": {"ticks": [_tick(101, action=0x05)]},
                     "a2": {"ticks": [_tick(101, action=0x07)]},
@@ -238,7 +263,7 @@ class NativeCombatBranchReportTests(unittest.TestCase):
             "result": {
                 "status": ROLLING_ACCEPTED_STATUS,
                 "root_native_combat_projection": _projection(100),
-                "root_compact_state": {"player_phase": 0},
+                "root_compact_state": _compact_state(),
                 "branches": {
                     branch_id: {
                         "ticks": [
@@ -266,13 +291,94 @@ class NativeCombatBranchReportTests(unittest.TestCase):
             )
         )
 
+    def test_resource_seams_close_life_and_bomb_temporal_gaps(self) -> None:
+        source = {
+            "schema": ROLLING_SCHEMA,
+            "result": {
+                "status": ROLLING_ACCEPTED_STATUS,
+                "root_native_combat_projection": _projection(100),
+                "root_compact_state": _compact_state(power=64.0),
+                "branches": {
+                    "a1": {
+                        "ticks": [
+                            _tick(101, action=0x05, power=65.0)
+                        ]
+                    },
+                    "a2": {
+                        "ticks": [
+                            _tick(101, action=0x05, bombs=2.0)
+                        ]
+                    },
+                    "b": {
+                        "ticks": [
+                            _tick(101, action=0x05, lives=2.0)
+                        ]
+                    },
+                },
+            },
+        }
+
+        report = build_report(
+            source,
+            source_path="fixture.json",
+            source_sha256="4" * 64,
+        )
+
+        self.assertEqual(report["survivor_count"], 2)
+        self.assertEqual(report["route2_nmnb_eligible_count"], 1)
+        by_id = {row["branch_id"]: row for row in report["branches"]}
+        self.assertEqual(
+            by_id["a1"]["metrics"]["resource_delta"]["power"],
+            1.0,
+        )
+        self.assertEqual(
+            by_id["a2"]["candidate_status"],
+            "rejected_hard_no_bomb",
+        )
+        self.assertEqual(
+            by_id["a2"]["bomb_resource_decrease_tick_indices"],
+            [0],
+        )
+        self.assertEqual(
+            by_id["b"]["candidate_status"],
+            "rejected_hard_survival",
+        )
+        self.assertEqual(by_id["b"]["life_decrease_tick_indices"], [0])
+        self.assertTrue(by_id["b"]["player_phase_survived_to_endpoint"])
+
+    def test_nonfinite_resource_state_fails_closed(self) -> None:
+        source = {
+            "schema": ROLLING_SCHEMA,
+            "result": {
+                "status": ROLLING_ACCEPTED_STATUS,
+                "root_native_combat_projection": _projection(100),
+                "root_compact_state": _compact_state(power=float("nan")),
+                "branches": {
+                    branch_id: {
+                        "ticks": [_tick(101, action=0x05)]
+                    }
+                    for branch_id in ("a1", "a2", "b")
+                },
+            },
+        }
+
+        with self.assertRaisesRegex(
+            NativeCombatBranchReportError,
+            "power must be finite and nonnegative",
+        ):
+            build_report(
+                source,
+                source_path="fixture.json",
+                source_sha256="5" * 64,
+            )
+
     def test_non_normal_active_shot_keeps_content_boundary_open(self) -> None:
         source = {
             "schema": ROLLING_SCHEMA,
             "result": {
                 "status": ROLLING_ACCEPTED_STATUS,
                 "root_native_combat_projection": _projection(100),
-                "root_compact_state": {"player_phase": 0},
+                "root_compact_state": _compact_state(),
                 "branches": {
                     branch_id: {
                         "ticks": [_tick(101, action=0x05)]
@@ -317,7 +423,7 @@ class NativeCombatBranchReportTests(unittest.TestCase):
             "result": {
                 "status": ROLLING_ACCEPTED_STATUS,
                 "root_native_combat_projection": _projection(100),
-                "root_compact_state": {"player_phase": 0},
+                "root_compact_state": _compact_state(),
                 "branches": {
                     branch_id: {
                         "ticks": [_tick(101, action=0x05)]
@@ -386,7 +492,7 @@ class NativeCombatBranchReportTests(unittest.TestCase):
                 "status": "causal_secondary_search_passed",
                 "origin": {
                     "native_combat_projection": _projection(100),
-                    "compact_state": {"player_phase": 0},
+                    "compact_state": _compact_state(),
                 },
                 "prefixes": [
                     {
@@ -397,7 +503,7 @@ class NativeCombatBranchReportTests(unittest.TestCase):
                         },
                         "subroot": {
                             "native_combat_projection": _projection(101),
-                            "compact_state": {"player_phase": 0},
+                            "compact_state": _compact_state(),
                         },
                         "continuations": [
                             {

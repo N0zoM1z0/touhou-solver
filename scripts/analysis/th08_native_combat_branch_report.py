@@ -6,11 +6,12 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import math
 from pathlib import Path
 from typing import Any
 
 
-SCHEMA = "th08-native-combat-branch-comparison-v2"
+SCHEMA = "th08-native-combat-branch-comparison-v3"
 ROLLING_SCHEMA = "th08-native-snapshot-rolling-trial-v10"
 CAUSAL_SEARCH_SCHEMA = "th08-native-snapshot-causal-secondary-search-v8"
 ROLLING_ACCEPTED_STATUS = "rolling_native_projection_snapshot_passed"
@@ -105,11 +106,30 @@ def _player_phase(value: object, *, field: str) -> int:
     return phase
 
 
+def _resources(value: object, *, field: str) -> dict[str, float]:
+    state = _object(value, field=field)
+    resources = _object(state.get("resources"), field=f"{field}.resources")
+    result: dict[str, float] = {}
+    for name in ("lives", "bombs", "power"):
+        raw = resources.get(name)
+        if (
+            type(raw) not in (int, float)
+            or not math.isfinite(float(raw))
+            or float(raw) < 0.0
+        ):
+            raise NativeCombatBranchReportError(
+                f"{field}.resources.{name} must be finite and nonnegative"
+            )
+        result[name] = float(raw)
+    return result
+
+
 def _summarize_branch(
     *,
     branch_id: str,
     root_summary: dict[str, Any],
     root_player_phase: int,
+    root_resources: dict[str, float],
     branch: dict[str, Any],
     prefix_mask: int | None = None,
     prefix_schedule: list[object] | None = None,
@@ -147,10 +167,43 @@ def _summarize_branch(
         _object(tick.get("compact_state"), field=f"{branch_id}.compact_state")
         for tick in tick_objects
     ]
-    survived = root_player_phase != 2 and not any(
+    player_phase_survived = root_player_phase != 2 and not any(
         _player_phase(state, field=f"{branch_id}.compact_state") == 2
         for state in compact_states
     )
+    resource_trajectory = [
+        root_resources,
+        *[
+            _resources(
+                state,
+                field=f"{branch_id}.ticks[{index}].compact_state",
+            )
+            for index, state in enumerate(compact_states)
+        ],
+    ]
+    life_decrease_tick_indices = [
+        index
+        for index, (previous, current) in enumerate(
+            zip(
+                resource_trajectory[:-1],
+                resource_trajectory[1:],
+                strict=True,
+            )
+        )
+        if current["lives"] < previous["lives"]
+    ]
+    bomb_resource_decrease_tick_indices = [
+        index
+        for index, (previous, current) in enumerate(
+            zip(
+                resource_trajectory[:-1],
+                resource_trajectory[1:],
+                strict=True,
+            )
+        )
+        if current["bombs"] < previous["bombs"]
+    ]
+    survived = player_phase_survived and not life_decrease_tick_indices
     selected_actions = [
         _action_mask(tick, field=f"{branch_id}.ticks[{index}]")
         for index, tick in enumerate(tick_objects)
@@ -207,6 +260,7 @@ def _summarize_branch(
         and not bomb_active_input_frames
         and not bomb_action_indices
         and not bomb_declared_action_fields
+        and not bomb_resource_decrease_tick_indices
     )
     route2_nmnb_eligible = survived and no_bomb and route2_scope
     endpoint = summaries[-1]
@@ -264,6 +318,7 @@ def _summarize_branch(
         "root_manager_frame": root_frame,
         "root_player_phase": root_player_phase,
         "manager_frames": manager_frames,
+        "player_phase_survived_to_endpoint": player_phase_survived,
         "survived_to_endpoint": survived,
         "no_bomb_to_endpoint": no_bomb,
         "route2_scope": route2_scope,
@@ -272,8 +327,22 @@ def _summarize_branch(
         "bomb_active_input_manager_frames": bomb_active_input_frames,
         "bomb_action_tick_indices": bomb_action_indices,
         "bomb_declared_action_fields": bomb_declared_action_fields,
+        "life_decrease_tick_indices": life_decrease_tick_indices,
+        "bomb_resource_decrease_tick_indices": (
+            bomb_resource_decrease_tick_indices
+        ),
         "candidate_status": candidate_status,
         "metrics": {
+            "root_resources": resource_trajectory[0],
+            "endpoint_resources": resource_trajectory[-1],
+            "resource_delta": {
+                name: (
+                    resource_trajectory[-1][name]
+                    - resource_trajectory[0][name]
+                )
+                for name in ("lives", "bombs", "power")
+            },
+            "resource_trajectory": resource_trajectory,
             "root_positive_hp_sum": _integer(root_summary, "positive_hp_sum"),
             "endpoint_positive_hp_sum": _integer(endpoint, "positive_hp_sum"),
             "observed_positive_hp_sum_change": (
@@ -349,10 +418,15 @@ def _summarize_branch(
             ),
         },
         "authority": {
-            "hard_survival_filter": "observed_native_player_phase_over_branch",
+            "hard_survival_filter": (
+                "observed_native_player_phase_and_lives_over_branch"
+            ),
             "hard_no_bomb_filter": (
                 "declared_and_selected_complete_masks_native_active_input_"
-                "and_observed_native_bomb_state"
+                "observed_native_bomb_state_and_bomb_stock_non_decrease"
+            ),
+            "resource_trajectory": (
+                "observed_native_float32_seam_values_no_benefit_inference"
             ),
             "route2_scope_filter": (
                 "exact_root_and_tick_native_route_id_equals_2"
@@ -396,6 +470,10 @@ def _rolling_rows(result: dict[str, Any]) -> list[dict[str, object]]:
         result.get("root_compact_state"),
         field="result.root_compact_state",
     )
+    root_resources = _resources(
+        result.get("root_compact_state"),
+        field="result.root_compact_state",
+    )
     branches = _object(result.get("branches"), field="result.branches")
     rows = []
     for branch_id in ("a1", "a2", "b"):
@@ -404,6 +482,7 @@ def _rolling_rows(result: dict[str, Any]) -> list[dict[str, object]]:
                 branch_id=branch_id,
                 root_summary=root_summary,
                 root_player_phase=root_player_phase,
+                root_resources=root_resources,
                 branch=_object(
                     branches.get(branch_id),
                     field=f"result.branches.{branch_id}",
@@ -424,6 +503,10 @@ def _causal_rows(result: dict[str, Any]) -> list[dict[str, object]]:
         field="result.origin.native_combat_projection",
     )
     origin_player_phase = _player_phase(
+        origin.get("compact_state"),
+        field="result.origin.compact_state",
+    )
+    origin_resources = _resources(
         origin.get("compact_state"),
         field="result.origin.compact_state",
     )
@@ -451,6 +534,7 @@ def _causal_rows(result: dict[str, Any]) -> list[dict[str, object]]:
                 branch_id=f"prefix-{prefix_index}",
                 root_summary=origin_summary,
                 root_player_phase=origin_player_phase,
+                root_resources=origin_resources,
                 branch=_object(
                     prefix.get("prefix"),
                     field=f"result.prefixes[{prefix_index}].prefix",
@@ -471,6 +555,10 @@ def _causal_rows(result: dict[str, Any]) -> list[dict[str, object]]:
             ),
         )
         subroot_player_phase = _player_phase(
+            subroot.get("compact_state"),
+            field=f"result.prefixes[{prefix_index}].subroot.compact_state",
+        )
+        subroot_resources = _resources(
             subroot.get("compact_state"),
             field=f"result.prefixes[{prefix_index}].subroot.compact_state",
         )
@@ -501,6 +589,7 @@ def _causal_rows(result: dict[str, Any]) -> list[dict[str, object]]:
                     ),
                     root_summary=subroot_summary,
                     root_player_phase=subroot_player_phase,
+                    root_resources=subroot_resources,
                     branch=continuation,
                     prefix_mask=prefix_mask,
                     prefix_schedule=prefix_schedule,
@@ -554,8 +643,9 @@ def build_report(
         "result": {
             "status": "combat_branches_lowered_without_benefit_promotion",
             "survival_is_hard_filter": True,
-            "survivor_count_is_player_phase_only": True,
+            "hard_survival_uses_player_phase_and_lives": True,
             "no_bomb_is_hard_filter": True,
+            "hard_no_bomb_uses_bomb_stock_non_decrease": True,
             "route2_scope_is_required_for_combat_proxy": True,
             "combat_metrics_are_proxy_or_observed_state_only": True,
             "verified_generation_safe_hp_transactions": False,

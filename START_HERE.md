@@ -112,11 +112,13 @@ historical handoff.
   branches, optional post-timer `/9` or block, and final HP/frame-damage write.
   Combat v7 now captures those raw predicates without guessing their physical
   labels and applies supported cross-target mutation in native manager order.
-  Branch report v2 hard-rejects Bomb-selected, Bomb-active-input, or
+  Branch report v3 hard-rejects Bomb-selected, Bomb-active-input, or
   Bomb-active-state histories, carries that rejection through inherited causal
-  prefix schedules, and keeps any non-Route-2 history outside its combat-proxy
-  scope. The next general WS-H boundary is generation-safe runtime comparison
-  before any combat ranking.
+  prefix schedules, and also closes between-seam contamination through exact
+  Bomb-stock non-decrease. Native lives decrease is a hard survival failure;
+  exact Power deltas remain observation-only. Any non-Route-2 history stays
+  outside combat-proxy scope. The next general WS-H boundary is
+  generation-safe runtime comparison before any combat ranking.
 - Root 2,129's old four-u16 pre-hostile prefix is compatible with a due
   focused level-5 option pair, but the retained v3 capsule lacks timer/pool
   fields, so this remains inferred rather than observed. Hostile birth 1220

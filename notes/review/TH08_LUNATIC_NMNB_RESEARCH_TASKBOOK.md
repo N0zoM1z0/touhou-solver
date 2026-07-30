@@ -1046,10 +1046,13 @@ Current semantic correction (2026-07-31):
   roots, reports supported resolved HP damage, and carries nonpiercing-shot
   plus damage-region mutation through ascending native manager slot order.
   Rolling v10 / causal v8 bind exact Route ID, native active input, and
-  Bomb-active state. Branch report v2 hard-rejects every Bomb-contaminated
+  Bomb-active state. Branch report v3 hard-rejects every Bomb-contaminated
   history, including inherited causal prefix schedules, and keeps non-Route-2
-  histories outside combat-proxy scope; unresolved callbacks/type-4/5
-  mutation and runtime generation joins still bound authority.
+  histories outside combat-proxy scope. It additionally treats native lives
+  decrease as hard survival failure and Bomb-stock decrease as hard no-Bomb
+  failure while retaining Power only as an observed trajectory; unresolved
+  callbacks/type-4/5 mutation and runtime generation joins still bound
+  authority.
 
 Exit gate:
 

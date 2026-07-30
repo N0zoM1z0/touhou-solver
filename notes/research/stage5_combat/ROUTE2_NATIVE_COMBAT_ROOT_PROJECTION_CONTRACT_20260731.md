@@ -171,13 +171,17 @@ the retained H1/H8/H32 collision evidence boundary.
 
 `scripts/analysis/th08_native_combat_branch_report.py` lowers only accepted
 v10 rolling transactions or accepted v8 causal-search transactions into
-`th08-native-combat-branch-comparison-v2`. It:
+`th08-native-combat-branch-comparison-v3`. It:
 
 - rejects every branch whose native compact history enters player phase 2;
 - rejects every branch whose selected complete mask, native active input, or
   native Bomb-active state contains Bomb;
 - carries the same hard rejection through a causal continuation when its
   inherited prefix mask or explicit prefix schedule contains Bomb;
+- rejects a Bomb-stock decrease between exact compact seams even if Bomb is no
+  longer active at the later seam;
+- treats a native lives decrease as hard survival failure and retains exact
+  lives/Bombs/Power trajectories without assigning Power benefit;
 - requires exact Route ID 2 at the root and every tick before applying the
   Route-2 combat-proxy scope;
 - reports native published frame damage and instantaneous supported ordinary
@@ -235,10 +239,11 @@ unknown. There is no maximization over hidden branches in this checkpoint.
 ### Horizon, resources, and safety
 
 The horizon is the exact finite branch retained by the parent tool. Native
-player phase 2 is a hard rejection. Bomb emission remains forbidden; observed
-Bomb state is context, not authority to issue Bomb. Lives, Bombs, Power,
-items, Boss resources, and later phase entry are not optimized by this
-lowerer.
+player phase 2 or lives decrease is a hard rejection. Bomb emission remains
+forbidden; selected/deployed Bomb evidence and Bomb-stock decrease are hard
+rejections, not authority to issue Bomb. Power is retained as an observed
+trajectory only. Items, Boss resources, and later phase entry are not
+optimized by this lowerer.
 
 ### Deadline and fallback
 
@@ -284,6 +289,7 @@ This checkpoint grants:
   cross-target shot/region mutation;
 - fail-closed offline enforcement of the hard no-Bomb and exact Route-2
   comparison scope from selected-mask and native-state evidence;
+- fail-closed lives/Bomb seam checks plus exact non-ranking Power trajectory;
 - deterministic integration into rolling and causal snapshot transactions;
   and
 - a hard-survival-filtered, non-ranking offline comparison format.
@@ -297,10 +303,10 @@ It grants no:
 - prevented hostile birth or shortened exposure claim;
 - physical predictive, shadow, or live action authority.
 
-Eight focused projection tests, nine focused report tests, three loaded-SHT
+Eight focused projection tests, eleven focused report tests, three loaded-SHT
 provenance tests, twelve rolling snapshot tests, and four causal-search tests
-pass. Complete discovery passes 1,527 tests in 14.682 seconds on Linux and
-31.066 seconds through the Windows UNC loader, with the three existing skips.
+pass. Complete discovery passes 1,529 tests in 14.658 seconds on Linux and
+31.588 seconds through the Windows UNC loader, with the three existing skips.
 
 The next authorized causal gate is a small immutable-root corpus spanning
 focused, unfocused, and dynamic-refocus complete-mask schedules. Each branch

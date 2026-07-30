@@ -1938,9 +1938,11 @@ first.
   ID, native active input, and Bomb-active state to compact summaries.
   Rolling v10 and causal-search v8 retain that identity at roots and ticks; the
   lowerer refuses to apply normal-content closure to any special or unknown
-  source. Branch report v2 rejects Bomb contamination as a hard NMNB failure
-  and treats non-Route-2 histories as out of scope. No new native corpus
-  exists. This grants loaded-content and source-
+  source. Branch report v3 rejects Bomb contamination, including stock
+  decrease between seams, as a hard NMNB failure; native lives decrease is a
+  hard survival failure, non-Route-2 histories are out of scope, and Power is
+  retained only as an observed trajectory. No new native corpus exists. This
+  grants loaded-content and source-
   ownership authority only, not damage, generation, combat benefit, ranking,
   physical prediction, or live authority.
 - **Boundary:** first revalidate native HP/damageability/end-reason/drop
@@ -2005,7 +2007,9 @@ first.
   manager-ordered supported mutation have offline exact-capture and synthetic
   scalar authority only; late enemy scaling has shipped-instruction/synthetic
   arithmetic and exact-root raw-predicate authority. Route/Bomb filtering has
-  offline exact-field and hard-constraint enforcement authority only. The
+  offline exact-field and hard-constraint enforcement authority only. Seam
+  resource trajectories have native-observation authority but no causal
+  benefit or route-ranking authority. The
   source/emission atlas has
   shipped-content/static
   candidate authority only. The item/drop atlas has shipped-native

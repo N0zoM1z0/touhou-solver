@@ -92,9 +92,10 @@ diagnostic, not causal closure.
 The current WS-H model can select generation-safe roots and compare completed
 native transactions for normal shots, enemy HP/defeat, phase transitions,
 items, Power, and resources. The general model remains offline. One narrow,
-default-off live experiment may prefer the same-direction unfocused action for
-an observed low-HP ordinary enemy, but only inside a fresh issue-safe action
-set and under hard no-Bomb.
+default-off live experiment may align with an observed ordinary non-boss
+enemy or a byte-verified upcoming fixed birth, but only inside a winning
+queried shadow-global action set followed by a fresh issue-safe set and under
+hard no-Bomb. This is objective gating, not promoted global safety authority.
 See `notes/CURRENT_COMBAT_RESOURCE_MODEL.md`.
 
 ## Proposed Research
@@ -121,6 +122,25 @@ projection. The rotated Stage-4A gate then delivered 1,915 unique policies and
 occurred after the shadow kernel was already losing and only nine were also in
 a winning shadow-global action set. This preserves the strategy but rejects
 short local safety as its global survival filter.
+
+The next Stage-4A physical gate enforced that rejection: 124 preferences were
+applied before the canonical first hit, each inside a winning queried
+shadow-global set and then a fresh issue-safe set. It completed with 11 hits,
+first hit 4148, and zero Bombs versus a different-RNG 16/1827 predecessor;
+that aggregate is encouraging but observational. The causal counterexample
+is sharper: the last winning query was frame 3679, while a 200-HP middle-wave
+enemy was body-visible near x=320 at frame 3864 but was not selected by the
+old HP gate until frame 3900 at 15 HP.
+
+The default-off correction recognizes full-health ordinary non-boss enemies
+and, when no current target supersedes it, may forecast the next fixed birth
+from a stable native timeline clock. It requires exact equality between the
+live relocated instruction interval and the shipped ECL, refuses timeline
+barriers/dynamic spawns/transitions, and uses only a 240-frame horizon. This
+forecast has no safety authority: missing or losing shadow-global guidance,
+runtime disagreement, or fresh issue rejection preserves the survival
+baseline. It is implemented and deterministically tested but not yet
+physically validated.
 
 ### P2 — Focus as a dynamic action factor
 

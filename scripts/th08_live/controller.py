@@ -193,7 +193,9 @@ from th08_live.issue_stage import (
     observe_action_issue,
 )
 from th08_live.kill_before_saturation import (
+    MINIMUM_PLAYER_POWER,
     choose_kill_before_saturation_preference,
+    choose_upcoming_spawn_preference,
     observe_kill_before_saturation_target,
 )
 from th08_live.local_certificates import (
@@ -222,6 +224,11 @@ from th08_live.local_objectives import (
     node_key as _node_key,
     terminal_threat_degeneracy as _terminal_threat_degeneracy,
     terminal_threat_scores as _terminal_threat_scores_impl,
+)
+from th08_runtime.timeline_spawn_forecast import (
+    DEFAULT_SPAWN_FORECAST_HORIZON,
+    StageTimelineSpawnForecaster,
+    UpcomingSpawnObservation,
 )
 from th08_live.movement import (
     BOMB,
@@ -456,6 +463,17 @@ ROUTE2_STAGE_SUCCESSORS = {
     3: 5,
     4: 5,
     5: 7,
+}
+ROUTE_STAGE_ECL_FILES = {
+    0: "ecldata1.ecl",
+    1: "ecldata2.ecl",
+    2: "ecldata3.ecl",
+    3: "ecldata4a.ecl",
+    4: "ecldata4b.ecl",
+    5: "ecldata5.ecl",
+    6: "ecldata6.ecl",
+    7: "ecldata7.ecl",
+    8: "ecldata8.ecl",
 }
 
 
@@ -1609,6 +1627,50 @@ def _run_live_session(
     kill_before_saturation = bool(
         getattr(args, "kill_before_saturation", False)
     )
+    timeline_spawn_forecasters: dict[
+        int,
+        StageTimelineSpawnForecaster | None,
+    ] = {}
+    timeline_spawn_forecaster_errors: dict[int, str] = {}
+    decoded_ecl_directory = (
+        Path(__file__).resolve().parents[2]
+        / "artifacts"
+        / "decoded"
+    )
+
+    def timeline_spawn_forecaster(
+        stage_route_index: int,
+    ) -> StageTimelineSpawnForecaster | None:
+        if stage_route_index not in timeline_spawn_forecasters:
+            ecl_name = ROUTE_STAGE_ECL_FILES.get(stage_route_index)
+            ecl_path = (
+                decoded_ecl_directory / ecl_name
+                if ecl_name is not None
+                else None
+            )
+            try:
+                timeline_spawn_forecasters[stage_route_index] = (
+                    StageTimelineSpawnForecaster(
+                        ecl_path,
+                        expected_difficulty_mask=(
+                            0x0F
+                            if args.difficulty == 4
+                            else 1 << args.difficulty
+                        ),
+                    )
+                    if ecl_path is not None and ecl_path.is_file()
+                    else None
+                )
+            except (OSError, RuntimeError, ValueError) as error:
+                timeline_spawn_forecasters[stage_route_index] = None
+                timeline_spawn_forecaster_errors[stage_route_index] = (
+                    f"{type(error).__name__}:{error}"
+                )
+        return timeline_spawn_forecasters[stage_route_index]
+
+    if kill_before_saturation and args.expected_stage is not None:
+        timeline_spawn_forecaster(args.expected_stage)
+
     enemy_lifecycle_probe: EnemyLifecycleProbe | None = None
     enemy_lifecycle_probe_last_serial: int | None = None
     enemy_lifecycle_probe_installation: dict[str, object] = {
@@ -1819,14 +1881,24 @@ def _run_live_session(
                             else "disabled"
                         ),
                         "complete_action": (
-                            "target_alignment_then_same_direction_"
-                            "unfocused"
+                            "observed_target_or_byte_verified_upcoming_"
+                            "spawn_alignment_then_same_direction_unfocused"
                         ),
                         "fallback": (
                             "preserve_survival_baseline_on_missing_or_"
                             "losing_global_query_or_fresh_rejection"
                         ),
                         "global_shadow_is_hard_authority": False,
+                        "upcoming_spawn_forecast": {
+                            "horizon_frames": (
+                                DEFAULT_SPAWN_FORECAST_HORIZON
+                            ),
+                            "source": (
+                                "native_timeline_clock_plus_runtime_byte_"
+                                "verified_shipped_ecl"
+                            ),
+                            "fallback": "current_enemy_or_survival_baseline",
+                        },
                         "hard_no_bomb_required": True,
                     },
                     "enemy_body_sensor": (
@@ -2976,6 +3048,38 @@ def _run_live_session(
                     excluded_enemy_pointer=boss_enemy_pointer,
                 )
             )
+            upcoming_spawn_observation: (
+                UpcomingSpawnObservation | None
+            ) = None
+            upcoming_spawn_skip_reason: str | None = None
+            if not kill_before_saturation:
+                upcoming_spawn_skip_reason = "disabled"
+            elif bool(spell_state["active"]):
+                upcoming_spawn_skip_reason = "spell_active"
+            elif (
+                float(resources["power"]) < MINIMUM_PLAYER_POWER
+            ):
+                upcoming_spawn_skip_reason = "power_below_native_root"
+            elif kill_before_saturation_observation.target is not None:
+                upcoming_spawn_skip_reason = (
+                    "current_enemy_target_has_priority"
+                )
+            else:
+                active_spawn_forecaster = timeline_spawn_forecaster(
+                    int(state["stage_route_index"])
+                )
+                if active_spawn_forecaster is None:
+                    upcoming_spawn_skip_reason = (
+                        "stage_ecl_forecaster_unavailable:"
+                        + timeline_spawn_forecaster_errors.get(
+                            int(state["stage_route_index"]),
+                            "missing_content",
+                        )
+                    )
+                else:
+                    upcoming_spawn_observation = (
+                        active_spawn_forecaster.observe(reader)
+                    )
             can_bomb = (
                 not args.no_bomb
                 and args.normal_bomb
@@ -3583,33 +3687,63 @@ def _run_live_session(
                 )
             )
             decision = local_proposal.decision
-            kill_before_saturation_preference = (
-                choose_kill_before_saturation_preference(
-                    decision.action,
-                    target=kill_before_saturation_observation.target,
-                    player_x=(
-                        published_guidance.capture.projected_player_x
-                    ),
-                    action_hold_frames=action_hold_frames,
-                    target_forecast_frames=(
-                        max(
-                            published_guidance.capture
-                            .delay_estimate.support,
-                            default=(
+            if kill_before_saturation_observation.target is not None:
+                kill_before_saturation_preference = (
+                    choose_kill_before_saturation_preference(
+                        decision.action,
+                        target=(
+                            kill_before_saturation_observation.target
+                        ),
+                        player_x=(
+                            published_guidance.capture.projected_player_x
+                        ),
+                        action_hold_frames=action_hold_frames,
+                        target_forecast_frames=(
+                            max(
                                 published_guidance.capture
-                                .control_delay_frames
-                            ),
-                        )
-                        + action_hold_frames
-                    ),
-                    allowed_first_actions=(
-                        policy_guidance.allowed_first_actions
-                    ),
-                    actions=_PLANNER_ACTIONS,
+                                .delay_estimate.support,
+                                default=(
+                                    published_guidance.capture
+                                    .control_delay_frames
+                                ),
+                            )
+                            + action_hold_frames
+                        ),
+                        allowed_first_actions=(
+                            policy_guidance.allowed_first_actions
+                        ),
+                        actions=_PLANNER_ACTIONS,
+                    )
                 )
-                if kill_before_saturation_observation.target is not None
-                else None
-            )
+                kill_before_saturation_preference_source = (
+                    "observed_enemy"
+                )
+            elif (
+                upcoming_spawn_observation is not None
+                and upcoming_spawn_observation.target is not None
+            ):
+                kill_before_saturation_preference = (
+                    choose_upcoming_spawn_preference(
+                        decision.action,
+                        spawn_x=(
+                            upcoming_spawn_observation.target.x
+                        ),
+                        player_x=(
+                            published_guidance.capture.projected_player_x
+                        ),
+                        action_hold_frames=action_hold_frames,
+                        allowed_first_actions=(
+                            policy_guidance.allowed_first_actions
+                        ),
+                        actions=_PLANNER_ACTIONS,
+                    )
+                )
+                kill_before_saturation_preference_source = (
+                    "upcoming_fixed_spawn"
+                )
+            else:
+                kill_before_saturation_preference = None
+                kill_before_saturation_preference_source = None
             kill_before_saturation_preferred_action = (
                 kill_before_saturation_preference.action
                 if kill_before_saturation_preference is not None
@@ -3827,6 +3961,14 @@ def _run_live_session(
                     )
                     else None
                 ),
+                "upcoming_spawn": (
+                    upcoming_spawn_observation.record()
+                    if upcoming_spawn_observation is not None
+                    else {
+                        "target": None,
+                        "reason": upcoming_spawn_skip_reason,
+                    }
+                ),
                 "planned_action": pre_issue_action,
                 "preferred_action": (
                     kill_before_saturation_preferred_action
@@ -3835,6 +3977,9 @@ def _run_live_session(
                     kill_before_saturation_preference.record()
                     if kill_before_saturation_preference is not None
                     else None
+                ),
+                "preference_source": (
+                    kill_before_saturation_preference_source
                 ),
                 "preference_applied": bool(
                     kill_before_saturation_transaction is not None

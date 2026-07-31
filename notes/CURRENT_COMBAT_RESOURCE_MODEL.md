@@ -165,6 +165,31 @@ were already in a losing shadow-global state and only nine were also members
 of a winning shadow-global action set. This rejects short local safety as the
 global survival filter; it does not reject killing enemies earlier.
 
+The next Stage-4A gate moved the objective strictly before observed kernel
+loss. It completed with 11 hits, first hit 4148, and zero Bombs. Before that
+first hit, 124 early-kill preferences were physically applied: 123 location
+alignments and one same-direction unfocus. Every application belonged to a
+winning queried shadow-global set and then passed fresh issue certification.
+The different-RNG 16→11 total and 1827→4148 first-hit change are
+observational, not causal A/B.
+
+The run also exposes the user's middle-wave failure. The first attempt's last
+winning query was frame 3679. A maximum-HP-200 ordinary enemy was already
+body-visible near x=320 at frame 3864, but the old observer selected it only
+at frame 3900 after its HP fell to 15. The immutable Stage-4A timeline places
+fixed births at `3560/64`, `3660/320`, `3810/64`, and `3860/320`, two to four
+frames before the observed runtime bodies. **Inferred:** current HP was an
+unnecessarily late observation boundary for this workload.
+
+The default-off implementation now accepts full-health ordinary non-boss
+targets and can expose an upcoming fixed birth from the stable native
+timeline clock plus exact live/static ECL byte equality. Current body
+evidence has priority. The forecast crosses no timeline barrier, rejects
+dynamic positions and transition/suppression gates, and has no independent
+action authority. Retained-trace replay found 18 pre-exhaustion forecast
+proposals, 15 also in the old fresh-safe set; this is offline eligibility
+only, not physical validation.
+
 The latest full-route game-start baseline is 68 hits, zero Bombs, with
 per-stage counts 2/3/5/20/15/23.
 
@@ -172,16 +197,17 @@ per-stage counts 2/3/5/20/15/23.
 
 Do not add more atlas/schema work unless it blocks this experiment:
 
-1. Establish exact ordinary-stage global action authority or an equivalent
-   causal pre-exhaustion viability filter.
-2. Test the combat objective before kernel loss and only inside the exact
-   winning action set.
-3. Repeat the native kill/prevented-birth result on a second ordinary enemy
+1. Physically falsify full-health observation and byte-verified upcoming-spawn
+   alignment on a fresh Stage-4A root.
+2. Require the last winning query to move beyond the old frame-3679 boundary,
+   or retain the first earlier failure explaining why it did not.
+3. Establish exact ordinary-stage hard action authority; the current queried
+   global set remains diagnostic shadow and only gates this optional
+   objective.
+4. Repeat the native kill/prevented-birth result on a second ordinary enemy
    and root.
-3. Keep the live HP/alignment rule default-off and unchanged until the second
-   root and a rotated Stage 3/4A physical workload agree.
-4. Return `UNKNOWN` at the first unsupported event; do not infer a causal A/B
-   from the different-RNG physical totals.
+5. Keep the rule default-off and return `UNKNOWN` at the first unsupported
+   event. Do not infer causal A/B from different-RNG totals.
 
 After that, test survival-feasible early Power collection on a clean prefix
 that crosses a Power threshold and has a later combat/survival join. Do not
@@ -199,3 +225,6 @@ model post-death recovery for an NMNB policy.
 - CE-0230: a physically exercised early-kill preference delayed the first hit
   but did not improve total hits or make global guidance available.
 - CE-0229: different-root physical totals are not causal A/B evidence.
+- CE-0232: local-safe early kill is not global survival filtering.
+- CE-0233: the old HP gate exposed a middle-wave ordinary enemy only after
+  global-kernel exhaustion.

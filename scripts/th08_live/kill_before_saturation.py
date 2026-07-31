@@ -120,18 +120,11 @@ def observe_kill_before_saturation_target(
         body = bodies_by_pointer.get(progress.enemy_pointer)
         if body is None:
             continue
-        small_enemy = (
-            0 < progress.maximum_health <= MAXIMUM_SMALL_ENEMY_HEALTH
-        )
         if (
             progress.enemy_pointer == excluded_enemy_pointer
             or progress.defeat_mode != 0
             or progress.current_health <= 0
             or progress.maximum_health <= 0
-            or (
-                not small_enemy
-                and progress.current_health > MAXIMUM_TARGET_HP
-            )
         ):
             continue
         horizontal_separation = body.x - player_x
@@ -178,7 +171,11 @@ def observe_kill_before_saturation_target(
         (
             "small_ordinary_enemy_observed"
             if selected.maximum_health <= MAXIMUM_SMALL_ENEMY_HEALTH
-            else "low_hp_ordinary_enemy_observed"
+            else (
+                "low_hp_ordinary_enemy_observed"
+                if selected.current_health <= MAXIMUM_TARGET_HP
+                else "ordinary_enemy_observed"
+            )
         ),
     )
 
@@ -344,6 +341,70 @@ def choose_kill_before_saturation_preference(
     )
 
 
+def choose_upcoming_spawn_preference(
+    planned_action: str,
+    *,
+    spawn_x: float,
+    player_x: float,
+    action_hold_frames: int,
+    allowed_first_actions: tuple[str, ...] | None,
+    actions: Sequence[PlannerAction],
+) -> KillBeforeSaturationPreference:
+    """Pre-position for one causally forecast fixed spawn location."""
+
+    synthetic_target = KillBeforeSaturationTarget(
+        slot=-1,
+        enemy_pointer=0,
+        current_health=1,
+        maximum_health=1,
+        x=spawn_x,
+        y=0.0,
+        vx=0.0,
+        vy=0.0,
+        half_width=0.0,
+        position_uncertainty=0.0,
+        horizontal_separation=spawn_x - player_x,
+        vertical_separation=0.0,
+        local_damage_flags_open=False,
+    )
+    preference = choose_kill_before_saturation_preference(
+        planned_action,
+        target=synthetic_target,
+        player_x=player_x,
+        action_hold_frames=action_hold_frames,
+        target_forecast_frames=0,
+        allowed_first_actions=allowed_first_actions,
+        actions=actions,
+    )
+    if preference.reason == "global_viable_target_alignment":
+        return KillBeforeSaturationPreference(
+            action=preference.action,
+            reason="global_viable_upcoming_spawn_alignment",
+            target_x=preference.target_x,
+            planned_endpoint_x=preference.planned_endpoint_x,
+            preferred_endpoint_x=preference.preferred_endpoint_x,
+            alignment_improvement=preference.alignment_improvement,
+            forecast_frames=preference.forecast_frames,
+            global_safe_action_count=(
+                preference.global_safe_action_count
+            ),
+        )
+    if preference.reason == "global_viable_same_direction_unfocused":
+        return KillBeforeSaturationPreference(
+            action=None,
+            reason="no_improving_global_safe_spawn_action",
+            target_x=preference.target_x,
+            planned_endpoint_x=preference.planned_endpoint_x,
+            preferred_endpoint_x=preference.preferred_endpoint_x,
+            alignment_improvement=preference.alignment_improvement,
+            forecast_frames=preference.forecast_frames,
+            global_safe_action_count=(
+                preference.global_safe_action_count
+            ),
+        )
+    return preference
+
+
 __all__ = [
     "KillBeforeSaturationObservation",
     "KillBeforeSaturationPreference",
@@ -354,6 +415,7 @@ __all__ = [
     "MINIMUM_ALIGNMENT_IMPROVEMENT",
     "MINIMUM_PLAYER_POWER",
     "choose_kill_before_saturation_preference",
+    "choose_upcoming_spawn_preference",
     "observe_kill_before_saturation_target",
     "unfocused_peer_action",
 ]

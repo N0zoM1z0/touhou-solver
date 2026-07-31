@@ -284,8 +284,18 @@ Current checkpoint:
 - 26 of 39 actual fresh-safe early-kill selections occurred after shadow
   kernel loss and only nine were also shadow-global safe, so short local
   safety is not the intended survival filter;
-- repeat the causal result on a second root before promotion. This checkpoint
-  neither promotes nor falsifies D1.
+- the following Stage-4A gate applied 124 preferences before first hit 4148,
+  all inside a winning queried shadow-global set and fresh issue-safe set,
+  with zero Bombs;
+- the first attempt lost its last winning query at frame 3679. A 200-HP
+  middle-wave enemy appeared near x=320 at frame 3864 but the old HP observer
+  selected it only at frame 3900 at 15 HP;
+- full-health ordinary targeting and a stable-clock, live-byte-verified fixed
+  spawn forecast are implemented default-off. Their retained-trace 18
+  proposals are offline eligibility only;
+- physically falsify that causal observation path, then repeat the native
+  kill/prevented-birth result on a second root before promotion. This
+  checkpoint supports D1 but does not promote it.
 
 #### D2: Focus as control
 

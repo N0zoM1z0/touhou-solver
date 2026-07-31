@@ -1,0 +1,159 @@
+{
+  "schema": "th08-nonspell-preexhaustion-early-kill-review-v1",
+  "run_id": "lunatic_route2_stage4a_unattended_20260731_133852",
+  "physical_code_checkpoint": "aae641f9c42d77ff78915d67f6c8b620c366fc75",
+  "scope": {
+    "stage_route_index": 3,
+    "difficulty_index": 3,
+    "team": "Sakuya/Remilia",
+    "hard_no_bomb": true,
+    "kill_before_saturation": true,
+    "forecast_code_exercised": false
+  },
+  "provenance": {
+    "executable_sha256": "330fbdbf58a710829d65277b4f312cfbb38d5448b3df523e79350b879213d924",
+    "raw_trace_sha256": "5a6bf30bfe9889412b84b37c1141ea9c88ce74ccc9f1be00dfb80adcf9644408",
+    "raw_trace_size_bytes": 429245610,
+    "replay_sha256": "260cbb4f2186e263881e9325598ed68b86f1cc0d1779db7c60c360305bea73b8",
+    "replay_input_sha256": "f86982ccdc66a1b45b3e44b1e536c7b12bcbc7937045adebbd8ab68d7947ce5e",
+    "replay_rng_seed": 43241,
+    "replay_slot": 15
+  },
+  "physical_outcome": {
+    "evidence_status": "observed",
+    "accepted_complete_practice": true,
+    "decision_count": 10992,
+    "first_frame": 2,
+    "last_frame": 42313,
+    "termination_reason": "route_complete",
+    "hit_count": 11,
+    "hit_frames": [
+      4148,
+      4449,
+      9011,
+      11122,
+      13311,
+      20905,
+      21621,
+      29194,
+      29545,
+      35425,
+      36046
+    ],
+    "first_hit_frame": 4148,
+    "bomb_count": 0,
+    "replay_bomb_press_frames": []
+  },
+  "global_shadow": {
+    "evidence_status": "observed",
+    "available_queries": 10813,
+    "winning_queries": 4882,
+    "losing_or_empty_queries": 5931,
+    "nonspell_queries": 6505,
+    "nonspell_winning_queries": 2852,
+    "nonspell_losing_or_empty_queries": 3653,
+    "unique_policies": 1702,
+    "action_authority": false
+  },
+  "canonical_first_attempt": {
+    "evidence_status": "observed",
+    "first_hit_frame": 4148,
+    "last_winning_query_frame": 3679,
+    "kernel_exhaustion_lead_frames": 469,
+    "target_decisions_before_hit": 722,
+    "preference_proposals_before_hit": 176,
+    "preference_applications_before_hit": 124,
+    "location_alignment_applications": 123,
+    "same_direction_unfocus_applications": 1,
+    "spell_target_or_application_violations": 0,
+    "full_health_30_of_30_target_observations": 398,
+    "alignment_improvement": {
+      "mean": 9.421,
+      "minimum": 0.281,
+      "maximum": 18.9
+    },
+    "applications_without_winning_global_query": 0
+  },
+  "second_wave_counterexample": {
+    "evidence_status": "observed",
+    "description": "The fixed-position middle group was present before the old HP gate exposed it to the combat objective.",
+    "enemy_pointer": "0x006443D0",
+    "maximum_health": 200,
+    "body_first_visible_decision_frame": 3864,
+    "body_first_visible_position": {
+      "x": 319.4,
+      "y": -0.7
+    },
+    "first_selected_target_frame": 3900,
+    "health_when_first_selected": 15,
+    "last_winning_query_frame": 3679,
+    "post_exhaustion_window": {
+      "start_frame": 3679,
+      "end_frame": 4148,
+      "winning_queries": 0,
+      "target_decisions": 82,
+      "mean_active_bullets": 690.5,
+      "bottom_occupancy": 0.367
+    },
+    "shipped_stage4a_fixed_spawns": [
+      {
+        "timeline": 0,
+        "time": 3560,
+        "x": 64.0
+      },
+      {
+        "timeline": 0,
+        "time": 3660,
+        "x": 320.0
+      },
+      {
+        "timeline": 0,
+        "time": 3810,
+        "x": 64.0
+      },
+      {
+        "timeline": 0,
+        "time": 3860,
+        "x": 320.0
+      }
+    ],
+    "runtime_body_observation_lag_frames": "2..4"
+  },
+  "interpretation": [
+    {
+      "evidence_status": "observed",
+      "conclusion": "The strict pre-exhaustion gate worked as designed: every applied early-kill action was inside a winning queried global set and then passed fresh issue certification."
+    },
+    {
+      "evidence_status": "inferred",
+      "conclusion": "The second-wave failure is an observation-timing failure, not evidence that losing-state local guidance should regain authority."
+    },
+    {
+      "evidence_status": "hypothesized",
+      "conclusion": "Full-health ordinary-enemy observation plus a live-clock, byte-verified shipped-ECL fixed-spawn forecast can expose the location objective before the global kernel is exhausted."
+    }
+  ],
+  "offline_forecast_eligibility": {
+    "evidence_status": "offline_eligibility_only",
+    "source": "retained physical first-attempt trace plus immutable Stage-4A ECL",
+    "window": {
+      "start_frame": 3400,
+      "end_frame": 4148
+    },
+    "no_current_old_rule_target_decisions": 143,
+    "losing_global_filtered": 122,
+    "forecast_preference_proposals": 18,
+    "proposals_after_last_winning_query": 0,
+    "proposals_also_retained_fresh_safe": 15,
+    "physical_validation": false
+  },
+  "different_rng_comparison": {
+    "evidence_status": "observational_only",
+    "baseline_run_id": "lunatic_route2_stage4a_unattended_20260731_130103",
+    "baseline_hits": 16,
+    "baseline_first_hit": 1827,
+    "candidate_hits": 11,
+    "candidate_first_hit": 4148,
+    "causal_ab_authority": false
+  }
+}

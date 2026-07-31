@@ -40,9 +40,12 @@ unknown-direction continuation.
 
 The ordinary-stage root-only continuation may compute and query a rolling
 global policy for diagnostic evidence, but that publication has no action
-authority: its target, viable-action set, repair labels, and survival labels
-are removed before local planning and fresh issue. Its declared horizon must
-cover the full sensor-age + asynchronous-publication-lead + kernel horizon.
+authority: its target, repair labels, and survival labels are removed before
+baseline local planning. The default-off nonspell combat experiment may use
+the queried viable-action set only as a necessary eligibility gate for its
+optional alignment proposal; baseline selection and hard safety do not inherit
+global authority from it. Its declared horizon must cover the full sensor-age
++ asynchronous-publication-lead + kernel horizon.
 
 Removed supplemental, candidate-verifier, prewarm, G5, and priority-17 lanes
 have no active code or strategy authority.
@@ -118,15 +121,30 @@ The detailed current combat/resource boundary is
 `CURRENT_COMBAT_RESOURCE_MODEL.md`.
 
 The only current physical combat experiment is default-off
-`--kill-before-saturation`. At a nonspell decision it may use the coherent
-first-64 enemy prefix to select an ordinary enemy with observed HP `1..22`,
-Power at least 100, positive vertical lead, and bounded horizontal separation.
-It may then request only the unfocused peer of the planner's complete focused
-movement action. The issue transaction applies that preference only when the
-peer is fresh-safe and, when global allowed actions exist, inside their
-intersection. No fresh transaction, an unsafe peer, deadline expiry, spell
-state, low Power, missing combat rows, stay, or an already-unfocused action
-preserves the baseline action. The option requires explicit hard no-Bomb.
+`--kill-before-saturation`. At a nonspell decision with Power at least 100 it
+may use the coherent first-64 enemy prefix to select any living ordinary
+non-boss enemy above the player and within bounded horizontal separation.
+Full-health enemies are eligible; small enemies retain deterministic
+selection priority. Using the current winning queried shadow-global action
+set, the objective may select a complete action that improves horizontal
+alignment while preserving the planner's vertical tendency. Same-direction
+unfocus remains a fallback for an observed body.
+
+When no current body target supersedes it, the experiment may pre-position
+for one upcoming fixed spawn within 240 frames. The observation is causal only
+when the native manager frame brackets a stable timeline runtime table, all
+spawn/transition gates are open, difficulty and relocated ECL identity match,
+no timeline barrier is crossed, and the live instruction interval through the
+spawn is byte-exact with the shipped decoded ECL. Dynamic-position spawns and
+any disagreement return no target. A forecast may change horizontal
+alignment but may not invent an unfocus-only action.
+
+These are objective proposals, not hard safety authority. A missing or losing
+queried global set, no improving action, unsupported forecast, deadline
+expiry, or fresh issue rejection preserves the baseline action. The chosen
+complete action still passes the issue-time fresh certificate and hard
+no-Bomb transaction. Selecting the held complete mask retains the ordinary
+no-write semantics.
 
 This rule is experimental, not promoted route-wide authority. Its first
 physical Stage-5 gate applied 27 preferences with zero Bomb/deadline
@@ -140,6 +158,15 @@ nine were also members of a winning shadow-global action set. Therefore
 fresh-local safety alone is not the intended “inside the viable set” rule.
 Move the combat objective earlier and require exact global membership before
 promotion; retain the current default-off rule as a physical probe.
+
+The following Stage-4A gate exercised that pre-exhaustion membership check:
+124 preferences were applied before first hit 4148, all after a winning query
+and fresh issue certification. The last winning query was frame 3679. A
+200-HP middle-wave body appeared near x=320 at frame 3864, but the old HP gate
+selected it only at frame 3900 at 15 HP. The new full-health and byte-verified
+spawn observations directly address this delay. They remain unphysical until
+the next authorized trial and do not promote the diagnostic global policy to
+hard action authority.
 
 ## Falsification And Promotion
 

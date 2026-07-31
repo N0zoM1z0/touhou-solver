@@ -9,6 +9,7 @@ from th08_live.enemy_combat_progress import (
 from th08_live.kill_before_saturation import (
     KillBeforeSaturationTarget,
     choose_kill_before_saturation_preference,
+    choose_upcoming_spawn_preference,
     observe_kill_before_saturation_target,
     unfocused_peer_action,
 )
@@ -172,11 +173,36 @@ class KillBeforeSaturationTests(unittest.TestCase):
                 **{**common, "power": 99.0}
             ).target
         )
-        self.assertIsNone(
-            observe_kill_before_saturation_target(
-                **{**common, "inventory": _inventory(health=23)}
-            ).target
+
+    def test_full_health_ordinary_enemy_is_visible_before_exhaustion(
+        self,
+    ) -> None:
+        result = observe_kill_before_saturation_target(
+            enabled=True,
+            inventory=_inventory(
+                health=200,
+                maximum_health=200,
+            ),
+            enemy_bodies=(
+                EnemyBody(
+                    pointer=0x5D63C0,
+                    x=320.0,
+                    y=-16.0,
+                    vx=0.0,
+                    vy=4.0,
+                    half_width=12.0,
+                    half_height=12.0,
+                    flags=1,
+                ),
+            ),
+            player_x=192.0,
+            player_y=420.0,
+            power=128.0,
+            spell_active=False,
         )
+
+        self.assertEqual(result.reason, "ordinary_enemy_observed")
+        self.assertIsNotNone(result.target)
 
     def test_unfocused_peer_preserves_direction_and_rejects_stay(self) -> None:
         self.assertEqual(
@@ -284,6 +310,35 @@ class KillBeforeSaturationTests(unittest.TestCase):
         self.assertEqual(
             fallback.reason,
             "global_viable_same_direction_unfocused",
+        )
+
+    def test_upcoming_spawn_alignment_does_not_invent_unfocus(self) -> None:
+        aligned = choose_upcoming_spawn_preference(
+            "up",
+            spawn_x=192.0,
+            player_x=192.0,
+            action_hold_frames=3,
+            allowed_first_actions=("up", "up_fast"),
+            actions=PLANNER_ACTIONS,
+        )
+        moving = choose_upcoming_spawn_preference(
+            "right_fast",
+            spawn_x=320.0,
+            player_x=312.0,
+            action_hold_frames=3,
+            allowed_first_actions=("stay", "right", "right_fast"),
+            actions=PLANNER_ACTIONS,
+        )
+
+        self.assertIsNone(aligned.action)
+        self.assertEqual(
+            aligned.reason,
+            "no_improving_global_safe_spawn_action",
+        )
+        self.assertEqual(moving.action, "right")
+        self.assertEqual(
+            moving.reason,
+            "global_viable_upcoming_spawn_alignment",
         )
 
 

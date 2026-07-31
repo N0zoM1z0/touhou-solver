@@ -13,8 +13,9 @@ authority.
 ## Checkpoint
 
 - Branch: `main`.
-- Last physical checkpoint: current `main` HEAD (`Retain Stage 4A global
-  delivery gate`), based on immutable live-code checkpoint `5f93153`.
+- Last physical checkpoint:
+  `lunatic_route2_stage4a_unattended_20260731_133852`, based on immutable
+  live-code checkpoint `aae641f`.
 - Native H=32 wind-tunnel checkpoint: `3d15953`.
 - Workspace-prune checkpoint: `be3e583` (`Prune TH08 active research
   workspace`). It removed dormant supplemental, candidate, prewarm, G5,
@@ -25,9 +26,11 @@ authority.
   the complete Windows UNC discovery over the same test set exited zero.
   Linux and Windows native builds pass the checked-in 41-symbol ABI gate.
 - No WS-H rule has promoted route-wide authority. One default-off
-  `--kill-before-saturation` experiment may change Focus only by selecting the
-  same-direction unfocused complete action inside the fresh issue-safe set.
-  It requires hard no-Bomb and fails closed without fresh certification.
+  `--kill-before-saturation` experiment may align with an observed ordinary
+  enemy or a byte-verified upcoming fixed spawn only inside a winning queried
+  shadow-global action set. Its issue transaction still requires fresh local
+  certification. It requires hard no-Bomb and fails closed on spell state,
+  missing/losing guidance, unsupported timeline content, or fresh rejection.
 - `audits/` and `archive/` are untracked/local. Never stage them.
 
 ## Current Outcome
@@ -43,6 +46,7 @@ Latest user-authorized Lunatic Route-2 practice ring:
 | Stage 5 | `20260731_093027` | 12 | 2124 | 0 | accepted |
 | Stage 5 early-kill gate | `20260731_122855` | 13 | 6981 | 0 | accepted |
 | Stage 4A global/early-kill gate | `20260731_130103` | 16 | 1827 | 0 | accepted |
+| Stage 4A pre-exhaustion early-kill gate | `20260731_133852` | 11 | 4148 | 0 | accepted |
 
 The automatic older-root comparisons were 15→5, 10→13, and 19→12. They are
 observational only: RNG roots differ and the proposed WS-H strategies were
@@ -50,6 +54,17 @@ disabled in the original ring. The later early-kill gate is also
 different-RNG: it physically applied 27 certified unfocus preferences,
 delayed first hit by 4857 frames relative to the listed Stage-5 baseline, but
 worsened total hits by one.
+
+The newest Stage-4A run is also different-RNG and therefore observational:
+relative to the preceding Stage-4A gate it moved 16→11 hits and first hit
+1827→4148. Its canonical first attempt is more useful than that aggregate:
+124 early-kill actions were physically applied, all before the first hit and
+only after a winning queried shadow-global set plus fresh issue
+certification. The last winning query was frame 3679, 469 frames before the
+hit. A 200-HP middle-wave enemy existed at frame 3864 near x=320 but the old
+HP gate exposed it only at frame 3900 at 15 HP. The shipped timeline names
+that fixed birth at time 3860, so the next correction moves observation
+before body/low-HP visibility.
 
 Latest full game-start Lunatic Route-2 run:
 
@@ -116,8 +131,8 @@ The active WS-H reconstruction now covers Route-2 normal shots,
 supported native damage, enemy generations, defeat/cleanup distinction,
 Boss transition identity, item allocation/pickup, Power/resources, and
 mandatory timeline events. Its general combat model remains offline. The only
-live action authority is the narrow default-off low-HP ordinary-enemy
-same-direction unfocus preference described above.
+live combat experiment is the narrow default-off ordinary-enemy alignment
+preference described above. It has no independent safety authority.
 
 The immediate high-value hypothesis is not another schema:
 
@@ -158,23 +173,24 @@ and explicit `STRATEGY.md` decision.
 
 ## Next Useful Gate
 
-The first Stage-5 native branch and physical delivery gate are complete.
+The first Stage-5 native branch and three physical delivery gates are
+complete.
 Next:
 
-1. Establish exact ordinary-stage global action authority or an equally
-   causal pre-exhaustion viability filter. Stage 4A physically delivered 1,915
-   unique policies and 12,156 queries, but the diagnostic scale schedule
-   correctly kept them shadow-only.
-2. Move the combat objective before kernel loss and require membership in the
-   exact winning action set. The rotated gate had 6,635/12,156 losing queries;
-   only nine of 39 actual fresh-safe early-kill choices were also
-   shadow-global safe.
-3. Repeat kill-before-saturation on a second generation-safe ordinary enemy
-   and root, retaining exact defeat and prevented-birth evidence.
-4. Keep the live rule default-off and fail-closed. Do not broaden HP,
-   alignment, or stage conditions from one different-RNG run.
-4. If the second same-root result holds, run a rotated Stage 3 or 4A physical
-   gate. Promotion still requires repeated physical evidence.
+1. Physically falsify the new causal observation path on a fresh Stage-4A
+   root: every upcoming location must come from a stable native timeline
+   clock and exact runtime/static ECL byte equality; current bodies override
+   the forecast; losing/missing global guidance preserves baseline.
+2. Require a visible alignment response before the 3660/3810/3860 middle
+   groups and test whether the last winning query moves later than frame 3679.
+   Retain target/proposal/application source separately.
+3. Continue the deeper global task: the ordinary-stage policy remains
+   diagnostic shadow, so exact hard action authority still requires a causal
+   action-conditioned future or an equivalent proved pre-exhaustion filter.
+4. Repeat the native kill/prevented-birth result on a second
+   generation-safe ordinary enemy and root.
+5. Keep the live rule default-off. Different-RNG 16→11 hits is encouraging
+   workload evidence, not causal promotion.
 
 Do not compensate with a stage-specific waypoint.
 

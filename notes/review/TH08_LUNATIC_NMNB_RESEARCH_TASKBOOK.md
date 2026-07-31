@@ -312,6 +312,18 @@ the f817/833/835/850/910 chain pass. Re-run Stage 4A before working on the
 remaining phase/transform/opcode/callback/movement coverage. Run Stage 5 only
 if Stage 4A shows the expected pressure-window authority improvement.
 
+Stage-4A `20260801_011902` validates the sector implementation but exposes the
+next causal deadline. Maximum physical clearance construction fell from 23.2
+seconds to 0.993 seconds, yet exact authority remained absent from all 380
+nonspell hit-window decisions. For the canonical frame-796 hit, source 639
+spent 478 ms in clearance and 918 ms in Boolean viability and arrived after
+the last nonnegative gate at frame 714. Therefore optimize the exact
+set-valued recurrence before expanding source semantics. The implemented
+all-action interior proof preserves the five-root action sets and cuts the
+Windows maximum from 2,071 to 775 ms. Physically revalidate this deadline
+correction; only then prioritize armed health/timeout successors and remaining
+source gaps. Stage 5 remains conditional on useful pressure-window authority.
+
 ### WS-D — Combat, Focus, and Power
 
 This is the highest-priority experiment after cleanup.

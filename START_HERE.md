@@ -14,8 +14,8 @@ authority.
 
 - Branch: `main`.
 - Last physical checkpoint:
-  `lunatic_route2_stage4a_unattended_20260801_004533`, based on immutable
-  live-code checkpoint `c67009f`.
+  `lunatic_route2_stage4a_unattended_20260801_011902`, based on immutable
+  live-code checkpoint `e8b77a8`.
 - Native H=32 wind-tunnel checkpoint: `3d15953`; it is historical evidence,
   not the live ordinary horizon.
 - Workspace-prune checkpoint: `be3e583` (`Prune TH08 active research
@@ -141,8 +141,25 @@ authority.
   4px regression completed in about 198 ms and matched the independent Python
   signed-clearance oracle exactly at sampled frames; 80 randomized angular
   unions also had zero observed error. Linux/Windows focused native parity and
-  the retained f817/833/835/850/910 semantic chain pass. A fresh Stage-4A
-  physical gate is next; Stage 5 remains withheld.
+  the retained f817/833/835/850/910 semantic chain pass.
+- **Observed sector win and newly isolated recurrence deadline:** Stage-4A
+  `20260801_011902` completed 26/796/no-Bomb with an accepted replay and full
+  cleanup. Different-RNG hit count is observational. Exact sector clearance
+  fell from the preceding physical maximum 23.2 seconds to 0.993 seconds,
+  while authority was effective on 399/7,162 nonspell decisions. It was still
+  effective on 0/380 decisions in the 80-frame nonspell hit windows. At the
+  canonical hit, source 639 spent 478 ms in clearance and 918 ms in Boolean
+  viability; it arrived after the corridor's last nonnegative gate at frame
+  714 and the predecessor was empty by frame 716. Future-source failures,
+  especially 1,195 armed phase transitions, dominate later aggregate gaps but
+  do not explain this first hit.
+- **Implemented exact interior recurrence acceleration:** each Boolean layer
+  now proves an all-action state in one set-valued reachable box only when
+  every covered signed-clearance cell and every terminal action is safe. All
+  unproved states use the unchanged branch recurrence. On Windows the retained
+  f817/833/835/850/910 chain keeps exactly the same action sets and no
+  unresolved action while maximum solve time falls from 2,071 to 775 ms. A
+  fresh Stage-4A physical gate is next; Stage 5 remains withheld.
 - `--kill-before-saturation` now uses observed ordinary bodies only. The
   falsified timeline spawn forecast is withheld from live input.
   Observed-body alignment/unfocus remains a proposed objective, but the
@@ -173,6 +190,7 @@ Latest user-authorized Lunatic Route-2 practice ring:
 | Stage 4A exact-authority activation | `20260731_233856` | 24 | 845 | 0 | accepted |
 | Stage 4A source-v4/delivery falsifier | `20260801_002006` | 24 | 1205 | 0 | accepted |
 | Stage 4A pending-delivery/clearance falsifier | `20260801_004533` | 22 | 1837 | 0 | accepted |
+| Stage 4A sector/viability deadline falsifier | `20260801_011902` | 26 | 796 | 0 | accepted |
 
 The automatic older-root comparisons were 15→5, 10→13, and 19→12. They are
 observational only: RNG roots differ and the proposed WS-H strategies were

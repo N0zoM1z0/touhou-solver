@@ -178,8 +178,25 @@ evaluates one distance per group/lattice point. Disjoint frame slabs run over
 at most 16 workers. This changes neither the set-valued hazard union nor the
 signed-clearance threshold. Synthetic 750-trajectory pressure and randomized
 wrap/overlap/disjoint cases match the independent Python oracle; Linux,
-Windows, and the retained five-root semantic chain pass. Physical
-revalidation is pending, and incomplete source coverage still fails closed.
+Windows, and the retained five-root semantic chain pass.
+
+Stage-4A `20260801_011902` physically validates that geometry correction:
+maximum exact clearance time fell from 23.2 seconds to 0.993 seconds. It does
+not promote L3. Authority was effective on 399/7,162 nonspell decisions but on
+0/380 decisions in 80-frame nonspell hit windows. The canonical frame-796
+root spent 478 ms in clearance and 918 ms in Boolean viability; publication
+missed the last nonnegative corridor gate at frame 714, and the predecessor
+was empty by frame 716. The 1,195 armed phase-transition source failures are
+an aggregate later blocker, not the causal explanation for the first hit.
+
+The Boolean kernel now proves common all-action interior states through a
+set-valued box containing every held/pickup branch at every physical step.
+The shortcut applies only when every covered signed-clearance cell and every
+terminal action is safe; all other states execute the unchanged exact branch
+recurrence. The retained Windows chain preserves exactly
+`left_fast/down_left_fast` at f817 and empty sets thereafter, with no
+unresolved action, while maximum solve time falls from 2,071 to 775 ms.
+Physical revalidation is pending. Missing source coverage still fails closed.
 
 ## Offline Native Authority
 

@@ -14,8 +14,8 @@ authority.
 
 - Branch: `main`.
 - Last physical checkpoint:
-  `lunatic_route2_stage4a_unattended_20260731_231944`, based on immutable
-  live-code checkpoint `1c23fc3`.
+  `lunatic_route2_stage4a_unattended_20260731_233856`, based on immutable
+  live-code checkpoint `70a8ccb`.
 - Native H=32 wind-tunnel checkpoint: `3d15953`; it is historical evidence,
   not the live ordinary horizon.
 - Workspace-prune checkpoint: `be3e583` (`Prune TH08 active research
@@ -36,7 +36,7 @@ authority.
   into the next active-policy layer. A still-pending command must be a member
   of that layer's exact action set.
 - **Implemented, deterministic hard gate passed:** collision-control
-  projection v12 now captures the manager singleton and every active ordinary
+  projection v13 now captures the manager singleton and every active ordinary
   ECL/timeline source, auxiliary VM, installed callback gate, emission
   descriptor, phase state, and motion state needed by the retained roots.
   Reachable timeline spawns and ECL emissions are lowered fail-closed into
@@ -102,6 +102,20 @@ authority.
   and exposes manager/pool memoryviews. This removes about 10.6 ms of Windows
   allocation/`.raw`/slice copies without relaxing exact frame equality or
   future-source coverage.
+- **Observed physical authority activation:** Stage-4A run
+  `20260731_233856` completed with 24 hits, first hit 845, zero Bombs, an
+  accepted replay, and full cleanup. Stable capture produced 119/1,914
+  complete roots; 196 ordinary decisions were constrained and 193 remained
+  effective at issue. This proves the exact authority is physically live.
+  It does not promote the outcome: all 98 pre-first-hit applicable roots were
+  early all-17 safe sets, while the pressure wave had 295 unavailable roots.
+  No nonempty effective authority appeared within 80 frames of a hit.
+- **Observed semantic starvation:** the dominant complete-root blockers were
+  699 manager-frame crossings, 476 legal auxiliary timer roots, 237 dynamic
+  float variable `10069`, and 181 armed phase successors. The first two
+  semantic classes plus generic auxiliary opcode-`0x02` wait scheduling are
+  now lowered from shipped-code evidence in source semantics v4/projection
+  v13. Armed phase successor coverage remains fail closed.
 - `--kill-before-saturation` now uses observed ordinary bodies only. The
   falsified timeline spawn forecast is withheld from live input.
   Observed-body alignment/unfocus remains a proposed objective, but the
@@ -129,6 +143,7 @@ Latest user-authorized Lunatic Route-2 practice ring:
 | Stage 4A live-source/delivery falsifier | `20260731_220830` | 23 | 939 | 0 | accepted |
 | Stage 4A ECL-config-invalid replay | `20260731_230657` | 18 | 499 | 0 | invalid gate |
 | Stage 4A contiguous-capture falsifier | `20260731_231944` | 35 | 498 | 0 | accepted |
+| Stage 4A exact-authority activation | `20260731_233856` | 24 | 845 | 0 | accepted |
 
 The automatic older-root comparisons were 15→5, 10→13, and 19→12. They are
 observational only: RNG roots differ and the proposed WS-H strategies were
@@ -168,6 +183,14 @@ Only 1/1,859 projections completed and 1,836 crossed manager frames; all
 including all 332 before first hit 498. Its 35 hits are fallback-path evidence.
 The preceding `20260731_230657` run had no runtime ECL image, emitted zero
 source projections, and is retained only as a configuration counterexample.
+
+Stage-4A run `20260731_233856` closes the capture/activation question:
+119/1,914 source projections completed, 205 decisions were authority-eligible,
+196 were constrained, and 193 were effective at issue. There were 24
+nontrivial directional sets and nine exact empty predecessors; the early
+applicable sets before hit 845 were all 17-action safe sets. The 24-hit
+different-RNG aggregate is not a causal regression verdict. Its actionable
+falsifier is pressure-wave semantic starvation, not authority wiring.
 
 The physical forecast gate also falsified the current timeline observer as a
 general later-wave source. All 376 observations recycled the same timeline-0

@@ -59,7 +59,7 @@ from th08_runtime.game_state import ADDR_PLAYER
 
 
 COLLISION_CONTROL_PROJECTION_SCHEMA = (
-    "th08-native-snapshot-collision-control-projection-v12"
+    "th08-native-snapshot-collision-control-projection-v13"
 )
 
 # Revalidated in bullet_manager_update (0x00431240).  These two adjacent

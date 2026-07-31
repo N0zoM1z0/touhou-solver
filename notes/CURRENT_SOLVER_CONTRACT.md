@@ -62,7 +62,7 @@ the required hazard version exactly. Missing prefix certification, a
 non-4px/expired policy layer, interval/version mismatch, or unknown future
 birth/event geometry yields `allowed_actions = None`.
 
-For supported ordinary nonspells, native collision-control projection v12
+For supported ordinary nonspells, native collision-control projection v13
 captures the manager singleton and ordinary enemy main/auxiliary ECL roots,
 installed callback gates, emission/template state, phase/motion state, and
 timeline runtime. A fail-closed source executor advances every reachable
@@ -273,6 +273,15 @@ now supplies the factorized 4px pickup/active-layer predecessor and bounded
 future-birth/event coverage. The unresolved promotion condition is physical
 Stage-4A delivery/effectiveness under deadline-safe hard no-Bomb, followed by
 a rotated workload if it materially improves.
+
+Stage-4A `20260731_233856` met activation but not promotion: 119/1,914 source
+projections completed, 196 exact constraints applied, and 193 remained
+effective at issue. All 98 applicable roots before first hit 845 were trivial
+all-17 sets; 295 were unavailable, and no useful nonempty exact set occurred
+within 80 frames of a hit. Source v4 now lowers captured enemy-angle variable
+`10069`, the auxiliary VM `+0x90` delay-timer root, and generic opcode-`0x02`
+waits. Armed health/timeout successor sources remain `UNKNOWN`; integrating
+them is the next contract gate, ahead of local ranking or hostile targeting.
 
 ## Falsification And Promotion
 

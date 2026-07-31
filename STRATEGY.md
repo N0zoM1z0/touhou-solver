@@ -103,7 +103,7 @@ the earlier eight-action f817 result came from H=32.
 
 The factorized lower replacement passes its deterministic semantic gate.
 Native
-collision-control projection v12 captures the ordinary manager singleton,
+collision-control projection v13 captures the ordinary manager singleton,
 active enemy main/auxiliary VMs, callback gates, emission descriptors, motion,
 phase, and timeline runtime. Reachable sources are executed fail-closed for
 268 frames and lowered to bounded bullet sectors and hostile-body AABBs.
@@ -144,6 +144,16 @@ retains one worker-local 10.32 MiB RPM destination and zero-copy pool views,
 removing about 10.6 ms of observer allocation/copy work from the bracket while
 preserving fail-closed semantics. L3 stays default-off until a fresh physical
 run shows nonzero effective exact authority.
+
+That activation gate is now passed, but promotion is not. Stage-4A
+`20260731_233856` produced 119/1,914 complete roots and 196/193
+applicable/effective ordinary constraints, proving the causal authority can
+control physical input. Before first hit 845, however, its 98 applicable roots
+were all trivial 17-action safe sets and 295 roots were unavailable; no
+nonempty effective authority occurred within 80 frames of any hit. Source
+semantics v4/projection v13 now lowers native motion-angle variable `10069`,
+the complete auxiliary timer root, and generic opcode-`0x02` delay scheduling.
+Armed phase-successor coverage remains the next fail-closed blocker.
 
 ## Offline Native Authority
 

@@ -146,6 +146,21 @@ def _native_payload(
         raise RuntimeError(
             f"native root {observation_frame} has the wrong projection schema"
         )
+    auxiliary_rows = (
+        payload["enemy_manager_template_source"]["auxiliary_ecl_contexts"][
+            "rows"
+        ]
+        + payload["enemy_auxiliary_ecl_contexts"]["rows"]
+    )
+    if auxiliary_rows:
+        raise RuntimeError(
+            "legacy v12 retained root cannot be uplifted without its "
+            "auxiliary delay timer"
+        )
+    # These fixed v12 roots contain no auxiliary VM.  Their omitted +0x90
+    # delay timer is therefore vacuous, so they are semantically identical to
+    # v13 for the retained deterministic chain.
+    payload["schema"] = "th08-native-snapshot-collision-control-projection-v13"
     return path, trial, payload
 
 

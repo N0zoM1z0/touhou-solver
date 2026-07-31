@@ -259,7 +259,7 @@ replacement now uses phase-only transition semantics, fresh prefix
 certificates, exact active/held/pending pickup branches, a 4px Boolean lower
 kernel with cell-radius clearance, and exact active-policy version binding.
 
-Collision-control projection v12 and the fail-closed ordinary source executor
+Collision-control projection v13 and the fail-closed ordinary source executor
 now cover the manager singleton, ordinary main/auxiliary ECL, callback gates,
 emission descriptors, motion/phase state, and timeline births for the full
 268-frame source horizon. The exact annular-sector/AABB projection is consumed
@@ -284,12 +284,15 @@ it omitted the runtime ECL identity flags. Persistent read-into storage and
 zero-copy manager/pool views now remove about 10.6 ms of observer work from
 the exact bracket.
 
-The next task is one fresh Stage-4A physical capture/activation falsifier from
-the persistent-buffer checkpoint. Promotion metrics are a material complete
-projection rate, nonzero authority-eligible/effective ordinary decisions,
-and exact constraints before first nonspell exhaustion. Total hits remain
-secondary different-RNG evidence. Local scoring and hostile-birth ranking
-remain later.
+That activation gate ran as `20260731_233856`: 119/1,914 source roots
+completed and 196/193 ordinary constraints were applicable/effective, but no
+useful nonempty authority survived within 80 frames of a hit. Treat capture
+delivery as closed and source-semantic starvation as current. Source v4
+lowers captured enemy-angle variable `10069`, legal auxiliary timer roots,
+and generic native opcode-`0x02` delay scheduling. Next integrate armed
+health/timeout successor sources without relaxing fail-closed future-event
+coverage, then repeat 4A. Total hits remain secondary different-RNG evidence;
+local scoring and hostile-birth ranking remain later.
 
 ### WS-D — Combat, Focus, and Power
 

@@ -13,6 +13,7 @@ CONTEXT_TARGET_OFFSET = 0x00
 CONTEXT_CALL_DEPTH_OFFSET = 0x06
 CONTEXT_ACTIVE_VM_OFFSET = 0x08
 ACTIVE_VM_BYTES = 0x228
+ACTIVE_VM_DELAY_TIMER_OFFSET = 0x90
 ACTIVE_VM_AUXILIARY_MARKER_OFFSET = 0x220
 MAXIMUM_RESTORABLE_FRAMES = 15
 MINIMUM_RUNTIME_ADDRESS = 0x00010000
@@ -25,6 +26,9 @@ class AuxiliaryEclTimerState:
     timer_previous: int
     timer_fraction_bits: int
     timer_elapsed: int
+    delay_timer_previous: int
+    delay_timer_fraction_bits: int
+    delay_timer_elapsed: int
     auxiliary_marker: int
 
     @classmethod
@@ -41,6 +45,12 @@ class AuxiliaryEclTimerState:
             timer_elapsed,
         ) = struct.unpack_from("<IiIi", active_vm, 0)
         timer_fraction = float32_from_bits(timer_fraction_bits)
+        (
+            delay_timer_previous,
+            delay_timer_fraction_bits,
+            delay_timer_elapsed,
+        ) = struct.unpack_from("<iIi", active_vm, ACTIVE_VM_DELAY_TIMER_OFFSET)
+        delay_timer_fraction = float32_from_bits(delay_timer_fraction_bits)
         auxiliary_marker = struct.unpack_from(
             "<I",
             active_vm,
@@ -58,6 +68,13 @@ class AuxiliaryEclTimerState:
             raise ValueError("auxiliary active VM has an invalid timer fraction")
         if timer_elapsed < 0:
             raise ValueError("auxiliary active VM has a negative timer elapsed")
+        if (
+            not math.isfinite(delay_timer_fraction)
+            or not 0.0 <= delay_timer_fraction < 1.0
+        ):
+            raise ValueError(
+                "auxiliary active VM has an invalid delay-timer fraction"
+            )
         if not 1 <= auxiliary_marker <= 4:
             raise ValueError("auxiliary active VM has an invalid scheduler marker")
         return cls(
@@ -65,6 +82,9 @@ class AuxiliaryEclTimerState:
             timer_previous=timer_previous,
             timer_fraction_bits=timer_fraction_bits,
             timer_elapsed=timer_elapsed,
+            delay_timer_previous=delay_timer_previous,
+            delay_timer_fraction_bits=delay_timer_fraction_bits,
+            delay_timer_elapsed=delay_timer_elapsed,
             auxiliary_marker=auxiliary_marker,
         )
 
@@ -80,6 +100,12 @@ class AuxiliaryEclTimerState:
             "timer_fraction_bits": self.timer_fraction_bits,
             "timer_fraction_bits_hex": f"{self.timer_fraction_bits:#010x}",
             "timer_elapsed": self.timer_elapsed,
+            "delay_timer_previous": self.delay_timer_previous,
+            "delay_timer_fraction_bits": self.delay_timer_fraction_bits,
+            "delay_timer_fraction_bits_hex": (
+                f"{self.delay_timer_fraction_bits:#010x}"
+            ),
+            "delay_timer_elapsed": self.delay_timer_elapsed,
             "auxiliary_marker": self.auxiliary_marker,
         }
 
@@ -96,6 +122,9 @@ class AuxiliaryEclVmState(AuxiliaryEclTimerState):
             timer_previous=timer.timer_previous,
             timer_fraction_bits=timer.timer_fraction_bits,
             timer_elapsed=timer.timer_elapsed,
+            delay_timer_previous=timer.delay_timer_previous,
+            delay_timer_fraction_bits=timer.delay_timer_fraction_bits,
+            delay_timer_elapsed=timer.delay_timer_elapsed,
             auxiliary_marker=timer.auxiliary_marker,
             local_projection=EclVmLocalProjection.from_vm_bytes(active_vm),
         )
@@ -110,6 +139,7 @@ class AuxiliaryEclVmState(AuxiliaryEclTimerState):
 __all__ = [
     "ACTIVE_VM_AUXILIARY_MARKER_OFFSET",
     "ACTIVE_VM_BYTES",
+    "ACTIVE_VM_DELAY_TIMER_OFFSET",
     "AuxiliaryEclTimerState",
     "AuxiliaryEclVmState",
     "CONTEXT_ACTIVE_VM_OFFSET",

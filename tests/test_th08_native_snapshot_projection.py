@@ -273,6 +273,7 @@ class NativeSnapshotProjectionTests(unittest.TestCase):
         struct.pack_into("<i", context, active_base + 0x04, 12)
         struct.pack_into("<I", context, active_base + 0x08, 0)
         struct.pack_into("<i", context, active_base + 0x0C, 13)
+        struct.pack_into("<iIi", context, active_base + 0x90, 4, 0, 5)
         struct.pack_into(
             "<I",
             context,
@@ -317,6 +318,7 @@ class NativeSnapshotProjectionTests(unittest.TestCase):
         self.assertEqual(row["call_depth"], 0)
         self.assertEqual(row["state"]["instruction_pointer"], instruction_pointer)
         self.assertEqual(row["state"]["timer_elapsed"], 13)
+        self.assertEqual(row["state"]["delay_timer_elapsed"], 5)
         self.assertEqual(row["state"]["auxiliary_marker"], 1)
         self.assertEqual(row["current_instruction"]["opcode"], 0x60)
         self.assertEqual(row["current_instruction"]["payload_hex"], "01020304")

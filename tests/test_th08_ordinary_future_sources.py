@@ -11,6 +11,7 @@ from th08_future_birth_envelope import FloatInterval
 from th08_ordinary_future_sources import (
     _VmState,
     _direct_fire_count,
+    _eval_float_operand,
     _execute_auxiliary,
     project_ordinary_future_sources,
 )
@@ -153,7 +154,7 @@ def _payload() -> dict[str, object]:
     }
     ordinary = _empty_source_group()
     return {
-        "schema": "th08-native-snapshot-collision-control-projection-v12",
+        "schema": "th08-native-snapshot-collision-control-projection-v13",
         "compact_state": {
             "manager_frame": 2129,
             "time_scale_bits": 0x3F800000,
@@ -226,6 +227,88 @@ def _payload() -> dict[str, object]:
 
 
 class OrdinaryFutureSourceTests(unittest.TestCase):
+    def test_auxiliary_timer_reset_uses_captured_integer_local(self) -> None:
+        instructions = {
+            0: SubInstruction(
+                offset=0,
+                time=0,
+                opcode=0x02,
+                size=16,
+                byte_08=0,
+                difficulty_mask=0xFF,
+                parameter_mask=0x01,
+                arguments=(10000,),
+            )
+        }
+        vm = _VmState(
+            instruction_offset=0,
+            timer_elapsed=0,
+            integer_locals=[4, 0, 0, 0, 0, 0, 0, 0],
+            float_locals=[FloatInterval.point(0.0)] * 8,
+            scratch_integers=[0] * 4,
+        )
+        source = SimpleNamespace(identity="test")
+
+        _execute_auxiliary(
+            source=source,
+            vm=vm,
+            instructions=instructions,
+            difficulty_mask=0x08,
+            frame=1,
+            aim_angle=FloatInterval.point(0.0),
+            payload={},
+        )
+        self.assertEqual(vm.instruction_offset, 16)
+        self.assertEqual(vm.delay_remaining, 3)
+        for frame, remaining in ((2, 2), (3, 1), (4, 0)):
+            _execute_auxiliary(
+                source=source,
+                vm=vm,
+                instructions=instructions,
+                difficulty_mask=0x08,
+                frame=frame,
+                aim_angle=FloatInterval.point(0.0),
+                payload={},
+            )
+            self.assertEqual(vm.delay_remaining, remaining)
+
+    def test_native_motion_angle_variable_reads_captured_source(self) -> None:
+        vm = _VmState(
+            instruction_offset=0,
+            timer_elapsed=0,
+            integer_locals=[0] * 8,
+            float_locals=[FloatInterval.point(0.0)] * 8,
+            scratch_integers=[0] * 4,
+        )
+        source = SimpleNamespace(motion=SimpleNamespace(angle=-1.25))
+
+        value = _eval_float_operand(
+            _bits(10069.0),
+            dynamic=True,
+            vm=vm,
+            aim_angle=FloatInterval.point(0.0),
+            source=source,
+        )
+
+        self.assertEqual(value, FloatInterval.point(-1.25))
+
+    def test_auxiliary_previous_and_fraction_do_not_block_unit_root(self) -> None:
+        payload = deepcopy(_payload())
+        state = payload["enemy_manager_template_source"][
+            "auxiliary_ecl_contexts"
+        ]["rows"][0]["state"]
+        state["timer_previous"] = 17
+        state["timer_fraction_bits"] = _bits(0.5)
+
+        closure = project_ordinary_future_sources(
+            payload,
+            ECL,
+            horizon_frames=1,
+        )
+
+        self.assertTrue(closure.projection.source_closure_complete)
+        self.assertEqual(len(closure.direct_fire_events), 1)
+
     def test_auxiliary_float_subtraction_uses_interval_arithmetic(self) -> None:
         destination = _bits(10016.0)
         left = _bits(10017.0)
@@ -356,7 +439,10 @@ class OrdinaryFutureSourceTests(unittest.TestCase):
             for event in closure.direct_fire_events
             if event.source.startswith("timeline:")
         ]
-        self.assertEqual(len(timeline_events), 2)
+        # The bootstrap and ordinary update share the physical spawn frame.
+        # The first fire arms opcode-0x02's two-tick delay; the second update
+        # consumes its remaining tick instead of emitting again.
+        self.assertEqual(len(timeline_events), 1)
         self.assertEqual(timeline_events[0].origin_x.lower, 48.0)
         self.assertEqual(timeline_events[0].origin_x.upper, 160.0)
 
@@ -407,7 +493,7 @@ class OrdinaryFutureSourceTests(unittest.TestCase):
         )
         self.assertTrue(closure.projection.source_closure_complete)
         self.assertEqual(closure.timeline_spawn_count, 9)
-        self.assertGreater(len(closure.direct_fire_events), 1000)
+        self.assertGreater(len(closure.direct_fire_events), 700)
         self.assertTrue(closure.projection.coverage.complete)
 
     def test_runtime_program_identity_mismatch_fails_closed(self) -> None:

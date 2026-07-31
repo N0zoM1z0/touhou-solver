@@ -51,9 +51,9 @@ from touhou_control.corridor import AabbHazard, AabbTrajectoryHazard
 
 
 ORDINARY_FUTURE_SOURCE_SEMANTICS_VERSION = (
-    "th08-ordinary-future-sources-v3-coherent-live-root"
+    "th08-ordinary-future-sources-v4-native-angle-aux-timer-root"
 )
-_PROJECTION_SCHEMA = "th08-native-snapshot-collision-control-projection-v12"
+_PROJECTION_SCHEMA = "th08-native-snapshot-collision-control-projection-v13"
 _DIRECT_FIRE_OPCODES = frozenset(range(0x60, 0x69))
 # Native table entry 51 is ANM/effect-only:
 #   table 0x004C6F94 -> init 0x00426280, update 0x004264F0.
@@ -66,6 +66,7 @@ _FLOAT_LOCAL_LAST = 10023
 _RNG_UNIT_VARIABLE = 10033
 _RNG_SIGNED_UNIT_VARIABLE = 10035
 _ANGLE_TO_PLAYER_VARIABLE = 10048
+_SOURCE_MOTION_ANGLE_VARIABLE = 10069
 _TWO_PI = 2.0 * math.pi
 _FLOAT32_ONE_BITS = 0x3F800000
 _PLAYER_MAX_AXIS_SPEED = 4.0
@@ -143,6 +144,7 @@ class _VmState:
     float_locals: list[FloatInterval]
     scratch_integers: list[int]
     stopped: bool = False
+    delay_remaining: int = 0
 
 
 @dataclass
@@ -519,13 +521,10 @@ def _build_sources(
                 state = auxiliary.get("state")
                 if not isinstance(state, dict):
                     _fail(f"{role}:{int(slot)} auxiliary state is absent")
-                if (
-                    int(state.get("timer_fraction_bits", -1)) != 0
-                    or int(state.get("timer_previous", -2)) != -1
-                ):
-                    _fail(
-                        f"{role}:{int(slot)} auxiliary timer state is unsupported"
-                    )
+                # ECL scheduling reads only the signed integer elapsed member.
+                # At the already-required unit time scale, timer advance keeps
+                # a finite captured fraction unchanged while incrementing that
+                # integer.  The native previous member does not affect dispatch.
                 local = state.get("local_projection")
                 if not isinstance(local, dict):
                     _fail(
@@ -552,6 +551,10 @@ def _build_sources(
                         int(value)
                         for value in local.get("scratch_integers", [])
                     ],
+                    delay_remaining=max(
+                        0,
+                        int(state.get("delay_timer_elapsed", 0)),
+                    ),
                 )
             auxiliary_count += sum(
                 auxiliary is not None for auxiliary in auxiliaries
@@ -609,6 +612,7 @@ def _eval_float_operand(
     dynamic: bool,
     vm: _VmState,
     aim_angle: FloatInterval,
+    source: _SourceState,
 ) -> FloatInterval:
     if not dynamic:
         value = _float32(raw)
@@ -624,6 +628,10 @@ def _eval_float_operand(
         return FloatInterval(-1.0, 1.0)
     if variable == _ANGLE_TO_PLAYER_VARIABLE:
         return aim_angle
+    # ecl_eval_float case 0x2755 reads enemy+0x2D94, the coherently
+    # captured and subsequently advanced motion angle.
+    if variable == _SOURCE_MOTION_ANGLE_VARIABLE:
+        return FloatInterval.point(source.motion.angle)
     _fail(f"dynamic ECL float variable {variable} is unsupported")
     raise AssertionError("unreachable")
 
@@ -828,24 +836,28 @@ def _direct_fire_events(
         dynamic=bool(instruction.parameter_mask & 0x10),
         vm=vm,
         aim_angle=aim_angle,
+        source=source,
     )
     speed2 = _eval_float_operand(
         int(instruction.arguments[4]),
         dynamic=bool(instruction.parameter_mask & 0x20),
         vm=vm,
         aim_angle=aim_angle,
+        source=source,
     )
     angle1 = _eval_float_operand(
         int(instruction.arguments[5]),
         dynamic=bool(instruction.parameter_mask & 0x40),
         vm=vm,
         aim_angle=aim_angle,
+        source=source,
     )
     angle2 = _eval_float_operand(
         int(instruction.arguments[6]),
         dynamic=bool(instruction.parameter_mask & 0x80),
         vm=vm,
         aim_angle=aim_angle,
+        source=source,
     )
     original_flags = int(instruction.arguments[7])
     rank_count = source.emission.get("rank_count_interval")
@@ -961,6 +973,11 @@ def _execute_auxiliary(
     payload: dict[str, object],
 ) -> tuple[FutureDirectFire, ...]:
     events: list[FutureDirectFire] = []
+    if vm.delay_remaining > 0:
+        # The selected VM's +0x90 delay timer is decremented once per update;
+        # its ordinary ECL timer is decremented and then advanced, net zero.
+        vm.delay_remaining -= 1
+        return ()
     visited: set[tuple[int, int]] = set()
     for _ in range(_MAX_INSTRUCTIONS_PER_UPDATE):
         key = (vm.instruction_offset, vm.timer_elapsed)
@@ -989,22 +1006,19 @@ def _execute_auxiliary(
         if opcode == 0x02:
             if len(instruction.arguments) != 1:
                 _fail("auxiliary timer reset argument layout drifted")
-            variable = int(instruction.arguments[0])
-            if not instruction.parameter_mask & 1:
-                _fail("auxiliary timer reset does not reference captured scratch")
-            if not 10036 <= variable <= 10039:
-                _fail("auxiliary timer reset variable is unsupported")
-            index = variable - 10036
-            if index >= len(vm.scratch_integers):
-                _fail("auxiliary scratch integer is absent")
-            reset_value = vm.scratch_integers[index]
-            if reset_value != 2:
-                _fail("auxiliary timer reset is not native two-tick wait")
+            reset_value = _eval_integer_operand(
+                int(instruction.arguments[0]),
+                dynamic=bool(instruction.parameter_mask & 1),
+                vm=vm,
+            )
             vm.instruction_offset += int(instruction.size)
-            # Native opcode 0x02 sets two, the interpreter's paired timer
-            # decrements and final advance leave the next root at elapsed zero.
-            vm.timer_elapsed = 0
-            return tuple(events)
+            if reset_value > 0:
+                # Opcode 0x02 writes the independent +0x90 delay timer.  The
+                # scheduler immediately revisits its gate in this update and
+                # consumes the first tick before publishing the next root.
+                vm.delay_remaining = reset_value - 1
+                return tuple(events)
+            continue
         if opcode == 0x06:
             if len(instruction.arguments) != 2:
                 _fail("auxiliary integer assignment argument layout drifted")
@@ -1022,6 +1036,7 @@ def _execute_auxiliary(
                 dynamic=bool(instruction.parameter_mask & 0x02),
                 vm=vm,
                 aim_angle=aim_angle,
+                source=source,
             )
         elif opcode == 0x1B:
             if len(instruction.arguments) != 3:
@@ -1032,12 +1047,14 @@ def _execute_auxiliary(
                 dynamic=bool(instruction.parameter_mask & 0x02),
                 vm=vm,
                 aim_angle=aim_angle,
+                source=source,
             )
             right = _eval_float_operand(
                 int(instruction.arguments[2]),
                 dynamic=bool(instruction.parameter_mask & 0x04),
                 vm=vm,
                 aim_angle=aim_angle,
+                source=source,
             )
             vm.float_locals[destination] = left.multiply(right)
         elif opcode == 0x1A:
@@ -1049,12 +1066,14 @@ def _execute_auxiliary(
                 dynamic=bool(instruction.parameter_mask & 0x02),
                 vm=vm,
                 aim_angle=aim_angle,
+                source=source,
             )
             right = _eval_float_operand(
                 int(instruction.arguments[2]),
                 dynamic=bool(instruction.parameter_mask & 0x04),
                 vm=vm,
                 aim_angle=aim_angle,
+                source=source,
             )
             vm.float_locals[destination] = FloatInterval(
                 left.lower - right.upper,
@@ -1069,6 +1088,7 @@ def _execute_auxiliary(
                 dynamic=bool(instruction.parameter_mask & 0x02),
                 vm=vm,
                 aim_angle=aim_angle,
+                source=source,
             )
             vm.float_locals[destination] = (
                 vm.float_locals[destination].add(value)
@@ -1111,6 +1131,7 @@ def _clone_vm(vm: _VmState) -> _VmState:
         float_locals=list(vm.float_locals),
         scratch_integers=list(vm.scratch_integers),
         stopped=vm.stopped,
+        delay_remaining=vm.delay_remaining,
     )
 
 
@@ -1213,12 +1234,14 @@ def _install_timed_polar_motion(
         dynamic=bool(instruction.parameter_mask & 0x04),
         vm=source.main,
         aim_angle=aim_angle,
+        source=source,
     )
     speed = _eval_float_operand(
         int(instruction.arguments[3]),
         dynamic=bool(instruction.parameter_mask & 0x08),
         vm=source.main,
         aim_angle=aim_angle,
+        source=source,
     )
     if angle.lower != angle.upper or speed.lower != speed.upper:
         _fail("timed polar movement requires point angle and speed")
@@ -1309,6 +1332,7 @@ def _execute_main(
                 dynamic=bool(instruction.parameter_mask & 0x02),
                 vm=vm,
                 aim_angle=aim_angle,
+                source=source,
             )
         elif opcode == 0x41:
             if len(instruction.arguments) != 2:
@@ -1340,12 +1364,14 @@ def _execute_main(
                 dynamic=bool(instruction.parameter_mask & 0x02),
                 vm=vm,
                 aim_angle=aim_angle,
+                source=source,
             )
             radius_acceleration = _eval_float_operand(
                 int(instruction.arguments[2]),
                 dynamic=bool(instruction.parameter_mask & 0x04),
                 vm=vm,
                 aim_angle=aim_angle,
+                source=source,
             )
             if (
                 angular_velocity.lower != angular_velocity.upper
@@ -1370,12 +1396,14 @@ def _execute_main(
                 dynamic=bool(instruction.parameter_mask & 0x01),
                 vm=vm,
                 aim_angle=aim_angle,
+                source=source,
             )
             height = _eval_float_operand(
                 int(instruction.arguments[1]),
                 dynamic=bool(instruction.parameter_mask & 0x02),
                 vm=vm,
                 aim_angle=aim_angle,
+                source=source,
             )
             if width.lower < 0.0 or height.lower < 0.0:
                 _fail("enemy hitbox interval crosses negative")

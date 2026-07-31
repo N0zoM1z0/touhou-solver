@@ -132,6 +132,16 @@ class Route2ShtProvenanceTests(unittest.TestCase):
         )
         self.assertEqual(sum(cadence_damage), 990)
         self.assertEqual(
+            _normal_future_damage_by_cadence_phase(
+                state,
+                minimum_level=5,
+            ),
+            (
+                156, 0, 0, 82, 0, 130, 40, 0, 42, 40,
+                156, 0, 40, 42, 0, 130, 0, 0, 82, 0,
+            ),
+        )
+        self.assertEqual(
             state.provenance_for_pointer(primary_record.record_pointer),
             primary_record,
         )

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import hashlib
+import math
 import struct
 import threading
 import time
@@ -73,18 +74,26 @@ _CAPTURE_BUFFERS = threading.local()
 
 def _normal_future_damage_by_cadence_phase(
     loaded: LoadedRoute2ShtState,
+    *,
+    minimum_level: int = 0,
 ) -> tuple[int, ...]:
     """Return the greatest raw normal-shot emission at each cadence phase.
 
-    Focus and Power are objectives/observations outside hostile-source
-    closure.  Taking the maximum over every selector-reachable level of both
-    exactly loaded Route-2 SHTs therefore covers every future focus choice and
-    every possible Power increase without predicting either one.
+    Taking the maximum over both exactly loaded Route-2 profiles and every
+    selector-reachable level at or above ``minimum_level`` covers every future
+    focus choice and Power increase.  Levels below the exact root selection
+    are unreachable on the survival branches for which global viability is
+    queried: normal play has no Power decay, and a hit terminates that branch.
     """
 
+    if minimum_level < 0:
+        raise ValueError("minimum normal SHT level cannot be negative")
     level_records: dict[tuple[str, int], list[object]] = {}
     for record in loaded.records_by_pointer.values():
-        if not record.normal_selector_reachable:
+        if (
+            not record.normal_selector_reachable
+            or record.level < minimum_level
+        ):
             continue
         if (
             record.fire_period <= 0
@@ -126,7 +135,33 @@ def _route2_health_damage_envelope_record(
 
     loaded = capture_loaded_route2_sht_state(reader)
     shots = capture_player_shot_combat_state(reader)
-    cadence_damage = _normal_future_damage_by_cadence_phase(loaded)
+    resources = state.get("resources")
+    power = (
+        float(resources["power"])
+        if isinstance(resources, dict) and "power" in resources
+        else math.nan
+    )
+    native_power = math.trunc(power) if math.isfinite(power) else -1
+    current_normal_level = next(
+        (
+            level
+            for level, upper_bound in enumerate(
+                loaded.primary.spec.power_upper_bounds[
+                    : loaded.primary.spec.normal_level_count
+                ]
+            )
+            if native_power < upper_bound
+        ),
+        -1,
+    )
+    cadence_damage = (
+        _normal_future_damage_by_cadence_phase(
+            loaded,
+            minimum_level=current_normal_level,
+        )
+        if current_normal_level >= 0
+        else (0,) * _SHOT_CADENCE_LENGTH
+    )
     incompatible_slots: list[int] = []
     active_raw_damage = 0
     for shot in shots.slots:
@@ -159,6 +194,11 @@ def _route2_health_damage_envelope_record(
         "all_active_shots_are_exact_route2_normal_nonpiercing": not (
             incompatible_slots
         ),
+        "finite_nonnegative_power_selects_normal_sht_level": bool(
+            math.isfinite(power)
+            and power >= 0.0
+            and current_normal_level >= 0
+        ),
     }
     return {
         "schema": ROUTE2_HEALTH_DAMAGE_ENVELOPE_SCHEMA,
@@ -172,6 +212,9 @@ def _route2_health_damage_envelope_record(
         "active_shot_count": len(shots.slots),
         "active_incompatible_slots": incompatible_slots,
         "active_raw_damage_upper_bound": active_raw_damage,
+        "root_power": power if math.isfinite(power) else None,
+        "root_native_power": native_power,
+        "minimum_future_normal_sht_level": current_normal_level,
         "future_raw_damage_by_cadence_phase": list(cadence_damage),
         "cadence_length": _SHOT_CADENCE_LENGTH,
         "loaded_sht_normalized_sha256": {
@@ -181,7 +224,8 @@ def _route2_health_damage_envelope_record(
         "player_damage_bonus_upper_ratio": [106, 100],
         "authority": (
             "health_transition_unreachability_only_while_every_causal_"
-            "pipeline_and_branch_mask_continues_to_hold_shot"
+            "pipeline_and_branch_mask_continues_to_hold_shot_and_survival_"
+            "branches_preserve_the_native_non_decreasing_power_level"
         ),
     }
 

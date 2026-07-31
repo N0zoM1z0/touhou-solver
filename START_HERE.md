@@ -155,7 +155,9 @@ broad audit:
    clearance, and native survival horizon.
 6. Stop at the first unsupported event or model/native mismatch.
 7. Repeat the winner on a second root before changing the live planner.
-8. Only then pay one rotated focused physical trial.
+8. Integrate the winner default-off and verify immutable version matching,
+   issue deadline, cancellation, and safe fallback.
+9. Only then request and pay one rotated focused physical trial.
 
 If this hypothesis fails, return to the first mismatch or planner/action
 factorization. Do not compensate with a stage-specific waypoint.

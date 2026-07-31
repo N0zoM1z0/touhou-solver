@@ -338,8 +338,10 @@ only the workload it was developed on.
 
 ### M6 — Lunatic NMNB
 
-Fresh game-start Route-2 completes NMNB, then repeats sufficiently to rule out
-a one-root accident.
+One fresh game-start Route-2 run completes NMNB. Robust closure requires two
+additional clean full routes on distinct natural RNG roots, for three retained
+clean full routes total. These are final acceptance repeats, not iteration
+gates paid after ordinary changes.
 
 ### M7 — Extra
 

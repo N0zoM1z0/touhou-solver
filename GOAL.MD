@@ -20,10 +20,18 @@ The minimum achievement witness is one retained, reviewable run that:
 - preserves enough native trace, replay, resource, stage/phase, input, and
   timing evidence to audit the NMNB claim.
 
-Repeat clean full routes are the robustness acceptance gate: they establish
-that the solver generalizes beyond one favorable RNG root. Extra is follow-on
-scope after the Lunatic target closes; it is not a substitute for Lunatic
-NMNB.
+Diagnostic and acceptance runs may use the verified one-byte
+no-life-decrement patch only when its exact executable/patch identity is
+retained. For an accepted zero-hit run the patched life-decrement branch is
+never exercised; native hit edges must independently prove that condition.
+This is an original-engine execution claim, not a claim that the executable
+bytes were unmodified.
+
+One clean full route achieves the NMNB milestone. Robust Lunatic closure
+requires two additional clean full routes on distinct natural RNG roots:
+three retained clean full routes total. These repeats are a final acceptance
+gate after the first NMNB, not a per-change iteration gate. Extra is follow-on
+scope after that closure; it is not a substitute for Lunatic NMNB.
 
 ## What counts as progress
 

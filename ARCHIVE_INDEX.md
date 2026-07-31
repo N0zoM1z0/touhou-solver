@@ -21,6 +21,22 @@ historical recovery.
 The local `archive/` directory is ignored by Git. It also contains retired
 raw JSONL, launch logs, captures, old roots, and external reference clones.
 
+## Relocated active-run raw evidence
+
+The 2026-07-31 Stage 3/4A/5 compact dossiers intentionally preserve their
+capture-time `artifacts/runtime_reports/*.jsonl` provenance paths. The large
+ignored files now live at:
+
+```text
+archive/raw/runtime_reports/lunatic_route2_stage3_unattended_20260731_091104.jsonl
+archive/raw/runtime_reports/lunatic_route2_stage4a_unattended_20260731_091925.jsonl
+archive/raw/runtime_reports/lunatic_route2_stage5_unattended_20260731_093027.jsonl
+```
+
+Do not rewrite retained dossier provenance to reflect local relocation.
+Resolve the basename through `archive/raw/runtime_reports/` and verify the
+recorded SHA-256 before use.
+
 ## Inspect without restoring
 
 ```bash

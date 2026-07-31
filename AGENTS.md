@@ -138,7 +138,7 @@ Physical play is sparse but mandatory:
 - rotate workloads so improvements do not overfit one stage or RNG root;
 - after a material integrated improvement, run one fresh full Lunatic Route-2
   game-start diagnostic;
-- require repeated clean passes before NMNB acceptance.
+- use the exact milestone and robust-closure counts in `GOAL.MD`.
 
 Before injection verify executable identity, foreground ownership, route,
 difficulty, gameplay state, no-life-decrement patch, and hard no-Bomb.

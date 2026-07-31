@@ -60,7 +60,9 @@ separate.
    items/Power, phase attribution, cadence, timing, and viability health.
 4. Classify conclusions as observed, inferred, or hypothesized. A completed
    run does not promote a model or strategy by itself.
-5. Route concrete failures through `notes/COUNTEREXAMPLES.md` and chronology
-   through `notes/RESEARCH_LOG.md`. Update `START_HERE.md`, `STRATEGY.md`,
-   compact evidence, and the focused counterexample only when the trial
-   changes them, then make one focused English research-checkpoint commit.
+5. Route concrete failures directly to the current shard
+   `notes/counterexamples/CE-0220-0269.md`, as named by
+   `notes/COUNTEREXAMPLES.md`, and chronology through
+   `notes/RESEARCH_LOG.md`. Update `START_HERE.md`, `STRATEGY.md`, compact
+   evidence, and the focused counterexample only when the trial changes them,
+   then make one focused English research-checkpoint commit.

@@ -447,6 +447,89 @@ class OrdinaryFutureSourceTests(unittest.TestCase):
             )
             self.assertEqual(vm.delay_remaining, remaining)
 
+    def test_auxiliary_future_pc_waits_on_native_equality_clock(self) -> None:
+        instructions = {
+            0: SubInstruction(
+                offset=0,
+                time=2,
+                opcode=0x02,
+                size=16,
+                byte_08=0,
+                difficulty_mask=0xFF,
+                parameter_mask=0,
+                arguments=(1,),
+            )
+        }
+        vm = _VmState(
+            instruction_offset=0,
+            timer_elapsed=0,
+            integer_locals=[0] * 8,
+            float_locals=[FloatInterval.point(0.0)] * 8,
+            scratch_integers=[0] * 4,
+        )
+        source = SimpleNamespace(identity="test")
+
+        for frame, elapsed in ((1, 1), (2, 2)):
+            self.assertEqual(
+                _execute_auxiliary(
+                    source=source,
+                    vm=vm,
+                    instructions=instructions,
+                    difficulty_mask=0x08,
+                    frame=frame,
+                    aim_angle=FloatInterval.point(0.0),
+                    payload={},
+                ),
+                (),
+            )
+            self.assertEqual(vm.timer_elapsed, elapsed)
+        _execute_auxiliary(
+            source=source,
+            vm=vm,
+            instructions=instructions,
+            difficulty_mask=0x08,
+            frame=3,
+            aim_angle=FloatInterval.point(0.0),
+            payload={},
+        )
+        self.assertEqual(vm.instruction_offset, 16)
+        self.assertEqual(vm.timer_elapsed, 2)
+
+    def test_auxiliary_stale_pc_is_silent_until_parent_replacement(self) -> None:
+        instructions = {
+            0: SubInstruction(
+                offset=0,
+                time=0,
+                opcode=0x68,
+                size=40,
+                byte_08=0,
+                difficulty_mask=0xFF,
+                parameter_mask=0,
+                arguments=(0,) * 7,
+            )
+        }
+        vm = _VmState(
+            instruction_offset=0,
+            timer_elapsed=1,
+            integer_locals=[0] * 8,
+            float_locals=[FloatInterval.point(0.0)] * 8,
+            scratch_integers=[0] * 4,
+        )
+
+        self.assertEqual(
+            _execute_auxiliary(
+                source=SimpleNamespace(identity="test"),
+                vm=vm,
+                instructions=instructions,
+                difficulty_mask=0x08,
+                frame=1,
+                aim_angle=FloatInterval.point(0.0),
+                payload={},
+            ),
+            (),
+        )
+        self.assertTrue(vm.stopped)
+
     def test_native_motion_angle_variable_reads_captured_source(self) -> None:
         vm = _VmState(
             instruction_offset=0,
@@ -727,6 +810,27 @@ class OrdinaryFutureSourceTests(unittest.TestCase):
             closure.projection.source_closure_reason,
         )
         self.assertFalse(closure.projection.coverage.complete)
+
+    def test_future_unsupported_source_publishes_only_exact_prefix(self) -> None:
+        payload = deepcopy(_payload())
+        main = payload["enemy_manager_template_source"][
+            "main_ecl_vm_inventory"
+        ]["rows"][0]
+        # Stage-5 sub46 offset 0x488C is an unsupported opcode 0x35 at ECL
+        # time 4.  The native equality clock cannot reach it until update 5.
+        main[3] = ECL_BASE + 0x488C
+        main[5] = 0
+
+        closure = project_ordinary_future_sources(
+            payload,
+            ECL,
+            horizon_frames=10,
+        )
+
+        self.assertTrue(closure.projection.source_closure_complete)
+        self.assertEqual(closure.projection.horizon_frames, 4)
+        self.assertIn("future frame 5", closure.causal_prefix_reason)
+        self.assertIn("unsupported opcode 0x35", closure.causal_prefix_reason)
 
     def test_reached_random_x_timeline_spawn_is_lowered(self) -> None:
         payload = deepcopy(_payload())

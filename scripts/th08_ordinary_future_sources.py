@@ -51,7 +51,7 @@ from touhou_control.corridor import AabbHazard, AabbTrajectoryHazard
 
 
 ORDINARY_FUTURE_SOURCE_SEMANTICS_VERSION = (
-    "th08-ordinary-future-sources-v8-causal-phase-safe-prefix"
+    "th08-ordinary-future-sources-v10-causal-unknown-prefix-and-aux-clock"
 )
 _PROJECTION_SCHEMA = "th08-native-snapshot-collision-control-projection-v13"
 _DIRECT_FIRE_OPCODES = frozenset(range(0x60, 0x69))
@@ -181,6 +181,7 @@ class OrdinaryFutureSourceClosure:
     timeline_spawn_count: int
     health_transition_proven_count: int
     health_transition_minimum_margin: int | None
+    causal_prefix_reason: str | None
 
 
 def _fail(message: str) -> None:
@@ -1137,6 +1138,8 @@ def _execute_auxiliary(
     payload: dict[str, object],
 ) -> tuple[FutureDirectFire, ...]:
     events: list[FutureDirectFire] = []
+    if vm.stopped:
+        return ()
     if vm.delay_remaining > 0:
         # The selected VM's +0x90 delay timer is decremented once per update;
         # its ordinary ECL timer is decremented and then advanced, net zero.
@@ -1152,9 +1155,17 @@ def _execute_auxiliary(
         if instruction is None:
             _fail(f"{source.identity} auxiliary PC is outside static ECL")
         if instruction.time != vm.timer_elapsed:
-            _fail(
-                f"{source.identity} auxiliary timer/PC contract drifted"
-            )
+            # Native timer_elapsed_eq dispatches only on exact equality.  A
+            # future-dated PC waits while the ordinary VM timer advances.  A
+            # stale PC can never regain equality under unit positive time, so
+            # it is a permanently silent context until its owner replaces it
+            # through opcode 0x87; retaining that replacement in the parent
+            # source is sufficient.
+            if instruction.time < vm.timer_elapsed:
+                vm.stopped = True
+            else:
+                vm.timer_elapsed += 1
+            return tuple(events)
         opcode = int(instruction.opcode)
         if not _eligible(instruction, difficulty_mask):
             vm.instruction_offset += int(instruction.size)
@@ -1945,7 +1956,11 @@ def _lower_timeline_events(
     ecl: EclFile,
     *,
     horizon_frames: int,
-) -> tuple[dict[int, tuple[TimelineSpawnRequest, ...]], int]:
+) -> tuple[
+    dict[int, tuple[TimelineSpawnRequest, ...]],
+    int,
+    str | None,
+]:
     root_state, root_external, difficulty_mask = _timeline_root(payload, ecl)
     frontier = {_canonical_timeline_state(root_state)}
     external_variants = _timeline_external_variants(root_external)
@@ -1953,45 +1968,52 @@ def _lower_timeline_events(
     for frame in range(1, horizon_frames + 1):
         next_frontier: set[StageTimelineState] = set()
         frame_spawns: dict[TimelineSpawnRequest, None] = {}
-        for state in frontier:
-            for external in external_variants:
-                try:
+        try:
+            for state in frontier:
+                for external in external_variants:
                     step = step_stage_timelines(
                         ecl,
                         state,
                         active_difficulty_mask=difficulty_mask,
                         external=external,
                     )
-                except (IndexError, RuntimeError, ValueError) as error:
-                    raise FutureSourceClosureError(
-                        "timeline lowering failed at future frame "
-                        f"{frame}: {error}"
-                    ) from error
-                if step.engine_events:
-                    opcodes = sorted(
-                        {event.opcode for event in step.engine_events}
-                    )
-                    _fail(
-                        f"timeline reaches engine event(s) {opcodes} at "
-                        f"future frame {frame}; event effects are not lowered"
-                    )
-                if step.field_writes:
-                    _fail(
-                        "timeline reaches indexed enemy field write at "
-                        f"future frame {frame}; coupled enemy state is not "
-                        "lowered"
-                    )
-                for spawn in step.spawns:
-                    frame_spawns[_normalized_spawn(spawn)] = None
-                next_frontier.add(_canonical_timeline_state(step.state))
-        if len(next_frontier) > _MAX_TIMELINE_FRONTIER_STATES:
-            _fail(
-                "set-valued timeline frontier exceeds deterministic bound "
-                f"{_MAX_TIMELINE_FRONTIER_STATES}"
+                    if step.engine_events:
+                        opcodes = sorted(
+                            {event.opcode for event in step.engine_events}
+                        )
+                        _fail(
+                            f"timeline reaches engine event(s) {opcodes} at "
+                            f"future frame {frame}; event effects are not "
+                            "lowered"
+                        )
+                    if step.field_writes:
+                        _fail(
+                            "timeline reaches indexed enemy field write at "
+                            f"future frame {frame}; coupled enemy state is not "
+                            "lowered"
+                        )
+                    for spawn in step.spawns:
+                        frame_spawns[_normalized_spawn(spawn)] = None
+                    next_frontier.add(_canonical_timeline_state(step.state))
+            if len(next_frontier) > _MAX_TIMELINE_FRONTIER_STATES:
+                _fail(
+                    "set-valued timeline frontier exceeds deterministic bound "
+                    f"{_MAX_TIMELINE_FRONTIER_STATES}"
+                )
+        except (
+            FutureSourceClosureError,
+            IndexError,
+            RuntimeError,
+            ValueError,
+        ) as error:
+            return (
+                spawns_by_frame,
+                frame - 1,
+                f"timeline UNKNOWN begins at future frame {frame}: {error}",
             )
         frontier = next_frontier
         spawns_by_frame[frame] = tuple(frame_spawns)
-    return spawns_by_frame, horizon_frames
+    return spawns_by_frame, horizon_frames, None
 
 
 def _timeline_source(
@@ -2119,6 +2141,7 @@ def _analyze(
     int,
     int | None,
     int,
+    str | None,
 ]:
     if str(payload.get("schema")) != _PROJECTION_SCHEMA:
         _fail(
@@ -2149,11 +2172,26 @@ def _analyze(
         ecl_base=ecl_base,
         horizon_frames=horizon_frames,
     )
-    spawns_by_frame, timeline_steps = _lower_timeline_events(
+    causal_prefix_reason = (
+        (
+            "health/timeout successor UNKNOWN begins after future frame "
+            f"{projected_horizon_frames}"
+        )
+        if projected_horizon_frames < horizon_frames
+        else None
+    )
+    (
+        spawns_by_frame,
+        timeline_steps,
+        timeline_prefix_reason,
+    ) = _lower_timeline_events(
         payload,
         ecl,
         horizon_frames=projected_horizon_frames,
     )
+    if timeline_steps < projected_horizon_frames:
+        projected_horizon_frames = timeline_steps
+        causal_prefix_reason = timeline_prefix_reason
     if not sources:
         _fail("manager template source is absent")
     template = sources[0]
@@ -2163,68 +2201,92 @@ def _analyze(
     silent_children = 0
     timeline_spawn_count = 0
     for frame in range(1, projected_horizon_frames + 1):
-        for spawn in spawns_by_frame.get(frame, ()):
-            source = _timeline_source(
-                template=template,
-                spawn=spawn,
-                frame=frame,
-                serial=timeline_spawn_count,
-                ecl=ecl,
-            )
-            timeline_spawn_count += 1
-            future_body_samples[source.identity] = [None] * (
-                projected_horizon_frames + 1
-            )
-            # enemy_spawn_from_timeline runs the new ECL VM once immediately.
-            # enemy_manager_update then reaches the allocated slot and performs
-            # the ordinary VM update a second time in this same physical frame.
-            bootstrap_events, child_count = _execute_source_update(
-                source=source,
-                frame=frame,
-                root_player_x=player_x,
-                root_player_y=player_y,
-                instructions=instructions,
-                difficulty_mask=difficulty_mask,
-                payload=payload,
-                ecl=ecl,
-                remaining_horizon=projected_horizon_frames - frame,
-            )
-            events.extend(bootstrap_events)
-            silent_children += child_count
-            sources.append(source)
-        for source in sources:
-            source_events, child_count = _execute_source_update(
-                source=source,
-                frame=frame,
-                root_player_x=player_x,
-                root_player_y=player_y,
-                instructions=instructions,
-                difficulty_mask=difficulty_mask,
-                payload=payload,
-                ecl=ecl,
-                remaining_horizon=projected_horizon_frames - frame,
-            )
-            events.extend(source_events)
-            silent_children += child_count
-            _advance_motion(source)
-            if source.timeline_spawned and source.enemy_flags & 0x04:
-                samples = future_body_samples[source.identity]
-                samples[frame] = AabbHazard(
-                    x=source.motion.world_x,
-                    y=source.motion.world_y,
-                    half_width=(
-                        source.body_half_width
-                        + source.motion.uncertainty_x
-                    ),
-                    half_height=(
-                        source.body_half_height
-                        + source.motion.uncertainty_y
-                    ),
+        event_count_before = len(events)
+        source_count_before = len(sources)
+        timeline_spawn_count_before = timeline_spawn_count
+        silent_children_before = silent_children
+        try:
+            for spawn in spawns_by_frame.get(frame, ()):
+                source = _timeline_source(
+                    template=template,
+                    spawn=spawn,
+                    frame=frame,
+                    serial=timeline_spawn_count,
+                    ecl=ecl,
                 )
+                timeline_spawn_count += 1
+                future_body_samples[source.identity] = [None] * (
+                    projected_horizon_frames + 1
+                )
+                # Native timeline construction executes the new VM once;
+                # the manager reaches the new slot and executes it again.
+                bootstrap_events, child_count = _execute_source_update(
+                    source=source,
+                    frame=frame,
+                    root_player_x=player_x,
+                    root_player_y=player_y,
+                    instructions=instructions,
+                    difficulty_mask=difficulty_mask,
+                    payload=payload,
+                    ecl=ecl,
+                    remaining_horizon=projected_horizon_frames - frame,
+                )
+                events.extend(bootstrap_events)
+                silent_children += child_count
+                sources.append(source)
+            for source in sources:
+                source_events, child_count = _execute_source_update(
+                    source=source,
+                    frame=frame,
+                    root_player_x=player_x,
+                    root_player_y=player_y,
+                    instructions=instructions,
+                    difficulty_mask=difficulty_mask,
+                    payload=payload,
+                    ecl=ecl,
+                    remaining_horizon=projected_horizon_frames - frame,
+                )
+                events.extend(source_events)
+                silent_children += child_count
+                _advance_motion(source)
+                if source.timeline_spawned and source.enemy_flags & 0x04:
+                    samples = future_body_samples[source.identity]
+                    samples[frame] = AabbHazard(
+                        x=source.motion.world_x,
+                        y=source.motion.world_y,
+                        half_width=(
+                            source.body_half_width
+                            + source.motion.uncertainty_x
+                        ),
+                        half_height=(
+                            source.body_half_height
+                            + source.motion.uncertainty_y
+                        ),
+                    )
+        except (
+            FutureSourceClosureError,
+            KeyError,
+            TypeError,
+            ValueError,
+        ) as error:
+            del events[event_count_before:]
+            del sources[source_count_before:]
+            timeline_spawn_count = timeline_spawn_count_before
+            silent_children = silent_children_before
+            projected_horizon_frames = frame - 1
+            causal_prefix_reason = (
+                f"source UNKNOWN begins at future frame {frame}: {error}"
+            )
+            break
     body_trajectories = tuple(
-        AabbTrajectoryHazard(samples=tuple(samples))
+        AabbTrajectoryHazard(
+            samples=tuple(samples[: projected_horizon_frames + 1])
+        )
         for samples in future_body_samples.values()
-        if any(sample is not None for sample in samples)
+        if any(
+            sample is not None
+            for sample in samples[: projected_horizon_frames + 1]
+        )
     )
     auxiliary_count = sum(
         auxiliary is not None
@@ -2242,6 +2304,7 @@ def _analyze(
         health_transition_proven_count,
         health_transition_minimum_margin,
         projected_horizon_frames,
+        causal_prefix_reason,
     )
 
 
@@ -2271,6 +2334,7 @@ def project_ordinary_future_sources(
             health_transition_proven_count,
             health_transition_minimum_margin,
             projected_horizon_frames,
+            causal_prefix_reason,
         ) = _analyze(payload, ecl, horizon_frames=horizon_frames)
     except (FutureSourceClosureError, KeyError, TypeError, ValueError) as error:
         projection = unknown_future_hazard_projection(
@@ -2291,6 +2355,7 @@ def project_ordinary_future_sources(
             timeline_spawn_count=0,
             health_transition_proven_count=0,
             health_transition_minimum_margin=None,
+            causal_prefix_reason=None,
         )
     projection = complete_future_hazard_projection(
         root_frame=root_frame,
@@ -2311,6 +2376,7 @@ def project_ordinary_future_sources(
         health_transition_minimum_margin=(
             health_transition_minimum_margin
         ),
+        causal_prefix_reason=causal_prefix_reason,
     )
 
 

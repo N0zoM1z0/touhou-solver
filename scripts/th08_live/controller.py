@@ -3741,6 +3741,9 @@ def _run_live_session(
                                 and closure.projection.horizon_frames
                                 < ORDINARY_FUTURE_SOURCE_HORIZON_FRAMES
                             ),
+                            "causal_prefix_reason": (
+                                closure.causal_prefix_reason
+                            ),
                             "stable_capture": (
                                 ordinary_future_source_result.snapshot.stable
                             ),

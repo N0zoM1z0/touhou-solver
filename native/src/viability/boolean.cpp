@@ -87,6 +87,77 @@ static int robust_viability(
         std::uint32_t{0}
     );
 
+    const bool clamp = clamp_to_bounds != 0;
+    const int state_count = row_count * column_count;
+    const auto transitions = transition_table(
+        x_start,
+        x_step,
+        column_count,
+        y_start,
+        y_step,
+        row_count,
+        velocity_x,
+        velocity_y,
+        action_count,
+        frames_per_layer,
+        clamp
+    );
+    const std::uint32_t every_action_mask = (
+        action_count == 32
+        ? std::numeric_limits<std::uint32_t>::max()
+        : (
+            (std::uint32_t{1} << action_count)
+            - std::uint32_t{1}
+        )
+    );
+    // Use the maximum error from the same finite transition table consumed by
+    // the recurrence.  If the entire requested hazard slab clears that bound
+    // strictly, every clamped transition sample is safe and the unconstrained
+    // terminal recurrence is exactly the all-action kernel.
+    const double lattice_error_bound = std::hypot(
+        *std::max_element(
+            transitions->sample_x_errors.begin(),
+            transitions->sample_x_errors.end()
+        ),
+        *std::max_element(
+            transitions->sample_y_errors.begin(),
+            transitions->sample_y_errors.end()
+        )
+    );
+    if (terminal_viable == nullptr && clamp) {
+        const std::size_t clearance_count = (
+            static_cast<std::size_t>(frame_count)
+            * row_count
+            * column_count
+        );
+        const bool whole_slab_trivially_safe = std::all_of(
+            clearance,
+            clearance + clearance_count,
+            [&](float value) {
+                return (
+                    static_cast<double>(value) - lattice_error_bound
+                    > static_cast<double>(required_clearance)
+                );
+            }
+        );
+        if (whole_slab_trivially_safe) {
+            std::fill(
+                viable,
+                viable + static_cast<std::size_t>(layer_count + 1)
+                    * layer_state_count,
+                std::uint8_t{1}
+            );
+            std::fill(
+                safe_action_masks,
+                safe_action_masks
+                    + static_cast<std::size_t>(layer_count)
+                        * layer_state_count,
+                every_action_mask
+            );
+            return 0;
+        }
+    }
+
     const int horizon_frame = frame_count - 1;
     for (int action = 0; action < action_count; ++action) {
         for (int row = 0; row < row_count; ++row) {
@@ -126,25 +197,66 @@ static int robust_viability(
         }
     }
 
-    const bool clamp = clamp_to_bounds != 0;
-    const int state_count = row_count * column_count;
-    const auto transitions = transition_table(
-        x_start,
-        x_step,
-        column_count,
-        y_start,
-        y_step,
-        row_count,
-        velocity_x,
-        velocity_y,
-        action_count,
-        frames_per_layer,
-        clamp
-    );
     const int layer_work = action_count * state_count;
     const int worker_count = touhou_native::viability_internal::worker_count();
     for (int layer = layer_count - 1; layer >= 0; --layer) {
         const int start_frame = layer * frames_per_layer;
+        const std::uint8_t* next_layer = (
+            viable
+            + static_cast<std::size_t>(layer + 1)
+                * layer_state_count
+        );
+        const bool next_layer_all_viable = std::all_of(
+            next_layer,
+            next_layer + layer_state_count,
+            [](std::uint8_t value) { return value != 0; }
+        );
+        if (clamp && next_layer_all_viable) {
+            bool layer_trivially_safe = true;
+            for (
+                int frame = start_frame;
+                frame <= start_frame + frames_per_layer
+                    && layer_trivially_safe;
+                ++frame
+            ) {
+                const float* frame_clearance = (
+                    clearance
+                    + static_cast<std::size_t>(frame) * state_count
+                );
+                layer_trivially_safe = std::all_of(
+                    frame_clearance,
+                    frame_clearance + state_count,
+                    [&](float value) {
+                        return (
+                            static_cast<double>(value)
+                                - lattice_error_bound
+                            > static_cast<double>(required_clearance)
+                        );
+                    }
+                );
+            }
+            if (layer_trivially_safe) {
+                std::fill(
+                    viable
+                        + static_cast<std::size_t>(layer)
+                            * layer_state_count,
+                    viable
+                        + static_cast<std::size_t>(layer + 1)
+                            * layer_state_count,
+                    std::uint8_t{1}
+                );
+                std::fill(
+                    safe_action_masks
+                        + static_cast<std::size_t>(layer)
+                            * layer_state_count,
+                    safe_action_masks
+                        + static_cast<std::size_t>(layer + 1)
+                            * layer_state_count,
+                    every_action_mask
+                );
+                continue;
+            }
+        }
         const auto solve_range = [&](int begin, int end) {
             for (int work_index = begin; work_index < end; ++work_index) {
                     const int active = work_index / state_count;
@@ -175,48 +287,35 @@ static int robust_viability(
                             ++delay_index
                         ) {
                             const int delay = delay_frames[delay_index];
-                            std::int32_t terminal_state = -1;
-                            for (
-                                int step = 1;
-                                step <= frames_per_layer;
-                                ++step
-                            ) {
-                                const Sample sample = transition_sample(
-                                    *transitions,
-                                    active,
-                                    selected,
-                                    delay,
-                                    row,
-                                    column,
-                                    step - 1,
-                                    action_count
-                                );
-                                terminal_state = (
-                                    sample.inside
-                                    ? (
-                                        sample.row * column_count
-                                        + sample.column
-                                    )
-                                    : -1
-                                );
-                                if (
-                                    terminal_state < 0
-                                    || clearance[clearance_index(
-                                        start_frame + step,
-                                        terminal_state / column_count,
-                                        terminal_state % column_count,
-                                        row_count,
-                                        column_count
-                                    )] - static_cast<float>(sample.error)
-                                        <= required_clearance
-                                ) {
-                                    robust = false;
-                                    break;
-                                }
-                            }
+                            // Terminal membership is a necessary condition
+                            // for this hidden-delay branch.  Test it before
+                            // walking the hazard samples: near exhaustion the
+                            // next lower kernel is sparse, so most branches
+                            // can be rejected without repeated clearance
+                            // lookups and hypot calls.  This is only a
+                            // recurrence-order change; every branch accepted
+                            // here still checks the identical path below.
+                            const Sample terminal_sample = transition_sample(
+                                *transitions,
+                                active,
+                                selected,
+                                delay,
+                                row,
+                                column,
+                                frames_per_layer - 1,
+                                action_count
+                            );
+                            const std::int32_t terminal_state = (
+                                terminal_sample.inside
+                                ? (
+                                    terminal_sample.row * column_count
+                                    + terminal_sample.column
+                                )
+                                : -1
+                            );
                             if (
-                                robust
-                                && !viable[state_index(
+                                terminal_state < 0
+                                || !viable[state_index(
                                     layer + 1,
                                     selected,
                                     terminal_state / column_count,
@@ -227,6 +326,41 @@ static int robust_viability(
                                 )]
                             ) {
                                 robust = false;
+                                break;
+                            }
+                            for (
+                                int step = 1;
+                                step <= frames_per_layer;
+                                ++step
+                            ) {
+                                const Sample& sample = (
+                                    step == frames_per_layer
+                                    ? terminal_sample
+                                    : transition_sample(
+                                        *transitions,
+                                        active,
+                                        selected,
+                                        delay,
+                                        row,
+                                        column,
+                                        step - 1,
+                                        action_count
+                                    )
+                                );
+                                if (
+                                    !sample.inside
+                                    || clearance[clearance_index(
+                                        start_frame + step,
+                                        sample.row,
+                                        sample.column,
+                                        row_count,
+                                        column_count
+                                    )] - static_cast<float>(sample.error)
+                                        <= required_clearance
+                                ) {
+                                    robust = false;
+                                    break;
+                                }
                             }
                         }
                         if (robust) {

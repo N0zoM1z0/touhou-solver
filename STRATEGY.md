@@ -113,10 +113,29 @@ Observation-aligned immutable replay roots 816/831/834/848/908 rebuild the
 retained f817/833/835/850/910 chain. Native exact recurrence and the live
 adapter agree that f817 permits only `left_fast/down_left_fast`, excluding
 active `up_fast` and issued `up_left_fast`. The later four roots are empty and
-fail closed. Windows measured f817 kernel/certificate delivery at 1420/21 ms;
+fail closed. Windows measured f817 kernel/certificate delivery at 1412/21 ms;
 the five roots have no unresolved action. This is deterministic native-replay
-evidence, not a physical outcome. L3 remains default-off pending the already
-authorized Stage-4A physical falsifier.
+evidence.
+
+The authorized Stage-4A physical run `20260731_220830` did not exercise that
+authority: all 1,754 live source projections were incomplete, chiefly because
+the former sparse capture crossed the manager frame 1,726 times. Consequently
+all 10,016 L3 records failed closed and zero selected actions were constrained.
+Its 23 hits and first hit 939 are different-RNG observations; they falsify the
+capture/delivery implementation, not the retained f817 action set or the
+observed-body early-kill objective.
+
+Source semantics v3 now captures the contiguous manager+480-slot image in one
+read and lowers the reached dynamic-count, auxiliary subtraction,
+indexed-enemy timeline field, and FRScreen gate cases. The exact native
+kernel tests terminal membership first and publishes an all-action kernel
+directly when the complete clearance slab proves every clamped transition
+safe. Boolean hard membership omits soft scans; directional recovery is still
+computed when the predecessor is empty. Windows no-hazard viability is about
+282 ms cold and 9 ms warm instead of the physical 2,996 ms bootstrap solve;
+the retained dense-root worst case is still about 2,104 ms and remains
+fail-closed on deadline expiry. L3 stays default-off until a fresh physical
+run shows nonzero complete source projections and effective exact authority.
 
 ## Offline Native Authority
 

@@ -74,18 +74,18 @@
         "horizon_frames": 268,
         "source_closure_complete": true,
         "source_closure_reason": null,
-        "source_semantics_version": "th08-ordinary-future-sources-v2-set-valued-timeline-spawn",
+        "source_semantics_version": "th08-ordinary-future-sources-v3-coherent-live-root",
         "producer_count": 1,
         "trajectory_count": 0,
         "aabb_trajectory_count": 1,
-        "digest": "3187d583d79f5e0bb9491279a8accb44d5b21426adc629a773c8e2ca2d1c97f8",
+        "digest": "5e104a81cb7ade371b4f4443060dcc330ef3ff08ab145fecdefcd650451bda52",
         "version": {
           "namespace": "th08-ordinary-future-hazard-projection-v3",
           "components": {
-            "digest": "3187d583d79f5e0bb9491279a8accb44d5b21426adc629a773c8e2ca2d1c97f8",
+            "digest": "5e104a81cb7ade371b4f4443060dcc330ef3ff08ab145fecdefcd650451bda52",
             "horizon_frames": 268,
             "root_frame": 816,
-            "source_semantics_version": "th08-ordinary-future-sources-v2-set-valued-timeline-spawn"
+            "source_semantics_version": "th08-ordinary-future-sources-v3-coherent-live-root"
           }
         },
         "coverage": {
@@ -106,17 +106,17 @@
               "version": {
                 "namespace": "th08-ordinary-future-hazard-projection-v3",
                 "components": {
-                  "digest": "3187d583d79f5e0bb9491279a8accb44d5b21426adc629a773c8e2ca2d1c97f8",
+                  "digest": "5e104a81cb7ade371b4f4443060dcc330ef3ff08ab145fecdefcd650451bda52",
                   "horizon_frames": 268,
                   "root_frame": 816,
-                  "source_semantics_version": "th08-ordinary-future-sources-v2-set-valued-timeline-spawn"
+                  "source_semantics_version": "th08-ordinary-future-sources-v3-coherent-live-root"
                 }
               },
               "rationale": "all reachable ordinary ECL/timeline producers were lowered into consumed continuous annular-sector and future hostile-body AABB envelopes"
             }
           ]
         },
-        "closure_wall_ms": 17.477823988883756,
+        "closure_wall_ms": 26.83033399807755,
         "source_count": 12,
         "auxiliary_count": 0,
         "silent_child_count": 0,
@@ -133,8 +133,8 @@
         ],
         "reachable": false,
         "reason": "initial robust viability action set is empty",
-        "solve_ms": 1116.464268998243,
-        "solve_wall_ms": 1116.991048998898,
+        "solve_ms": 1243.3711420017062,
+        "solve_wall_ms": 1243.8829580059974,
         "viability_backend": "native",
         "viable_state_count_layer0": 3820,
         "initial_safe_action_count": 0,
@@ -157,10 +157,10 @@
         "future_projection_version": {
           "namespace": "th08-ordinary-future-hazard-projection-v3",
           "components": {
-            "digest": "3187d583d79f5e0bb9491279a8accb44d5b21426adc629a773c8e2ca2d1c97f8",
+            "digest": "5e104a81cb7ade371b4f4443060dcc330ef3ff08ab145fecdefcd650451bda52",
             "horizon_frames": 268,
             "root_frame": 816,
-            "source_semantics_version": "th08-ordinary-future-sources-v2-set-valued-timeline-spawn"
+            "source_semantics_version": "th08-ordinary-future-sources-v3-coherent-live-root"
           }
         },
         "safe_actions": [
@@ -428,10 +428,10 @@
               "version": {
                 "namespace": "th08-ordinary-future-hazard-projection-v3",
                 "components": {
-                  "digest": "3187d583d79f5e0bb9491279a8accb44d5b21426adc629a773c8e2ca2d1c97f8",
+                  "digest": "5e104a81cb7ade371b4f4443060dcc330ef3ff08ab145fecdefcd650451bda52",
                   "horizon_frames": 268,
                   "root_frame": 816,
-                  "source_semantics_version": "th08-ordinary-future-sources-v2-set-valued-timeline-spawn"
+                  "source_semantics_version": "th08-ordinary-future-sources-v3-coherent-live-root"
                 }
               },
               "rationale": "all reachable ordinary ECL/timeline producers were lowered into consumed continuous annular-sector and future hostile-body AABB envelopes"
@@ -441,10 +441,10 @@
         "required_hazard_version": {
           "namespace": "th08-ordinary-future-hazard-projection-v3",
           "components": {
-            "digest": "3187d583d79f5e0bb9491279a8accb44d5b21426adc629a773c8e2ca2d1c97f8",
+            "digest": "5e104a81cb7ade371b4f4443060dcc330ef3ff08ab145fecdefcd650451bda52",
             "horizon_frames": 268,
             "root_frame": 816,
-            "source_semantics_version": "th08-ordinary-future-sources-v2-set-valued-timeline-spawn"
+            "source_semantics_version": "th08-ordinary-future-sources-v3-coherent-live-root"
           }
         },
         "actions": [
@@ -709,18 +709,18 @@
         "horizon_frames": 268,
         "source_closure_complete": true,
         "source_closure_reason": null,
-        "source_semantics_version": "th08-ordinary-future-sources-v2-set-valued-timeline-spawn",
+        "source_semantics_version": "th08-ordinary-future-sources-v3-coherent-live-root",
         "producer_count": 1,
         "trajectory_count": 0,
         "aabb_trajectory_count": 1,
-        "digest": "2559d8c34d5cd81c019c4e21acdb4b218a0773e13c453919f0e028ff6737c79e",
+        "digest": "d469eeb1b40429766e21b9b10ee56e24bcc01515d7c0ee15b49b6525768b24e6",
         "version": {
           "namespace": "th08-ordinary-future-hazard-projection-v3",
           "components": {
-            "digest": "2559d8c34d5cd81c019c4e21acdb4b218a0773e13c453919f0e028ff6737c79e",
+            "digest": "d469eeb1b40429766e21b9b10ee56e24bcc01515d7c0ee15b49b6525768b24e6",
             "horizon_frames": 268,
             "root_frame": 831,
-            "source_semantics_version": "th08-ordinary-future-sources-v2-set-valued-timeline-spawn"
+            "source_semantics_version": "th08-ordinary-future-sources-v3-coherent-live-root"
           }
         },
         "coverage": {
@@ -741,17 +741,17 @@
               "version": {
                 "namespace": "th08-ordinary-future-hazard-projection-v3",
                 "components": {
-                  "digest": "2559d8c34d5cd81c019c4e21acdb4b218a0773e13c453919f0e028ff6737c79e",
+                  "digest": "d469eeb1b40429766e21b9b10ee56e24bcc01515d7c0ee15b49b6525768b24e6",
                   "horizon_frames": 268,
                   "root_frame": 831,
-                  "source_semantics_version": "th08-ordinary-future-sources-v2-set-valued-timeline-spawn"
+                  "source_semantics_version": "th08-ordinary-future-sources-v3-coherent-live-root"
                 }
               },
               "rationale": "all reachable ordinary ECL/timeline producers were lowered into consumed continuous annular-sector and future hostile-body AABB envelopes"
             }
           ]
         },
-        "closure_wall_ms": 16.442110005300492,
+        "closure_wall_ms": 18.249840009957552,
         "source_count": 12,
         "auxiliary_count": 0,
         "silent_child_count": 0,
@@ -768,8 +768,8 @@
         ],
         "reachable": false,
         "reason": "initial robust viability action set is empty",
-        "solve_ms": 1095.9275880013593,
-        "solve_wall_ms": 1096.040186996106,
+        "solve_ms": 1239.858445012942,
+        "solve_wall_ms": 1239.9778099934338,
         "viability_backend": "native",
         "viable_state_count_layer0": 3677,
         "initial_safe_action_count": 0,
@@ -792,10 +792,10 @@
         "future_projection_version": {
           "namespace": "th08-ordinary-future-hazard-projection-v3",
           "components": {
-            "digest": "2559d8c34d5cd81c019c4e21acdb4b218a0773e13c453919f0e028ff6737c79e",
+            "digest": "d469eeb1b40429766e21b9b10ee56e24bcc01515d7c0ee15b49b6525768b24e6",
             "horizon_frames": 268,
             "root_frame": 831,
-            "source_semantics_version": "th08-ordinary-future-sources-v2-set-valued-timeline-spawn"
+            "source_semantics_version": "th08-ordinary-future-sources-v3-coherent-live-root"
           }
         },
         "safe_actions": [
@@ -1055,10 +1055,10 @@
               "version": {
                 "namespace": "th08-ordinary-future-hazard-projection-v3",
                 "components": {
-                  "digest": "2559d8c34d5cd81c019c4e21acdb4b218a0773e13c453919f0e028ff6737c79e",
+                  "digest": "d469eeb1b40429766e21b9b10ee56e24bcc01515d7c0ee15b49b6525768b24e6",
                   "horizon_frames": 268,
                   "root_frame": 831,
-                  "source_semantics_version": "th08-ordinary-future-sources-v2-set-valued-timeline-spawn"
+                  "source_semantics_version": "th08-ordinary-future-sources-v3-coherent-live-root"
                 }
               },
               "rationale": "all reachable ordinary ECL/timeline producers were lowered into consumed continuous annular-sector and future hostile-body AABB envelopes"
@@ -1068,10 +1068,10 @@
         "required_hazard_version": {
           "namespace": "th08-ordinary-future-hazard-projection-v3",
           "components": {
-            "digest": "2559d8c34d5cd81c019c4e21acdb4b218a0773e13c453919f0e028ff6737c79e",
+            "digest": "d469eeb1b40429766e21b9b10ee56e24bcc01515d7c0ee15b49b6525768b24e6",
             "horizon_frames": 268,
             "root_frame": 831,
-            "source_semantics_version": "th08-ordinary-future-sources-v2-set-valued-timeline-spawn"
+            "source_semantics_version": "th08-ordinary-future-sources-v3-coherent-live-root"
           }
         },
         "actions": [
@@ -1336,18 +1336,18 @@
         "horizon_frames": 268,
         "source_closure_complete": true,
         "source_closure_reason": null,
-        "source_semantics_version": "th08-ordinary-future-sources-v2-set-valued-timeline-spawn",
+        "source_semantics_version": "th08-ordinary-future-sources-v3-coherent-live-root",
         "producer_count": 1,
         "trajectory_count": 0,
         "aabb_trajectory_count": 1,
-        "digest": "026196de541930a1811fd9110f87ca2eb0a7c82fe916702682de64b5f837ebb3",
+        "digest": "778f478b139f455ae60af4eee6258b8bd19a8ebb2c0bed736c59eacf38250ed6",
         "version": {
           "namespace": "th08-ordinary-future-hazard-projection-v3",
           "components": {
-            "digest": "026196de541930a1811fd9110f87ca2eb0a7c82fe916702682de64b5f837ebb3",
+            "digest": "778f478b139f455ae60af4eee6258b8bd19a8ebb2c0bed736c59eacf38250ed6",
             "horizon_frames": 268,
             "root_frame": 834,
-            "source_semantics_version": "th08-ordinary-future-sources-v2-set-valued-timeline-spawn"
+            "source_semantics_version": "th08-ordinary-future-sources-v3-coherent-live-root"
           }
         },
         "coverage": {
@@ -1368,17 +1368,17 @@
               "version": {
                 "namespace": "th08-ordinary-future-hazard-projection-v3",
                 "components": {
-                  "digest": "026196de541930a1811fd9110f87ca2eb0a7c82fe916702682de64b5f837ebb3",
+                  "digest": "778f478b139f455ae60af4eee6258b8bd19a8ebb2c0bed736c59eacf38250ed6",
                   "horizon_frames": 268,
                   "root_frame": 834,
-                  "source_semantics_version": "th08-ordinary-future-sources-v2-set-valued-timeline-spawn"
+                  "source_semantics_version": "th08-ordinary-future-sources-v3-coherent-live-root"
                 }
               },
               "rationale": "all reachable ordinary ECL/timeline producers were lowered into consumed continuous annular-sector and future hostile-body AABB envelopes"
             }
           ]
         },
-        "closure_wall_ms": 15.741278999485075,
+        "closure_wall_ms": 18.936024003778584,
         "source_count": 12,
         "auxiliary_count": 0,
         "silent_child_count": 0,
@@ -1395,8 +1395,8 @@
         ],
         "reachable": false,
         "reason": "initial robust viability action set is empty",
-        "solve_ms": 1162.6195069984533,
-        "solve_wall_ms": 1162.7210510050645,
+        "solve_ms": 1193.323469007737,
+        "solve_wall_ms": 1193.4407910011942,
         "viability_backend": "native",
         "viable_state_count_layer0": 3929,
         "initial_safe_action_count": 0,
@@ -1419,10 +1419,10 @@
         "future_projection_version": {
           "namespace": "th08-ordinary-future-hazard-projection-v3",
           "components": {
-            "digest": "026196de541930a1811fd9110f87ca2eb0a7c82fe916702682de64b5f837ebb3",
+            "digest": "778f478b139f455ae60af4eee6258b8bd19a8ebb2c0bed736c59eacf38250ed6",
             "horizon_frames": 268,
             "root_frame": 834,
-            "source_semantics_version": "th08-ordinary-future-sources-v2-set-valued-timeline-spawn"
+            "source_semantics_version": "th08-ordinary-future-sources-v3-coherent-live-root"
           }
         },
         "safe_actions": [
@@ -1680,10 +1680,10 @@
               "version": {
                 "namespace": "th08-ordinary-future-hazard-projection-v3",
                 "components": {
-                  "digest": "026196de541930a1811fd9110f87ca2eb0a7c82fe916702682de64b5f837ebb3",
+                  "digest": "778f478b139f455ae60af4eee6258b8bd19a8ebb2c0bed736c59eacf38250ed6",
                   "horizon_frames": 268,
                   "root_frame": 834,
-                  "source_semantics_version": "th08-ordinary-future-sources-v2-set-valued-timeline-spawn"
+                  "source_semantics_version": "th08-ordinary-future-sources-v3-coherent-live-root"
                 }
               },
               "rationale": "all reachable ordinary ECL/timeline producers were lowered into consumed continuous annular-sector and future hostile-body AABB envelopes"
@@ -1693,10 +1693,10 @@
         "required_hazard_version": {
           "namespace": "th08-ordinary-future-hazard-projection-v3",
           "components": {
-            "digest": "026196de541930a1811fd9110f87ca2eb0a7c82fe916702682de64b5f837ebb3",
+            "digest": "778f478b139f455ae60af4eee6258b8bd19a8ebb2c0bed736c59eacf38250ed6",
             "horizon_frames": 268,
             "root_frame": 834,
-            "source_semantics_version": "th08-ordinary-future-sources-v2-set-valued-timeline-spawn"
+            "source_semantics_version": "th08-ordinary-future-sources-v3-coherent-live-root"
           }
         },
         "actions": [
@@ -1966,18 +1966,18 @@
         "horizon_frames": 268,
         "source_closure_complete": true,
         "source_closure_reason": null,
-        "source_semantics_version": "th08-ordinary-future-sources-v2-set-valued-timeline-spawn",
+        "source_semantics_version": "th08-ordinary-future-sources-v3-coherent-live-root",
         "producer_count": 1,
         "trajectory_count": 0,
         "aabb_trajectory_count": 1,
-        "digest": "dd603ddd556f3ba29784da11a6a22666967811565b1000ce62e006d89584a341",
+        "digest": "3b26f80eafebf9fc4ccebd399340d592fb8598792260fed1a2c759c2521c5f9b",
         "version": {
           "namespace": "th08-ordinary-future-hazard-projection-v3",
           "components": {
-            "digest": "dd603ddd556f3ba29784da11a6a22666967811565b1000ce62e006d89584a341",
+            "digest": "3b26f80eafebf9fc4ccebd399340d592fb8598792260fed1a2c759c2521c5f9b",
             "horizon_frames": 268,
             "root_frame": 848,
-            "source_semantics_version": "th08-ordinary-future-sources-v2-set-valued-timeline-spawn"
+            "source_semantics_version": "th08-ordinary-future-sources-v3-coherent-live-root"
           }
         },
         "coverage": {
@@ -1998,17 +1998,17 @@
               "version": {
                 "namespace": "th08-ordinary-future-hazard-projection-v3",
                 "components": {
-                  "digest": "dd603ddd556f3ba29784da11a6a22666967811565b1000ce62e006d89584a341",
+                  "digest": "3b26f80eafebf9fc4ccebd399340d592fb8598792260fed1a2c759c2521c5f9b",
                   "horizon_frames": 268,
                   "root_frame": 848,
-                  "source_semantics_version": "th08-ordinary-future-sources-v2-set-valued-timeline-spawn"
+                  "source_semantics_version": "th08-ordinary-future-sources-v3-coherent-live-root"
                 }
               },
               "rationale": "all reachable ordinary ECL/timeline producers were lowered into consumed continuous annular-sector and future hostile-body AABB envelopes"
             }
           ]
         },
-        "closure_wall_ms": 17.815950006479397,
+        "closure_wall_ms": 17.850222997367382,
         "source_count": 12,
         "auxiliary_count": 0,
         "silent_child_count": 0,
@@ -2025,8 +2025,8 @@
         ],
         "reachable": false,
         "reason": "initial robust viability action set is empty",
-        "solve_ms": 1117.1255160006694,
-        "solve_wall_ms": 1117.2337290045107,
+        "solve_ms": 1131.6002840030706,
+        "solve_wall_ms": 1131.7121700121788,
         "viability_backend": "native",
         "viable_state_count_layer0": 4355,
         "initial_safe_action_count": 0,
@@ -2049,10 +2049,10 @@
         "future_projection_version": {
           "namespace": "th08-ordinary-future-hazard-projection-v3",
           "components": {
-            "digest": "dd603ddd556f3ba29784da11a6a22666967811565b1000ce62e006d89584a341",
+            "digest": "3b26f80eafebf9fc4ccebd399340d592fb8598792260fed1a2c759c2521c5f9b",
             "horizon_frames": 268,
             "root_frame": 848,
-            "source_semantics_version": "th08-ordinary-future-sources-v2-set-valued-timeline-spawn"
+            "source_semantics_version": "th08-ordinary-future-sources-v3-coherent-live-root"
           }
         },
         "safe_actions": [
@@ -2311,10 +2311,10 @@
               "version": {
                 "namespace": "th08-ordinary-future-hazard-projection-v3",
                 "components": {
-                  "digest": "dd603ddd556f3ba29784da11a6a22666967811565b1000ce62e006d89584a341",
+                  "digest": "3b26f80eafebf9fc4ccebd399340d592fb8598792260fed1a2c759c2521c5f9b",
                   "horizon_frames": 268,
                   "root_frame": 848,
-                  "source_semantics_version": "th08-ordinary-future-sources-v2-set-valued-timeline-spawn"
+                  "source_semantics_version": "th08-ordinary-future-sources-v3-coherent-live-root"
                 }
               },
               "rationale": "all reachable ordinary ECL/timeline producers were lowered into consumed continuous annular-sector and future hostile-body AABB envelopes"
@@ -2324,10 +2324,10 @@
         "required_hazard_version": {
           "namespace": "th08-ordinary-future-hazard-projection-v3",
           "components": {
-            "digest": "dd603ddd556f3ba29784da11a6a22666967811565b1000ce62e006d89584a341",
+            "digest": "3b26f80eafebf9fc4ccebd399340d592fb8598792260fed1a2c759c2521c5f9b",
             "horizon_frames": 268,
             "root_frame": 848,
-            "source_semantics_version": "th08-ordinary-future-sources-v2-set-valued-timeline-spawn"
+            "source_semantics_version": "th08-ordinary-future-sources-v3-coherent-live-root"
           }
         },
         "actions": [
@@ -2592,18 +2592,18 @@
         "horizon_frames": 268,
         "source_closure_complete": true,
         "source_closure_reason": null,
-        "source_semantics_version": "th08-ordinary-future-sources-v2-set-valued-timeline-spawn",
+        "source_semantics_version": "th08-ordinary-future-sources-v3-coherent-live-root",
         "producer_count": 1,
         "trajectory_count": 0,
         "aabb_trajectory_count": 1,
-        "digest": "fdcc4285070b4d336a45c9cffef0b25ae04a9bb6762bc7bc57059c83b0dcccb5",
+        "digest": "21854c6d4107609dc6fcd1599a20e7385858193465ba019f6db00a9d8d3a60df",
         "version": {
           "namespace": "th08-ordinary-future-hazard-projection-v3",
           "components": {
-            "digest": "fdcc4285070b4d336a45c9cffef0b25ae04a9bb6762bc7bc57059c83b0dcccb5",
+            "digest": "21854c6d4107609dc6fcd1599a20e7385858193465ba019f6db00a9d8d3a60df",
             "horizon_frames": 268,
             "root_frame": 908,
-            "source_semantics_version": "th08-ordinary-future-sources-v2-set-valued-timeline-spawn"
+            "source_semantics_version": "th08-ordinary-future-sources-v3-coherent-live-root"
           }
         },
         "coverage": {
@@ -2624,17 +2624,17 @@
               "version": {
                 "namespace": "th08-ordinary-future-hazard-projection-v3",
                 "components": {
-                  "digest": "fdcc4285070b4d336a45c9cffef0b25ae04a9bb6762bc7bc57059c83b0dcccb5",
+                  "digest": "21854c6d4107609dc6fcd1599a20e7385858193465ba019f6db00a9d8d3a60df",
                   "horizon_frames": 268,
                   "root_frame": 908,
-                  "source_semantics_version": "th08-ordinary-future-sources-v2-set-valued-timeline-spawn"
+                  "source_semantics_version": "th08-ordinary-future-sources-v3-coherent-live-root"
                 }
               },
               "rationale": "all reachable ordinary ECL/timeline producers were lowered into consumed continuous annular-sector and future hostile-body AABB envelopes"
             }
           ]
         },
-        "closure_wall_ms": 16.232082998612896,
+        "closure_wall_ms": 16.567245998885483,
         "source_count": 12,
         "auxiliary_count": 0,
         "silent_child_count": 0,
@@ -2651,8 +2651,8 @@
         ],
         "reachable": false,
         "reason": "initial robust viability action set is empty",
-        "solve_ms": 1101.8013919965597,
-        "solve_wall_ms": 1101.8873719876865,
+        "solve_ms": 1144.8791449947748,
+        "solve_wall_ms": 1144.968552995124,
         "viability_backend": "native",
         "viable_state_count_layer0": 7811,
         "initial_safe_action_count": 0,
@@ -2675,10 +2675,10 @@
         "future_projection_version": {
           "namespace": "th08-ordinary-future-hazard-projection-v3",
           "components": {
-            "digest": "fdcc4285070b4d336a45c9cffef0b25ae04a9bb6762bc7bc57059c83b0dcccb5",
+            "digest": "21854c6d4107609dc6fcd1599a20e7385858193465ba019f6db00a9d8d3a60df",
             "horizon_frames": 268,
             "root_frame": 908,
-            "source_semantics_version": "th08-ordinary-future-sources-v2-set-valued-timeline-spawn"
+            "source_semantics_version": "th08-ordinary-future-sources-v3-coherent-live-root"
           }
         },
         "safe_actions": [],
@@ -2916,10 +2916,10 @@
               "version": {
                 "namespace": "th08-ordinary-future-hazard-projection-v3",
                 "components": {
-                  "digest": "fdcc4285070b4d336a45c9cffef0b25ae04a9bb6762bc7bc57059c83b0dcccb5",
+                  "digest": "21854c6d4107609dc6fcd1599a20e7385858193465ba019f6db00a9d8d3a60df",
                   "horizon_frames": 268,
                   "root_frame": 908,
-                  "source_semantics_version": "th08-ordinary-future-sources-v2-set-valued-timeline-spawn"
+                  "source_semantics_version": "th08-ordinary-future-sources-v3-coherent-live-root"
                 }
               },
               "rationale": "all reachable ordinary ECL/timeline producers were lowered into consumed continuous annular-sector and future hostile-body AABB envelopes"
@@ -2929,10 +2929,10 @@
         "required_hazard_version": {
           "namespace": "th08-ordinary-future-hazard-projection-v3",
           "components": {
-            "digest": "fdcc4285070b4d336a45c9cffef0b25ae04a9bb6762bc7bc57059c83b0dcccb5",
+            "digest": "21854c6d4107609dc6fcd1599a20e7385858193465ba019f6db00a9d8d3a60df",
             "horizon_frames": 268,
             "root_frame": 908,
-            "source_semantics_version": "th08-ordinary-future-sources-v2-set-valued-timeline-spawn"
+            "source_semantics_version": "th08-ordinary-future-sources-v3-coherent-live-root"
           }
         },
         "actions": [

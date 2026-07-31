@@ -241,6 +241,119 @@ class RobustViabilityPolicy:
             survival_best_actions,
         )
 
+    def query_membership(
+        self,
+        *,
+        frame: int,
+        x: float,
+        y: float,
+        active_action: str,
+    ) -> ViabilityQuery:
+        """Query only exact set membership and admissible action bits.
+
+        Hard predecessor checks do not consume repair volumes, distant
+        recovery scans, or survival labels.  Keeping that authority query
+        separate avoids recomputing whole-plane soft diagnostics for every
+        hidden pickup branch while returning the identical Boolean member,
+        action mask, lattice coordinate, and position error as ``query``.
+        """
+
+        if frame < 0:
+            return ViabilityQuery(
+                False,
+                None,
+                None,
+                None,
+                active_action,
+                False,
+                (),
+                (),
+                math.inf,
+                "query frame precedes policy source",
+            )
+        layer = frame // self.config.frames_per_layer
+        if layer >= self.layer_count:
+            return ViabilityQuery(
+                False,
+                layer,
+                None,
+                None,
+                active_action,
+                False,
+                (),
+                (),
+                math.inf,
+                "query is outside the finite policy horizon",
+            )
+        action_index = next(
+            (
+                index
+                for index, action in enumerate(self.actions)
+                if action.name == active_action
+            ),
+            None,
+        )
+        if action_index is None:
+            return ViabilityQuery(
+                False,
+                layer,
+                None,
+                None,
+                active_action,
+                False,
+                (),
+                (),
+                math.inf,
+                "active action is absent from policy",
+            )
+        if not (
+            float(self.x_axis[0]) <= x <= float(self.x_axis[-1])
+            and float(self.y_axis[0]) <= y <= float(self.y_axis[-1])
+        ):
+            return ViabilityQuery(
+                False,
+                layer,
+                None,
+                None,
+                active_action,
+                False,
+                (),
+                (),
+                math.inf,
+                "query position is outside policy bounds",
+            )
+        _, _, row, column, position_error = self.project_to_lattice(
+            x=x,
+            y=y,
+        )
+        mask = int(
+            self.safe_action_masks[layer, action_index, row, column]
+        )
+        safe_actions = tuple(
+            action.name
+            for index, action in enumerate(self.actions)
+            if mask & (1 << index)
+        )
+        state_viable = bool(
+            self.viable[layer, action_index, row, column]
+        )
+        return ViabilityQuery(
+            True,
+            layer,
+            row,
+            column,
+            active_action,
+            state_viable,
+            safe_actions,
+            (),
+            position_error,
+            (
+                "robust viable actions found"
+                if state_viable
+                else "robust action set is empty"
+            ),
+        )
+
     def _repair_volume(
         self,
         *,

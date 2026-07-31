@@ -496,6 +496,48 @@ class RobustViabilityTests(unittest.TestCase):
         self.assertEqual(policy.layer_count, 2)
         self.assertEqual(policy.horizon_frames, 4)
 
+    def test_membership_query_matches_hard_fields_without_soft_scans(
+        self,
+    ) -> None:
+        actions = (
+            ControlAction("stay", 0.0, 0.0),
+            ControlAction("right", 1.0, 0.0),
+        )
+        clearance = np.full((3, 2, 4), 100.0, dtype=np.float32)
+        clearance[1] = -1.0
+        policy = build_robust_viability_policy(
+            x_axis=np.arange(4, dtype=np.float32),
+            y_axis=np.asarray([0.0, 1.0], dtype=np.float32),
+            clearance_volume=clearance,
+            actions=actions,
+            delay_frames=(0, 1),
+            nominal_delay=1,
+            config=ViabilityConfig(frames_per_layer=2),
+        )
+
+        complete = policy.query(
+            frame=0,
+            x=1.25,
+            y=0.0,
+            active_action="stay",
+        )
+        membership = policy.query_membership(
+            frame=0,
+            x=1.25,
+            y=0.0,
+            active_action="stay",
+        )
+
+        self.assertEqual(membership.available, complete.available)
+        self.assertEqual(membership.layer, complete.layer)
+        self.assertEqual(membership.row, complete.row)
+        self.assertEqual(membership.column, complete.column)
+        self.assertEqual(membership.state_viable, complete.state_viable)
+        self.assertEqual(membership.safe_actions, complete.safe_actions)
+        self.assertEqual(membership.position_error, complete.position_error)
+        self.assertEqual(membership.repair_volumes, ())
+        self.assertEqual(membership.recovery_distances, ())
+
     def test_query_and_rollout_projection_share_round_to_even_ties(
         self,
     ) -> None:

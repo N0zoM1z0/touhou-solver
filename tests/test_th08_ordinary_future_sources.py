@@ -4,9 +4,16 @@ import struct
 import unittest
 from copy import deepcopy
 from pathlib import Path
+from types import SimpleNamespace
 
-from th08_ecl_tool.core import parse_ecl
-from th08_ordinary_future_sources import project_ordinary_future_sources
+from th08_ecl_tool.core import SubInstruction, parse_ecl
+from th08_future_birth_envelope import FloatInterval
+from th08_ordinary_future_sources import (
+    _VmState,
+    _direct_fire_count,
+    _execute_auxiliary,
+    project_ordinary_future_sources,
+)
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -219,6 +226,77 @@ def _payload() -> dict[str, object]:
 
 
 class OrdinaryFutureSourceTests(unittest.TestCase):
+    def test_auxiliary_float_subtraction_uses_interval_arithmetic(self) -> None:
+        destination = _bits(10016.0)
+        left = _bits(10017.0)
+        instructions = {
+            0: SubInstruction(
+                offset=0,
+                time=0,
+                opcode=0x1A,
+                size=24,
+                byte_08=0,
+                difficulty_mask=0xFF,
+                parameter_mask=0x03,
+                arguments=(destination, left, _bits(2.0)),
+            ),
+            24: SubInstruction(
+                offset=24,
+                time=0,
+                opcode=0x02,
+                size=16,
+                byte_08=0,
+                difficulty_mask=0xFF,
+                parameter_mask=0x01,
+                arguments=(10036,),
+            ),
+        }
+        vm = _VmState(
+            instruction_offset=0,
+            timer_elapsed=0,
+            integer_locals=[0] * 8,
+            float_locals=[
+                FloatInterval.point(0.0),
+                FloatInterval(3.0, 5.0),
+                *[FloatInterval.point(0.0) for _ in range(6)],
+            ],
+            scratch_integers=[2, 0, 0, 0],
+        )
+
+        events = _execute_auxiliary(
+            source=SimpleNamespace(identity="test"),
+            vm=vm,
+            instructions=instructions,
+            difficulty_mask=0x08,
+            frame=1,
+            aim_angle=FloatInterval.point(0.0),
+            payload={},
+        )
+
+        self.assertEqual(events, ())
+        self.assertEqual(vm.float_locals[0], FloatInterval(1.0, 3.0))
+
+    def test_dynamic_direct_fire_count_resolves_captured_integer_local(
+        self,
+    ) -> None:
+        vm = _VmState(
+            instruction_offset=0,
+            timer_elapsed=0,
+            integer_locals=[9, 0, 0, 0, 0, 0, 0, 0],
+            float_locals=[FloatInterval.point(0.0)] * 8,
+            scratch_integers=[0] * 4,
+        )
+
+        self.assertEqual(
+            _direct_fire_count(10000, dynamic=True, vm=vm),
+            9,
+        )
+        vm.integer_locals[0] = 0x1_0002
+        self.assertEqual(
+            _direct_fire_count(10000, dynamic=True, vm=vm),
+            2,
+        )
+
     def test_auxiliary_fire_is_complete_and_consumed(self) -> None:
         closure = project_ordinary_future_sources(
             _payload(),
@@ -281,6 +359,35 @@ class OrdinaryFutureSourceTests(unittest.TestCase):
         self.assertEqual(len(timeline_events), 2)
         self.assertEqual(timeline_events[0].origin_x.lower, 48.0)
         self.assertEqual(timeline_events[0].origin_x.upper, 160.0)
+
+    def test_frscreen_gates_are_lifted_as_hazard_maximal_variants(
+        self,
+    ) -> None:
+        payload = deepcopy(_payload())
+        spawn = next(
+            instruction
+            for instruction in ECL.timelines[0].instructions
+            if instruction.offset == 43348
+        )
+        row = payload["stage_timeline_runtime"]["rows"][0]
+        row["elapsed"] = spawn.time
+        row["current_instruction"]["static_offset"] = spawn.offset
+        row["current_instruction"]["terminal"] = False
+        external = payload["stage_timeline_runtime"]["external"]
+        external["stage_transition_busy"] = True
+        external["spawn_suppressed"] = True
+        external["conditional_gate_blocked"] = True
+
+        closure = project_ordinary_future_sources(
+            payload,
+            ECL,
+            horizon_frames=1,
+        )
+
+        self.assertTrue(closure.projection.source_closure_complete)
+        # Busy/suppressed roots can only omit this consumed record.  Retaining
+        # the false variant is the hazard-maximal hard projection.
+        self.assertEqual(closure.timeline_spawn_count, 1)
 
     def test_spawn_wave_remains_closed_through_timed_motion(self) -> None:
         payload = deepcopy(_payload())

@@ -177,6 +177,7 @@ TIMELINE_MARKERS_ADDRESS = 0x00F54E1C
 TIMELINE_SPAWN_SUPPRESSED_ADDRESS = 0x00F54E2C
 INDEXED_ENEMY_REGISTRY_ADDRESS = 0x00F54CC0
 INDEXED_ENEMY_REGISTRY_COUNT = 8
+INDEXED_ENEMY_TIMELINE_FIELD_OFFSET = 0x2D30
 FRSCREEN_STATE_ADDRESS = 0x0160F428
 FRSCREEN_INNER_POINTER_OFFSET = 0x08
 FRSCREEN_TIMELINE_SPAWN_GATE_OFFSET = 0x2C
@@ -1185,11 +1186,21 @@ def _timeline_external_state_record(reader: Any) -> dict[str, object]:
                 field="indexed enemy flags",
             ),
         )[0]
+        field_2d30 = struct.unpack(
+            "<H",
+            _read_exact(
+                reader,
+                pointer + INDEXED_ENEMY_TIMELINE_FIELD_OFFSET,
+                2,
+                field="indexed enemy timeline field",
+            ),
+        )[0]
         indexed_enemies.append(
             {
                 "enemy_pointer": pointer,
                 "flags": flags,
                 "active": bool(flags & ENEMY_ACTIVE_FLAG),
+                "field_2d30": field_2d30,
             }
         )
 

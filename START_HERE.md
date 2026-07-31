@@ -14,8 +14,8 @@ authority.
 
 - Branch: `main`.
 - Last physical checkpoint:
-  `lunatic_route2_stage4a_unattended_20260731_152921`, based on immutable
-  live-code checkpoint `1c64751`.
+  `lunatic_route2_stage4a_unattended_20260731_220830`, based on immutable
+  live-code checkpoint `81ed96a`.
 - Native H=32 wind-tunnel checkpoint: `3d15953`; it is historical evidence,
   not the live ordinary horizon.
 - Workspace-prune checkpoint: `be3e583` (`Prune TH08 active research
@@ -23,9 +23,9 @@ authority.
   priority-17, and old focused Final-B lanes while preserving the promoted
   baseline/pre-loss live path, native snapshot executor, exact pipeline
   workspace, and Final-B scale authority.
-- Current complete Linux discovery passes 1,234 tests in 9.652 seconds.
-  Complete Windows UNC discovery passes 1,234 tests with three platform
-  skips in 19.618 seconds. Linux and Windows native builds pass the
+- Current complete Linux discovery passes 1,240 tests in 9.894 seconds.
+  Complete Windows UNC discovery passes 1,240 tests with three platform
+  skips in 23.118 seconds. Linux and Windows native builds pass the
   checked-in 44-symbol ABI gate.
 - **Implemented, factorized hard lower authority:** default-off
   `--ordinary-preexhaustion-authority` no longer uses scalar reserve or the
@@ -66,9 +66,31 @@ authority.
   adapter independently agree that f817 permits only
   `left_fast/down_left_fast`, excluding active `up_fast` and issued
   `up_left_fast`. f833/f835/f850/f910 are already empty and remain fail
-  closed. Windows measured f817 kernel/certificate at 1420/21 ms; the five
+  closed. Windows measured f817 kernel/certificate at 1412/21 ms; the five
   roots have no unresolved action. This is finite-model evidence, not a
   physical outcome.
+- **Observed physical integration falsifier:** Stage-4A run
+  `20260731_220830` completed with 23 hits, first hit 939, and zero Bombs. Its
+  different-RNG aggregate does not falsify the f817 directional result.
+  Decisively, none of 1,754 live future-source projections completed: 1,726
+  crossed the manager-frame bracket. All 10,016 ordinary-authority records
+  therefore failed closed and zero actions were constrained. This falsified
+  live source capture/delivery, not the finite-model predecessor.
+- **Implemented after that run:** manager singleton plus all 480 ordinary
+  slots are now captured in one contiguous 9.8 MiB read instead of at least
+  481 sparse process reads. Source semantics v3 also lowers the reached
+  dynamic direct-fire count, auxiliary subtraction, indexed-enemy
+  `+0x2D30`, and set-valued FRScreen gate cases. Reached unsupported events
+  still fail closed.
+- **Implemented exact delivery acceleration:** the Boolean native kernel now
+  rejects branches by next-layer terminal membership before walking hazard
+  samples and publishes an exact all-action kernel when the whole clearance
+  slab/layer proves every clamped transition safe. Hard membership no longer
+  computes soft repair/recovery scans eagerly; directional recovery remains
+  available when the Boolean predecessor is empty. Windows no-hazard
+  viability fell from the physical 2,996 ms bootstrap solve to 282 ms cold
+  and about 9 ms warm. The retained dense-root worst case is still 2,104 ms
+  and remains fail-closed on expiry.
 - `--kill-before-saturation` now uses observed ordinary bodies only. The
   falsified timeline spawn forecast is withheld from live input.
   Observed-body alignment/unfocus remains a proposed objective, but the
@@ -93,6 +115,7 @@ Latest user-authorized Lunatic Route-2 practice ring:
 | Stage 4A pre-exhaustion early-kill gate | `20260731_133852` | 11 | 4148 | 0 | accepted |
 | Stage 4A forecast/global investigation | `20260731_142342` | 18 | 1915 | 0 | accepted |
 | Stage 4A reserve-authority falsifier | `20260731_152921` | 17 | 914 | 0 | accepted |
+| Stage 4A live-source/delivery falsifier | `20260731_220830` | 23 | 939 | 0 | accepted |
 
 The automatic older-root comparisons were 15→5, 10→13, and 19→12. They are
 observational only: RNG roots differ and the proposed WS-H strategies were
@@ -101,7 +124,7 @@ different-RNG: it physically applied 27 certified unfocus preferences,
 delayed first hit by 4857 frames relative to the listed Stage-5 baseline, but
 worsened total hits by one.
 
-The newest Stage-4A run is different-RNG and its 17/914 aggregate is
+Stage-4A run `20260731_152921` is different-RNG and its 17/914 aggregate is
 observational. Its experiment activation is decisive: the flag was present
 on all 12,029 decisions but yielded zero eligible, applicable, or effective
 constraints and zero early-kill applications. All 7,202 nonspell decisions
@@ -113,6 +136,18 @@ delivered an empty set at 835. The compact trace cannot attribute that version
 flip to slot 455 alone. Counterfactual reserve evaluation still allowed
 `down_left` there and allowed all 17 actions at frames 850 and 910. Robust
 local prefixes exhausted only at 910, four frames before the hit.
+
+The newer Stage-4A run `20260731_220830` is also different-RNG; its 23/939
+aggregate is observational and must not erase the earlier local improvement.
+Its exact failure is live integration: all 10,016 authority records had
+incomplete coverage and no allowed set. Of 1,754 future-source attempts, zero
+completed; 1,726 crossed `enemy_manager_frame`, 16 observed impossible
+auxiliary depth from a torn root, four lacked the then-uncaptured indexed
+timeline field, three reached a dynamic direct-fire count, two hit an
+FRScreen message-clock boundary, and three reached the now-lowered auxiliary
+`0x1A`. The worker also produced 3,610 expired-policy and 3,792 no-query
+decisions. These are capture/publication counterexamples, not evidence that
+`left_fast/down_left_fast` at retained f817 was wrong.
 
 The physical forecast gate also falsified the current timeline observer as a
 general later-wave source. All 376 observations recycled the same timeline-0

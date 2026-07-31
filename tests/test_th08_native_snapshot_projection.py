@@ -49,6 +49,7 @@ from th08_runtime.native_snapshot_projection import (
     FRSCREEN_STATE_ADDRESS,
     FRSCREEN_TIMELINE_SPAWN_GATE_OFFSET,
     INDEXED_ENEMY_REGISTRY_ADDRESS,
+    INDEXED_ENEMY_TIMELINE_FIELD_OFFSET,
     STAGE_TIMELINE_FLAG_10_ADDRESS,
     TH08_TIMER_ELAPSED_OFFSET,
     TH08_TIMER_FRACTION_OFFSET,
@@ -198,6 +199,9 @@ class NativeSnapshotProjectionTests(unittest.TestCase):
                 struct.pack("<I", 0)
             ),
             INDEXED_ENEMY_REGISTRY_ADDRESS: bytes(indexed_registry),
+            ENEMY_POOL_BASE + INDEXED_ENEMY_TIMELINE_FIELD_OFFSET: (
+                struct.pack("<H", 0x2345)
+            ),
             ENEMY_POOL_BASE + ENEMY_FLAGS_OFFSET: struct.pack(
                 "<I",
                 ENEMY_ACTIVE_FLAG,
@@ -232,6 +236,10 @@ class NativeSnapshotProjectionTests(unittest.TestCase):
         self.assertFalse(result["external"]["stage_transition_busy"])
         self.assertFalse(result["external"]["conditional_gate_blocked"])
         self.assertTrue(result["external"]["indexed_enemies"][0]["active"])
+        self.assertEqual(
+            result["external"]["indexed_enemies"][0]["field_2d30"],
+            0x2345,
+        )
 
     def test_auxiliary_ecl_context_retains_active_vm_and_instruction(
         self,

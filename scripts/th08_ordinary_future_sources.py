@@ -51,7 +51,7 @@ from touhou_control.corridor import AabbHazard, AabbTrajectoryHazard
 
 
 ORDINARY_FUTURE_SOURCE_SEMANTICS_VERSION = (
-    "th08-ordinary-future-sources-v2-set-valued-timeline-spawn"
+    "th08-ordinary-future-sources-v3-coherent-live-root"
 )
 _PROJECTION_SCHEMA = "th08-native-snapshot-collision-control-projection-v12"
 _DIRECT_FIRE_OPCODES = frozenset(range(0x60, 0x69))
@@ -648,6 +648,38 @@ def _integer_lvalue(raw: int, vm: _VmState) -> tuple[list[int], int]:
     raise AssertionError("unreachable")
 
 
+def _eval_integer_operand(
+    raw: int,
+    *,
+    dynamic: bool,
+    vm: _VmState,
+) -> int:
+    if not dynamic:
+        return _signed_u32(raw)
+    variable = _signed_u32(raw)
+    if 10000 <= variable <= 10007:
+        return vm.integer_locals[variable - 10000]
+    if 10036 <= variable <= 10039:
+        index = variable - 10036
+        if index >= len(vm.scratch_integers):
+            _fail("ECL scratch integer is absent")
+        return vm.scratch_integers[index]
+    _fail(f"dynamic ECL integer variable {variable} is unsupported")
+    raise AssertionError("unreachable")
+
+
+def _direct_fire_count(
+    raw: int,
+    *,
+    dynamic: bool,
+    vm: _VmState,
+) -> int:
+    # The shipped direct-fire cases evaluate dynamic operands through
+    # ecl_eval_int, then store the low signed word in the fire descriptor.
+    value = _eval_integer_operand(raw, dynamic=dynamic, vm=vm)
+    return struct.unpack("<h", struct.pack("<H", value & 0xFFFF))[0]
+
+
 def _literal_integer(instruction: SubInstruction, index: int) -> int:
     if instruction.parameter_mask & (1 << index):
         _fail(
@@ -779,16 +811,16 @@ def _direct_fire_events(
     if instruction.parameter_mask & 0x03:
         _fail("dynamic direct-fire type/color is unsupported")
     bullet_type = struct.unpack("<h", struct.pack("<H", packed_type_color & 0xFFFF))[0]
-    count1 = struct.unpack(
-        "<h",
-        struct.pack("<H", int(instruction.arguments[1]) & 0xFFFF),
-    )[0]
-    count2 = struct.unpack(
-        "<h",
-        struct.pack("<H", int(instruction.arguments[2]) & 0xFFFF),
-    )[0]
-    if instruction.parameter_mask & 0x0C:
-        _fail("dynamic direct-fire count is unsupported")
+    count1 = _direct_fire_count(
+        int(instruction.arguments[1]),
+        dynamic=bool(instruction.parameter_mask & 0x04),
+        vm=vm,
+    )
+    count2 = _direct_fire_count(
+        int(instruction.arguments[2]),
+        dynamic=bool(instruction.parameter_mask & 0x08),
+        vm=vm,
+    )
     if count1 <= 0 or count2 <= 0:
         _fail("future direct-fire count is not positive")
     speed1 = _eval_float_operand(
@@ -1008,6 +1040,26 @@ def _execute_auxiliary(
                 aim_angle=aim_angle,
             )
             vm.float_locals[destination] = left.multiply(right)
+        elif opcode == 0x1A:
+            if len(instruction.arguments) != 3:
+                _fail("auxiliary subtraction argument layout drifted")
+            destination = _float_lvalue(int(instruction.arguments[0]))
+            left = _eval_float_operand(
+                int(instruction.arguments[1]),
+                dynamic=bool(instruction.parameter_mask & 0x02),
+                vm=vm,
+                aim_angle=aim_angle,
+            )
+            right = _eval_float_operand(
+                int(instruction.arguments[2]),
+                dynamic=bool(instruction.parameter_mask & 0x04),
+                vm=vm,
+                aim_angle=aim_angle,
+            )
+            vm.float_locals[destination] = FloatInterval(
+                left.lower - right.upper,
+                left.upper - right.lower,
+            )
         elif opcode == 0x0F:
             if len(instruction.arguments) != 2:
                 _fail("auxiliary add argument layout drifted")
@@ -1613,10 +1665,15 @@ def _timeline_external_variants(
             indexed[index] = replace(enemy, active=active)
         variants.append(
             TimelineExternalState(
-                # False is the hazard-maximal branch: both native gates
-                # consume the same timeline record, but only false can spawn.
+                # Both native spawn gates consume the same due record.  The
+                # false branch is therefore hazard-maximal: it includes every
+                # spawn that a currently-busy/suppressed root could omit, and
+                # no omitted record can be replayed after the gate clears.
                 stage_transition_busy=False,
                 spawn_suppressed=False,
+                # A blocked opcode 0x07 holds both its clock and PC. Applying
+                # both values independently at every projected update covers
+                # every possible message-release frame before future events.
                 conditional_gate_blocked=conditional,
                 indexed_enemies=tuple(indexed),
             )
@@ -1655,14 +1712,6 @@ def _lower_timeline_events(
     horizon_frames: int,
 ) -> tuple[dict[int, tuple[TimelineSpawnRequest, ...]], int]:
     root_state, root_external, difficulty_mask = _timeline_root(payload, ecl)
-    if (
-        root_external.stage_transition_busy
-        or root_external.conditional_gate_blocked
-    ):
-        _fail(
-            "FRScreen transition/message clock blocking is active; physical "
-            "player-frame to enemy/timeline-frame lifting is not complete"
-        )
     frontier = {_canonical_timeline_state(root_state)}
     external_variants = _timeline_external_variants(root_external)
     spawns_by_frame: dict[int, tuple[TimelineSpawnRequest, ...]] = {}

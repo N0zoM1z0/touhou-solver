@@ -97,9 +97,30 @@ The factorized 4px lower gate uses observation-aligned immutable replay roots
 f817 permits only `left_fast/down_left_fast`, excluding active `up_fast` and
 issued `up_left_fast`; f833/f835/f850/f910 remain empty and fail closed. All
 roots have complete interval/version coverage and no unresolved action.
-Windows measured f817 future-kernel/certificate delivery at 1420/21 ms. The
-feature remains default-off until the authorized Stage-4A physical trial
-establishes live delivery and effect.
+Windows measured f817 future-kernel/certificate delivery at 1412/21 ms.
+
+Stage-4A physical run `20260731_220830` did not falsify that retained action
+set because the hard lane never became eligible. All 1,754 live source
+projections were incomplete, including 1,726 manager-frame crossings, so all
+10,016 prepublication records failed closed and constrained zero actions. Its
+23 hits/first-hit 939 are different-RNG observations of the fallback path.
+
+Source semantics v3 replaces at least 481 sparse manager/pool reads with one
+contiguous 9.8 MiB root and lowers the reached dynamic-count, auxiliary
+subtraction, indexed-enemy `+0x2D30`, and FRScreen gate cases. Missing reached
+semantics still yield `UNKNOWN`; this is not a promotion of incomplete future
+slabs.
+
+The exact Boolean kernel now tests necessary next-layer terminal membership
+before path samples and recognizes a completely safe clearance slab/layer as
+the exact all-action kernel. Prepublication uses a membership-only query for
+hard bits and delays soft recovery work until the Boolean predecessor is
+empty. Directional terminal recoverability is therefore preserved at zero
+reserve without imposing its scan cost on a nonempty exact set. On Windows,
+the no-hazard bootstrap viability pass is 282 ms cold and about 9 ms warm
+instead of the physical 2,996 ms; the retained dense-root maximum remains
+2,104 ms and expires fail closed. The feature remains default-off pending a
+fresh physical coverage/delivery gate.
 
 Removed supplemental, candidate-verifier, prewarm, G5, and priority-17 lanes
 have no active code or strategy authority.

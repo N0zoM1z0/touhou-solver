@@ -269,8 +269,21 @@ roots 816/831/834/848/908 first falsify the old result: at the real H=80 the
 gate recovers exactly `left_fast/down_left_fast` at f817 and excludes the
 retained losing active/issued actions; f833/f835/f850/f910 remain empty.
 Native exact recurrence and the live adapter agree, with no unresolved
-action. Complete Linux and Windows gates pass. The next task is the already
-authorized single Stage-4A physical falsifier; local scoring remains later.
+action. The first Stage-4A physical gate `20260731_220830` produced zero hard
+authority because none of 1,754 sparse future-source captures completed; it
+falsified capture/delivery rather than the finite-model set. The corrected
+source v3 uses one contiguous manager+pool read and closes the reached
+dynamic-count, auxiliary subtraction, indexed timeline field, and FRScreen
+gate cases. Exact all-clear and terminal-first native paths remove the
+3-second empty-field bootstrap; hard membership no longer pays eager soft
+recovery cost. Complete Linux and Windows gates pass.
+
+The next task is one fresh Stage-4A physical coverage/delivery falsifier. Its
+promotion metrics are nonzero complete source projections, nonzero
+authority-eligible ordinary decisions, sharply fewer expired/no-query
+policies, and exact constraints before the first retained nonspell
+exhaustion. Total hits remain secondary different-RNG evidence. Local scoring
+and hostile-birth ranking remain later.
 
 ### WS-D — Combat, Focus, and Power
 

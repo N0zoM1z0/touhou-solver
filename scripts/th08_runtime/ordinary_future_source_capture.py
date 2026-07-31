@@ -1,4 +1,4 @@
-"""Coherent, sparse-read native root for ordinary future-source closure."""
+"""Coherent native root for ordinary future-source closure."""
 
 from __future__ import annotations
 
@@ -58,34 +58,40 @@ class OrdinaryFutureSourceCaptureResult:
 def _read_active_enemy_records(
     reader: Any,
 ) -> tuple[bytes, bytes, int]:
-    manager_blob = bytearray(ENEMY_STRIDE)
-    active_record_count = 0
-    manager_flags = reader.u32(
-        ENEMY_MANAGER_TEMPLATE_BASE + ENEMY_FLAGS_OFFSET
+    # The manager singleton is immediately before the ordinary pool.  Capture
+    # both in one ReadProcessMemory transaction: the former sparse scan made
+    # at least 481 cross-process calls, and retained physical traces showed
+    # that 1,726/1,754 roots crossed enemy_manager_frame before closure could
+    # even be attempted.  One contiguous image is larger (~9.8 MiB) but is a
+    # single versioned native observation and retains every slot coordinate.
+    slab = reader.read(
+        ENEMY_MANAGER_TEMPLATE_BASE,
+        (ENEMY_POOL_SIZE + 1) * ENEMY_STRIDE,
     )
-    if manager_flags & ENEMY_ACTIVE_FLAG:
-        manager_blob[:] = reader.read(
-            ENEMY_MANAGER_TEMPLATE_BASE,
-            ENEMY_STRIDE,
+    expected_size = (ENEMY_POOL_SIZE + 1) * ENEMY_STRIDE
+    if len(slab) != expected_size:
+        raise ValueError("ordinary future-source enemy slab is truncated")
+    manager_blob = slab[:ENEMY_STRIDE]
+    ordinary_blob = slab[ENEMY_STRIDE:]
+    active_record_count = int(
+        bool(
+            struct.unpack_from(
+                "<I",
+                manager_blob,
+                ENEMY_FLAGS_OFFSET,
+            )[0]
+            & ENEMY_ACTIVE_FLAG
         )
-        active_record_count += 1
-
-    # Keep native slot coordinates while avoiding a 10 MiB process read.
-    # Only active records cross the process boundary; the zero-filled local
-    # image lets the existing complete decoder retain its slot identity.
-    ordinary_blob = bytearray(ENEMY_POOL_SIZE * ENEMY_STRIDE)
+    )
     for slot in range(ENEMY_POOL_SIZE):
-        pointer = ENEMY_POOL_BASE + slot * ENEMY_STRIDE
-        flags = reader.u32(pointer + ENEMY_FLAGS_OFFSET)
-        if not flags & ENEMY_ACTIVE_FLAG:
-            continue
         base = slot * ENEMY_STRIDE
-        ordinary_blob[base : base + ENEMY_STRIDE] = reader.read(
-            pointer,
-            ENEMY_STRIDE,
-        )
-        active_record_count += 1
-    return bytes(manager_blob), bytes(ordinary_blob), active_record_count
+        flags = struct.unpack_from(
+            "<I",
+            ordinary_blob,
+            base + ENEMY_FLAGS_OFFSET,
+        )[0]
+        active_record_count += int(bool(flags & ENEMY_ACTIVE_FLAG))
+    return manager_blob, ordinary_blob, active_record_count
 
 
 def _canonical_runtime_ecl_sha256(

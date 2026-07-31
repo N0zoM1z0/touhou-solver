@@ -13,7 +13,7 @@ coverage may produce ``allowed_actions`` and action authority.
 from __future__ import annotations
 
 import math
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from typing import Mapping, Protocol
 
 from .hazard_coverage import HazardCoverageAssessment
@@ -274,6 +274,32 @@ def _query_recovery_distance(
     return min(distances, default=math.inf)
 
 
+def _query_boolean_membership(
+    policy: HazardSpaceViabilityPolicy,
+    *,
+    frame: int,
+    x: float,
+    y: float,
+    active_action: str,
+) -> ViabilityQuery:
+    """Use a hard-membership surface when the concrete policy exposes one."""
+
+    membership_query = getattr(policy, "query_membership", None)
+    if callable(membership_query):
+        return membership_query(
+            frame=frame,
+            x=x,
+            y=y,
+            active_action=active_action,
+        )
+    return policy.query(
+        frame=frame,
+        x=x,
+        y=y,
+        active_action=active_action,
+    )
+
+
 def build_causal_prepublication_filter(
     *,
     enabled: bool,
@@ -432,6 +458,10 @@ def build_causal_prepublication_filter(
 
     lead_frames = publication_frame - current_frame
     assessments: list[PrepublicationActionAssessment] = []
+    terminal_roots_by_action: dict[
+        str,
+        tuple[tuple[float, float, str, str | None], ...],
+    ] = {}
     for selected_action in selected_actions:
         branches = enumerate_local_pipeline_branches(
             root=root,
@@ -442,7 +472,7 @@ def build_causal_prepublication_filter(
         viable_count = 0
         unavailable_count = 0
         certified_margins: list[float] = []
-        recovery_distances: list[float] = []
+        terminal_roots: list[tuple[float, float, str, str | None]] = []
         terminal_actions: set[str] = set()
         for branch in branches:
             x = float(start_x)
@@ -453,12 +483,6 @@ def build_causal_prepublication_filter(
                 y = min(bottom, max(top, y + velocity_y))
             terminal_active = branch.active_actions[-1]
             terminal_actions.add(terminal_active)
-            policy_query = future_policy.query(
-                frame=policy_query_frame,
-                x=x,
-                y=y,
-                active_action=terminal_active,
-            )
             pending_action = (
                 selected_action
                 if _terminal_pending(
@@ -468,7 +492,16 @@ def build_causal_prepublication_filter(
                 )
                 else None
             )
+            terminal_roots.append(
+                (x, y, terminal_active, pending_action)
+            )
             if future_safety_policy is not None:
+                policy_query = future_safety_policy.query(
+                    frame=policy_query_frame,
+                    x=x,
+                    y=y,
+                    active_action=terminal_active,
+                )
                 safety_query = policy_query
                 if pending_action is not None:
                     certified_margin = (
@@ -498,6 +531,14 @@ def build_causal_prepublication_filter(
                     )
                 )
             else:
+                assert future_viability_policy is not None
+                policy_query = _query_boolean_membership(
+                    future_viability_policy,
+                    frame=policy_query_frame,
+                    x=x,
+                    y=y,
+                    active_action=terminal_active,
+                )
                 viability_query = policy_query
                 boolean_member = bool(
                     (
@@ -523,18 +564,7 @@ def build_causal_prepublication_filter(
             viable_count += int(branch_viable)
             unavailable_count += int(branch_unavailable)
             certified_margins.append(certified_margin)
-            if future_recovery_policy is not None:
-                recovery_distances.append(
-                    _query_recovery_distance(
-                        future_recovery_policy.query(
-                            frame=policy_query_frame,
-                            x=x,
-                            y=y,
-                            active_action=terminal_active,
-                        ),
-                        held_action_pending=pending_action,
-                    )
-                )
+        terminal_roots_by_action[selected_action] = tuple(terminal_roots)
         assessments.append(
             PrepublicationActionAssessment(
                 action=selected_action,
@@ -545,10 +575,7 @@ def build_causal_prepublication_filter(
                     certified_margins,
                     default=-math.inf,
                 ),
-                worst_recovery_distance=max(
-                    recovery_distances,
-                    default=math.inf,
-                ),
+                worst_recovery_distance=math.inf,
                 terminal_active_actions=tuple(sorted(terminal_actions)),
             )
         )
@@ -573,6 +600,44 @@ def build_causal_prepublication_filter(
         for assessment in assessments
         if math.isfinite(assessment.worst_certified_margin)
     )
+    # For a Boolean lower kernel, recovery is a directional terminal
+    # diagnostic only after the exact predecessor is empty.  When any
+    # certified Boolean action exists, its hard margin determines the result
+    # and the former eager recovery pass was dead work across every hidden
+    # branch. Signed policies retain their full diagnostic surface.
+    if (
+        future_recovery_policy is not None
+        and (
+            future_safety_policy is not None
+            or not finite_margins
+        )
+    ):
+        assessments = [
+            replace(
+                assessment,
+                worst_recovery_distance=max(
+                    (
+                        _query_recovery_distance(
+                            future_recovery_policy.query(
+                                frame=policy_query_frame,
+                                x=x,
+                                y=y,
+                                active_action=terminal_active,
+                            ),
+                            held_action_pending=pending_action,
+                        )
+                        for (
+                            x,
+                            y,
+                            terminal_active,
+                            pending_action,
+                        ) in terminal_roots_by_action[assessment.action]
+                    ),
+                    default=math.inf,
+                ),
+            )
+            for assessment in assessments
+        ]
     recovery_actions: tuple[str, ...] = ()
     if finite_margins:
         best_margin = max(

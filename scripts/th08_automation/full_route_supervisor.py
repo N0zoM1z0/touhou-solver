@@ -219,6 +219,10 @@ def run_trial(args: argparse.Namespace, *, api: Win32) -> str:
         "trace_enemy_lifecycle_events": (
             args.trace_enemy_lifecycle_events
         ),
+        "kill_before_saturation": args.kill_before_saturation,
+        "ordinary_preexhaustion_authority": (
+            args.ordinary_preexhaustion_authority
+        ),
         "diagnostic_continue_root_only_scale": (
             args.diagnostic_continue_root_only_scale
         ),
@@ -242,6 +246,10 @@ def run_trial(args: argparse.Namespace, *, api: Win32) -> str:
             ),
             trace_enemy_lifecycle_events=(
                 args.trace_enemy_lifecycle_events
+            ),
+            kill_before_saturation=args.kill_before_saturation,
+            ordinary_preexhaustion_authority=(
+                args.ordinary_preexhaustion_authority
             ),
             diagnostic_continue_root_only_scale=(
                 args.diagnostic_continue_root_only_scale
@@ -487,6 +495,23 @@ def build_parser() -> argparse.ArgumentParser:
         help=(
             "install the reversible bounded ordinary-enemy lifecycle ring "
             "for the complete route; trace only, no action authority"
+        ),
+    )
+    parser.add_argument(
+        "--kill-before-saturation",
+        action="store_true",
+        help=(
+            "enable observed ordinary-enemy target alignment/unfocus as a "
+            "fresh-certified objective preference"
+        ),
+    )
+    parser.add_argument(
+        "--ordinary-preexhaustion-authority",
+        action=argparse.BooleanOptionalAction,
+        default=False,
+        help=(
+            "enable causal control-reserve action filtering during ordinary "
+            "nonspells only; shadow future hazards remain non-authoritative"
         ),
     )
     parser.add_argument(

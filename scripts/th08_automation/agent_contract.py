@@ -56,6 +56,7 @@ def build_long_run_arguments(
     trace_enemy_mode_transitions: bool = False,
     trace_enemy_lifecycle_events: bool = False,
     kill_before_saturation: bool = False,
+    ordinary_preexhaustion_authority: bool = False,
     diagnostic_continue_root_only_scale: bool = False,
     runtime_ecl_static_image: Path | None = None,
     runtime_ecl_static_sha256: str | None = None,
@@ -155,6 +156,8 @@ def build_long_run_arguments(
         arguments.append("--trace-enemy-lifecycle-events")
     if kill_before_saturation:
         arguments.append("--kill-before-saturation")
+    if ordinary_preexhaustion_authority:
+        arguments.append("--ordinary-preexhaustion-authority")
     if diagnostic_continue_root_only_scale:
         arguments.append("--diagnostic-continue-root-only-scale")
     if runtime_ecl_static_image is not None:

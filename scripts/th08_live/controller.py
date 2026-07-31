@@ -195,7 +195,6 @@ from th08_live.issue_stage import (
 from th08_live.kill_before_saturation import (
     MINIMUM_PLAYER_POWER,
     choose_kill_before_saturation_preference,
-    choose_upcoming_spawn_preference,
     observe_kill_before_saturation_target,
 )
 from th08_live.local_certificates import (
@@ -225,10 +224,10 @@ from th08_live.local_objectives import (
     terminal_threat_degeneracy as _terminal_threat_degeneracy,
     terminal_threat_scores as _terminal_threat_scores_impl,
 )
-from th08_runtime.timeline_spawn_forecast import (
-    DEFAULT_SPAWN_FORECAST_HORIZON,
-    StageTimelineSpawnForecaster,
-    UpcomingSpawnObservation,
+from touhou_control.preexhaustion import (
+    CausalPreexhaustionFilter,
+    build_causal_preexhaustion_filter,
+    unavailable_causal_preexhaustion_filter,
 )
 from th08_live.movement import (
     BOMB,
@@ -464,16 +463,16 @@ ROUTE2_STAGE_SUCCESSORS = {
     4: 5,
     5: 7,
 }
-ROUTE_STAGE_ECL_FILES = {
-    0: "ecldata1.ecl",
-    1: "ecldata2.ecl",
-    2: "ecldata3.ecl",
-    3: "ecldata4a.ecl",
-    4: "ecldata4b.ecl",
-    5: "ecldata5.ecl",
-    6: "ecldata6.ecl",
-    7: "ecldata7.ecl",
-    8: "ecldata8.ecl",
+ORDINARY_PREEXHAUSTION_AUTHORITY = (
+    "causal_ordinary_nonspell_control_reserve_v1"
+)
+CORRIDOR_ALLOWED_ACTION_AUTHORITY = "exact_corridor_viability_v1"
+_ORDINARY_PREEXHAUSTION_ACTIONS = tuple(
+    action.name for action in _PLANNER_ACTIONS
+)
+_ORDINARY_PREEXHAUSTION_VELOCITIES = {
+    action.name: (action.dx, action.dy)
+    for action in _LOCAL_PIPELINE_STATE_ACTIONS
 }
 
 
@@ -513,6 +512,81 @@ def _diagnostic_constant_root_time_scale(
             "diagnostic_constant_current_root_unknown_direction_no_authority"
         ),
         source_frame=schedule.source_frame,
+    )
+
+
+def _ordinary_nonspell_preexhaustion_filter(
+    *,
+    enabled: bool,
+    spell_active: bool,
+    player_phase: int,
+    predeath_counter: int,
+    root_scale_bits: int,
+    root: LocalPipelineRoot | None,
+    action_hold_frames: int,
+    player_x: float,
+    player_y: float,
+) -> CausalPreexhaustionFilter:
+    """Build fail-closed causal action authority for an ordinary phase."""
+
+    uncertainty_frames = action_hold_frames
+    pickup_delay_frames = tuple(range(action_hold_frames + 1))
+    if not enabled:
+        return unavailable_causal_preexhaustion_filter(
+            enabled=False,
+            reason="disabled",
+            hostile_birth_uncertainty_frames=uncertainty_frames,
+            pickup_delay_frames=pickup_delay_frames,
+        )
+    if spell_active:
+        return unavailable_causal_preexhaustion_filter(
+            enabled=True,
+            reason="spell_active",
+            hostile_birth_uncertainty_frames=uncertainty_frames,
+            pickup_delay_frames=pickup_delay_frames,
+        )
+    if player_phase != 0 or predeath_counter != 0:
+        return unavailable_causal_preexhaustion_filter(
+            enabled=True,
+            reason="player_transition_or_predeath",
+            hostile_birth_uncertainty_frames=uncertainty_frames,
+            pickup_delay_frames=pickup_delay_frames,
+        )
+    if root_scale_bits != TH08_UNIT_TIME_SCALE_BITS:
+        return unavailable_causal_preexhaustion_filter(
+            enabled=True,
+            reason="nonunit_root_time_scale",
+            hostile_birth_uncertainty_frames=uncertainty_frames,
+            pickup_delay_frames=pickup_delay_frames,
+        )
+    if root is not None and root.pending_action is not None:
+        root = LocalPipelineRoot(
+            active_action=root.active_action,
+            held_desired_action=root.held_desired_action,
+            pending_action=root.pending_action,
+            remaining_delay_support=tuple(
+                range(action_hold_frames + 1)
+            ),
+        )
+    return build_causal_preexhaustion_filter(
+        enabled=True,
+        root=root,
+        selected_actions=_ORDINARY_PREEXHAUSTION_ACTIONS,
+        action_velocities=_ORDINARY_PREEXHAUSTION_VELOCITIES,
+        delay_frames=pickup_delay_frames,
+        action_hold_frames=action_hold_frames,
+        start_x=player_x,
+        start_y=player_y,
+        bounds=(
+            PLAYFIELD_LEFT,
+            PLAYFIELD_RIGHT,
+            PLAYFIELD_TOP,
+            PLAYFIELD_BOTTOM,
+        ),
+        player_radius=PLAYER_RADIUS,
+        hostile_birth_uncertainty_frames=uncertainty_frames,
+        movement_scale_bounds=(0.0, 1.0),
+        physical_lease_frames=action_hold_frames,
     )
 
 
@@ -604,6 +678,9 @@ def _issue_recertification_record(
         "global_constraint_relaxed": (
             recertification.global_constraint_relaxed
         ),
+        "allowed_action_authority": (
+            recertification.allowed_action_authority
+        ),
         "selected_outside_global_without_relaxation": (
             selected_outside_global_without_relaxation
         ),
@@ -634,6 +711,7 @@ def commit_local_proposal_for_fresh_hazards(
     snapshot_lag: int,
     pipeline_root: LocalPipelineRoot | None = None,
     allowed_first_actions: tuple[str, ...] | None = None,
+    allowed_action_authority: str | None = None,
     viability_repair_volumes: tuple[tuple[str, int], ...] = (),
     viability_recovery_distances: tuple[tuple[str, float], ...] = (),
     viability_safety_actions: tuple[str, ...] = (),
@@ -665,6 +743,7 @@ def commit_local_proposal_for_fresh_hazards(
             time_scale_schedule=time_scale_schedule,
             pipeline_root=pipeline_root,
             allowed_first_actions=allowed_first_actions,
+            allowed_action_authority=allowed_action_authority,
             viability_repair_volumes=viability_repair_volumes,
             viability_recovery_distances=(
                 viability_recovery_distances
@@ -699,6 +778,7 @@ def issue_transaction_for_fresh_hazards(
     snapshot_lag: int,
     pipeline_root: LocalPipelineRoot | None = None,
     allowed_first_actions: tuple[str, ...] | None = None,
+    allowed_action_authority: str | None = None,
     viability_repair_volumes: tuple[tuple[str, int], ...] = (),
     viability_recovery_distances: tuple[tuple[str, float], ...] = (),
     viability_safety_actions: tuple[str, ...] = (),
@@ -722,6 +802,7 @@ def issue_transaction_for_fresh_hazards(
         snapshot_lag=snapshot_lag,
         pipeline_root=pipeline_root,
         allowed_first_actions=allowed_first_actions,
+        allowed_action_authority=allowed_action_authority,
         viability_repair_volumes=viability_repair_volumes,
         viability_recovery_distances=viability_recovery_distances,
         viability_safety_actions=viability_safety_actions,
@@ -1503,6 +1584,13 @@ def _prepare_live_run(args: argparse.Namespace) -> None:
         raise ValueError(
             "kill-before-saturation requires explicit hard no-Bomb"
         )
+    if (
+        getattr(args, "ordinary_preexhaustion_authority", False)
+        and not args.no_bomb
+    ):
+        raise ValueError(
+            "ordinary pre-exhaustion authority requires explicit hard no-Bomb"
+        )
     if enable_finalb_scale_source_authority and (
         runtime_ecl_static_image is None
         or runtime_ecl_static_sha256 is None
@@ -1627,49 +1715,9 @@ def _run_live_session(
     kill_before_saturation = bool(
         getattr(args, "kill_before_saturation", False)
     )
-    timeline_spawn_forecasters: dict[
-        int,
-        StageTimelineSpawnForecaster | None,
-    ] = {}
-    timeline_spawn_forecaster_errors: dict[int, str] = {}
-    decoded_ecl_directory = (
-        Path(__file__).resolve().parents[2]
-        / "artifacts"
-        / "decoded"
+    ordinary_preexhaustion_authority = bool(
+        getattr(args, "ordinary_preexhaustion_authority", False)
     )
-
-    def timeline_spawn_forecaster(
-        stage_route_index: int,
-    ) -> StageTimelineSpawnForecaster | None:
-        if stage_route_index not in timeline_spawn_forecasters:
-            ecl_name = ROUTE_STAGE_ECL_FILES.get(stage_route_index)
-            ecl_path = (
-                decoded_ecl_directory / ecl_name
-                if ecl_name is not None
-                else None
-            )
-            try:
-                timeline_spawn_forecasters[stage_route_index] = (
-                    StageTimelineSpawnForecaster(
-                        ecl_path,
-                        expected_difficulty_mask=(
-                            0x0F
-                            if args.difficulty == 4
-                            else 1 << args.difficulty
-                        ),
-                    )
-                    if ecl_path is not None and ecl_path.is_file()
-                    else None
-                )
-            except (OSError, RuntimeError, ValueError) as error:
-                timeline_spawn_forecasters[stage_route_index] = None
-                timeline_spawn_forecaster_errors[stage_route_index] = (
-                    f"{type(error).__name__}:{error}"
-                )
-        return timeline_spawn_forecasters[stage_route_index]
-
-    if kill_before_saturation and args.expected_stage is not None:
-        timeline_spawn_forecaster(args.expected_stage)
 
     enemy_lifecycle_probe: EnemyLifecycleProbe | None = None
     enemy_lifecycle_probe_last_serial: int | None = None
@@ -1872,17 +1920,33 @@ def _run_live_session(
                     "damage_objective": (
                         "shadow_lexicographic_inside_fresh_safe_set"
                     ),
+                    "ordinary_preexhaustion_authority": {
+                        "enabled": ordinary_preexhaustion_authority,
+                        "scope": "ordinary_nonspell_only",
+                        "authority": ORDINARY_PREEXHAUSTION_AUTHORITY,
+                        "hard_inputs": (
+                            "observed_active_held_pending_pipeline_root_"
+                            "pickup_delay_support_playfield_bounds"
+                        ),
+                        "hostile_birth_uncertainty": (
+                            "one_additional_observation_lease_reaction_"
+                            "reserve_no_spawn_geometry_claim"
+                        ),
+                        "future_time_scale_support": [0.0, 1.0],
+                        "fresh_collision_certificate_is_final_gate": True,
+                        "shadow_future_promoted": False,
+                    },
                     "kill_before_saturation": {
                         "enabled": kill_before_saturation,
                         "role": (
-                            "global_pre_exhaustion_objective_filter_"
-                            "inside_fresh_issue_safe_set"
+                            "observed_enemy_objective_preference_inside_"
+                            "causal_and_fresh_issue_safe_set"
                             if kill_before_saturation
                             else "disabled"
                         ),
                         "complete_action": (
-                            "observed_target_or_byte_verified_upcoming_"
-                            "spawn_alignment_then_same_direction_unfocused"
+                            "observed_target_alignment_then_same_direction_"
+                            "unfocused"
                         ),
                         "fallback": (
                             "preserve_survival_baseline_on_missing_or_"
@@ -1890,14 +1954,11 @@ def _run_live_session(
                         ),
                         "global_shadow_is_hard_authority": False,
                         "upcoming_spawn_forecast": {
-                            "horizon_frames": (
-                                DEFAULT_SPAWN_FORECAST_HORIZON
+                            "enabled": False,
+                            "reason": (
+                                "withheld_after_noncausal_timeline_lifecycle_"
+                                "counterexample"
                             ),
-                            "source": (
-                                "native_timeline_clock_plus_runtime_byte_"
-                                "verified_shipped_ecl"
-                            ),
-                            "fallback": "current_enemy_or_survival_baseline",
                         },
                         "hard_no_bomb_required": True,
                     },
@@ -3048,9 +3109,7 @@ def _run_live_session(
                     excluded_enemy_pointer=boss_enemy_pointer,
                 )
             )
-            upcoming_spawn_observation: (
-                UpcomingSpawnObservation | None
-            ) = None
+            upcoming_spawn_observation = None
             upcoming_spawn_skip_reason: str | None = None
             if not kill_before_saturation:
                 upcoming_spawn_skip_reason = "disabled"
@@ -3065,21 +3124,10 @@ def _run_live_session(
                     "current_enemy_target_has_priority"
                 )
             else:
-                active_spawn_forecaster = timeline_spawn_forecaster(
-                    int(state["stage_route_index"])
+                upcoming_spawn_skip_reason = (
+                    "withheld_after_noncausal_timeline_lifecycle_"
+                    "counterexample"
                 )
-                if active_spawn_forecaster is None:
-                    upcoming_spawn_skip_reason = (
-                        "stage_ecl_forecaster_unavailable:"
-                        + timeline_spawn_forecaster_errors.get(
-                            int(state["stage_route_index"]),
-                            "missing_content",
-                        )
-                    )
-                else:
-                    upcoming_spawn_observation = (
-                        active_spawn_forecaster.observe(reader)
-                    )
             can_bomb = (
                 not args.no_bomb
                 and args.normal_bomb
@@ -3557,6 +3605,90 @@ def _run_live_session(
             action_hold_frames = _estimate_live_action_hold(
                 tuple(decision_frame_deltas)
             )
+            preexhaustion_active_action = (
+                _local_pipeline_action_from_mask(
+                    captured_iteration.native_active_mask
+                )
+            )
+            preexhaustion_held_action = (
+                _local_pipeline_action_from_mask(
+                    captured_iteration.held_desired_mask
+                )
+            )
+            preexhaustion_pipeline_root = (
+                LocalPipelineRoot(
+                    active_action=preexhaustion_active_action,
+                    held_desired_action=preexhaustion_held_action,
+                )
+                if (
+                    preexhaustion_active_action
+                    == preexhaustion_held_action
+                )
+                else LocalPipelineRoot(
+                    active_action=preexhaustion_active_action,
+                    held_desired_action=preexhaustion_held_action,
+                    pending_action=preexhaustion_held_action,
+                    # The helper replaces this placeholder with every
+                    # possible pickup inside its physical lease.
+                    remaining_delay_support=(0,),
+                )
+            )
+            ordinary_preexhaustion = (
+                _ordinary_nonspell_preexhaustion_filter(
+                    enabled=ordinary_preexhaustion_authority,
+                    spell_active=bool(spell_state["active"]),
+                    player_phase=int(player["phase"]),
+                    predeath_counter=int(player["predeath_counter"]),
+                    root_scale_bits=player_control_root.scale_bits,
+                    root=preexhaustion_pipeline_root,
+                    action_hold_frames=LIVE_ACTION_HOLD_MAX,
+                    player_x=player_control_root.x,
+                    player_y=player_control_root.y,
+                )
+            )
+            allowed_action_authority = (
+                CORRIDOR_ALLOWED_ACTION_AUTHORITY
+                if (
+                    corridor_action_authority
+                    and actionable_policy_guidance.allowed_first_actions
+                    is not None
+                )
+                else None
+            )
+            if (
+                allowed_action_authority is None
+                and ordinary_preexhaustion.applicable
+                and ordinary_preexhaustion.allowed_actions is not None
+            ):
+                actionable_policy_guidance = replace(
+                    actionable_policy_guidance,
+                    support_covers_current=True,
+                    allowed_first_actions=(
+                        ordinary_preexhaustion.allowed_actions
+                    ),
+                    repair_volumes=(),
+                    recovery_distances=(),
+                    safety_actions=(),
+                    safety_state_value=None,
+                    survival_actions=(),
+                    survival_frames=None,
+                    survival_bottleneck_margin=None,
+                    position_error=0.0,
+                )
+                allowed_action_authority = (
+                    ORDINARY_PREEXHAUSTION_AUTHORITY
+                )
+            early_kill_allowed_actions = (
+                actionable_policy_guidance.allowed_first_actions
+            )
+            if (
+                early_kill_allowed_actions is None
+                and ordinary_preexhaustion.authority_eligible
+                and not ordinary_preexhaustion.applicable
+            ):
+                early_kill_allowed_actions = (
+                    _ORDINARY_PREEXHAUSTION_ACTIONS
+                )
             damage_target_x: float | None = None
             damage_target_half_width = 0.0
             damageable = False
@@ -3618,6 +3750,7 @@ def _run_live_session(
                             published_guidance.capture.delay_estimate.support
                         ),
                         action_hold_frames=action_hold_frames,
+                        local_pipeline_root=observed_local_pipeline_root,
                     ),
                     guidance=GlobalGuidance(
                         target_x=(
@@ -3637,6 +3770,13 @@ def _run_live_session(
                         ),
                         allowed_first_actions=(
                             actionable_policy_guidance.allowed_first_actions
+                        ),
+                        allowed_action_authority=(
+                            allowed_action_authority
+                        ),
+                        allow_coarse_viability_relaxation=(
+                            allowed_action_authority
+                            != ORDINARY_PREEXHAUSTION_AUTHORITY
                         ),
                         viability_repair_volumes=(
                             actionable_policy_guidance.repair_volumes
@@ -3710,36 +3850,13 @@ def _run_live_session(
                             + action_hold_frames
                         ),
                         allowed_first_actions=(
-                            policy_guidance.allowed_first_actions
+                            early_kill_allowed_actions
                         ),
                         actions=_PLANNER_ACTIONS,
                     )
                 )
                 kill_before_saturation_preference_source = (
                     "observed_enemy"
-                )
-            elif (
-                upcoming_spawn_observation is not None
-                and upcoming_spawn_observation.target is not None
-            ):
-                kill_before_saturation_preference = (
-                    choose_upcoming_spawn_preference(
-                        decision.action,
-                        spawn_x=(
-                            upcoming_spawn_observation.target.x
-                        ),
-                        player_x=(
-                            published_guidance.capture.projected_player_x
-                        ),
-                        action_hold_frames=action_hold_frames,
-                        allowed_first_actions=(
-                            policy_guidance.allowed_first_actions
-                        ),
-                        actions=_PLANNER_ACTIONS,
-                    )
-                )
-                kill_before_saturation_preference_source = (
-                    "upcoming_fixed_spawn"
                 )
             else:
                 kill_before_saturation_preference = None
@@ -3774,8 +3891,12 @@ def _run_live_session(
                         lasers=lasers,
                         enemy_bodies=fresh_enemy_bodies,
                         snapshot_lag=player_to_hazard_lag,
+                        pipeline_root=observed_local_pipeline_root,
                         allowed_first_actions=(
                             actionable_policy_guidance.allowed_first_actions
+                        ),
+                        allowed_action_authority=(
+                            allowed_action_authority
                         ),
                         viability_repair_volumes=(
                             actionable_policy_guidance.repair_volumes
@@ -3993,12 +4114,20 @@ def _run_live_session(
                 "issued_action": decision.action,
                 "deadline_missed": action_deadline_missed,
                 "global_role": (
-                    "causal_pre_exhaustion_objective_filter"
+                    "observed_enemy_objective_preference"
                     if kill_before_saturation
                     else "disabled"
                 ),
-                "global_action_authority": corridor_action_authority,
-                "fresh_local_action_authority": kill_before_saturation,
+                "global_action_authority": False,
+                "fresh_local_action_authority": False,
+                "planned_allowed_action_authority": (
+                    allowed_action_authority
+                ),
+                "issued_allowed_action_authority": (
+                    allowed_action_authority
+                    if not action_deadline_missed
+                    else None
+                ),
             }
             can_deathbomb = issue_overrides.can_deathbomb
             auto_confirm_event = issue_overrides.auto_confirm_event
@@ -4231,6 +4360,26 @@ def _run_live_session(
                     ),
                 )
                 record.update(sensing_trace_fields)
+                ordinary_preexhaustion_record = (
+                    ordinary_preexhaustion.record()
+                )
+                ordinary_preexhaustion_record.update(
+                    {
+                        "selected_as_allowed_action_authority": (
+                            allowed_action_authority
+                            == ORDINARY_PREEXHAUSTION_AUTHORITY
+                        ),
+                        "effective_at_issue": bool(
+                            allowed_action_authority
+                            == ORDINARY_PREEXHAUSTION_AUTHORITY
+                            and not action_deadline_missed
+                        ),
+                        "deadline_missed": action_deadline_missed,
+                    }
+                )
+                record["ordinary_preexhaustion"] = (
+                    ordinary_preexhaustion_record
+                )
                 record["corridor_delivery"] = {
                     "executor_enabled": corridor_executor is not None,
                     "worker_pending": corridor_future is not None,
@@ -4255,6 +4404,9 @@ def _run_live_session(
                         captured_iteration.player_projection_authority
                     ),
                     "action_authority": corridor_action_authority,
+                    "allowed_action_authority": (
+                        allowed_action_authority
+                    ),
                 }
                 control_trace_fields = build_decision_control_trace_fields(
                     DecisionControlTraceInput(

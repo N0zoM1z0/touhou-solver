@@ -41,11 +41,34 @@ unknown-direction continuation.
 The ordinary-stage root-only continuation may compute and query a rolling
 global policy for diagnostic evidence, but that publication has no action
 authority: its target, repair labels, and survival labels are removed before
-baseline local planning. The default-off nonspell combat experiment may use
-the queried viable-action set only as a necessary eligibility gate for its
-optional alignment proposal; baseline selection and hard safety do not inherit
-global authority from it. Its declared horizon must cover the full sensor-age
-+ asynchronous-publication-lead + kernel horizon.
+baseline local planning. `--ordinary-preexhaustion-authority` does not change
+that rule or promote the shadow future-hazard slab. Instead it supplies a
+separate causal player-control reserve constraint for ordinary nonspells.
+
+The pre-exhaustion observation is native active input, held complete desired
+input, player position/phase/predeath, root time scale, and the current action
+lease. If active and held differ, held is the one pending complete action.
+Within a six-physical-update lease, nature may choose every pending/new pickup
+order, including next-step pickup and no pickup within the lease; this does
+not use `enemy_manager_frame` as a pickup clock. Selecting held remains
+no-write and samples no new delay. Future player movement scale is universally
+bounded in `[0,1]`.
+
+The filter activates when signed playfield-boundary reserve is within the
+player radius plus maximum axis travel over the current lease and one
+additional hostile-birth reaction lease. It retains actions whose minimum
+reserve across every pipeline branch and every lease step does not decrease.
+If an already-pending motion forces loss for every action, only actions with
+maximum worst-lease reserve remain. This is exact finite-lease
+player-controllability authority, not future hostile-birth geometry or global
+collision authority.
+
+The local planner receives this allowed set without coarse-grid viability
+relaxation. Fresh issue-time collision certificates remain authoritative. If
+the causal/fresh intersection is empty, the transaction explicitly relaxes
+the reserve constraint in favor of immediate collision survival; timeout or
+deadline fallback holds the prior complete mask and records loss of current
+publication authority.
 
 Removed supplemental, candidate-verifier, prewarm, G5, and priority-17 lanes
 have no active code or strategy authority.
@@ -125,33 +148,26 @@ The only current physical combat experiment is default-off
 may use the coherent first-64 enemy prefix to select any living ordinary
 non-boss enemy above the player and within bounded horizontal separation.
 Full-health enemies are eligible; small enemies retain deterministic
-selection priority. Using the current winning queried shadow-global action
-set, the objective may select a complete action that improves horizontal
-alignment while preserving the planner's vertical tendency. Same-direction
-unfocus remains a fallback for an observed body.
-
-When no current body target supersedes it, the experiment may pre-position
-for one upcoming fixed spawn within 240 frames. The observation is causal only
-when the native manager frame brackets a stable timeline runtime table, all
-spawn/transition gates are open, difficulty and relocated ECL identity match,
-no timeline barrier is crossed, and the live instruction interval through the
-spawn is byte-exact with the shipped decoded ECL. Dynamic-position spawns and
-any disagreement return no target. A forecast may change horizontal
-alignment but may not invent an unfocus-only action.
+selection priority. When the causal pre-exhaustion flag is enabled, the
+objective may select a complete action that improves horizontal alignment
+while preserving the planner's vertical tendency inside its allowed set. In
+an interior state whose reserve exceeds the activation threshold, every
+complete action is eligible for objective ranking but still requires fresh
+issue safety. Same-direction unfocus remains a fallback for an observed body.
 
 Physical Stage-4A run `20260731_142342` falsified the current forecast
 implementation as a later-wave observer. Its 376 observations all named the
 same timeline-0 time-1 x=30 startup instruction. The zero-pointer fallback
 does not distinguish not-yet-started from completed timeline state. Until
-that lifecycle is made causal, forecast output has no objective authority;
-full-health currently observed bodies remain eligible under the other gates.
+that lifecycle is made causal, forecast output has no objective authority and
+the live path does not call it; full-health currently observed bodies remain
+eligible under the other gates.
 
 These are objective proposals, not hard safety authority. A missing or losing
-queried global set, no improving action, unsupported forecast, deadline
-expiry, or fresh issue rejection preserves the baseline action. The chosen
-complete action still passes the issue-time fresh certificate and hard
-no-Bomb transaction. Selecting the held complete mask retains the ordinary
-no-write semantics.
+causal reserve root, no improving action, deadline expiry, or fresh issue
+rejection preserves the baseline action. The chosen complete action still
+passes the issue-time fresh certificate and hard no-Bomb transaction.
+Selecting the held complete mask retains the ordinary no-write semantics.
 
 This rule is experimental, not promoted route-wide authority. Its first
 physical Stage-5 gate applied 27 preferences with zero Bomb/deadline
@@ -182,7 +198,17 @@ nonspell hit 1915, the last winning query at 1707 allowed only
 `stay/up/up_fast`; the fresh-local transaction selected `down_left`. The
 global set became empty at 1710, while the fresh issue set became empty only
 at 1912. Ordinary-stage global action authority, or a causally equivalent
-pre-exhaustion filter, is therefore the next hard contract gap.
+pre-exhaustion filter, was therefore the next hard contract gap.
+
+**Implemented, not observed physically:** the default-off filter now reaches
+local planning and fresh issue with an explicit authority label. The exact
+active/held/pending root also reaches both certificate calls when available.
+The frame-1707-shaped regression rejects `down_left`; zero-remaining pending
+pickup and hostile-birth early activation have deterministic coverage. The
+next physical gate must determine whether this moves global/fresh exhaustion
+and the first hit, and whether the six-update publication lease is respected.
+Until then the change is not promoted route-wide and local micro-ranking is
+unchanged.
 
 ## Falsification And Promotion
 

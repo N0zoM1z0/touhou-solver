@@ -42,6 +42,7 @@ class AgentHotkeyTests(unittest.TestCase):
         self.assertEqual(parsed.terminal_stage, 2)
         self.assertFalse(parsed.trace_enemy_lifecycle_events)
         self.assertFalse(parsed.kill_before_saturation)
+        self.assertFalse(parsed.ordinary_preexhaustion_authority)
         self.assertFalse(parsed.enable_finalb_scale_source_authority)
 
     def test_active_diagnostics_are_explicit(self) -> None:
@@ -51,6 +52,7 @@ class AgentHotkeyTests(unittest.TestCase):
                 trace_enemy_mode_transitions=True,
                 trace_enemy_lifecycle_events=True,
                 kill_before_saturation=True,
+                ordinary_preexhaustion_authority=True,
                 diagnostic_continue_root_only_scale=True,
             )
         )
@@ -58,6 +60,7 @@ class AgentHotkeyTests(unittest.TestCase):
         self.assertTrue(parsed.trace_enemy_mode_transitions)
         self.assertTrue(parsed.trace_enemy_lifecycle_events)
         self.assertTrue(parsed.kill_before_saturation)
+        self.assertTrue(parsed.ordinary_preexhaustion_authority)
         self.assertTrue(parsed.diagnostic_continue_root_only_scale)
 
     def test_finalb_scale_authority_is_exact_and_stage_bound(self) -> None:

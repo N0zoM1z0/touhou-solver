@@ -29,6 +29,7 @@ class IssueRequest:
     time_scale_schedule: Th08TimeScaleSchedule
     pipeline_root: Any | None = None
     allowed_first_actions: tuple[str, ...] | None = None
+    allowed_action_authority: str | None = None
     viability_repair_volumes: tuple[tuple[str, int], ...] = ()
     viability_recovery_distances: tuple[tuple[str, float], ...] = ()
     viability_safety_actions: tuple[str, ...] = ()
@@ -110,6 +111,13 @@ class IssueTransaction:
                 raise ValueError(
                     f"unknown allowed first actions: {sorted(unknown)}"
                 )
+        if (
+            request.allowed_action_authority is not None
+            and allowed is None
+        ):
+            raise ValueError(
+                "allowed action authority requires allowed first actions"
+            )
         if (
             request.preferred_action is not None
             and request.preferred_action not in action_by_name
@@ -240,6 +248,7 @@ class IssueTransaction:
             preferred_action=request.preferred_action,
             preference_reason=request.preference_reason,
             preference_applied=preferred is not None,
+            allowed_action_authority=request.allowed_action_authority,
         )
         issued_mask = (
             adapter.shot_mask

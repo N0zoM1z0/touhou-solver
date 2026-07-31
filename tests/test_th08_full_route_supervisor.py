@@ -81,6 +81,24 @@ class FullRouteSupervisorTests(unittest.TestCase):
         self.assertFalse(default_args.trace_enemy_lifecycle_events)
         self.assertTrue(enabled_args.trace_enemy_lifecycle_events)
 
+    def test_ordinary_nonspell_control_options_are_explicit(self) -> None:
+        default_args = build_parser().parse_args([])
+        enabled_args = build_parser().parse_args(
+            [
+                "--kill-before-saturation",
+                "--ordinary-preexhaustion-authority",
+            ]
+        )
+
+        self.assertFalse(default_args.kill_before_saturation)
+        self.assertFalse(
+            default_args.ordinary_preexhaustion_authority
+        )
+        self.assertTrue(enabled_args.kill_before_saturation)
+        self.assertTrue(
+            enabled_args.ordinary_preexhaustion_authority
+        )
+
     def test_enemy_mode_scale_continuation_is_explicit(self) -> None:
         enabled_args = build_parser().parse_args(
             [

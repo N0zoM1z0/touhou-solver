@@ -50,6 +50,8 @@ class GlobalGuidance:
     target_y: float | None = None
     target_deadline: int | None = None
     allowed_first_actions: tuple[str, ...] | None = None
+    allowed_action_authority: str | None = None
+    allow_coarse_viability_relaxation: bool = True
     viability_repair_volumes: tuple[tuple[str, int], ...] = ()
     viability_recovery_distances: tuple[tuple[str, float], ...] = ()
     viability_safety_actions: tuple[str, ...] = ()

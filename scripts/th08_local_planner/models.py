@@ -104,6 +104,7 @@ class IssueRecertification:
     preferred_action: str | None = None
     preference_reason: str | None = None
     preference_applied: bool = False
+    allowed_action_authority: str | None = None
 
 
 @dataclass(frozen=True)

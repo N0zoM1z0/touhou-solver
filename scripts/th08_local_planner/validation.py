@@ -104,6 +104,13 @@ def validate_local_planner_request(
         )
 
     allowed = guidance.allowed_first_actions
+    if (
+        guidance.allowed_action_authority is not None
+        and allowed is None
+    ):
+        raise ValueError(
+            "allowed action authority requires allowed first actions"
+        )
     if allowed is not None:
         if not allowed:
             raise ValueError("allowed first actions cannot be empty")
@@ -125,7 +132,10 @@ def validate_local_planner_request(
                 guidance.viability_position_error
             ),
         )
-        if threat_horizon > config.horizon
+        if (
+            threat_horizon > config.horizon
+            and guidance.allow_coarse_viability_relaxation
+        )
         else None
     )
 

@@ -10,6 +10,29 @@ from touhou_control.local_pipeline_oracle import (
 
 
 class LocalPipelineOracleTests(unittest.TestCase):
+    def test_zero_remaining_pending_pickup_applies_on_first_step(
+        self,
+    ) -> None:
+        root = LocalPipelineRoot(
+            active_action="stay",
+            held_desired_action="left",
+            pending_action="left",
+            remaining_delay_support=(0,),
+        )
+
+        branch = enumerate_local_pipeline_branches(
+            root=root,
+            selected_action="left",
+            delay_frames=(2,),
+            horizon_frames=3,
+        )[0]
+
+        self.assertFalse(branch.write_required)
+        self.assertEqual(
+            branch.active_actions,
+            ("left", "left", "left"),
+        )
+
     def test_pending_hold_is_no_write_and_does_not_reset_delay(self) -> None:
         root = LocalPipelineRoot(
             active_action="stay",

@@ -56,11 +56,11 @@ class LocalPipelineRoot:
             not self.remaining_delay_support
             or tuple(sorted(set(self.remaining_delay_support)))
             != self.remaining_delay_support
-            or self.remaining_delay_support[0] <= 0
+            or self.remaining_delay_support[0] < 0
         ):
             raise ValueError(
                 "pending remaining-delay support must be sorted, unique, "
-                "and positive"
+                "and nonnegative"
             )
 
 

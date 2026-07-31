@@ -15,6 +15,7 @@ from th08_time_scale import (
     TH08_UNIT_TIME_SCALE_BITS,
     Th08TimeScaleSchedule,
 )
+from touhou_control.local_pipeline_oracle import LocalPipelineRoot
 
 
 def _certificates(
@@ -252,6 +253,97 @@ class IssueTransactionTests(unittest.TestCase):
 
         self.assertIs(first, second)
         self.assertEqual(first.decision.mask & live.BOMB, 0)
+
+    def test_allowed_action_authority_is_retained_at_fresh_issue(self) -> None:
+        arguments = self._arguments()
+        arguments["allowed_first_actions"] = ("left", "right")
+        arguments["allowed_action_authority"] = (
+            "causal_ordinary_nonspell_control_reserve_v1"
+        )
+        with patch.object(
+            live,
+            "_robust_action_certificates",
+            side_effect=_certificates(
+                {
+                    "up_fast": (0, 9.0, 0.0),
+                    "left": (0, 5.0, 0.0),
+                    "right": (1, -1.0, 1.0),
+                }
+            ),
+        ):
+            issued = live.issue_transaction_for_fresh_hazards(
+                self._decision(),
+                **arguments,
+            )
+
+        self.assertEqual(issued.decision.action, "left")
+        self.assertEqual(
+            issued.transaction.allowed_action_authority,
+            arguments["allowed_action_authority"],
+        )
+        self.assertEqual(
+            issued.transaction.fresh_global_intersection,
+            ("left",),
+        )
+        self.assertFalse(
+            issued.transaction.global_constraint_relaxed
+        )
+
+    def test_explicit_pipeline_root_reaches_issue_certificate(self) -> None:
+        root = LocalPipelineRoot(
+            active_action="stay",
+            held_desired_action="left",
+            pending_action="left",
+            remaining_delay_support=(0, 1),
+        )
+        arguments = self._arguments()
+        arguments["pipeline_root"] = root
+        observed_roots: list[object] = []
+        base_provider = _certificates({})
+
+        def provider(**kwargs):
+            observed_roots.append(kwargs["pipeline_root"])
+            return base_provider(**kwargs)
+
+        transaction = IssueTransaction(
+            LocalProposal.from_decision(self._decision()),
+            IssueRequest(**arguments),
+            IssueAdapter(
+                actions=live._PLANNER_ACTIONS,
+                certificate_provider=provider,
+                timing_factory=live._LocalCertificateTimingAccumulator,
+                shot_mask=live.SHOT,
+                focus_mask=live.FOCUS,
+                bomb_mask=live.BOMB,
+            ),
+        )
+
+        transaction.commit()
+
+        self.assertEqual(observed_roots, [root])
+
+    def test_allowed_action_authority_without_actions_is_rejected(self) -> None:
+        arguments = self._arguments()
+        arguments["allowed_first_actions"] = None
+        arguments["allowed_action_authority"] = "authority_without_actions"
+        transaction = IssueTransaction(
+            LocalProposal.from_decision(self._decision()),
+            IssueRequest(**arguments),
+            IssueAdapter(
+                actions=live._PLANNER_ACTIONS,
+                certificate_provider=_certificates({}),
+                timing_factory=live._LocalCertificateTimingAccumulator,
+                shot_mask=live.SHOT,
+                focus_mask=live.FOCUS,
+                bomb_mask=live.BOMB,
+            ),
+        )
+
+        with self.assertRaisesRegex(
+            ValueError,
+            "requires allowed first actions",
+        ):
+            transaction.commit()
 
     def test_preference_applies_only_inside_fresh_global_safe_set(
         self,

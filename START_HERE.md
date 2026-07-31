@@ -22,15 +22,26 @@ authority.
   priority-17, and old focused Final-B lanes while preserving the promoted
   baseline/pre-loss live path, native snapshot executor, exact pipeline
   workspace, and Final-B scale authority.
-- Final cleanup gates: Linux discovery passed 1,136 tests in 9.611 seconds;
-  the complete Windows UNC discovery over the same test set exited zero.
-  Linux and Windows native builds pass the checked-in 41-symbol ABI gate.
-- No WS-H rule has promoted route-wide authority. One default-off
-  `--kill-before-saturation` experiment may align with an observed ordinary
-  enemy or a byte-verified upcoming fixed spawn only inside a winning queried
-  shadow-global action set. Its issue transaction still requires fresh local
-  certification. It requires hard no-Bomb and fails closed on spell state,
-  missing/losing guidance, unsupported timeline content, or fresh rejection.
+- Current Linux discovery passed 1,182 tests in 9.342 seconds. The affected
+  Windows UNC delivery/parser/planner gate passed 188 tests; complete Windows
+  discovery remains the pre-physical-promotion gate. Linux and Windows native
+  builds at the preceding checkpoint pass the checked-in 41-symbol ABI gate.
+- **Implemented, not physically validated:** default-off
+  `--ordinary-preexhaustion-authority` supplies an ordinary-nonspell causal
+  control-reserve filter without promoting the shadow future-hazard slab.
+  It uses observed active/held complete masks, enumerates every physical
+  pickup order (including no pickup) over a six-update lease, bounds future
+  movement scale in `[0,1]`, and retains only nondegrading worst-lease
+  boundary-reserve actions near exhaustion. One additional lease activates
+  the filter early for hostile-birth reaction uncertainty; this is not a
+  future birth-geometry claim. Fresh issue collision certification remains
+  the final gate, with explicit immediate-survival relaxation only when the
+  intersection is empty.
+- `--kill-before-saturation` now uses observed ordinary bodies only. The
+  falsified timeline spawn forecast is withheld from live input. With the
+  pre-exhaustion flag enabled, observed-body alignment/unfocus is an objective
+  inside the causal reserve set and fresh issue-safe set; it has no independent
+  safety authority.
 - `audits/` and `archive/` are untracked/local. Never stage them.
 
 ## Current Outcome
@@ -70,7 +81,8 @@ The physical forecast gate also falsified the current timeline observer as a
 general later-wave source. All 376 observations recycled the same timeline-0
 startup birth at time 1, x=30, and only three affected input. Full-health
 observed-body targeting remains useful, but zero-pointer timeline lifecycle
-must be disambiguated before the birth forecast is trusted again.
+must be disambiguated before the birth forecast is trusted again. The live
+forecaster is now disabled rather than used as an eligibility source.
 
 Latest full game-start Lunatic Route-2 run:
 
@@ -174,29 +186,38 @@ Final-B uses the exact pinned global-time-scale schedule. The root-only
 constant-scale continuation is diagnostic and unknown-direction, never a
 general hard-safety authority.
 
+The default-off ordinary pre-exhaustion experiment adds a causal
+player-controllability constraint before step 5. It is exact only for its
+declared six-physical-update lease, active/held/pending action partition,
+pickup-order set, `[0,1]` movement-scale bound, and playfield geometry. It
+makes no hard claim about unseen hostile geometry.
+
 Removed lanes must not be re-enabled from archive without a new causal need
 and explicit `STRATEGY.md` decision.
 
 ## Next Useful Gate
 
-The first Stage-5 native branch and three physical delivery gates are
-complete.
+The ordinary pre-exhaustion implementation and focused Linux/Windows gates
+are complete. No physical claim has been made.
 Next:
 
-1. Physically falsify the new causal observation path on a fresh Stage-4A
-   root: every upcoming location must come from a stable native timeline
-   clock and exact runtime/static ECL byte equality; current bodies override
-   the forecast; losing/missing global guidance preserves baseline.
-2. Require a visible alignment response before the 3660/3810/3860 middle
-   groups and test whether the last winning query moves later than frame 3679.
-   Retain target/proposal/application source separately.
-3. Continue the deeper global task: the ordinary-stage policy remains
-   diagnostic shadow, so exact hard action authority still requires a causal
-   action-conditioned future or an equivalent proved pre-exhaustion filter.
-4. Repeat the native kill/prevented-birth result on a second
-   generation-safe ordinary enemy and root.
-5. Keep the live rule default-off. Different-RNG 16→11 hits is encouraging
-   workload evidence, not causal promotion.
+1. With explicit gameplay authorization, run one fresh Stage-4A practice
+   using both `--ordinary-preexhaustion-authority` and
+   `--kill-before-saturation`; do not enable lifecycle tracing or spawn
+   forecasting.
+2. At the canonical first failure, verify that every near-exhaustion issued
+   action is in `ordinary_preexhaustion.allowed_actions`, or carries an
+   explicit empty-fresh-intersection/deadline fallback. The frame-1707-shaped
+   regression must reject `down_left`.
+3. Falsify physical usefulness, not merely code parity: compare last
+   nonempty global query, first causal-reserve activation, first fresh-set
+   exhaustion, first hit, total hits, Bombs, and exact-root certificate calls.
+4. Rotate the next gate to Stage 3 or Stage 5 if Stage 4A improves, then run a
+   fresh full Lunatic Route-2 diagnostic only after a material integrated
+   gain.
+5. If the causal filter preserves control reserve but a new hostile birth
+   still invalidates fresh-local safety, keep that as the next model gap;
+   do not promote the shadow future or tune local micro ranking.
 
 Do not compensate with a stage-specific waypoint.
 

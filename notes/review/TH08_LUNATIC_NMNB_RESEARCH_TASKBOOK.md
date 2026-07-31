@@ -248,13 +248,17 @@ Alternative methods:
 No heuristic may discard a safety branch or condition on hidden state without
 proof.
 
-Current first task: establish ordinary-stage exact global action authority, or
-an equivalent causal pre-exhaustion filter. In physical Stage-4A run
+Current first task: physically falsify the newly implemented ordinary-stage
+causal pre-exhaustion filter. In physical Stage-4A run
 `20260731_142342`, frame 1707 still had queried safe actions
 `stay/up/up_fast`, but the authority-free live transaction selected
 `down_left`. Global loss followed 205 frames before the hit; local loss
-appeared only three frames before it. Do not tune local scoring until this
-authority seam is closed.
+appeared only three frames before it. The default-off filter now enumerates
+active/held/pending pickup order over a six-physical-update lease, rejects
+reserve-degrading actions near exhaustion, activates one lease early for
+unknown hostile births, and still requires fresh issue safety. It does not
+promote shadow future hazards. Do not tune local scoring until a physical
+Stage-4A gate shows whether this closes the authority seam.
 
 ### WS-D — Combat, Focus, and Power
 
@@ -298,16 +302,17 @@ Current checkpoint:
 - the first attempt lost its last winning query at frame 3679. A 200-HP
   middle-wave enemy appeared near x=320 at frame 3864 but the old HP observer
   selected it only at frame 3900 at 15 HP;
-- full-health ordinary targeting and a stable-clock, live-byte-verified fixed
-  spawn forecast are implemented default-off. Their retained-trace 18
-  proposals are offline eligibility only;
+- full-health ordinary targeting remains implemented default-off. The
+  stable-clock/live-byte-verified fixed-spawn forecast was physically
+  falsified and is now withheld from the live preference path;
 - the authorized physical gate retained full-health body sensing but
   falsified the timeline forecast: all 376 observations recycled the same
   time-1 startup birth and only three affected input;
-- preserve early kill, repair exact timeline lifecycle before re-enabling
-  forecast authority, and first establish ordinary-stage global action
-  authority. Then repeat the native kill/prevented-birth result on a second
-  root before promotion. This checkpoint supports D1 but does not promote it.
+- preserve observed-body early kill inside the new causal reserve and fresh
+  issue sets; repair exact timeline lifecycle only before any future forecast
+  experiment. First physically test ordinary-stage pre-exhaustion authority,
+  then repeat the native kill/prevented-birth result on a second root before
+  promotion. This checkpoint supports D1 but does not promote it.
 
 #### D2: Focus as control
 
@@ -476,16 +481,17 @@ it.
 
 ## 11. Immediate Backlog
 
-1. Select a generation-safe ordinary-enemy root from the retained Stage
-   3/4A/5 evidence.
-2. Capture/reproduce the complete combat/resource native root.
-3. Run D1/D2 schedules inside the same survival-feasible set.
-4. Fix only the first model/native mismatch that blocks comparison.
+1. Request one fresh Stage-4A physical gate with
+   `--ordinary-preexhaustion-authority --kill-before-saturation`.
+2. Verify allowed-set membership, explicit empty-intersection/deadline
+   fallbacks, exact-root certificate calls, first reserve activation, global
+   exhaustion, fresh-set exhaustion, first hit, hits, and Bombs.
+3. If the filter helps, rotate to Stage 3 or Stage 5; if it fails, keep the
+   first causal authority/birth/cadence mismatch.
+4. Only after global constraint evidence, evaluate local micro ranking.
 5. Repeat a winner on a second root.
-6. Integrate default-off shadow and verify deadline/fallback.
-7. Request one rotated focused physical trial.
-8. If materially better, run one fresh full Lunatic route.
-9. Use the new first hit to begin the next loop.
+6. If materially better, run one fresh full Lunatic route.
+7. Use the new first hit to begin the next loop.
 
 Optional warm-service work and learned/MCTS candidate ordering stay behind
 this backlog unless branch latency becomes the measured bottleneck.

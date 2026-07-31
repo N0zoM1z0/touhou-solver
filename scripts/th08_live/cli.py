@@ -119,6 +119,17 @@ def build_live_parser(
         ),
     )
     parser.add_argument(
+        "--ordinary-preexhaustion-authority",
+        action=argparse.BooleanOptionalAction,
+        default=False,
+        help=(
+            "enable the default-off ordinary-nonspell causal player-control "
+            "reserve filter; it models active/held/pending input and hostile-"
+            "birth reaction time without promoting the root-only shadow "
+            "future"
+        ),
+    )
+    parser.add_argument(
         "--input-clock-boundary-shadow",
         action="store_true",
         help=(

@@ -37,6 +37,7 @@ class Th08LiveCliTests(unittest.TestCase):
         self.assertEqual(arguments.stage_transition_timeout, 91.0)
         self.assertFalse(arguments.trace_enemy_lifecycle_events)
         self.assertFalse(arguments.kill_before_saturation)
+        self.assertFalse(arguments.ordinary_preexhaustion_authority)
         self.assertTrue(arguments.losing_control_reserve)
 
     def test_controller_wrapper_resolves_current_values(self) -> None:
@@ -68,6 +69,18 @@ class Th08LiveCliTests(unittest.TestCase):
             ["trace.jsonl", "--kill-before-saturation", "--no-bomb"]
         )
         self.assertTrue(arguments.kill_before_saturation)
+
+    def test_ordinary_preexhaustion_authority_is_explicitly_opt_in(
+        self,
+    ) -> None:
+        arguments = controller.build_parser().parse_args(
+            [
+                "trace.jsonl",
+                "--ordinary-preexhaustion-authority",
+                "--no-bomb",
+            ]
+        )
+        self.assertTrue(arguments.ordinary_preexhaustion_authority)
 
     def test_unsafe_lifecycle_cleanup_terminates_verified_target(self) -> None:
         records: list[dict[str, object]] = []

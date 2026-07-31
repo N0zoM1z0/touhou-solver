@@ -40,7 +40,9 @@ Limit:
 
 - incomplete future hazards and resource/combat strategy still cause global
   kernel exhaustion;
-- live does not contain an exact explicit pipeline belief root for ranking;
+- exact active/held/pending pipeline roots now reach planning and fresh issue
+  when the observation invariant is available, but future hostile coverage
+  remains incomplete;
 - stage/spell identities do not define planner mechanics.
 
 ### L2 — Final-B global-time-scale schedule
@@ -53,6 +55,37 @@ The constant-current-root continuation is diagnostic and
 unknown-direction. It may publish a queryable shadow global policy, but its
 target and action labels are stripped before planning/issue; it is not general
 live safety authority.
+
+### L3 — Default-off ordinary pre-exhaustion experiment
+
+`--ordinary-preexhaustion-authority` may affect input only during an ordinary
+nonspell, normal player phase, zero predeath counter, unit observed root
+time-scale, hard no-Bomb run. It does not enable the existing shadow-global
+flag or inherit the shadow future-hazard slab.
+
+Its hard claim is narrower than global hazard viability: from observed native
+active input and held complete input, it forms the one-pending causal root and
+enumerates every pickup order over a six-physical-update lease, including
+next-step pickup and no pickup within the lease. Movement scale is universally
+bounded in `[0,1]`. Near boundary exhaustion it admits only actions whose
+minimum reserve over every pipeline branch does not fall below the root
+reserve; if already-pending motion makes that impossible, it retains only the
+maximum worst-lease actions.
+
+One additional six-update lease moves activation earlier for an unseen
+hostile-birth reaction window. This is a controllability reserve, not hostile
+spawn/bullet geometry authority. The local planner may not discard the
+constraint through coarse-grid degeneracy. Fresh issue collision
+certification is the final gate; an empty intersection is explicitly relaxed
+only to preserve immediate collision survival. The held complete mask remains
+no-write and preserves a pending command.
+
+**Implemented/unvalidated:** the frame-1707-shaped deterministic regression
+excludes `down_left`/`down_left_fast`, and focused Windows delivery tests pass.
+No physical hit reduction or promotion is claimed yet. The falsifier is an
+issued near-exhaustion action outside the allowed set without a recorded
+fresh-intersection/deadline relaxation, or physical reserve exhaustion before
+the declared lease expires.
 
 ## Offline Native Authority
 
@@ -93,9 +126,9 @@ The current WS-H model can select generation-safe roots and compare completed
 native transactions for normal shots, enemy HP/defeat, phase transitions,
 items, Power, and resources. The general model remains offline. One narrow,
 default-off live experiment may align with an observed ordinary non-boss
-enemy or a byte-verified upcoming fixed birth, but only inside a winning
-queried shadow-global action set followed by a fresh issue-safe set and under
-hard no-Bomb. This is objective gating, not promoted global safety authority.
+enemy inside the causal pre-exhaustion set (or unconstrained interior reserve)
+and a fresh issue-safe set under hard no-Bomb. This is objective ranking, not
+independent safety authority.
 See `notes/CURRENT_COMBAT_RESOURCE_MODEL.md`.
 
 ## Proposed Research
@@ -133,14 +166,14 @@ is sharper: the last winning query was frame 3679, while a 200-HP middle-wave
 enemy was body-visible near x=320 at frame 3864 but was not selected by the
 old HP gate until frame 3900 at 15 HP.
 
-The default-off correction recognizes full-health ordinary non-boss enemies
-and, when no current target supersedes it, may forecast the next fixed birth
-from a stable native timeline clock. The physical `20260731_142342` gate
-preserves the observed-body part but falsifies the forecast implementation:
+The default-off correction recognizes full-health ordinary non-boss enemies.
+The physical `20260731_142342` gate preserves the observed-body part but
+falsifies the forecast implementation:
 all 376 observations recycled the timeline-0 time-1 x=30 startup birth and
 only three affected input. A zero instruction pointer is currently aliased to
 timeline start without causal not-started/completed lifecycle identity.
-Disable forecast authority until that identity is exact.
+The forecast is now removed from the live preference path until that identity
+is exact.
 
 ### P2 — Focus as a dynamic action factor
 
@@ -177,14 +210,15 @@ bounds. MCTS, learned value functions, Monte Carlo, beam widening, and
 imitation may rank or propose candidates offline, but cannot prune hard-safety
 branches or gain live authority without an independent exact verifier.
 
-This is now the immediate implementation target for nonspells. Physical
+The causal pre-exhaustion portion is now implemented default-off for
+nonspells, but remains physically unvalidated. Physical
 Stage-4A run `20260731_142342` produced 11,947 available ordinary/spell global
 queries but zero viability-constrained decisions and zero selected
 recoveries. At the canonical nonspell hit, frame 1707 still had the exact
 queried set `stay/up/up_fast`, while live selected `down_left`; global loss
-followed at 1710 and local loss only at 1912. Establish exact causal
-ordinary-stage authority, or an equivalent causal pre-exhaustion filter,
-before tuning local scores.
+followed at 1710 and local loss only at 1912. The next gate must test whether
+the new filter prevents that control-reserve expenditure before tuning local
+scores.
 
 ### P5 — Representative root corpus
 

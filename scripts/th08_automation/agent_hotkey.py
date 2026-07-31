@@ -65,6 +65,7 @@ class AgentHotkey:
         trace_enemy_mode_transitions: bool = False,
         trace_enemy_lifecycle_events: bool = False,
         kill_before_saturation: bool = False,
+        ordinary_preexhaustion_authority: bool = False,
         diagnostic_continue_root_only_scale: bool = False,
         runtime_ecl_static_image: Path | None = None,
         runtime_ecl_static_sha256: str | None = None,
@@ -156,6 +157,9 @@ class AgentHotkey:
             trace_enemy_lifecycle_events
         )
         self.kill_before_saturation = kill_before_saturation
+        self.ordinary_preexhaustion_authority = (
+            ordinary_preexhaustion_authority
+        )
         self.diagnostic_continue_root_only_scale = (
             diagnostic_continue_root_only_scale
         )
@@ -311,6 +315,9 @@ class AgentHotkey:
                     self.trace_enemy_lifecycle_events
                 ),
                 kill_before_saturation=self.kill_before_saturation,
+                ordinary_preexhaustion_authority=(
+                    self.ordinary_preexhaustion_authority
+                ),
                 diagnostic_continue_root_only_scale=(
                     self.diagnostic_continue_root_only_scale
                 ),

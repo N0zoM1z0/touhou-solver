@@ -12,6 +12,7 @@ from th08_local_planner import (
     ObjectiveContext,
     PhysicalHazardSnapshot,
     PlannerConfig,
+    validate_local_planner_request,
 )
 from th08_time_scale import (
     IncompleteTimeScaleScheduleError,
@@ -28,6 +29,76 @@ _UNIT_SCALE = Th08TimeScaleSchedule.constant(
 
 
 class LocalPlannerRequestTests(unittest.TestCase):
+    def test_causal_authority_cannot_exist_without_allowed_actions(
+        self,
+    ) -> None:
+        request = LocalPlannerRequest(
+            physical=PhysicalHazardSnapshot(
+                player_x=192.0,
+                player_y=400.0,
+                bullets=(),
+                lasers=(),
+                time_scale_schedule=_UNIT_SCALE,
+            ),
+            actuator=ActuatorPipeline(
+                previous_direction=0,
+                can_bomb=False,
+            ),
+            guidance=GlobalGuidance(
+                allowed_action_authority="authority_without_actions",
+            ),
+        )
+
+        with self.assertRaisesRegex(
+            ValueError,
+            "requires allowed first actions",
+        ):
+            live.choose_action_request(request)
+
+    def test_causal_preexhaustion_skips_coarse_grid_relaxation(
+        self,
+    ) -> None:
+        request = LocalPlannerRequest(
+            physical=PhysicalHazardSnapshot(
+                player_x=21.4,
+                player_y=409.1,
+                bullets=(),
+                lasers=(),
+                time_scale_schedule=_UNIT_SCALE,
+            ),
+            actuator=ActuatorPipeline(
+                previous_direction=0,
+                can_bomb=False,
+                control_delay_candidates=(2, 3, 4),
+                action_hold_frames=3,
+            ),
+            guidance=GlobalGuidance(
+                allowed_first_actions=("stay", "up", "right"),
+                allowed_action_authority=(
+                    "causal_ordinary_nonspell_control_reserve_v1"
+                ),
+                allow_coarse_viability_relaxation=False,
+            ),
+            config=PlannerConfig(
+                horizon=10,
+                threat_horizon=32,
+                beam_width=8,
+            ),
+        )
+
+        validated = validate_local_planner_request(
+            request,
+            planner_action_names=frozenset(
+                action.name for action in live._PLANNER_ACTIONS
+            ),
+            terminal_threat_degeneracy=lambda **_: self.fail(
+                "causal authority reached coarse degeneracy"
+            ),
+        )
+
+        self.assertIsNone(validated.viability_degeneracy)
+        self.assertFalse(validated.viability_relaxation_candidate)
+
     def test_root_only_scale_cannot_acquire_hard_planner_authority(self) -> None:
         request = LocalPlannerRequest(
             physical=PhysicalHazardSnapshot(

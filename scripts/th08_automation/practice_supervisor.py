@@ -255,6 +255,9 @@ def run_trial(
             args.trace_enemy_lifecycle_events
         ),
         "kill_before_saturation": args.kill_before_saturation,
+        "ordinary_preexhaustion_authority": (
+            args.ordinary_preexhaustion_authority
+        ),
         "diagnostic_continue_root_only_scale": (
             args.diagnostic_continue_root_only_scale
         ),
@@ -300,6 +303,9 @@ def run_trial(
                 args.trace_enemy_lifecycle_events
             ),
             kill_before_saturation=args.kill_before_saturation,
+            ordinary_preexhaustion_authority=(
+                args.ordinary_preexhaustion_authority
+            ),
             diagnostic_continue_root_only_scale=(
                 args.diagnostic_continue_root_only_scale
             ),
@@ -639,6 +645,15 @@ def build_parser() -> argparse.ArgumentParser:
             "enable the default-off ordinary-enemy pre-exhaustion "
             "target-alignment/unfocus preference inside the fresh "
             "certified issue action set"
+        ),
+    )
+    parser.add_argument(
+        "--ordinary-preexhaustion-authority",
+        action=argparse.BooleanOptionalAction,
+        default=False,
+        help=(
+            "enable the default-off ordinary-nonspell causal control-reserve "
+            "action filter; this does not promote shadow future hazards"
         ),
     )
     parser.add_argument(

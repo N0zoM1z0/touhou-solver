@@ -1,0 +1,372 @@
+{
+  "schema": "th08-practice-comparison-v2",
+  "baseline_run_id": "lunatic_route2_stage3_unattended_20260724_132007",
+  "candidate_run_id": "lunatic_route2_stage3_unattended_20260731_091104",
+  "scope_compatibility": {
+    "same_stage_route_index": true,
+    "candidate_selected_frame_epoch_index": 0,
+    "candidate_frame_epoch_count": 1,
+    "candidate_pre_scope_decisions_excluded": 0,
+    "candidate_raw_summary_scope_valid": true,
+    "candidate_accepted_completion": true
+  },
+  "no_bomb_passed": {
+    "baseline": true,
+    "candidate": true
+  },
+  "death_count": {
+    "baseline": 15,
+    "candidate": 5,
+    "delta": -10,
+    "reduction_fraction": 0.6666666666666666
+  },
+  "robust_viability": {
+    "counts": {
+      "policy_decision_count": {
+        "baseline": 5460,
+        "candidate": 0,
+        "delta": -5460,
+        "reduction_fraction": 1.0
+      },
+      "decision_without_query_count": {
+        "baseline": 47,
+        "candidate": 0,
+        "delta": -47,
+        "reduction_fraction": 1.0
+      },
+      "unique_solution_count": {
+        "baseline": 1017,
+        "candidate": 0,
+        "delta": -1017,
+        "reduction_fraction": 1.0
+      },
+      "query_count": {
+        "baseline": 5413,
+        "candidate": 0,
+        "delta": -5413,
+        "reduction_fraction": 1.0
+      },
+      "available_query_count": {
+        "baseline": 5413,
+        "candidate": 0,
+        "delta": -5413,
+        "reduction_fraction": 1.0
+      },
+      "support_uncovered_query_count": {
+        "baseline": 0,
+        "candidate": 0,
+        "delta": 0,
+        "reduction_fraction": null
+      },
+      "viable_query_count": {
+        "baseline": 2547,
+        "candidate": 0,
+        "delta": -2547,
+        "reduction_fraction": 1.0
+      },
+      "empty_action_set_count": {
+        "baseline": 2866,
+        "candidate": 0,
+        "delta": -2866,
+        "reduction_fraction": 1.0
+      },
+      "constrained_decision_count": {
+        "baseline": 2472,
+        "candidate": 0,
+        "delta": -2472,
+        "reduction_fraction": 1.0
+      },
+      "serial_worker_serviceable_count": {
+        "baseline": 5363,
+        "candidate": 0,
+        "delta": -5363,
+        "reduction_fraction": 1.0
+      },
+      "queryable_policy_decisions": {
+        "baseline": 5411,
+        "candidate": 0,
+        "delta": -5411,
+        "reduction_fraction": 1.0
+      },
+      "expired_policy_decisions": {
+        "baseline": 19,
+        "candidate": 0,
+        "delta": -19,
+        "reduction_fraction": 1.0
+      }
+    },
+    "solve_ms": null,
+    "backend_counts": {
+      "baseline": {
+        "native": 1017
+      },
+      "candidate": {}
+    },
+    "solver_phase_ms": {
+      "baseline": {
+        "clearance": {
+          "median": 92.74789999471977,
+          "p95": 158.5627000022214,
+          "max": 219.91309997974895
+        },
+        "rollout": {
+          "median": 0.0,
+          "p95": 17.34809999470599,
+          "max": 33.05999998701736
+        },
+        "safety_value": {
+          "median": 49.970599997323006,
+          "p95": 58.70429999777116,
+          "max": 81.01520000491291
+        },
+        "viability": {
+          "median": 137.9185999976471,
+          "p95": 346.724400005769,
+          "max": 444.0061999775935
+        }
+      },
+      "candidate": {}
+    },
+    "serial_coverage_margin_frames": {
+      "baseline": {
+        "median": 57.0,
+        "p95": 64.0,
+        "max": 64.0
+      },
+      "candidate": null
+    }
+  },
+  "prehit_behavior": {
+    "fast_fraction": {
+      "baseline": 0.3072289156626506,
+      "candidate": 0.38636363636363635,
+      "delta": 0.07913472070098576,
+      "reduction_fraction": -0.25757575757575757
+    },
+    "bottom_8px_fraction": {
+      "baseline": 0.42168674698795183,
+      "candidate": 0.5909090909090909,
+      "delta": 0.1692223439211391,
+      "reduction_fraction": -0.40129870129870127
+    },
+    "nonpositive_pipeline_fraction": {
+      "baseline": 0.09036144578313253,
+      "candidate": 0.08333333333333333,
+      "delta": -0.007028112449799201,
+      "reduction_fraction": 0.07777777777777782
+    },
+    "negative_corridor_slack_fraction": {
+      "baseline": 0.56,
+      "candidate": null,
+      "delta": null,
+      "reduction_fraction": null
+    },
+    "control_reserve_deficit_mean": {
+      "baseline": 7.390772579664207,
+      "candidate": 0.0,
+      "delta": -7.390772579664207,
+      "reduction_fraction": 1.0
+    },
+    "positive_control_reserve_deficit_fraction": {
+      "baseline": 0.5060240963855421,
+      "candidate": 0.0,
+      "delta": -0.5060240963855421,
+      "reduction_fraction": 1.0
+    }
+  },
+  "input_visible_next_observation_fraction": {
+    "baseline": 0.8610363391655451,
+    "candidate": 0.9105512960934647,
+    "delta": 0.04951495692791963,
+    "reduction_fraction": -0.05750623368103835
+  },
+  "per_phase": {
+    "nonspell": {
+      "spell_name": null,
+      "hit_count": {
+        "baseline": 6,
+        "candidate": 3,
+        "delta": -3,
+        "reduction_fraction": 0.5
+      },
+      "decision_count": {
+        "baseline": 3052,
+        "candidate": 5317,
+        "delta": 2265,
+        "reduction_fraction": -0.7421363040629095
+      },
+      "query_count": {
+        "baseline": 2960,
+        "candidate": 0,
+        "delta": -2960,
+        "reduction_fraction": 1.0
+      },
+      "empty_action_set_count": {
+        "baseline": 1330,
+        "candidate": 0,
+        "delta": -1330,
+        "reduction_fraction": 1.0
+      },
+      "solve_ms": null,
+      "decision_cadence_frames": null,
+      "runtime_timing_ms": {}
+    },
+    "35": {
+      "spell_name": "産霊「ファーストピラミッド」",
+      "hit_count": {
+        "baseline": 1,
+        "candidate": 1,
+        "delta": 0,
+        "reduction_fraction": 0.0
+      },
+      "decision_count": {
+        "baseline": 584,
+        "candidate": 1023,
+        "delta": 439,
+        "reduction_fraction": -0.7517123287671232
+      },
+      "query_count": {
+        "baseline": 573,
+        "candidate": 0,
+        "delta": -573,
+        "reduction_fraction": 1.0
+      },
+      "empty_action_set_count": {
+        "baseline": 389,
+        "candidate": 0,
+        "delta": -389,
+        "reduction_fraction": 1.0
+      },
+      "solve_ms": null,
+      "decision_cadence_frames": null,
+      "runtime_timing_ms": {}
+    },
+    "38": {
+      "spell_name": "始符「エフェメラリティ137」",
+      "hit_count": {
+        "baseline": 3,
+        "candidate": 1,
+        "delta": -2,
+        "reduction_fraction": 0.6666666666666666
+      },
+      "decision_count": {
+        "baseline": 589,
+        "candidate": 956,
+        "delta": 367,
+        "reduction_fraction": -0.6230899830220713
+      },
+      "query_count": {
+        "baseline": 578,
+        "candidate": 0,
+        "delta": -578,
+        "reduction_fraction": 1.0
+      },
+      "empty_action_set_count": {
+        "baseline": 217,
+        "candidate": 0,
+        "delta": -217,
+        "reduction_fraction": 1.0
+      },
+      "solve_ms": null,
+      "decision_cadence_frames": null,
+      "runtime_timing_ms": {}
+    },
+    "42": {
+      "spell_name": null,
+      "hit_count": {
+        "baseline": 0,
+        "candidate": 0,
+        "delta": 0,
+        "reduction_fraction": null
+      },
+      "decision_count": {
+        "baseline": 492,
+        "candidate": 875,
+        "delta": 383,
+        "reduction_fraction": -0.7784552845528455
+      },
+      "query_count": {
+        "baseline": 478,
+        "candidate": 0,
+        "delta": -478,
+        "reduction_fraction": 1.0
+      },
+      "empty_action_set_count": {
+        "baseline": 387,
+        "candidate": 0,
+        "delta": -387,
+        "reduction_fraction": 1.0
+      },
+      "solve_ms": null,
+      "decision_cadence_frames": null,
+      "runtime_timing_ms": {}
+    },
+    "46": {
+      "spell_name": null,
+      "hit_count": {
+        "baseline": 0,
+        "candidate": 0,
+        "delta": 0,
+        "reduction_fraction": null
+      },
+      "decision_count": {
+        "baseline": 547,
+        "candidate": 1043,
+        "delta": 496,
+        "reduction_fraction": -0.906764168190128
+      },
+      "query_count": {
+        "baseline": 536,
+        "candidate": 0,
+        "delta": -536,
+        "reduction_fraction": 1.0
+      },
+      "empty_action_set_count": {
+        "baseline": 390,
+        "candidate": 0,
+        "delta": -390,
+        "reduction_fraction": 1.0
+      },
+      "solve_ms": null,
+      "decision_cadence_frames": null,
+      "runtime_timing_ms": {}
+    },
+    "50": {
+      "spell_name": "虚史「幻想郷伝説」",
+      "hit_count": {
+        "baseline": 5,
+        "candidate": 0,
+        "delta": -5,
+        "reduction_fraction": 1.0
+      },
+      "decision_count": {
+        "baseline": 297,
+        "candidate": 772,
+        "delta": 475,
+        "reduction_fraction": -1.5993265993265993
+      },
+      "query_count": {
+        "baseline": 288,
+        "candidate": 0,
+        "delta": -288,
+        "reduction_fraction": 1.0
+      },
+      "empty_action_set_count": {
+        "baseline": 153,
+        "candidate": 0,
+        "delta": -153,
+        "reduction_fraction": 1.0
+      },
+      "solve_ms": null,
+      "decision_cadence_frames": null,
+      "runtime_timing_ms": {}
+    }
+  },
+  "candidate_primary_cause_counts": {
+    "observed_bullet_overlap": 2,
+    "modeled_committed_prefix_collision": 3
+  },
+  "candidate_planner_failure_counts": {
+    "robust_action_set_exhausted_before_hit": 5
+  }
+}

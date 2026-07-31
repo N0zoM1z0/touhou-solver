@@ -169,6 +169,15 @@ counts `2/3/5/20/15/23`, and Stage-5 practice `20260730_232102` retained
 19 hits plus a verified no-Bomb replay. They establish workloads only and
 cause no strategy promotion.
 
+The user-authorized checkpoint-`5176fbe` practice ring on 2026-07-31 also
+changes no strategy authority. Stage 3/4A/5 completed with `5/13/12` hits and
+verified no-Bomb replays. Their automatic different-root comparisons were
+`15 -> 5`, `10 -> 13`, and `19 -> 12`; all used the explicitly
+unknown-direction root-only scale continuation, and no WS-H combat, Focus, or
+Power ranking affected live actions. The mixed aggregate is retained as
+observed workload evidence, not a causal improvement, regression, promotion,
+or rollback trigger.
+
 The deferred performance proposal is a supervised warm wind-tunnel service
 with a single-writer queue, immutable session/root IDs, branch-level
 root/FX/stack/thread/map validation, cooperative cancellation, idle TTL,

@@ -45,8 +45,9 @@ historical handoff.
   mandatory-event atlas with native-revalidated timeline-`0x06`
   message/cleanup/item semantics, plus the six-stage Route-2 cleanup-seam
   atlas, exact pre-update item allocation, and post-allocation all-active-item
-  homing recurrences, are the current repository checkpoint; no new physical
-  trial was run.
+  homing recurrences, are the current repository checkpoint. The
+  user-authorized Stage-3/4A/5 physical ring below was then retained at
+  checkpoint `5176fbe`; it changes no live strategy authority.
 - Complete Linux discovery passes 1,537 tests in 14.064 seconds.
 - Complete Windows UNC discovery passes 1,537 tests in 30.711 seconds with
   the three existing skips.
@@ -454,13 +455,24 @@ historical handoff.
 
 ### Latest physical and replay evidence
 
-- Latest complete physical trial:
-  `lunatic_route2_stage5_unattended_20260730_232102`.
-  It completed original-game Lunatic Sakuya/Remilia Stage 5, hard no-Bomb,
-  `route_complete`, 19 hits, accepted replay saving, and exact cleanup.
-- Its first hit is frame 3,493. Spell 107 and its following transition are
-  the densest retained loss cluster. The aggregate 19 is a new workload
-  baseline, not a regression/rollback result or strategy promotion.
+- The latest user-authorized physical ring ran original-game Lunatic
+  Sakuya/Remilia Route-2 practice at checkpoint `5176fbe`, with optional
+  observers and WS-H ranking disabled. Each run used the explicit
+  unknown-direction root-only scale continuation required for a complete
+  current practice workload.
+- Stage 3 `20260731_091104` completed `route_complete` with 9,986 decisions,
+  five hits, first hit frame 2,150, hard no-Bomb, accepted replay saving, and
+  exact cleanup.
+- Stage 4A `20260731_091925` completed with 14,131 decisions, 13 hits, first
+  hit frame 2,555, hard no-Bomb, one automatic dialogue wall pulse, accepted
+  replay saving, and exact cleanup.
+- Stage 5 `20260731_093027` completed with 12,800 decisions, 12 hits, first
+  hit frame 2,124, hard no-Bomb, two automatic dialogue wall pulses, accepted
+  replay saving, and exact cleanup.
+- Automatic different-root comparisons are observational only:
+  Stage 3 `15 -> 5`, Stage 4A `10 -> 13`, and Stage 5 `19 -> 12`. The current
+  WS-H hypotheses still have no live action authority; these aggregate
+  changes cause neither promotion nor rollback.
 - User-authorized complete-route hit baseline
   `lunatic_route2_fullrun_unattended_20260730_222529` reached
   `route_complete` with 68 hits, zero Bombs, and per-stage hits
@@ -472,10 +484,18 @@ historical handoff.
 - Stage-1 run `lunatic_route2_stage1_unattended_20260730_144256` first
   physically validated dynamic result-menu resolution and the complete
   `10 -> 12 -> 14 -> 13 -> 2` replay-save state chain.
-- Current canonical Stage-5 replay:
-  `artifacts/replays/archive/th8_15_4a31f868c2214235bde019d17c47f733236c16dc7cbf89db3fd073f6c1b783de.rpy`.
-  It is Route 2/Lunatic/single Stage 5, RNG seed 38,179, 33,728 frames, and no
-  Bomb press.
+- The three new slot-15 generations are independently preserved at:
+  `artifacts/replays/archive/th8_15_880f65232b6ba8cb06f78f248271fe031a6ff5d0cca86bcaadcfebb6f0767831.rpy`
+  (Stage 3),
+  `artifacts/replays/archive/th8_15_4e13d0170da6dba34e0d007f55d03e4e8b135a121119460cc8548d0fff7dbd49.rpy`
+  (Stage 4A), and
+  `artifacts/replays/archive/th8_15_6c51aa21bdeac9db8a9a2759834f60460a128a81093e33937818f2c29b10255e.rpy`
+  (Stage 5). Each manifest decodes Route 2/Lunatic/the exact single stage
+  with an empty Bomb-press list. Slot 15 currently contains the Stage-5
+  generation and matches its archive byte for byte.
+- The prior Stage-5 replay
+  `artifacts/replays/archive/th8_15_4a31f868c2214235bde019d17c47f733236c16dc7cbf89db3fd073f6c1b783de.rpy`
+  remains immutable.
 - The prior wind-tunnel replay remains immutable at
   `de1e4e941adc8c2899eb3ae1bedd2b4faaf14362d4ce2af984d1c9e5a32da613`.
   Existing root-2,129 reports SHA-pin that older workload. Both old and new

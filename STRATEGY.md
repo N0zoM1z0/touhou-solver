@@ -50,7 +50,9 @@ Final-B only under the pinned static ECL identity and exact schedule
 authority. Content mismatch fails closed.
 
 The constant-current-root continuation is diagnostic and
-unknown-direction. It is not general live safety authority.
+unknown-direction. It may publish a queryable shadow global policy, but its
+target and action labels are stripped before planning/issue; it is not general
+live safety authority.
 
 ## Offline Native Authority
 
@@ -112,7 +114,10 @@ unchanged at three later frames. The first default-off physical gate applied
 27 fresh-safe preferences, had first hit 6981 and 13 total hits versus a
 different-RNG 2124/12 baseline, and received no global policy guidance. This
 physically exercises delivery but neither promotes nor falsifies the general
-hypothesis.
+hypothesis. The zero-publication cause was the diagnostic scale horizon
+(120 available versus 161–162 required), not kernel exhaustion or player
+projection; the repaired 269-frame diagnostic path remains shadow-only until
+rotated physical publication/query evidence exists.
 
 ### P2 — Focus as a dynamic action factor
 

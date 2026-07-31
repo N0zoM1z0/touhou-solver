@@ -93,6 +93,7 @@ class CapturedIteration:
                 "time-scale schedule source frame must match capture frame"
             )
         if self.player_projection_authority not in {
+            "exact_current_control_root",
             "exact_zero_lag",
             "exact_source_root_one_step",
             "unknown_incomplete_source_schedule",

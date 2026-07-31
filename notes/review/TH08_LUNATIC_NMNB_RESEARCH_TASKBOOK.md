@@ -277,8 +277,12 @@ Current checkpoint:
   preferences with zero Bombs;
 - the different-RNG physical result moved first hit 2124→6981 but total hits
   12→13, while global policy guidance remained unavailable;
-- repeat the causal result on a second root and repair global publication
-  before promotion. This checkpoint neither promotes nor falsifies D1.
+- the publication failure was a deterministic 120-frame diagnostic-scale
+  horizon versus a 161–162-frame initial rolling-policy requirement. The
+  repaired 269-frame path is queryable shadow-only and still needs a rotated
+  physical delivery gate;
+- repeat the causal result on a second root before promotion. This checkpoint
+  neither promotes nor falsifies D1.
 
 #### D2: Focus as control
 

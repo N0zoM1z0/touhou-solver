@@ -25,6 +25,9 @@ def _time_scale_schedule_hard_authority(
         and not schedule.provenance.startswith(
             "experimental_pretarget_unit_transport"
         )
+        and not schedule.provenance.startswith(
+            "diagnostic_constant_current_root_unknown_direction"
+        )
     )
 
 

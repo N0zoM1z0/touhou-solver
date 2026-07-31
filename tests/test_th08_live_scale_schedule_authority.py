@@ -9,8 +9,13 @@ from th08_live.scale_schedule_authority import (
 )
 from th08_live.sensing_trace import _time_scale_schedule_hard_authority
 from th08_live.controller import (
+    CORRIDOR_POLICY_MAXIMUM_LEAD_FRAMES,
+    DIAGNOSTIC_ROOT_ONLY_SCALE_HORIZON,
+    MAX_SENSOR_EPOCH_EXTENT_FRAMES,
     _corridor_scale_schedule_supported,
+    _diagnostic_constant_root_time_scale,
 )
+from th08_corridor_adapter import TH08_CORRIDOR_CONFIG
 from th08_time_scale import (
     SCALE_COVERAGE_COMPLETE,
     TH08_UNIT_TIME_SCALE_BITS,
@@ -348,6 +353,52 @@ class FinalBScaleScheduleAuthorityTests(unittest.TestCase):
         )
         self.assertFalse(
             _corridor_scale_schedule_supported(unit, horizon=5)
+        )
+
+    def test_diagnostic_constant_schedule_has_no_hard_action_authority(
+        self,
+    ) -> None:
+        diagnostic = Th08TimeScaleSchedule.constant(
+            TH08_UNIT_TIME_SCALE_BITS,
+            horizon=269,
+            provenance=(
+                "diagnostic_constant_current_root_unknown_direction_"
+                "no_authority"
+            ),
+            source_frame=100,
+        )
+
+        self.assertFalse(
+            _time_scale_schedule_hard_authority(diagnostic)
+        )
+
+    def test_diagnostic_horizon_covers_maximum_corridor_submit_lead(
+        self,
+    ) -> None:
+        root = Th08TimeScaleSchedule.root_observation(
+            TH08_UNIT_TIME_SCALE_BITS,
+            source_frame=100,
+        )
+        diagnostic = _diagnostic_constant_root_time_scale(root)
+        required = (
+            MAX_SENSOR_EPOCH_EXTENT_FRAMES
+            + CORRIDOR_POLICY_MAXIMUM_LEAD_FRAMES
+            + TH08_CORRIDOR_CONFIG.horizon_frames
+            + 1
+        )
+
+        self.assertEqual(
+            DIAGNOSTIC_ROOT_ONLY_SCALE_HORIZON,
+            required,
+        )
+        self.assertTrue(
+            _corridor_scale_schedule_supported(
+                diagnostic,
+                horizon=required,
+            )
+        )
+        self.assertFalse(
+            _time_scale_schedule_hard_authority(diagnostic)
         )
 
     def test_retained_physical_schedule_rebases_across_the_restore(

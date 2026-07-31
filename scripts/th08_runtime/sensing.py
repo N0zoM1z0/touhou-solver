@@ -84,6 +84,107 @@ def capture_time_scale_root(reader: StateReader) -> TimeScaleRootCapture:
     )
 
 
+@dataclass(frozen=True)
+class PlayerControlRootCapture:
+    """Player position/input/scale held constant inside one frame bracket."""
+
+    frame_before: int
+    frame_after: int
+    x_before: float
+    y_before: float
+    x_after: float
+    y_after: float
+    input_raw_before: int
+    input_current_before: int
+    input_previous_before: int
+    input_raw_after: int
+    input_current_after: int
+    input_previous_after: int
+    scale_bits: int
+    attempts: int
+
+    @property
+    def stable(self) -> bool:
+        return bool(
+            self.frame_before == self.frame_after
+            and self.x_before == self.x_after
+            and self.y_before == self.y_after
+            and self.input_raw_before == self.input_raw_after
+            and self.input_current_before == self.input_current_after
+            and self.input_previous_before == self.input_previous_after
+        )
+
+    @property
+    def x(self) -> float:
+        return self.x_after
+
+    @property
+    def y(self) -> float:
+        return self.y_after
+
+    @property
+    def input_raw(self) -> int:
+        return self.input_raw_after
+
+    @property
+    def input_current(self) -> int:
+        return self.input_current_after
+
+    @property
+    def input_previous(self) -> int:
+        return self.input_previous_after
+
+
+def capture_player_control_root(
+    reader: StateReader,
+    *,
+    maximum_attempts: int = 2,
+) -> PlayerControlRootCapture:
+    """Capture a current player root without assuming the manager clock moves.
+
+    The duplicate position and input reads are required because held input may
+    continue moving the player while ``enemy_manager_frame`` is frozen.
+    """
+
+    if maximum_attempts <= 0:
+        raise ValueError("player control-root attempts must be positive")
+    capture = None
+    for attempt in range(1, maximum_attempts + 1):
+        frame_before = reader.u32(ADDR_ENEMY_MANAGER_FRAME)
+        input_raw_before = reader.u16(ADDR_RAW_INPUT)
+        input_current_before = reader.u16(ADDR_CURRENT_INPUT)
+        input_previous_before = reader.u16(ADDR_PREVIOUS_INPUT)
+        x_before = reader.f32(ADDR_PLAYER + PLAYER_POSITION_OFFSET)
+        y_before = reader.f32(ADDR_PLAYER + PLAYER_POSITION_OFFSET + 4)
+        scale_bits = reader.u32(ADDR_GAMEPLAY_TIME_SCALE)
+        x_after = reader.f32(ADDR_PLAYER + PLAYER_POSITION_OFFSET)
+        y_after = reader.f32(ADDR_PLAYER + PLAYER_POSITION_OFFSET + 4)
+        input_raw_after = reader.u16(ADDR_RAW_INPUT)
+        input_current_after = reader.u16(ADDR_CURRENT_INPUT)
+        input_previous_after = reader.u16(ADDR_PREVIOUS_INPUT)
+        frame_after = reader.u32(ADDR_ENEMY_MANAGER_FRAME)
+        capture = PlayerControlRootCapture(
+            frame_before=frame_before,
+            frame_after=frame_after,
+            x_before=x_before,
+            y_before=y_before,
+            x_after=x_after,
+            y_after=y_after,
+            input_raw_before=input_raw_before,
+            input_current_before=input_current_before,
+            input_previous_before=input_previous_before,
+            input_raw_after=input_raw_after,
+            input_current_after=input_current_after,
+            input_previous_after=input_previous_after,
+            scale_bits=scale_bits,
+            attempts=attempt,
+        )
+        if capture.stable:
+            return capture
+    assert capture is not None
+    return capture
+
+
 def decode_spell_state(blob: bytes) -> dict[str, object]:
     if len(blob) < SPELL_STATE_PREFIX_SIZE:
         raise ValueError(

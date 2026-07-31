@@ -38,6 +38,12 @@ its pinned Route-2 content identity. Unknown or mismatched schedule state
 fails closed unless a diagnostic explicitly authorizes the root-only
 unknown-direction continuation.
 
+The ordinary-stage root-only continuation may compute and query a rolling
+global policy for diagnostic evidence, but that publication has no action
+authority: its target, viable-action set, repair labels, and survival labels
+are removed before local planning and fresh issue. Its declared horizon must
+cover the full sensor-age + asynchronous-publication-lead + kernel horizon.
+
 Removed supplemental, candidate-verifier, prewarm, G5, and priority-17 lanes
 have no active code or strategy authority.
 

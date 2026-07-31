@@ -254,6 +254,7 @@ from th08_live.movement import (
 )
 from th08_live.sensing_trace import (
     SensingTraceInput,
+    _time_scale_schedule_hard_authority,
     build_sensing_trace_fields,
 )
 from th08_time_scale import (
@@ -348,7 +349,7 @@ from th08_runtime_agent import (
     TARGET_EXE,
     _require_foreground,
     capture_input_clock_shadow,
-    capture_time_scale_root,
+    capture_player_control_root,
     observe_state,
     send_scan_key,
     verify_target,
@@ -407,9 +408,6 @@ MAX_SENSOR_EPOCH_EXTENT_FRAMES = 8
 # before input issue without mislabeling an ordinary 7..20-frame overrun as a
 # new gameplay epoch.
 MAX_ACTION_CONTIGUOUS_ADVANCE_FRAMES = 120
-DIAGNOSTIC_ROOT_ONLY_SCALE_HORIZON = (
-    MAX_ACTION_CONTIGUOUS_ADVANCE_FRAMES
-)
 # Below this active-pool density, consolidated scalar unpacking is faster
 # than allocating NumPy gather arrays. Retained synthetic sweeps place the
 # crossover between 400 and 600 records on the current host.
@@ -428,9 +426,17 @@ CORRIDOR_MAX_AGE_FRAMES = (
 )
 CORRIDOR_POLICY_LEAD_INITIAL_FRAMES = 80
 CORRIDOR_POLICY_OVERLAP_FRAMES = 8
+CORRIDOR_POLICY_MAXIMUM_LEAD_FRAMES = 180
 CORRIDOR_POLICY_MINIMUM_LEAD_FRAMES = max(
     2 * TH08_CORRIDOR_CONFIG.frames_per_layer,
     LIVE_CONTROL_DELAY_MAX + LIVE_ACTION_HOLD_MAX,
+)
+DIAGNOSTIC_ROOT_ONLY_SCALE_HORIZON = max(
+    MAX_ACTION_CONTIGUOUS_ADVANCE_FRAMES,
+    MAX_SENSOR_EPOCH_EXTENT_FRAMES
+    + CORRIDOR_POLICY_MAXIMUM_LEAD_FRAMES
+    + TH08_CORRIDOR_CONFIG.horizon_frames
+    + 1,
 )
 # An ordinary enemy slot can clear its active/contact mode while its geometry
 # continues and later re-enable inside the current robust-policy horizon.
@@ -1591,6 +1597,7 @@ def _run_live_session(
         initial_frames=CORRIDOR_POLICY_LEAD_INITIAL_FRAMES,
         overlap_frames=CORRIDOR_POLICY_OVERLAP_FRAMES,
         minimum_frames=CORRIDOR_POLICY_MINIMUM_LEAD_FRAMES,
+        maximum_frames=CORRIDOR_POLICY_MAXIMUM_LEAD_FRAMES,
     )
     ecl_instruction_cache = EclInstructionCache()
     trace_enemy_mode_transitions = bool(
@@ -2728,23 +2735,38 @@ def _run_live_session(
                 enemy_bodies,
                 spell_enemy_body_guard,
             )
-            time_scale_root_capture = capture_time_scale_root(reader)
-            counter_after_read = time_scale_root_capture.frame_after
+            player_control_root = capture_player_control_root(reader)
+            counter_after_read = player_control_root.frame_after
             hazard_read_bookkeeping_ms = (
                 time.perf_counter() - hazard_read_bookkeeping_started
             ) * 1000.0
             read_ms = (time.perf_counter() - read_started) * 1000.0
-            if not time_scale_root_capture.stable:
+            if not player_control_root.stable:
                 gaps += 1
                 trace_sink.emit(
                     {
-                        "kind": "time_scale_root_unstable",
+                        "kind": "player_control_root_unstable",
                         "source_frame": state["enemy_manager_frame"],
                         "frame_before": (
-                            time_scale_root_capture.frame_before
+                            player_control_root.frame_before
                         ),
-                        "frame_after": time_scale_root_capture.frame_after,
-                        "scale_bits": time_scale_root_capture.scale_bits,
+                        "frame_after": player_control_root.frame_after,
+                        "scale_bits": player_control_root.scale_bits,
+                        "position_before": [
+                            player_control_root.x_before,
+                            player_control_root.y_before,
+                        ],
+                        "position_after": [
+                            player_control_root.x_after,
+                            player_control_root.y_after,
+                        ],
+                        "input_current_before": (
+                            player_control_root.input_current_before
+                        ),
+                        "input_current_after": (
+                            player_control_root.input_current_after
+                        ),
+                        "attempts": player_control_root.attempts,
                         "semantics_version": (
                             TH08_PLAYER_LASER_SCALE_SEMANTICS_VERSION
                         ),
@@ -2919,6 +2941,17 @@ def _run_live_session(
             ) * 1000.0
             decode_ms = (time.perf_counter() - decode_started) * 1000.0
             player = state["player"]
+            control_root_player = {
+                **player,
+                "x": player_control_root.x,
+                "y": player_control_root.y,
+            }
+            control_root_input_state = {
+                **state,
+                "input_raw": player_control_root.input_raw,
+                "input_current": player_control_root.input_current,
+                "input_previous": player_control_root.input_previous,
+            }
             resources = state["resources"]
             if resources is None:
                 termination_reason = "resources_unavailable"
@@ -2966,7 +2999,7 @@ def _run_live_session(
                             else None
                         ),
                         observed_root_scale_bits=(
-                            time_scale_root_capture.scale_bits
+                            player_control_root.scale_bits
                         ),
                         observed_player_bomb_active=int(
                             bool(player["bomb_active"])
@@ -2995,34 +3028,14 @@ def _run_live_session(
             else:
                 time_scale_schedule = (
                     Th08TimeScaleSchedule.root_observation(
-                        time_scale_root_capture.scale_bits,
+                        player_control_root.scale_bits,
                         source_frame=counter_after_read,
-                        provenance="live_stable_enemy_frame_bracket",
+                        provenance="live_stable_player_control_root",
                     )
                 )
-            if snapshot_lag == 0:
-                projected_player_x = float(player["x"])
-                projected_player_y = float(player["y"])
-                player_projection_authority = "exact_zero_lag"
-            elif snapshot_lag == 1:
-                projected_player_x, projected_player_y = (
-                    _project_player_for_read_lag(
-                        float(player["x"]),
-                        float(player["y"]),
-                        previous_mask,
-                        1,
-                        player_scale_bits=(source_time_scale_bits,),
-                    )
-                )
-                player_projection_authority = (
-                    "exact_source_root_one_step"
-                )
-            else:
-                projected_player_x = float(player["x"])
-                projected_player_y = float(player["y"])
-                player_projection_authority = (
-                    "unknown_incomplete_source_schedule"
-                )
+            projected_player_x = player_control_root.x
+            projected_player_y = player_control_root.y
+            player_projection_authority = "exact_current_control_root"
             delay_estimate = delay_estimator.estimate(
                 frame=counter_after_read,
                 default=args.control_delay_frames,
@@ -3063,11 +3076,11 @@ def _run_live_session(
                 player_projection_authority=(
                     player_projection_authority
                 ),
-                player_x=float(player["x"]),
-                player_y=float(player["y"]),
+                player_x=player_control_root.x,
+                player_y=player_control_root.y,
                 projected_player_x=projected_player_x,
                 projected_player_y=projected_player_y,
-                native_active_mask=int(state["input_current"]),
+                native_active_mask=player_control_root.input_current,
                 held_desired_mask=held_desired_mask,
                 previous_direction=previous_direction,
                 can_bomb=can_bomb,
@@ -3196,6 +3209,8 @@ def _run_live_session(
                     break
             corridor_started = time.perf_counter()
             corridor_updated = False
+            corridor_completed = False
+            corridor_submitted = False
             if corridor_pending_solution is not None:
                 pending_candidate = corridor_pending_solution
                 (
@@ -3216,6 +3231,7 @@ def _run_live_session(
             if corridor_future is not None and corridor_future.done():
                 completed_solution = corridor_future.result()
                 corridor_future = None
+                corridor_completed = True
                 corridor_policy_lead.observe(
                     completed_solution.worker_ms
                     if completed_solution.worker_ms is not None
@@ -3239,6 +3255,23 @@ def _run_live_session(
                         current_frame=counter_after_read,
                     )
                     corridor_updated = True
+            corridor_required_scale_horizon = (
+                max(0, hazard_snapshot_age)
+                + max(0, corridor_policy_lead.frames)
+                + TH08_CORRIDOR_CONFIG.horizon_frames
+                + 1
+            )
+            corridor_scale_schedule_supported = (
+                _corridor_scale_schedule_supported(
+                    captured_iteration.time_scale_schedule,
+                    horizon=corridor_required_scale_horizon,
+                )
+            )
+            corridor_submission_due = _corridor_submit_due(
+                current_frame=counter_after_read,
+                last_submit_frame=corridor_last_submit,
+                interval_frames=args.corridor_every,
+            )
             if (
                 corridor_executor is not None
                 and corridor_future is None
@@ -3247,20 +3280,8 @@ def _run_live_session(
                     captured_iteration.player_projection_authority
                     != "unknown_incomplete_source_schedule"
                 )
-                and _corridor_scale_schedule_supported(
-                    captured_iteration.time_scale_schedule,
-                    horizon=(
-                        max(0, hazard_snapshot_age)
-                        + max(0, corridor_policy_lead.frames)
-                        + TH08_CORRIDOR_CONFIG.horizon_frames
-                        + 1
-                    ),
-                )
-                and _corridor_submit_due(
-                    current_frame=counter_after_read,
-                    last_submit_frame=corridor_last_submit,
-                    interval_frames=args.corridor_every,
-                )
+                and corridor_scale_schedule_supported
+                and corridor_submission_due
             ):
                 forecast_lead_frames = corridor_policy_lead.frames
                 policy_delay_support = delay_support_envelope(
@@ -3320,6 +3341,7 @@ def _run_live_session(
                     ),
                 )
                 corridor_last_submit = counter_after_read
+                corridor_submitted = True
             observed_input_action = _action_name_from_mask(
                 captured_iteration.native_active_mask
             )
@@ -3379,6 +3401,29 @@ def _run_live_session(
             )
             safety_value_query = policy_queries.safety_value_query
             policy_guidance = policy_queries.guidance
+            corridor_action_authority = (
+                _time_scale_schedule_hard_authority(
+                    captured_iteration.time_scale_schedule
+                )
+            )
+            if corridor_action_authority:
+                actionable_corridor_target = corridor_target
+                actionable_policy_guidance = policy_guidance
+            else:
+                actionable_corridor_target = None
+                actionable_policy_guidance = replace(
+                    policy_guidance,
+                    support_covers_current=False,
+                    allowed_first_actions=None,
+                    repair_volumes=(),
+                    recovery_distances=(),
+                    safety_actions=(),
+                    safety_state_value=None,
+                    survival_actions=(),
+                    survival_frames=None,
+                    survival_bottleneck_margin=None,
+                    position_error=0.0,
+                )
             corridor_overhead_ms = (
                 time.perf_counter() - corridor_started
             ) * 1000.0
@@ -3465,46 +3510,47 @@ def _run_live_session(
                     ),
                     guidance=GlobalGuidance(
                         target_x=(
-                            corridor_target[0]
-                            if corridor_target is not None
+                            actionable_corridor_target[0]
+                            if actionable_corridor_target is not None
                             else None
                         ),
                         target_y=(
-                            corridor_target[1]
-                            if corridor_target is not None
+                            actionable_corridor_target[1]
+                            if actionable_corridor_target is not None
                             else None
                         ),
                         target_deadline=(
-                            corridor_target[2]
-                            if corridor_target is not None
+                            actionable_corridor_target[2]
+                            if actionable_corridor_target is not None
                             else None
                         ),
                         allowed_first_actions=(
-                            policy_guidance.allowed_first_actions
+                            actionable_policy_guidance.allowed_first_actions
                         ),
                         viability_repair_volumes=(
-                            policy_guidance.repair_volumes
+                            actionable_policy_guidance.repair_volumes
                         ),
                         viability_recovery_distances=(
-                            policy_guidance.recovery_distances
+                            actionable_policy_guidance.recovery_distances
                         ),
                         viability_safety_actions=(
-                            policy_guidance.safety_actions
+                            actionable_policy_guidance.safety_actions
                         ),
                         viability_safety_state_value=(
-                            policy_guidance.safety_state_value
+                            actionable_policy_guidance.safety_state_value
                         ),
                         viability_survival_actions=(
-                            policy_guidance.survival_actions
+                            actionable_policy_guidance.survival_actions
                         ),
                         viability_survival_frames=(
-                            policy_guidance.survival_frames
+                            actionable_policy_guidance.survival_frames
                         ),
                         viability_survival_bottleneck_margin=(
-                            policy_guidance.survival_bottleneck_margin
+                            actionable_policy_guidance
+                            .survival_bottleneck_margin
                         ),
                         viability_position_error=(
-                            policy_guidance.position_error
+                            actionable_policy_guidance.position_error
                         ),
                     ),
                     config=PlannerConfig(
@@ -3554,8 +3600,8 @@ def _run_live_session(
                 commit=lambda proposal, fresh_enemy_bodies: (
                     commit_local_proposal_for_fresh_hazards(
                         proposal,
-                        player_x=float(player["x"]),
-                        player_y=float(player["y"]),
+                        player_x=player_control_root.x,
+                        player_y=player_control_root.y,
                         previous_mask=previous_mask,
                         delay_frames=delay_estimate.support,
                         action_hold_frames=action_hold_frames,
@@ -3564,19 +3610,19 @@ def _run_live_session(
                         enemy_bodies=fresh_enemy_bodies,
                         snapshot_lag=player_to_hazard_lag,
                         allowed_first_actions=(
-                            policy_guidance.allowed_first_actions
+                            actionable_policy_guidance.allowed_first_actions
                         ),
                         viability_repair_volumes=(
-                            policy_guidance.repair_volumes
+                            actionable_policy_guidance.repair_volumes
                         ),
                         viability_recovery_distances=(
-                            policy_guidance.recovery_distances
+                            actionable_policy_guidance.recovery_distances
                         ),
                         viability_safety_actions=(
-                            policy_guidance.safety_actions
+                            actionable_policy_guidance.safety_actions
                         ),
                         viability_survival_actions=(
-                            policy_guidance.survival_actions
+                            actionable_policy_guidance.survival_actions
                         ),
                         preferred_action=(
                             kill_before_saturation_preferred_action
@@ -3845,8 +3891,8 @@ def _run_live_session(
                     local_pipeline_certificate_shadow = (
                         _direct_root_certificate_shadow(
                             root=observed_local_pipeline_root,
-                            player_x=float(player["x"]),
-                            player_y=float(player["y"]),
+                            player_x=player_control_root.x,
+                            player_y=player_control_root.y,
                             previous_mask=held_desired_mask,
                             delay_frames=delay_estimate.support,
                             action_hold_frames=action_hold_frames,
@@ -3993,20 +4039,45 @@ def _run_live_session(
                     ),
                 )
                 record.update(sensing_trace_fields)
+                record["corridor_delivery"] = {
+                    "executor_enabled": corridor_executor is not None,
+                    "worker_pending": corridor_future is not None,
+                    "pending_publication": (
+                        corridor_pending_solution is not None
+                    ),
+                    "active_publication": corridor_solution is not None,
+                    "completed_this_decision": corridor_completed,
+                    "submitted_this_decision": corridor_submitted,
+                    "submission_due": corridor_submission_due,
+                    "required_scale_horizon": (
+                        corridor_required_scale_horizon
+                    ),
+                    "available_scale_horizon": (
+                        captured_iteration.time_scale_schedule
+                        .complete_horizon
+                    ),
+                    "scale_schedule_supported": (
+                        corridor_scale_schedule_supported
+                    ),
+                    "player_projection_authority": (
+                        captured_iteration.player_projection_authority
+                    ),
+                    "action_authority": corridor_action_authority,
+                }
                 control_trace_fields = build_decision_control_trace_fields(
                     DecisionControlTraceInput(
                         issue=fresh_issue_result,
                         delay_estimate=delay_estimate,
                         control_delay_frames=control_delay_frames,
                         action_hold_frames=action_hold_frames,
-                        input_state=state,
+                        input_state=control_root_input_state,
                         local_pipeline_root_record=(
                             local_pipeline_root_record
                         ),
                         local_pipeline_certificate_shadow=(
                             local_pipeline_certificate_shadow
                         ),
-                        corridor_target=corridor_target,
+                        corridor_target=actionable_corridor_target,
                         damage_target_x=damage_target_x,
                         damage_target_half_width=(
                             damage_target_half_width
@@ -4017,8 +4088,8 @@ def _run_live_session(
                         corridor_context_changed=(
                             corridor_context_changed
                         ),
-                        policy_guidance=policy_guidance,
-                        player=player,
+                        policy_guidance=actionable_policy_guidance,
+                        player=control_root_player,
                         projected_player_x=projected_player_x,
                         projected_player_y=projected_player_y,
                         control_origin_x=control_origin_x,
@@ -4124,6 +4195,7 @@ def _run_live_session(
                     decision=decision,
                     delay_support=delay_estimate.support,
                     guidance=policy_guidance,
+                    action_authority=corridor_action_authority,
                     pending_command_estimate=(
                         pending_command_estimate
                     ),

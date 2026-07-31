@@ -60,6 +60,7 @@ from th08_runtime.game_state import (  # noqa: F401
 )
 from th08_runtime.sensing import (  # noqa: F401
     capture_input_clock_shadow,
+    capture_player_control_root,
     capture_time_scale_root,
     decode_spell_state,
     frscreen_blocks_enemy_clock,

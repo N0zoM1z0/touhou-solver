@@ -62,6 +62,7 @@ class CorridorTraceTests(unittest.TestCase):
             decision=object(),
             delay_support=(1,),
             guidance=object(),
+            action_authority=False,
             pending_command_estimate=None,
             target=None,
             control_origin_x=0.0,
@@ -106,6 +107,7 @@ class CorridorTraceTests(unittest.TestCase):
             decision=decision,
             delay_support=(1, 2),
             guidance=guidance,
+            action_authority=True,
             pending_command_estimate=pending,
             target=(20.0, 30.0, 12),
             control_origin_x=10.0,
@@ -116,6 +118,7 @@ class CorridorTraceTests(unittest.TestCase):
 
         assert record is not None
         self.assertEqual(record["policy_status"], "unavailable")
+        self.assertTrue(record["action_authority"])
         self.assertEqual(record["age"], 10)
         self.assertEqual(record["commitment"]["context"], (3, 1, 7))
         self.assertEqual(record["pending_command"]["desired_action"], "left")
@@ -157,6 +160,7 @@ class CorridorTraceTests(unittest.TestCase):
             decision=SimpleNamespace(action="stay", mask=0),
             delay_support=(1, 2),
             guidance=SimpleNamespace(safety_actions=()),
+            action_authority=False,
             pending_command_estimate=None,
             target=None,
             control_origin_x=0.0,

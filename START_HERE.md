@@ -160,12 +160,12 @@ and explicit `STRATEGY.md` decision.
 The first Stage-5 native branch and physical delivery gate are complete.
 Next:
 
-1. Repeat kill-before-saturation on a second generation-safe ordinary enemy
+1. Physically verify the repaired rolling global delivery on rotated Stage
+   4A. The retained Stage-5 trace proved the old 120-frame diagnostic schedule
+   could never meet the initial 161–162-frame submit requirement; the new
+   269-frame schedule is queryable shadow-only and records its gate state.
+2. Repeat kill-before-saturation on a second generation-safe ordinary enemy
    and root, retaining exact defeat and prevented-birth evidence.
-2. Make the rolling global policy publish/queryable on this workload; the
-   physical gate had zero global allowed-action queries and zero
-   viability-constrained decisions, so it could not demonstrate kernel
-   rescue.
 3. Keep the live rule default-off and fail-closed. Do not broaden HP,
    alignment, or stage conditions from one different-RNG run.
 4. If the second same-root result holds, run a rotated Stage 3 or 4A physical

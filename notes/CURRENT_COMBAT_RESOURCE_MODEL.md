@@ -150,6 +150,13 @@ actions and viability-constrained decisions were both zero, so this gate did
 not show that early killing rescues the global kernel. It also does not
 falsify the separate same-root native hostile-birth suppression.
 
+Post-run gate reconstruction found that no rolling solve was submitted: all
+13,306 player projections were exact (12,594 zero-lag and 712 one-step), but
+the 120-frame diagnostic scale schedule was shorter than the 161–162 frames
+required by sensor age + initial asynchronous lead + the kernel. The repaired
+269-frame diagnostic schedule can publish/query shadow policies but cannot
+constrain live actions because its future scale remains unknown-direction.
+
 The latest full-route game-start baseline is 68 hits, zero Bombs, with
 per-stage counts 2/3/5/20/15/23.
 
@@ -157,10 +164,10 @@ per-stage counts 2/3/5/20/15/23.
 
 Do not add more atlas/schema work unless it blocks this experiment:
 
-1. Repeat the native kill/prevented-birth result on a second ordinary enemy
+1. Verify submit, completion, publication, and query of the repaired
+   shadow-only global policy on rotated Stage 4A.
+2. Repeat the native kill/prevented-birth result on a second ordinary enemy
    and root.
-2. Restore queryable rolling global policy delivery on the workload so a
-   physical gate can actually test global-kernel rescue.
 3. Keep the live HP/alignment rule default-off and unchanged until the second
    root and a rotated Stage 3/4A physical workload agree.
 4. Return `UNKNOWN` at the first unsupported event; do not infer a causal A/B

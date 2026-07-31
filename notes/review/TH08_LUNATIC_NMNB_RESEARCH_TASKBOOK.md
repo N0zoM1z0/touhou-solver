@@ -324,6 +324,16 @@ Windows maximum from 2,071 to 775 ms. Physically revalidate this deadline
 correction; only then prioritize armed health/timeout successors and remaining
 source gaps. Stage 5 remains conditional on useful pressure-window authority.
 
+Stage-4A `20260801_015631` validates that recurrence correction: nonspell
+viability maximum/p95 fell from 3,026/1,664 to 1,038/926 ms. Directional exact
+sets occurred 102 times before first hit 2009, but all 238 nonspell hit-window
+decisions still lacked authority. The canonical gap is now future transform
+coverage, not armed phase succession: roots 1915..2007 repeatedly reached a
+nonzero program, with opcode-`0x19` interleaved. Source v5 lowers the observed
+player-relative stop/re-aim as a full-direction bounded disc and interval-adds
+`0x19`; every unhandled active transform remains fail closed. Re-run Stage 4A
+and require nonzero useful pressure-window authority before Stage 5.
+
 ### WS-D — Combat, Focus, and Power
 
 This is the highest-priority experiment after cleanup.

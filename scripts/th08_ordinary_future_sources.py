@@ -51,7 +51,7 @@ from touhou_control.corridor import AabbHazard, AabbTrajectoryHazard
 
 
 ORDINARY_FUTURE_SOURCE_SEMANTICS_VERSION = (
-    "th08-ordinary-future-sources-v4-native-angle-aux-timer-root"
+    "th08-ordinary-future-sources-v5-stop-reaim-float-add-envelope"
 )
 _PROJECTION_SCHEMA = "th08-native-snapshot-collision-control-projection-v13"
 _DIRECT_FIRE_OPCODES = frozenset(range(0x60, 0x69))
@@ -885,7 +885,8 @@ def _direct_fire_events(
     if not isinstance(transform_hex, str):
         _fail("source transform program is absent")
     try:
-        transform_zero = not any(bytes.fromhex(transform_hex))
+        transform_program = bytes.fromhex(transform_hex)
+        transform_zero = not any(transform_program)
     except ValueError as error:
         raise FutureSourceClosureError(
             "source transform program is malformed"
@@ -932,6 +933,7 @@ def _direct_fire_events(
             half_height=half_height,
             original_flags=original_flags,
             transform_program_zero=transform_zero,
+            transform_program=transform_program,
         ),
     )
 
@@ -1057,9 +1059,9 @@ def _execute_auxiliary(
                 source=source,
             )
             vm.float_locals[destination] = left.multiply(right)
-        elif opcode == 0x1A:
+        elif opcode in (0x19, 0x1A):
             if len(instruction.arguments) != 3:
-                _fail("auxiliary subtraction argument layout drifted")
+                _fail("auxiliary add/subtract argument layout drifted")
             destination = _float_lvalue(int(instruction.arguments[0]))
             left = _eval_float_operand(
                 int(instruction.arguments[1]),
@@ -1075,9 +1077,13 @@ def _execute_auxiliary(
                 aim_angle=aim_angle,
                 source=source,
             )
-            vm.float_locals[destination] = FloatInterval(
-                left.lower - right.upper,
-                left.upper - right.lower,
+            vm.float_locals[destination] = (
+                left.add(right)
+                if opcode == 0x19
+                else FloatInterval(
+                    left.lower - right.upper,
+                    left.upper - right.lower,
+                )
             )
         elif opcode == 0x0F:
             if len(instruction.arguments) != 2:

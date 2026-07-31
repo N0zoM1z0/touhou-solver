@@ -10,6 +10,7 @@ dropping a future hostile.
 from __future__ import annotations
 
 import math
+import struct
 from dataclasses import dataclass
 
 from touhou_control.corridor import (
@@ -20,14 +21,67 @@ from touhou_control.corridor import (
 
 
 FUTURE_BIRTH_ENVELOPE_SEMANTICS_VERSION = (
-    "th08-future-birth-envelope-v1-native-state2"
+    "th08-future-birth-envelope-v2-native-state2-stop-reaim-disc"
 )
 FUTURE_BIRTH_SECTOR_SEMANTICS_VERSION = (
-    "th08-future-birth-sector-v1-native-state2-disc-envelope"
+    "th08-future-birth-sector-v2-native-state2-stop-reaim-disc-envelope"
 )
 _TWO_PI = 2.0 * math.pi
 _STATE2_COMPLETION_AGE = 10
 _KNOWN_NONPROGRAM_FLAGS = 0x0203
+_TRANSFORM_PROGRAM_LENGTH = 18
+_TRANSFORM_RECORD_SIZE = 24
+_STOP_REAIM_REPEAT = 0x0000080
+_SUPPRESS_OFFSCREEN_CULL = 0x0002000
+_TIMED_QUEUE_BARRIER = 0x0020000
+_PLAY_SOUND = 0x0080000
+_SUPPORTED_TRANSFORM_KINDS = frozenset(
+    (
+        _STOP_REAIM_REPEAT,
+        _SUPPRESS_OFFSCREEN_CULL,
+        _TIMED_QUEUE_BARRIER,
+        _PLAY_SOUND,
+    )
+)
+
+
+@dataclass(frozen=True)
+class _TransformRecord:
+    float_0: float
+    float_1: float
+    int_0: int
+    int_1: int
+    kind: int
+    allow_while_active: bool
+
+
+def _active_transform_records(
+    program: bytes,
+    *,
+    original_flags: int,
+) -> tuple[_TransformRecord, ...]:
+    if len(program) != _TRANSFORM_PROGRAM_LENGTH * _TRANSFORM_RECORD_SIZE:
+        raise ValueError("future transform program must contain 18 records")
+    records: list[_TransformRecord] = []
+    for index in range(_TRANSFORM_PROGRAM_LENGTH):
+        values = struct.unpack_from(
+            "<ffiiII",
+            program,
+            index * _TRANSFORM_RECORD_SIZE,
+        )
+        record = _TransformRecord(
+            float_0=float(values[0]),
+            float_1=float(values[1]),
+            int_0=int(values[2]),
+            int_1=int(values[3]),
+            kind=int(values[4]),
+            allow_while_active=bool(values[5]),
+        )
+        if record.kind == 0:
+            break
+        if record.kind & original_flags:
+            records.append(record)
+    return tuple(records)
 
 
 @dataclass(frozen=True)
@@ -102,6 +156,7 @@ class FutureDirectFire:
     half_height: float
     original_flags: int
     transform_program_zero: bool
+    transform_program: bytes = b""
 
     def __post_init__(self) -> None:
         if not self.source:
@@ -126,11 +181,42 @@ class FutureDirectFire:
             or self.half_height < 0.0
         ):
             raise ValueError("future bullet geometry must be finite")
-        if not self.transform_program_zero:
-            raise ValueError(
-                "nonzero future transform programs require exact lowering"
+        if self.transform_program_zero:
+            if self.transform_program and any(self.transform_program):
+                raise ValueError("future transform zero marker is inconsistent")
+            active_transforms: tuple[_TransformRecord, ...] = ()
+        else:
+            if not self.transform_program:
+                raise ValueError(
+                    "nonzero future transform programs require program bytes"
+                )
+            active_transforms = _active_transform_records(
+                self.transform_program,
+                original_flags=self.original_flags,
             )
-        unsupported_flags = self.original_flags & ~_KNOWN_NONPROGRAM_FLAGS
+            unsupported_kinds = sorted(
+                record.kind
+                for record in active_transforms
+                if record.kind not in _SUPPORTED_TRANSFORM_KINDS
+            )
+            if unsupported_kinds:
+                joined = ",".join(hex(kind) for kind in unsupported_kinds)
+                raise ValueError(
+                    "future transform programs contain unsupported active "
+                    f"kinds {joined}"
+                )
+            if any(
+                not math.isfinite(record.float_0)
+                or not math.isfinite(record.float_1)
+                for record in active_transforms
+            ):
+                raise ValueError("future transform operand is nonfinite")
+        active_kind_mask = 0
+        for record in active_transforms:
+            active_kind_mask |= record.kind
+        unsupported_flags = self.original_flags & ~(
+            _KNOWN_NONPROGRAM_FLAGS | active_kind_mask
+        )
         if unsupported_flags:
             raise ValueError(
                 f"unsupported future bullet flags 0x{unsupported_flags:x}"
@@ -139,6 +225,45 @@ class FutureDirectFire:
             raise ValueError(
                 "future lifecycle states 3/4 require separate geometry"
             )
+
+    @property
+    def active_transform_records(self) -> tuple[_TransformRecord, ...]:
+        if self.transform_program_zero:
+            return ()
+        return _active_transform_records(
+            self.transform_program,
+            original_flags=self.original_flags,
+        )
+
+
+def _stop_reaim_path_speed_bound(event: FutureDirectFire) -> float | None:
+    """Bound path length for the supported player-relative stop transform.
+
+    Native 0x80 may choose a new direction from the future player position,
+    so its post-stop angle is deliberately set-valued.  Its handler only
+    decelerates, pauses, and resumes at ``float_1``; it cannot exceed the
+    larger magnitude of the emitted and resume speeds.  Queue barriers,
+    culling suppression, and sound records do not move the bullet.
+    """
+
+    records = event.active_transform_records
+    stop_records = tuple(
+        record for record in records if record.kind == _STOP_REAIM_REPEAT
+    )
+    if not stop_records:
+        return None
+    maximum_speed = max(abs(event.speed1.lower), abs(event.speed1.upper))
+    maximum_speed = max(
+        maximum_speed,
+        abs(event.speed2.lower),
+        abs(event.speed2.upper),
+    )
+    for record in stop_records:
+        resume_speed = (
+            maximum_speed if record.float_1 <= -999.0 else abs(record.float_1)
+        )
+        maximum_speed = max(maximum_speed, resume_speed)
+    return maximum_speed
 
 
 @dataclass(frozen=True)
@@ -299,6 +424,7 @@ def lower_future_direct_fire(
         raise ValueError("future birth horizon cannot be negative")
     envelopes: list[FutureBirthEnvelope] = []
     state2 = bool(event.original_flags & 0x02)
+    transformed_speed_bound = _stop_reaim_path_speed_bound(event)
     for activation_frame in event.activation_frames:
         if activation_frame > horizon_frames:
             continue
@@ -316,23 +442,44 @@ def lower_future_direct_fire(
                     if age <= 0 or (state2 and age < _STATE2_COMPLETION_AGE):
                         samples.append(None)
                         continue
-                    coefficient = (
-                        state2_position_coefficient(age)
-                        if state2
-                        else float(age)
-                    )
-                    samples.append(
-                        _sample_from_bounds(
-                            event.origin_x.add(
-                                velocity_x.scale(coefficient)
-                            ),
-                            event.origin_y.add(
-                                velocity_y.scale(coefficient)
-                            ),
-                            half_width=event.half_width,
-                            half_height=event.half_height,
+                    if transformed_speed_bound is not None:
+                        radius = transformed_speed_bound * (
+                            age + 4 if state2 else age
                         )
-                    )
+                        samples.append(
+                            AabbHazard(
+                                x=event.origin_x.midpoint,
+                                y=event.origin_y.midpoint,
+                                half_width=(
+                                    event.half_width
+                                    + event.origin_x.radius
+                                    + radius
+                                ),
+                                half_height=(
+                                    event.half_height
+                                    + event.origin_y.radius
+                                    + radius
+                                ),
+                            )
+                        )
+                    else:
+                        coefficient = (
+                            state2_position_coefficient(age)
+                            if state2
+                            else float(age)
+                        )
+                        samples.append(
+                            _sample_from_bounds(
+                                event.origin_x.add(
+                                    velocity_x.scale(coefficient)
+                                ),
+                                event.origin_y.add(
+                                    velocity_y.scale(coefficient)
+                                ),
+                                half_width=event.half_width,
+                                half_height=event.half_height,
+                            )
+                        )
                 envelopes.append(
                     FutureBirthEnvelope(
                         source=event.source,
@@ -355,6 +502,7 @@ def lower_future_direct_fire_sectors(
         raise ValueError("future birth horizon cannot be negative")
     envelopes: list[FutureBirthSectorEnvelope] = []
     state2 = bool(event.original_flags & 0x02)
+    transformed_speed_bound = _stop_reaim_path_speed_bound(event)
     origin_uncertainty = math.hypot(
         event.origin_x.radius,
         event.origin_y.radius,
@@ -384,13 +532,20 @@ def lower_future_direct_fire_sectors(
                         minimum_radii.append(None)
                         maximum_radii.append(None)
                         continue
-                    coefficient = (
-                        state2_position_coefficient(age)
-                        if state2
-                        else float(age)
-                    )
-                    minimum_radii.append(speed.lower * coefficient)
-                    maximum_radii.append(speed.upper * coefficient)
+                    if transformed_speed_bound is not None:
+                        minimum_radii.append(0.0)
+                        maximum_radii.append(
+                            transformed_speed_bound
+                            * (age + 4 if state2 else age)
+                        )
+                    else:
+                        coefficient = (
+                            state2_position_coefficient(age)
+                            if state2
+                            else float(age)
+                        )
+                        minimum_radii.append(speed.lower * coefficient)
+                        maximum_radii.append(speed.upper * coefficient)
                 envelopes.append(
                     FutureBirthSectorEnvelope(
                         source=event.source,
@@ -399,8 +554,16 @@ def lower_future_direct_fire_sectors(
                         trajectory=AnnularSectorTrajectoryHazard(
                             origin_x=event.origin_x.midpoint,
                             origin_y=event.origin_y.midpoint,
-                            minimum_angle=angle.lower,
-                            maximum_angle=angle.upper,
+                            minimum_angle=(
+                                -math.pi
+                                if transformed_speed_bound is not None
+                                else angle.lower
+                            ),
+                            maximum_angle=(
+                                math.pi
+                                if transformed_speed_bound is not None
+                                else angle.upper
+                            ),
                             minimum_radii=tuple(minimum_radii),
                             maximum_radii=tuple(maximum_radii),
                             half_extent_radius=half_extent_radius,

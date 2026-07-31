@@ -198,6 +198,26 @@ recurrence. The retained Windows chain preserves exactly
 unresolved action, while maximum solve time falls from 2,071 to 775 ms.
 Physical revalidation is pending. Missing source coverage still fails closed.
 
+Stage-4A `20260801_015631` physically validates the recurrence optimization
+without closing L3. Nonspell exact solve maximum fell from 3,050 to 1,338 ms;
+viability maximum/p95 fell from 3,026/1,664 to 1,038/926 ms. Exact authority
+was applicable/effective on 494/479 of 6,941 nonspell decisions, and 102 of
+278 pre-first-hit applicable decisions were directional. It remained absent
+from all 238 decisions in the 80-frame nonspell hit windows. The complete
+first-hit-window failure is now source coverage: roots 1915..2007 chiefly
+reached a nonzero bullet transform program, with opcode-`0x19` failures mixed
+in.
+
+Shipped `bullet_apply_next_transform` confirms a record executes only when
+its kind intersects the bullet's original flags. Source semantics v5 retains
+that gating. Active player-relative stop/re-aim (`0x80`) is represented by a
+full-direction path-length disc bounded by the maximum emitted/resume speed;
+it does not condition on an unobserved future player. Timed barrier,
+offscreen-cull suppression, and sound records are movement-neutral. Other
+active transform kinds remain UNKNOWN. Auxiliary float addition (`0x19`) is
+advanced with interval arithmetic. Retained Windows action sets are
+unchanged; physical pressure-window revalidation remains required.
+
 ## Offline Native Authority
 
 ### O1 — Rolling native snapshot wind tunnel

@@ -14,8 +14,8 @@ authority.
 
 - Branch: `main`.
 - Last physical checkpoint:
-  `lunatic_route2_stage4a_unattended_20260801_011902`, based on immutable
-  live-code checkpoint `e8b77a8`.
+  `lunatic_route2_stage4a_unattended_20260801_015631`, based on immutable
+  live-code checkpoint `627d937`.
 - Native H=32 wind-tunnel checkpoint: `3d15953`; it is historical evidence,
   not the live ordinary horizon.
 - Workspace-prune checkpoint: `be3e583` (`Prune TH08 active research
@@ -160,6 +160,24 @@ authority.
   f817/833/835/850/910 chain keeps exactly the same action sets and no
   unresolved action while maximum solve time falls from 2,071 to 775 ms. A
   fresh Stage-4A physical gate is next; Stage 5 remains withheld.
+- **Observed recurrence win and coverage handoff:** Stage-4A
+  `20260801_015631` completed 20/2009/no-Bomb with accepted replay and cleanup.
+  Different-RNG hits are observational. Nonspell exact solve maximum fell from
+  3,050 to 1,338 ms and viability maximum/p95 from 3,026/1,664 to
+  1,038/926 ms. Before the first hit, 278 decisions had exact applicable
+  authority and 102 of those were directional, but authority was still 0/238
+  in the 80-frame windows before nine nonspell hits. Every first-hit-window
+  decision was `future_policy_unavailable`; roots 1915..2007 chiefly failed
+  on nonzero transform programs, with opcode-`0x19` interleaved.
+- **Implemented bounded transform/addition closure:** shipped-code recheck
+  confirms only transform records whose kind intersects the bullet's original
+  flags execute. Active `0x80` stop/re-aim is lowered as a full-direction
+  path-length disc using the maximum emitted/resume speed, without predicting
+  the future player. Barrier, culling-suppression, and sound records are
+  movement-neutral; every other active kind remains UNKNOWN. Auxiliary
+  opcode-`0x19` now performs exact interval addition. The retained Windows
+  chain keeps identical action sets/no unresolved action. Physical
+  revalidation is next; Stage 5 remains withheld.
 - `--kill-before-saturation` now uses observed ordinary bodies only. The
   falsified timeline spawn forecast is withheld from live input.
   Observed-body alignment/unfocus remains a proposed objective, but the
@@ -191,6 +209,7 @@ Latest user-authorized Lunatic Route-2 practice ring:
 | Stage 4A source-v4/delivery falsifier | `20260801_002006` | 24 | 1205 | 0 | accepted |
 | Stage 4A pending-delivery/clearance falsifier | `20260801_004533` | 22 | 1837 | 0 | accepted |
 | Stage 4A sector/viability deadline falsifier | `20260801_011902` | 26 | 796 | 0 | accepted |
+| Stage 4A recurrence/coverage handoff | `20260801_015631` | 20 | 2009 | 0 | accepted |
 
 The automatic older-root comparisons were 15→5, 10→13, and 19→12. They are
 observational only: RNG roots differ and the proposed WS-H strategies were

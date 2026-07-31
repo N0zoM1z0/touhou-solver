@@ -359,6 +359,55 @@ class OrdinaryFutureSourceTests(unittest.TestCase):
         self.assertEqual(events, ())
         self.assertEqual(vm.float_locals[0], FloatInterval(1.0, 3.0))
 
+    def test_auxiliary_float_addition_uses_interval_arithmetic(self) -> None:
+        destination = _bits(10016.0)
+        left = _bits(10017.0)
+        instructions = {
+            0: SubInstruction(
+                offset=0,
+                time=0,
+                opcode=0x19,
+                size=24,
+                byte_08=0,
+                difficulty_mask=0xFF,
+                parameter_mask=0x03,
+                arguments=(destination, left, _bits(2.0)),
+            ),
+            24: SubInstruction(
+                offset=24,
+                time=0,
+                opcode=0x02,
+                size=16,
+                byte_08=0,
+                difficulty_mask=0xFF,
+                parameter_mask=0x01,
+                arguments=(10036,),
+            ),
+        }
+        vm = _VmState(
+            instruction_offset=0,
+            timer_elapsed=0,
+            integer_locals=[0] * 8,
+            float_locals=[
+                FloatInterval.point(0.0),
+                FloatInterval(3.0, 5.0),
+                *[FloatInterval.point(0.0) for _ in range(6)],
+            ],
+            scratch_integers=[2, 0, 0, 0],
+        )
+
+        _execute_auxiliary(
+            source=SimpleNamespace(identity="test"),
+            vm=vm,
+            instructions=instructions,
+            difficulty_mask=0x08,
+            frame=1,
+            aim_angle=FloatInterval.point(0.0),
+            payload={},
+        )
+
+        self.assertEqual(vm.float_locals[0], FloatInterval(5.0, 7.0))
+
     def test_dynamic_direct_fire_count_resolves_captured_integer_local(
         self,
     ) -> None:

@@ -3,12 +3,14 @@
 from __future__ import annotations
 
 import math
+import struct
 import unittest
 
 from th08_future_birth_envelope import (
     FloatInterval,
     FutureDirectFire,
     lower_future_direct_fire,
+    lower_future_direct_fire_sectors,
     state2_position_coefficient,
 )
 
@@ -34,6 +36,22 @@ def _h1_event(**updates: object) -> FutureDirectFire:
     }
     fields.update(updates)
     return FutureDirectFire(**fields)
+
+
+def _stop_reaim_program(*, resume_speed: float = 2.5) -> bytes:
+    program = bytearray(18 * 24)
+    struct.pack_into(
+        "<ffiiII",
+        program,
+        0,
+        0.0,
+        resume_speed,
+        50,
+        1,
+        0x80,
+        0,
+    )
+    return bytes(program)
 
 
 class FutureBirthEnvelopeTests(unittest.TestCase):
@@ -104,6 +122,42 @@ class FutureBirthEnvelopeTests(unittest.TestCase):
     def test_nonzero_transform_program_fails_closed(self) -> None:
         with self.assertRaisesRegex(ValueError, "transform programs"):
             _h1_event(transform_program_zero=False)
+
+    def test_inactive_transform_record_preserves_linear_sector(self) -> None:
+        program = _stop_reaim_program()
+        event = _h1_event(
+            transform_program_zero=False,
+            transform_program=program,
+        )
+        trajectory = lower_future_direct_fire_sectors(
+            event,
+            horizon_frames=12,
+        )[0].trajectory
+        self.assertEqual(trajectory.minimum_angle, event.angle1.lower)
+        self.assertEqual(trajectory.maximum_angle, event.angle1.upper)
+
+    def test_active_stop_reaim_uses_full_direction_path_bound(self) -> None:
+        program = _stop_reaim_program(resume_speed=2.5)
+        event = _h1_event(
+            original_flags=0x283,
+            transform_program_zero=False,
+            transform_program=program,
+        )
+        sector = lower_future_direct_fire_sectors(
+            event,
+            horizon_frames=12,
+        )[0].trajectory
+        self.assertEqual(
+            (sector.minimum_angle, sector.maximum_angle),
+            (-math.pi, math.pi),
+        )
+        self.assertEqual(sector.minimum_radii[10], 0.0)
+        self.assertEqual(sector.maximum_radii[10], 2.5 * 14.0)
+        box = lower_future_direct_fire(event, horizon_frames=12)[0].trajectory
+        sample = box.sample(10)
+        self.assertIsNotNone(sample)
+        assert sample is not None
+        self.assertGreaterEqual(sample.half_width, 2.0 + 2.5 * 14.0)
 
     def test_unknown_native_flag_fails_closed(self) -> None:
         with self.assertRaisesRegex(ValueError, "unsupported future bullet flags"):

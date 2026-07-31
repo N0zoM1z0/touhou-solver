@@ -19,6 +19,9 @@ from th08_runtime.route2_sht_provenance import (
     capture_loaded_route2_sht_state,
     decode_loaded_route2_sht_profile,
 )
+from th08_runtime.ordinary_future_source_capture import (
+    _normal_future_damage_by_cadence_phase,
+)
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -114,6 +117,20 @@ class Route2ShtProvenanceTests(unittest.TestCase):
             53,
         )
         primary_record = state.primary.records[0]
+        self.assertEqual(primary_record.fire_period, 5)
+        self.assertEqual(primary_record.fire_phase, 0)
+        self.assertEqual(primary_record.damage, 48)
+        self.assertEqual(primary_record.shot_type, 0)
+        self.assertEqual(primary_record.callback_indices, (0, 0, 0, 0))
+        cadence_damage = _normal_future_damage_by_cadence_phase(state)
+        self.assertEqual(
+            cadence_damage,
+            (
+                162, 0, 0, 82, 0, 130, 46, 0, 42, 40,
+                156, 0, 46, 42, 0, 162, 0, 0, 82, 0,
+            ),
+        )
+        self.assertEqual(sum(cadence_damage), 990)
         self.assertEqual(
             state.provenance_for_pointer(primary_record.record_pointer),
             primary_record,

@@ -72,6 +72,12 @@ class LoadedShtRecordProvenance:
     record_offset: int
     record_pointer: int
     normal_selector_reachable: bool
+    fire_period: int
+    fire_phase: int
+    damage: int
+    source_index: int
+    shot_type: int
+    callback_indices: tuple[int, int, int, int]
 
     def record(self) -> dict[str, object]:
         return {
@@ -80,6 +86,12 @@ class LoadedShtRecordProvenance:
             "record_offset": self.record_offset,
             "record_pointer": self.record_pointer,
             "normal_selector_reachable": self.normal_selector_reachable,
+            "fire_period": self.fire_period,
+            "fire_phase": self.fire_phase,
+            "damage": self.damage,
+            "source_index": self.source_index,
+            "shot_type": self.shot_type,
+            "callback_indices": list(self.callback_indices),
         }
 
 
@@ -236,6 +248,7 @@ def decode_loaded_route2_sht_profile(
                 raise ValueError(
                     f"{spec.profile} level {level} record crosses its region"
                 )
+            callback_indices: list[int] = []
             for callback_slot, callback_offset in enumerate(
                 SHT_CALLBACK_OFFSETS
             ):
@@ -251,6 +264,7 @@ def decode_loaded_route2_sht_profile(
                     level=level,
                     record_offset=cursor,
                 )
+                callback_indices.append(index)
                 struct.pack_into(
                     "<I",
                     normalized,
@@ -264,6 +278,12 @@ def decode_loaded_route2_sht_profile(
                     record_offset=cursor,
                     record_pointer=base_pointer + cursor,
                     normal_selector_reachable=level < spec.normal_level_count,
+                    fire_period=fire_period,
+                    fire_phase=struct.unpack_from("<h", data, cursor + 0x02)[0],
+                    damage=struct.unpack_from("<h", data, cursor + 0x1C)[0],
+                    source_index=struct.unpack_from("<h", data, cursor + 0x20)[0],
+                    shot_type=struct.unpack_from("<h", data, cursor + 0x22)[0],
+                    callback_indices=tuple(callback_indices),
                 )
             )
             cursor += SHT_SHOT_RECORD_SIZE

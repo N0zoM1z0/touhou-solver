@@ -98,6 +98,8 @@ ROUTE2_OPTION_CAUSAL_TAIL_OFFSET = 0x2A4
 # instruction, then emit it whenever its period timer reaches the configured
 # interval after the main and auxiliary VMs have run.
 ENEMY_HITPOINTS_OFFSET = 0x2DFC
+ENEMY_MAX_HITPOINTS_OFFSET = 0x2E00
+ENEMY_PHASE_START_HITPOINTS_OFFSET = 0x2E04
 ENEMY_PERIODIC_EMISSION_DESCRIPTOR_OFFSET = 0x3034
 ENEMY_PERIODIC_EMISSION_DESCRIPTOR_SIZE = 0x2C
 ENEMY_PERIODIC_EMISSION_PERIOD_OFFSET = 0x3060
@@ -641,6 +643,21 @@ def _enemy_phase_transition_state_records(
             {
                 "slot": observation.slot,
                 "enemy_pointer": observation.enemy_pointer,
+                "current_hitpoints": struct.unpack_from(
+                    "<i",
+                    enemy_blob,
+                    base + ENEMY_HITPOINTS_OFFSET,
+                )[0],
+                "maximum_hitpoints": struct.unpack_from(
+                    "<i",
+                    enemy_blob,
+                    base + ENEMY_MAX_HITPOINTS_OFFSET,
+                )[0],
+                "phase_start_hitpoints": struct.unpack_from(
+                    "<i",
+                    enemy_blob,
+                    base + ENEMY_PHASE_START_HITPOINTS_OFFSET,
+                )[0],
                 "health_thresholds": list(
                     struct.unpack_from(
                         f"<{ENEMY_HEALTH_TRANSITION_COUNT}i",
@@ -689,8 +706,9 @@ def _enemy_phase_transition_state_records(
     return {
         "schema": "th08-active-enemy-phase-transition-state-v1",
         "scope": (
-            "exact_health_threshold_successor_and_integer_phase_timer_"
-            "timeout_registry_for_bounded_transition_reachability"
+            "exact_current_max_phase_start_health_threshold_successor_and_"
+            "integer_phase_timer_timeout_registry_for_bounded_transition_"
+            "reachability"
         ),
         "rows": rows,
     }

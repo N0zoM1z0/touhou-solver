@@ -19,6 +19,9 @@ from th08_live.enemy_sensor import (
     ENEMY_STRIDE,
 )
 from th08_runtime.game_state import ADDR_ENEMY_MANAGER_FRAME
+from th08_runtime.native_combat_projection import (
+    capture_player_shot_combat_state,
+)
 from th08_runtime.native_snapshot_projection import (
     COLLISION_CONTROL_PROJECTION_SCHEMA,
     _bullet_template_geometry_record,
@@ -26,6 +29,10 @@ from th08_runtime.native_snapshot_projection import (
     _timeline_runtime_inventory_record,
 )
 from th08_runtime.sensing import observe_state
+from th08_runtime.route2_sht_provenance import (
+    LoadedRoute2ShtState,
+    capture_loaded_route2_sht_state,
+)
 from th08_ordinary_future_sources import (
     OrdinaryFutureSourceClosure,
     project_ordinary_future_sources,
@@ -35,6 +42,11 @@ from th08_ordinary_future_sources import (
 ORDINARY_FUTURE_SOURCE_SNAPSHOT_SCHEMA = (
     "th08-ordinary-future-source-snapshot-v1"
 )
+ROUTE2_HEALTH_DAMAGE_ENVELOPE_SCHEMA = (
+    "th08-route2-normal-shot-health-transition-damage-envelope-v1"
+)
+_SHOT_MASK = 0x01
+_SHOT_CADENCE_LENGTH = 20
 
 
 @dataclass(frozen=True)
@@ -57,6 +69,121 @@ class OrdinaryFutureSourceCaptureResult:
 
 
 _CAPTURE_BUFFERS = threading.local()
+
+
+def _normal_future_damage_by_cadence_phase(
+    loaded: LoadedRoute2ShtState,
+) -> tuple[int, ...]:
+    """Return the greatest raw normal-shot emission at each cadence phase.
+
+    Focus and Power are objectives/observations outside hostile-source
+    closure.  Taking the maximum over every selector-reachable level of both
+    exactly loaded Route-2 SHTs therefore covers every future focus choice and
+    every possible Power increase without predicting either one.
+    """
+
+    level_records: dict[tuple[str, int], list[object]] = {}
+    for record in loaded.records_by_pointer.values():
+        if not record.normal_selector_reachable:
+            continue
+        if (
+            record.fire_period <= 0
+            or record.fire_phase < 0
+            or record.damage < 0
+            or record.shot_type != 0
+            or record.callback_indices[0] not in (0, 7)
+            or any(record.callback_indices[index] for index in (1, 2, 3))
+        ):
+            raise ValueError(
+                "loaded Route-2 normal SHT is outside the nonpiercing "
+                "default damage envelope"
+            )
+        level_records.setdefault((record.profile, record.level), []).append(
+            record
+        )
+    if not level_records:
+        raise ValueError("loaded Route-2 SHT has no normal shot levels")
+    result: list[int] = []
+    for cadence in range(_SHOT_CADENCE_LENGTH):
+        result.append(
+            max(
+                sum(
+                    record.damage
+                    for record in records
+                    if cadence % record.fire_period == record.fire_phase
+                )
+                for records in level_records.values()
+            )
+        )
+    return tuple(result)
+
+
+def _route2_health_damage_envelope_record(
+    reader: Any,
+    state: dict[str, object],
+) -> dict[str, object]:
+    """Capture a hard upper envelope for health-transition reachability."""
+
+    loaded = capture_loaded_route2_sht_state(reader)
+    shots = capture_player_shot_combat_state(reader)
+    cadence_damage = _normal_future_damage_by_cadence_phase(loaded)
+    incompatible_slots: list[int] = []
+    active_raw_damage = 0
+    for shot in shots.slots:
+        provenance = loaded.provenance_for_pointer(
+            shot.source_record_pointer
+        )
+        if (
+            provenance is None
+            or not provenance.normal_selector_reachable
+            or not shot.route2_normal_damage_path_compatible
+        ):
+            incompatible_slots.append(shot.slot)
+            continue
+        active_raw_damage += shot.damage
+
+    player = state["player"]
+    spell = state["spell"]
+    assert isinstance(player, dict)
+    assert isinstance(spell, dict)
+    input_raw = int(state["input_raw"])
+    input_current = int(state["input_current"])
+    root_conditions = {
+        "route_id_2": int(state["route_id"]) == 2,
+        "ordinary_player_phase_0": int(player["phase"]) == 0,
+        "bomb_inactive": int(player["bomb_active"]) == 0,
+        "spell_inactive": not bool(spell["active"]),
+        "shot_held_in_raw_and_active_input": bool(
+            input_raw & _SHOT_MASK and input_current & _SHOT_MASK
+        ),
+        "all_active_shots_are_exact_route2_normal_nonpiercing": not (
+            incompatible_slots
+        ),
+    }
+    return {
+        "schema": ROUTE2_HEALTH_DAMAGE_ENVELOPE_SCHEMA,
+        "complete": all(root_conditions.values()),
+        "root_conditions": root_conditions,
+        "input": {
+            "raw": input_raw,
+            "current": input_current,
+            "previous": int(state["input_previous"]),
+        },
+        "active_shot_count": len(shots.slots),
+        "active_incompatible_slots": incompatible_slots,
+        "active_raw_damage_upper_bound": active_raw_damage,
+        "future_raw_damage_by_cadence_phase": list(cadence_damage),
+        "cadence_length": _SHOT_CADENCE_LENGTH,
+        "loaded_sht_normalized_sha256": {
+            "primary": loaded.primary.normalized_sha256,
+            "secondary": loaded.secondary.normalized_sha256,
+        },
+        "player_damage_bonus_upper_ratio": [106, 100],
+        "authority": (
+            "health_transition_unreachability_only_while_every_causal_"
+            "pipeline_and_branch_mask_continues_to_hold_shot"
+        ),
+    }
 
 
 def _persistent_enemy_slab_buffer(reader: Any) -> Any | None:
@@ -181,6 +308,11 @@ def _compact_state(state: dict[str, object]) -> dict[str, object]:
         "player_y": float(player["y"]),
         "player_phase": int(player["phase"]),
         "predeath_counter": int(player["predeath_counter"]),
+        "route_id": int(state["route_id"]),
+        "input_raw": int(state["input_raw"]),
+        "input_current": int(state["input_current"]),
+        "input_previous": int(state["input_previous"]),
+        "bomb_active": int(player["bomb_active"]),
         "spell_id": (
             int(spell["spell_id"]) if bool(spell["active"]) else None
         ),
@@ -218,6 +350,9 @@ def _payload(
     return {
         "schema": COLLISION_CONTROL_PROJECTION_SCHEMA,
         "compact_state": _compact_state(state),
+        "route2_health_transition_damage_envelope": (
+            _route2_health_damage_envelope_record(reader, state)
+        ),
         "enemy_manager_template_source": manager,
         "enemy_bodies": ordinary["enemy_bodies"],
         "enemy_main_ecl_vm_inventory": ordinary[

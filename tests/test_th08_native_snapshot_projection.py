@@ -41,6 +41,8 @@ from th08_runtime.native_snapshot_projection import (
     ECL_FILE_CONTEXT_ADDRESS,
     ENEMY_ANM_PREFIX_SIZE,
     ENEMY_HITPOINTS_OFFSET,
+    ENEMY_MAX_HITPOINTS_OFFSET,
+    ENEMY_PHASE_START_HITPOINTS_OFFSET,
     ENEMY_HEALTH_TRANSITION_SUCCESSORS_OFFSET,
     ENEMY_HEALTH_TRANSITION_THRESHOLDS_OFFSET,
     ENEMY_PHASE_TIMER_OFFSET,
@@ -87,6 +89,14 @@ class NativeSnapshotProjectionTests(unittest.TestCase):
     ) -> None:
         enemy_blob = bytearray(ENEMY_STRIDE)
         struct.pack_into(
+            "<iii",
+            enemy_blob,
+            ENEMY_HITPOINTS_OFFSET,
+            1200,
+            1800,
+            1800,
+        )
+        struct.pack_into(
             "<4i",
             enemy_blob,
             ENEMY_HEALTH_TRANSITION_THRESHOLDS_OFFSET,
@@ -131,6 +141,9 @@ class NativeSnapshotProjectionTests(unittest.TestCase):
         )
 
         row = result["rows"][0]
+        self.assertEqual(row["current_hitpoints"], 1200)
+        self.assertEqual(row["maximum_hitpoints"], 1800)
+        self.assertEqual(row["phase_start_hitpoints"], 1800)
         self.assertEqual(row["health_thresholds"], [500, -1, -1, -1])
         self.assertEqual(
             row["health_successor_subroutines"],

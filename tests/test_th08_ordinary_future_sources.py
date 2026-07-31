@@ -49,6 +49,20 @@ def _empty_source_group() -> dict[str, object]:
     }
 
 
+def _damage_envelope(*, active_raw_damage: int = 0) -> dict[str, object]:
+    return {
+        "schema": (
+            "th08-route2-normal-shot-health-transition-damage-envelope-v1"
+        ),
+        "complete": True,
+        "root_conditions": {"fixture": True},
+        "active_raw_damage_upper_bound": active_raw_damage,
+        "future_raw_damage_by_cadence_phase": [0] * 20,
+        "cadence_length": 20,
+        "player_damage_bonus_upper_ratio": [106, 100],
+    }
+
+
 def _payload() -> dict[str, object]:
     first_timeline = ECL.timelines[0].instructions[0]
     main_row = [
@@ -144,6 +158,9 @@ def _payload() -> dict[str, object]:
             "rows": [
                 {
                     "enemy_pointer": SOURCE_POINTER,
+                    "current_hitpoints": 100,
+                    "maximum_hitpoints": 100,
+                    "phase_start_hitpoints": 100,
                     "health_thresholds": [-1, -1, -1, -1],
                     "health_successor_subroutines": [-1, -1, -1, -1],
                     "phase_timer_previous": -1,
@@ -170,6 +187,7 @@ def _payload() -> dict[str, object]:
             "predeath_counter": 10,
             "spell_id": None,
         },
+        "route2_health_transition_damage_envelope": _damage_envelope(),
         "enemy_manager_template_source": manager,
         "enemy_main_ecl_vm_inventory": ordinary[
             "main_ecl_vm_inventory"
@@ -269,13 +287,37 @@ class OrdinaryFutureSourceTests(unittest.TestCase):
             closure.projection.source_closure_reason,
         )
 
-    def test_health_transition_remains_fail_closed(self) -> None:
+    def test_health_transition_outside_damage_envelope_is_proven(self) -> None:
         payload = deepcopy(_payload())
         phase = payload["enemy_manager_template_source"][
             "phase_transition_state"
         ]["rows"][0]
         phase["health_thresholds"][0] = 50
         phase["health_successor_subroutines"][0] = 7
+        payload["route2_health_transition_damage_envelope"] = (
+            _damage_envelope(active_raw_damage=48)
+        )
+
+        closure = project_ordinary_future_sources(
+            payload,
+            ECL,
+            horizon_frames=1,
+        )
+
+        self.assertTrue(closure.projection.source_closure_complete)
+        self.assertEqual(closure.health_transition_proven_count, 1)
+        self.assertEqual(closure.health_transition_minimum_margin, 0)
+
+    def test_health_transition_inside_damage_envelope_fails_closed(self) -> None:
+        payload = deepcopy(_payload())
+        phase = payload["enemy_manager_template_source"][
+            "phase_transition_state"
+        ]["rows"][0]
+        phase["health_thresholds"][0] = 50
+        phase["health_successor_subroutines"][0] = 7
+        payload["route2_health_transition_damage_envelope"] = (
+            _damage_envelope(active_raw_damage=49)
+        )
 
         closure = project_ordinary_future_sources(
             payload,
@@ -285,9 +327,10 @@ class OrdinaryFutureSourceTests(unittest.TestCase):
 
         self.assertFalse(closure.projection.source_closure_complete)
         self.assertIn(
-            "armed health phase transition",
+            "health phase transition is reachable",
             closure.projection.source_closure_reason,
         )
+        self.assertIn("margin=-1", closure.projection.source_closure_reason)
 
     def test_auxiliary_timer_reset_uses_captured_integer_local(self) -> None:
         instructions = {

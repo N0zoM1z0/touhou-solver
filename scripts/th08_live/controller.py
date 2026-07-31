@@ -3753,6 +3753,12 @@ def _run_live_session(
                             "timeline_spawn_count": (
                                 closure.timeline_spawn_count
                             ),
+                            "health_transition_proven_count": (
+                                closure.health_transition_proven_count
+                            ),
+                            "health_transition_minimum_margin": (
+                                closure.health_transition_minimum_margin
+                            ),
                             "direct_fire_event_count": len(
                                 closure.direct_fire_events
                             ),

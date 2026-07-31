@@ -51,7 +51,7 @@ from touhou_control.corridor import AabbHazard, AabbTrajectoryHazard
 
 
 ORDINARY_FUTURE_SOURCE_SEMANTICS_VERSION = (
-    "th08-ordinary-future-sources-v6-bounded-phase-timeout-envelope"
+    "th08-ordinary-future-sources-v7-bounded-health-and-timeout-envelope"
 )
 _PROJECTION_SCHEMA = "th08-native-snapshot-collision-control-projection-v13"
 _DIRECT_FIRE_OPCODES = frozenset(range(0x60, 0x69))
@@ -74,6 +74,9 @@ _POSITION_TOLERANCE = 1.0e-3
 _MAX_INSTRUCTIONS_PER_UPDATE = 64
 _AUXILIARY_SLOT_COUNT = 4
 _MAX_TIMELINE_FRONTIER_STATES = 4096
+_HEALTH_DAMAGE_ENVELOPE_SCHEMA = (
+    "th08-route2-normal-shot-health-transition-damage-envelope-v1"
+)
 
 
 class FutureSourceClosureError(ValueError):
@@ -176,6 +179,8 @@ class OrdinaryFutureSourceClosure:
     silent_child_count: int
     timeline_steps: int
     timeline_spawn_count: int
+    health_transition_proven_count: int
+    health_transition_minimum_margin: int | None
 
 
 def _fail(message: str) -> None:
@@ -374,14 +379,73 @@ def _callback_is_clear(row: object, *, label: str) -> None:
         _fail(f"{label} installed callback requires address-specific lowering")
 
 
+def _health_transition_hp_loss_upper_bound(
+    payload: dict[str, object],
+    *,
+    horizon_frames: int,
+) -> int:
+    envelope = payload.get("route2_health_transition_damage_envelope")
+    if not isinstance(envelope, dict):
+        _fail("health phase transition damage envelope is absent")
+    if str(envelope.get("schema")) != _HEALTH_DAMAGE_ENVELOPE_SCHEMA:
+        _fail("health phase transition damage envelope schema drifted")
+    if not bool(envelope.get("complete")):
+        conditions = envelope.get("root_conditions")
+        failed = (
+            sorted(
+                str(name)
+                for name, satisfied in conditions.items()
+                if not bool(satisfied)
+            )
+            if isinstance(conditions, dict)
+            else ["malformed_root_conditions"]
+        )
+        _fail(
+            "health phase transition damage envelope is incomplete: "
+            + ",".join(failed)
+        )
+    cadence_length = int(envelope.get("cadence_length", -1))
+    phases = envelope.get("future_raw_damage_by_cadence_phase")
+    if (
+        cadence_length <= 0
+        or not isinstance(phases, list)
+        or len(phases) != cadence_length
+    ):
+        _fail("health damage cadence envelope layout drifted")
+    phase_damage = tuple(int(value) for value in phases)
+    active_damage = int(
+        envelope.get("active_raw_damage_upper_bound", -1)
+    )
+    if active_damage < 0 or any(value < 0 for value in phase_damage):
+        _fail("health damage envelope contains negative damage")
+    cycles, remainder = divmod(horizon_frames, cadence_length)
+    future_damage = cycles * sum(phase_damage)
+    if remainder:
+        doubled = phase_damage + phase_damage
+        future_damage += max(
+            sum(doubled[start : start + remainder])
+            for start in range(cadence_length)
+        )
+    ratio = envelope.get("player_damage_bonus_upper_ratio")
+    if ratio != [106, 100]:
+        _fail("health damage bonus upper ratio drifted")
+    # Native applies floor(raw * 106 / 100) only when the observed global
+    # bonus is active.  Applying it to all active and future raw damage is an
+    # upper bound; the native per-frame cap of 70 can only reduce HP loss.
+    return (active_damage + future_damage) * 106 // 100
+
+
 def _build_sources(
     payload: dict[str, object],
     *,
     ecl_base: int,
     horizon_frames: int,
-) -> tuple[list[_SourceState], int]:
+) -> tuple[list[_SourceState], int, int, int | None]:
     sources: list[_SourceState] = []
     auxiliary_count = 0
+    health_loss_upper_bound: int | None = None
+    health_transition_proven_count = 0
+    health_transition_minimum_margin: int | None = None
     for role, group in _source_groups(payload):
         inventory = group.get("main_ecl_vm_inventory")
         if not isinstance(inventory, dict):
@@ -578,10 +642,34 @@ def _build_sources(
                 active_thresholds or timeout_frame >= 0
             )
             if active_thresholds:
-                _fail(
-                    f"{role}:{int(slot)} has an armed health phase "
-                    "transition without integrated damage-conditioned "
-                    "successor-source lowering"
+                if health_loss_upper_bound is None:
+                    health_loss_upper_bound = (
+                        _health_transition_hp_loss_upper_bound(
+                            payload,
+                            horizon_frames=horizon_frames,
+                        )
+                    )
+                current_hitpoints = int(
+                    phase.get("current_hitpoints", -0x80000000)
+                )
+                trigger_hitpoints = max(active_thresholds)
+                margin = (
+                    current_hitpoints
+                    - health_loss_upper_bound
+                    - trigger_hitpoints
+                )
+                if margin < 0:
+                    _fail(
+                        f"{role}:{int(slot)} health phase transition is "
+                        "reachable within the future-source horizon: "
+                        f"hp={current_hitpoints}, trigger={trigger_hitpoints}, "
+                        f"loss_upper={health_loss_upper_bound}, margin={margin}"
+                    )
+                health_transition_proven_count += 1
+                health_transition_minimum_margin = (
+                    margin
+                    if health_transition_minimum_margin is None
+                    else min(health_transition_minimum_margin, margin)
                 )
             if (
                 timeout_frame >= 0
@@ -615,7 +703,12 @@ def _build_sources(
                     phase_transition_armed=False,
                 )
             )
-    return sources, auxiliary_count
+    return (
+        sources,
+        auxiliary_count,
+        health_transition_proven_count,
+        health_transition_minimum_margin,
+    )
 
 
 def _variable_identifier(raw: int) -> int:
@@ -1974,6 +2067,8 @@ def _analyze(
     int,
     int,
     int,
+    int,
+    int | None,
 ]:
     if str(payload.get("schema")) != _PROJECTION_SCHEMA:
         _fail(
@@ -1998,7 +2093,12 @@ def _analyze(
         ecl,
         horizon_frames=horizon_frames,
     )
-    sources, auxiliary_count = _build_sources(
+    (
+        sources,
+        auxiliary_count,
+        health_transition_proven_count,
+        health_transition_minimum_margin,
+    ) = _build_sources(
         payload,
         ecl_base=ecl_base,
         horizon_frames=horizon_frames,
@@ -2088,6 +2188,8 @@ def _analyze(
         silent_children,
         timeline_steps,
         timeline_spawn_count,
+        health_transition_proven_count,
+        health_transition_minimum_margin,
     )
 
 
@@ -2114,6 +2216,8 @@ def project_ordinary_future_sources(
             silent_child_count,
             timeline_steps,
             timeline_spawn_count,
+            health_transition_proven_count,
+            health_transition_minimum_margin,
         ) = _analyze(payload, ecl, horizon_frames=horizon_frames)
     except (FutureSourceClosureError, KeyError, TypeError, ValueError) as error:
         projection = unknown_future_hazard_projection(
@@ -2132,6 +2236,8 @@ def project_ordinary_future_sources(
             silent_child_count=0,
             timeline_steps=0,
             timeline_spawn_count=0,
+            health_transition_proven_count=0,
+            health_transition_minimum_margin=None,
         )
     projection = complete_future_hazard_projection(
         root_frame=root_frame,
@@ -2148,6 +2254,10 @@ def project_ordinary_future_sources(
         silent_child_count=silent_child_count,
         timeline_steps=timeline_steps,
         timeline_spawn_count=timeline_spawn_count,
+        health_transition_proven_count=health_transition_proven_count,
+        health_transition_minimum_margin=(
+            health_transition_minimum_margin
+        ),
     )
 
 

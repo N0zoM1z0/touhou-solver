@@ -2,17 +2,23 @@
   "authority": {
     "event_side_effect_authority": false,
     "future_event_prediction_authority": false,
+    "individual_event_side_effect_authority": false,
     "kind": "offline_conservative_static_event_atlas",
     "physical_trial_run": false,
     "planner_or_action_authority": false,
-    "runtime_execution_authority": false
+    "runtime_execution_authority": false,
+    "static_opcode_side_effect_authority": [
+      "timeline:0x06"
+    ]
   },
   "classification": {
     "content_02_exit_gate_passed": false,
     "content_versions_exact": true,
     "lunatic_mask_applied": true,
     "mandatory_static_event_classes_inventoried": true,
+    "mandatory_static_opcode_semantics_complete": true,
     "native_event_execution_join_complete": false,
+    "native_timeline_06_static_side_effects_revalidated": true,
     "route_and_difficulty_branches_folded_where_observable": true,
     "unknown_runtime_branches_preserved": true
   },
@@ -50,8 +56,8 @@
     "forced_enemy_hp_zero": {
       "conservative_route_reachable": 30,
       "difficulty_eligible_cfg_unreachable": 3,
-      "timeline_schedule_candidate": 0,
-      "total": 33
+      "timeline_schedule_candidate": 19,
+      "total": 52
     },
     "hostile_fire": {
       "conservative_route_reachable": 331,
@@ -65,11 +71,17 @@
       "timeline_schedule_candidate": 0,
       "total": 0
     },
+    "item_motion_control": {
+      "conservative_route_reachable": 0,
+      "difficulty_eligible_cfg_unreachable": 0,
+      "timeline_schedule_candidate": 19,
+      "total": 19
+    },
     "item_resource": {
       "conservative_route_reachable": 78,
       "difficulty_eligible_cfg_unreachable": 3,
-      "timeline_schedule_candidate": 0,
-      "total": 81
+      "timeline_schedule_candidate": 19,
+      "total": 100
     },
     "laser_lifecycle": {
       "conservative_route_reachable": 13,
@@ -95,6 +107,12 @@
       "timeline_schedule_candidate": 0,
       "total": 20
     },
+    "scripted_enemy_cleanup": {
+      "conservative_route_reachable": 0,
+      "difficulty_eligible_cfg_unreachable": 0,
+      "timeline_schedule_candidate": 19,
+      "total": 19
+    },
     "spell_lifecycle": {
       "conservative_route_reachable": 80,
       "difficulty_eligible_cfg_unreachable": 11,
@@ -113,11 +131,17 @@
       "timeline_schedule_candidate": 519,
       "total": 519
     },
-    "timeline_unknown": {
+    "timeline_message_start": {
       "conservative_route_reachable": 0,
       "difficulty_eligible_cfg_unreachable": 0,
       "timeline_schedule_candidate": 19,
       "total": 19
+    },
+    "timeline_unknown": {
+      "conservative_route_reachable": 0,
+      "difficulty_eligible_cfg_unreachable": 0,
+      "timeline_schedule_candidate": 0,
+      "total": 0
     },
     "timeline_wait_or_marker": {
       "conservative_route_reachable": 0,
@@ -132,13 +156,17 @@
     "path": "artifacts/runtime_reports/th08_immutable_content_manifest_20260731.json",
     "sha256": "3a52b6f485ada63c833f77ae8cd1653f469ae4fadeef3c38336a737c7e753ae1"
   },
+  "mandatory_route_unknown_semantic_occurrence_count": 0,
   "next_gate": {
     "do_not_block_other_high_roi_tasks_on_capture_debt": true,
     "requires_event_specific_native_execution_evidence": true,
     "requires_exact_runtime_image_and_pc_join": true,
-    "requires_unknown_timeline_06_09_revalidation": true
+    "requires_mandatory_route_unknown_opcode_revalidation": false,
+    "shared_catalog_unknown_opcodes": [
+      "0x09"
+    ]
   },
-  "report_digest": "203693babf321706f96a26f5b024136f3f56c1e0dc9980b6930759d7600c78de",
+  "report_digest": "53645ae1f210a6ffaeb72b8a3dd0023dac35c21f68aac677c564bb21b5cbb82b",
   "route_profile": {
     "difficulty": "Lunatic",
     "difficulty_index": 3,
@@ -146,15 +174,14 @@
     "route_id": 2,
     "team": "Sakuya/Remilia"
   },
-  "schema": "th08-mandatory-event-atlas-v1",
+  "schema": "th08-mandatory-event-atlas-v2",
   "stage_count": 4,
   "stages": [
     {
       "content_set_sha256": "4b2c350c00358865787be0c19a2eba4d547b31f041aad5e75c57cad4abe5e60e",
       "eligible_instruction_semantic_confidence": {
-        "inferred": 461,
-        "observed": 1217,
-        "unknown": 4
+        "inferred": 439,
+        "observed": 1243
       },
       "event_class_matrix": {
         "bullet_cancel": {
@@ -190,8 +217,8 @@
         "forced_enemy_hp_zero": {
           "conservative_route_reachable": 6,
           "difficulty_eligible_cfg_unreachable": 3,
-          "timeline_schedule_candidate": 0,
-          "total": 9
+          "timeline_schedule_candidate": 4,
+          "total": 13
         },
         "hostile_fire": {
           "conservative_route_reachable": 79,
@@ -205,11 +232,17 @@
           "timeline_schedule_candidate": 0,
           "total": 0
         },
+        "item_motion_control": {
+          "conservative_route_reachable": 0,
+          "difficulty_eligible_cfg_unreachable": 0,
+          "timeline_schedule_candidate": 4,
+          "total": 4
+        },
         "item_resource": {
           "conservative_route_reachable": 20,
           "difficulty_eligible_cfg_unreachable": 3,
-          "timeline_schedule_candidate": 0,
-          "total": 23
+          "timeline_schedule_candidate": 4,
+          "total": 27
         },
         "laser_lifecycle": {
           "conservative_route_reachable": 2,
@@ -235,6 +268,12 @@
           "timeline_schedule_candidate": 0,
           "total": 3
         },
+        "scripted_enemy_cleanup": {
+          "conservative_route_reachable": 0,
+          "difficulty_eligible_cfg_unreachable": 0,
+          "timeline_schedule_candidate": 4,
+          "total": 4
+        },
         "spell_lifecycle": {
           "conservative_route_reachable": 15,
           "difficulty_eligible_cfg_unreachable": 5,
@@ -253,11 +292,17 @@
           "timeline_schedule_candidate": 121,
           "total": 121
         },
-        "timeline_unknown": {
+        "timeline_message_start": {
           "conservative_route_reachable": 0,
           "difficulty_eligible_cfg_unreachable": 0,
           "timeline_schedule_candidate": 4,
           "total": 4
+        },
+        "timeline_unknown": {
+          "conservative_route_reachable": 0,
+          "difficulty_eligible_cfg_unreachable": 0,
+          "timeline_schedule_candidate": 0,
+          "total": 0
         },
         "timeline_wait_or_marker": {
           "conservative_route_reachable": 0,
@@ -1165,17 +1210,22 @@
           ],
           "difficulty_mask": 255,
           "event_classes": [
-            "timeline_unknown"
+            "timeline_message_start",
+            "scripted_enemy_cleanup",
+            "forced_enemy_hp_zero",
+            "item_resource",
+            "item_motion_control"
           ],
           "file_offset": 46596,
+          "native_semantics_key": "timeline:0x06",
           "opcode": 6,
           "opcode_category": "timeline",
           "opcode_hex": "0x06",
-          "opcode_name": "engine_event_06",
+          "opcode_name": "start_message_script_and_cleanup",
           "route_static_status": "difficulty_eligible_timeline_schedule_candidate",
           "scope": "timeline",
           "scope_index": 0,
-          "semantic_confidence": "unknown",
+          "semantic_confidence": "observed",
           "size": 12,
           "symbolic_id": "ecldata3.ecl:timeline:0:0x0000b604",
           "time": 3080
@@ -1248,17 +1298,22 @@
           ],
           "difficulty_mask": 255,
           "event_classes": [
-            "timeline_unknown"
+            "timeline_message_start",
+            "scripted_enemy_cleanup",
+            "forced_enemy_hp_zero",
+            "item_resource",
+            "item_motion_control"
           ],
           "file_offset": 46644,
+          "native_semantics_key": "timeline:0x06",
           "opcode": 6,
           "opcode_category": "timeline",
           "opcode_hex": "0x06",
-          "opcode_name": "engine_event_06",
+          "opcode_name": "start_message_script_and_cleanup",
           "route_static_status": "difficulty_eligible_timeline_schedule_candidate",
           "scope": "timeline",
           "scope_index": 0,
-          "semantic_confidence": "unknown",
+          "semantic_confidence": "observed",
           "size": 12,
           "symbolic_id": "ecldata3.ecl:timeline:0:0x0000b634",
           "time": 3082
@@ -1815,17 +1870,22 @@
           ],
           "difficulty_mask": 255,
           "event_classes": [
-            "timeline_unknown"
+            "timeline_message_start",
+            "scripted_enemy_cleanup",
+            "forced_enemy_hp_zero",
+            "item_resource",
+            "item_motion_control"
           ],
           "file_offset": 47260,
+          "native_semantics_key": "timeline:0x06",
           "opcode": 6,
           "opcode_category": "timeline",
           "opcode_hex": "0x06",
-          "opcode_name": "engine_event_06",
+          "opcode_name": "start_message_script_and_cleanup",
           "route_static_status": "difficulty_eligible_timeline_schedule_candidate",
           "scope": "timeline",
           "scope_index": 0,
-          "semantic_confidence": "unknown",
+          "semantic_confidence": "observed",
           "size": 12,
           "symbolic_id": "ecldata3.ecl:timeline:0:0x0000b89c",
           "time": 4663
@@ -1945,17 +2005,22 @@
           ],
           "difficulty_mask": 255,
           "event_classes": [
-            "timeline_unknown"
+            "timeline_message_start",
+            "scripted_enemy_cleanup",
+            "forced_enemy_hp_zero",
+            "item_resource",
+            "item_motion_control"
           ],
           "file_offset": 47352,
+          "native_semantics_key": "timeline:0x06",
           "opcode": 6,
           "opcode_category": "timeline",
           "opcode_hex": "0x06",
-          "opcode_name": "engine_event_06",
+          "opcode_name": "start_message_script_and_cleanup",
           "route_static_status": "difficulty_eligible_timeline_schedule_candidate",
           "scope": "timeline",
           "scope_index": 0,
-          "semantic_confidence": "unknown",
+          "semantic_confidence": "observed",
           "size": 12,
           "symbolic_id": "ecldata3.ecl:timeline:0:0x0000b8f8",
           "time": 4664
@@ -4265,7 +4330,7 @@
           "route_static_status": "conservative_route_reachable",
           "scope": "subroutine",
           "scope_index": 0,
-          "semantic_confidence": "inferred",
+          "semantic_confidence": "observed",
           "size": 20,
           "symbolic_id": "ecldata3.ecl:sub:0:0x000001c8",
           "time": 0
@@ -5646,7 +5711,7 @@
           "route_static_status": "conservative_route_reachable",
           "scope": "subroutine",
           "scope_index": 7,
-          "semantic_confidence": "inferred",
+          "semantic_confidence": "observed",
           "size": 20,
           "symbolic_id": "ecldata3.ecl:sub:7:0x00000f54",
           "time": 0
@@ -6551,7 +6616,7 @@
           "route_static_status": "conservative_route_reachable",
           "scope": "subroutine",
           "scope_index": 13,
-          "semantic_confidence": "inferred",
+          "semantic_confidence": "observed",
           "size": 20,
           "symbolic_id": "ecldata3.ecl:sub:13:0x00001804",
           "time": 0
@@ -6729,7 +6794,7 @@
           "route_static_status": "conservative_route_reachable",
           "scope": "subroutine",
           "scope_index": 14,
-          "semantic_confidence": "inferred",
+          "semantic_confidence": "observed",
           "size": 20,
           "symbolic_id": "ecldata3.ecl:sub:14:0x000019e4",
           "time": 0
@@ -7591,7 +7656,7 @@
           "route_static_status": "conservative_route_reachable",
           "scope": "subroutine",
           "scope_index": 21,
-          "semantic_confidence": "inferred",
+          "semantic_confidence": "observed",
           "size": 20,
           "symbolic_id": "ecldata3.ecl:sub:21:0x00002494",
           "time": 0
@@ -8584,7 +8649,7 @@
           "route_static_status": "conservative_route_reachable",
           "scope": "subroutine",
           "scope_index": 27,
-          "semantic_confidence": "inferred",
+          "semantic_confidence": "observed",
           "size": 16,
           "symbolic_id": "ecldata3.ecl:sub:27:0x00002e10",
           "time": 0
@@ -8607,7 +8672,7 @@
           "route_static_status": "conservative_route_reachable",
           "scope": "subroutine",
           "scope_index": 27,
-          "semantic_confidence": "inferred",
+          "semantic_confidence": "observed",
           "size": 16,
           "symbolic_id": "ecldata3.ecl:sub:27:0x00002e20",
           "time": 0
@@ -9068,7 +9133,7 @@
           "route_static_status": "conservative_route_reachable",
           "scope": "subroutine",
           "scope_index": 30,
-          "semantic_confidence": "inferred",
+          "semantic_confidence": "observed",
           "size": 16,
           "symbolic_id": "ecldata3.ecl:sub:30:0x00003088",
           "time": 0
@@ -9986,7 +10051,7 @@
           "route_static_status": "conservative_route_reachable",
           "scope": "subroutine",
           "scope_index": 35,
-          "semantic_confidence": "inferred",
+          "semantic_confidence": "observed",
           "size": 20,
           "symbolic_id": "ecldata3.ecl:sub:35:0x00003d1c",
           "time": 0
@@ -10878,7 +10943,7 @@
           "route_static_status": "conservative_route_reachable",
           "scope": "subroutine",
           "scope_index": 38,
-          "semantic_confidence": "inferred",
+          "semantic_confidence": "observed",
           "size": 20,
           "symbolic_id": "ecldata3.ecl:sub:38:0x000045c8",
           "time": 0
@@ -12647,7 +12712,7 @@
           "route_static_status": "conservative_route_reachable",
           "scope": "subroutine",
           "scope_index": 44,
-          "semantic_confidence": "inferred",
+          "semantic_confidence": "observed",
           "size": 16,
           "symbolic_id": "ecldata3.ecl:sub:44:0x0000562c",
           "time": 0
@@ -13194,7 +13259,7 @@
           "route_static_status": "conservative_route_reachable",
           "scope": "subroutine",
           "scope_index": 46,
-          "semantic_confidence": "inferred",
+          "semantic_confidence": "observed",
           "size": 16,
           "symbolic_id": "ecldata3.ecl:sub:46:0x0000619c",
           "time": 0
@@ -13217,7 +13282,7 @@
           "route_static_status": "conservative_route_reachable",
           "scope": "subroutine",
           "scope_index": 46,
-          "semantic_confidence": "inferred",
+          "semantic_confidence": "observed",
           "size": 16,
           "symbolic_id": "ecldata3.ecl:sub:46:0x000061ac",
           "time": 0
@@ -13400,7 +13465,7 @@
           "route_static_status": "conservative_route_reachable",
           "scope": "subroutine",
           "scope_index": 47,
-          "semantic_confidence": "inferred",
+          "semantic_confidence": "observed",
           "size": 16,
           "symbolic_id": "ecldata3.ecl:sub:47:0x00006278",
           "time": 0
@@ -14347,7 +14412,7 @@
           "route_static_status": "difficulty_eligible_cfg_unreachable",
           "scope": "subroutine",
           "scope_index": 50,
-          "semantic_confidence": "inferred",
+          "semantic_confidence": "observed",
           "size": 16,
           "symbolic_id": "ecldata3.ecl:sub:50:0x00007010",
           "time": 0
@@ -15003,7 +15068,7 @@
           "route_static_status": "difficulty_eligible_cfg_unreachable",
           "scope": "subroutine",
           "scope_index": 54,
-          "semantic_confidence": "inferred",
+          "semantic_confidence": "observed",
           "size": 16,
           "symbolic_id": "ecldata3.ecl:sub:54:0x000076cc",
           "time": 0
@@ -15714,7 +15779,7 @@
           "route_static_status": "difficulty_eligible_cfg_unreachable",
           "scope": "subroutine",
           "scope_index": 58,
-          "semantic_confidence": "inferred",
+          "semantic_confidence": "observed",
           "size": 16,
           "symbolic_id": "ecldata3.ecl:sub:58:0x00007fdc",
           "time": 0
@@ -16378,7 +16443,7 @@
           "route_static_status": "conservative_route_reachable",
           "scope": "subroutine",
           "scope_index": 62,
-          "semantic_confidence": "inferred",
+          "semantic_confidence": "observed",
           "size": 16,
           "symbolic_id": "ecldata3.ecl:sub:62:0x00008744",
           "time": 0
@@ -16942,7 +17007,7 @@
           "route_static_status": "conservative_route_reachable",
           "scope": "subroutine",
           "scope_index": 66,
-          "semantic_confidence": "inferred",
+          "semantic_confidence": "observed",
           "size": 16,
           "symbolic_id": "ecldata3.ecl:sub:66:0x00008da8",
           "time": 0
@@ -16965,7 +17030,7 @@
           "route_static_status": "conservative_route_reachable",
           "scope": "subroutine",
           "scope_index": 66,
-          "semantic_confidence": "inferred",
+          "semantic_confidence": "observed",
           "size": 16,
           "symbolic_id": "ecldata3.ecl:sub:66:0x00008db8",
           "time": 0
@@ -17148,7 +17213,7 @@
           "route_static_status": "conservative_route_reachable",
           "scope": "subroutine",
           "scope_index": 67,
-          "semantic_confidence": "inferred",
+          "semantic_confidence": "observed",
           "size": 16,
           "symbolic_id": "ecldata3.ecl:sub:67:0x00008e84",
           "time": 0
@@ -17932,7 +17997,7 @@
           "route_static_status": "conservative_route_reachable",
           "scope": "subroutine",
           "scope_index": 71,
-          "semantic_confidence": "inferred",
+          "semantic_confidence": "observed",
           "size": 16,
           "symbolic_id": "ecldata3.ecl:sub:71:0x00009b7c",
           "time": 0
@@ -19087,39 +19152,13 @@
         "natural_route_authority": false,
         "sha256": "3d458ec6549f1d7fb6c694388adb55c010ac4cb405457ab9af6df2e13928ca5f"
       },
-      "unknown_semantic_occurrences": [
-        {
-          "opcode_hex": "0x06",
-          "opcode_name": "engine_event_06",
-          "route_static_status": "difficulty_eligible_timeline_schedule_candidate",
-          "symbolic_id": "ecldata3.ecl:timeline:0:0x0000b604"
-        },
-        {
-          "opcode_hex": "0x06",
-          "opcode_name": "engine_event_06",
-          "route_static_status": "difficulty_eligible_timeline_schedule_candidate",
-          "symbolic_id": "ecldata3.ecl:timeline:0:0x0000b634"
-        },
-        {
-          "opcode_hex": "0x06",
-          "opcode_name": "engine_event_06",
-          "route_static_status": "difficulty_eligible_timeline_schedule_candidate",
-          "symbolic_id": "ecldata3.ecl:timeline:0:0x0000b89c"
-        },
-        {
-          "opcode_hex": "0x06",
-          "opcode_name": "engine_event_06",
-          "route_static_status": "difficulty_eligible_timeline_schedule_candidate",
-          "symbolic_id": "ecldata3.ecl:timeline:0:0x0000b8f8"
-        }
-      ]
+      "unknown_semantic_occurrences": []
     },
     {
       "content_set_sha256": "71d40f0041ddf09edd7cf21ae9242bac050ed1f910c9abf56882e22f2f281234",
       "eligible_instruction_semantic_confidence": {
-        "inferred": 282,
-        "observed": 1273,
-        "unknown": 4
+        "inferred": 267,
+        "observed": 1292
       },
       "event_class_matrix": {
         "bullet_cancel": {
@@ -19155,8 +19194,8 @@
         "forced_enemy_hp_zero": {
           "conservative_route_reachable": 7,
           "difficulty_eligible_cfg_unreachable": 0,
-          "timeline_schedule_candidate": 0,
-          "total": 7
+          "timeline_schedule_candidate": 4,
+          "total": 11
         },
         "hostile_fire": {
           "conservative_route_reachable": 93,
@@ -19170,11 +19209,17 @@
           "timeline_schedule_candidate": 0,
           "total": 0
         },
+        "item_motion_control": {
+          "conservative_route_reachable": 0,
+          "difficulty_eligible_cfg_unreachable": 0,
+          "timeline_schedule_candidate": 4,
+          "total": 4
+        },
         "item_resource": {
           "conservative_route_reachable": 16,
           "difficulty_eligible_cfg_unreachable": 0,
-          "timeline_schedule_candidate": 0,
-          "total": 16
+          "timeline_schedule_candidate": 4,
+          "total": 20
         },
         "laser_lifecycle": {
           "conservative_route_reachable": 0,
@@ -19200,6 +19245,12 @@
           "timeline_schedule_candidate": 0,
           "total": 3
         },
+        "scripted_enemy_cleanup": {
+          "conservative_route_reachable": 0,
+          "difficulty_eligible_cfg_unreachable": 0,
+          "timeline_schedule_candidate": 4,
+          "total": 4
+        },
         "spell_lifecycle": {
           "conservative_route_reachable": 17,
           "difficulty_eligible_cfg_unreachable": 2,
@@ -19218,11 +19269,17 @@
           "timeline_schedule_candidate": 247,
           "total": 247
         },
-        "timeline_unknown": {
+        "timeline_message_start": {
           "conservative_route_reachable": 0,
           "difficulty_eligible_cfg_unreachable": 0,
           "timeline_schedule_candidate": 4,
           "total": 4
+        },
+        "timeline_unknown": {
+          "conservative_route_reachable": 0,
+          "difficulty_eligible_cfg_unreachable": 0,
+          "timeline_schedule_candidate": 0,
+          "total": 0
         },
         "timeline_wait_or_marker": {
           "conservative_route_reachable": 0,
@@ -22531,17 +22588,22 @@
           ],
           "difficulty_mask": 255,
           "event_classes": [
-            "timeline_unknown"
+            "timeline_message_start",
+            "scripted_enemy_cleanup",
+            "forced_enemy_hp_zero",
+            "item_resource",
+            "item_motion_control"
           ],
           "file_offset": 45676,
+          "native_semantics_key": "timeline:0x06",
           "opcode": 6,
           "opcode_category": "timeline",
           "opcode_hex": "0x06",
-          "opcode_name": "engine_event_06",
+          "opcode_name": "start_message_script_and_cleanup",
           "route_static_status": "difficulty_eligible_timeline_schedule_candidate",
           "scope": "timeline",
           "scope_index": 0,
-          "semantic_confidence": "unknown",
+          "semantic_confidence": "observed",
           "size": 12,
           "symbolic_id": "ecldata4a.ecl:timeline:0:0x0000b26c",
           "time": 4962
@@ -22659,17 +22721,22 @@
           ],
           "difficulty_mask": 255,
           "event_classes": [
-            "timeline_unknown"
+            "timeline_message_start",
+            "scripted_enemy_cleanup",
+            "forced_enemy_hp_zero",
+            "item_resource",
+            "item_motion_control"
           ],
           "file_offset": 45764,
+          "native_semantics_key": "timeline:0x06",
           "opcode": 6,
           "opcode_category": "timeline",
           "opcode_hex": "0x06",
-          "opcode_name": "engine_event_06",
+          "opcode_name": "start_message_script_and_cleanup",
           "route_static_status": "difficulty_eligible_timeline_schedule_candidate",
           "scope": "timeline",
           "scope_index": 0,
-          "semantic_confidence": "unknown",
+          "semantic_confidence": "observed",
           "size": 12,
           "symbolic_id": "ecldata4a.ecl:timeline:0:0x0000b2c4",
           "time": 4963
@@ -24322,17 +24389,22 @@
           ],
           "difficulty_mask": 255,
           "event_classes": [
-            "timeline_unknown"
+            "timeline_message_start",
+            "scripted_enemy_cleanup",
+            "forced_enemy_hp_zero",
+            "item_resource",
+            "item_motion_control"
           ],
           "file_offset": 47740,
+          "native_semantics_key": "timeline:0x06",
           "opcode": 6,
           "opcode_category": "timeline",
           "opcode_hex": "0x06",
-          "opcode_name": "engine_event_06",
+          "opcode_name": "start_message_script_and_cleanup",
           "route_static_status": "difficulty_eligible_timeline_schedule_candidate",
           "scope": "timeline",
           "scope_index": 0,
-          "semantic_confidence": "unknown",
+          "semantic_confidence": "observed",
           "size": 12,
           "symbolic_id": "ecldata4a.ecl:timeline:0:0x0000ba7c",
           "time": 6923
@@ -24452,17 +24524,22 @@
           ],
           "difficulty_mask": 255,
           "event_classes": [
-            "timeline_unknown"
+            "timeline_message_start",
+            "scripted_enemy_cleanup",
+            "forced_enemy_hp_zero",
+            "item_resource",
+            "item_motion_control"
           ],
           "file_offset": 47832,
+          "native_semantics_key": "timeline:0x06",
           "opcode": 6,
           "opcode_category": "timeline",
           "opcode_hex": "0x06",
-          "opcode_name": "engine_event_06",
+          "opcode_name": "start_message_script_and_cleanup",
           "route_static_status": "difficulty_eligible_timeline_schedule_candidate",
           "scope": "timeline",
           "scope_index": 0,
-          "semantic_confidence": "unknown",
+          "semantic_confidence": "observed",
           "size": 12,
           "symbolic_id": "ecldata4a.ecl:timeline:0:0x0000bad8",
           "time": 6925
@@ -27018,7 +27095,7 @@
           "route_static_status": "conservative_route_reachable",
           "scope": "subroutine",
           "scope_index": 7,
-          "semantic_confidence": "inferred",
+          "semantic_confidence": "observed",
           "size": 20,
           "symbolic_id": "ecldata4a.ecl:sub:7:0x00000b3c",
           "time": 0
@@ -27960,7 +28037,7 @@
           "route_static_status": "conservative_route_reachable",
           "scope": "subroutine",
           "scope_index": 17,
-          "semantic_confidence": "inferred",
+          "semantic_confidence": "observed",
           "size": 20,
           "symbolic_id": "ecldata4a.ecl:sub:17:0x00001700",
           "time": 0
@@ -28832,7 +28909,7 @@
           "route_static_status": "conservative_route_reachable",
           "scope": "subroutine",
           "scope_index": 19,
-          "semantic_confidence": "inferred",
+          "semantic_confidence": "observed",
           "size": 20,
           "symbolic_id": "ecldata4a.ecl:sub:19:0x000021a0",
           "time": 0
@@ -29581,7 +29658,7 @@
           "route_static_status": "conservative_route_reachable",
           "scope": "subroutine",
           "scope_index": 22,
-          "semantic_confidence": "inferred",
+          "semantic_confidence": "observed",
           "size": 16,
           "symbolic_id": "ecldata4a.ecl:sub:22:0x00002c88",
           "time": 0
@@ -29604,7 +29681,7 @@
           "route_static_status": "conservative_route_reachable",
           "scope": "subroutine",
           "scope_index": 22,
-          "semantic_confidence": "inferred",
+          "semantic_confidence": "observed",
           "size": 16,
           "symbolic_id": "ecldata4a.ecl:sub:22:0x00002c98",
           "time": 0
@@ -29986,7 +30063,7 @@
           "route_static_status": "conservative_route_reachable",
           "scope": "subroutine",
           "scope_index": 25,
-          "semantic_confidence": "inferred",
+          "semantic_confidence": "observed",
           "size": 20,
           "symbolic_id": "ecldata4a.ecl:sub:25:0x00002e94",
           "time": 0
@@ -31000,7 +31077,7 @@
           "route_static_status": "conservative_route_reachable",
           "scope": "subroutine",
           "scope_index": 26,
-          "semantic_confidence": "inferred",
+          "semantic_confidence": "observed",
           "size": 20,
           "symbolic_id": "ecldata4a.ecl:sub:26:0x0000372c",
           "time": 0
@@ -32302,7 +32379,7 @@
           "route_static_status": "conservative_route_reachable",
           "scope": "subroutine",
           "scope_index": 28,
-          "semantic_confidence": "inferred",
+          "semantic_confidence": "observed",
           "size": 16,
           "symbolic_id": "ecldata4a.ecl:sub:28:0x000042f4",
           "time": 0
@@ -32816,7 +32893,7 @@
           "route_static_status": "conservative_route_reachable",
           "scope": "subroutine",
           "scope_index": 30,
-          "semantic_confidence": "inferred",
+          "semantic_confidence": "observed",
           "size": 16,
           "symbolic_id": "ecldata4a.ecl:sub:30:0x00004c24",
           "time": 0
@@ -33415,7 +33492,7 @@
           "route_static_status": "conservative_route_reachable",
           "scope": "subroutine",
           "scope_index": 33,
-          "semantic_confidence": "inferred",
+          "semantic_confidence": "observed",
           "size": 16,
           "symbolic_id": "ecldata4a.ecl:sub:33:0x00005548",
           "time": 0
@@ -35873,7 +35950,7 @@
           "route_static_status": "conservative_route_reachable",
           "scope": "subroutine",
           "scope_index": 41,
-          "semantic_confidence": "inferred",
+          "semantic_confidence": "observed",
           "size": 16,
           "symbolic_id": "ecldata4a.ecl:sub:41:0x00006ec4",
           "time": 0
@@ -36995,7 +37072,7 @@
           "route_static_status": "conservative_route_reachable",
           "scope": "subroutine",
           "scope_index": 45,
-          "semantic_confidence": "inferred",
+          "semantic_confidence": "observed",
           "size": 16,
           "symbolic_id": "ecldata4a.ecl:sub:45:0x00007c64",
           "time": 0
@@ -37018,7 +37095,7 @@
           "route_static_status": "conservative_route_reachable",
           "scope": "subroutine",
           "scope_index": 45,
-          "semantic_confidence": "inferred",
+          "semantic_confidence": "observed",
           "size": 16,
           "symbolic_id": "ecldata4a.ecl:sub:45:0x00007c74",
           "time": 0
@@ -37340,7 +37417,7 @@
           "route_static_status": "conservative_route_reachable",
           "scope": "subroutine",
           "scope_index": 46,
-          "semantic_confidence": "inferred",
+          "semantic_confidence": "observed",
           "size": 16,
           "symbolic_id": "ecldata4a.ecl:sub:46:0x00007dac",
           "time": 0
@@ -38607,7 +38684,7 @@
           "route_static_status": "conservative_route_reachable",
           "scope": "subroutine",
           "scope_index": 54,
-          "semantic_confidence": "inferred",
+          "semantic_confidence": "observed",
           "size": 16,
           "symbolic_id": "ecldata4a.ecl:sub:54:0x00008d04",
           "time": 0
@@ -39745,39 +39822,13 @@
         "natural_route_authority": false,
         "sha256": "9ac983ec5a34fd607b73891d5ba95a19caadb493565b8986320c04d0de8a8df3"
       },
-      "unknown_semantic_occurrences": [
-        {
-          "opcode_hex": "0x06",
-          "opcode_name": "engine_event_06",
-          "route_static_status": "difficulty_eligible_timeline_schedule_candidate",
-          "symbolic_id": "ecldata4a.ecl:timeline:0:0x0000b26c"
-        },
-        {
-          "opcode_hex": "0x06",
-          "opcode_name": "engine_event_06",
-          "route_static_status": "difficulty_eligible_timeline_schedule_candidate",
-          "symbolic_id": "ecldata4a.ecl:timeline:0:0x0000b2c4"
-        },
-        {
-          "opcode_hex": "0x06",
-          "opcode_name": "engine_event_06",
-          "route_static_status": "difficulty_eligible_timeline_schedule_candidate",
-          "symbolic_id": "ecldata4a.ecl:timeline:0:0x0000ba7c"
-        },
-        {
-          "opcode_hex": "0x06",
-          "opcode_name": "engine_event_06",
-          "route_static_status": "difficulty_eligible_timeline_schedule_candidate",
-          "symbolic_id": "ecldata4a.ecl:timeline:0:0x0000bad8"
-        }
-      ]
+      "unknown_semantic_occurrences": []
     },
     {
       "content_set_sha256": "38bda7bbf9d938427308055975490da01f05c334e5b15e1feb9fb577e9fad43f",
       "eligible_instruction_semantic_confidence": {
-        "inferred": 414,
-        "observed": 1235,
-        "unknown": 2
+        "inferred": 397,
+        "observed": 1254
       },
       "event_class_matrix": {
         "bullet_cancel": {
@@ -39813,8 +39864,8 @@
         "forced_enemy_hp_zero": {
           "conservative_route_reachable": 6,
           "difficulty_eligible_cfg_unreachable": 0,
-          "timeline_schedule_candidate": 0,
-          "total": 6
+          "timeline_schedule_candidate": 2,
+          "total": 8
         },
         "hostile_fire": {
           "conservative_route_reachable": 60,
@@ -39828,11 +39879,17 @@
           "timeline_schedule_candidate": 0,
           "total": 0
         },
+        "item_motion_control": {
+          "conservative_route_reachable": 0,
+          "difficulty_eligible_cfg_unreachable": 0,
+          "timeline_schedule_candidate": 2,
+          "total": 2
+        },
         "item_resource": {
           "conservative_route_reachable": 19,
           "difficulty_eligible_cfg_unreachable": 0,
-          "timeline_schedule_candidate": 0,
-          "total": 19
+          "timeline_schedule_candidate": 2,
+          "total": 21
         },
         "laser_lifecycle": {
           "conservative_route_reachable": 0,
@@ -39858,6 +39915,12 @@
           "timeline_schedule_candidate": 0,
           "total": 3
         },
+        "scripted_enemy_cleanup": {
+          "conservative_route_reachable": 0,
+          "difficulty_eligible_cfg_unreachable": 0,
+          "timeline_schedule_candidate": 2,
+          "total": 2
+        },
         "spell_lifecycle": {
           "conservative_route_reachable": 13,
           "difficulty_eligible_cfg_unreachable": 2,
@@ -39876,11 +39939,17 @@
           "timeline_schedule_candidate": 130,
           "total": 130
         },
-        "timeline_unknown": {
+        "timeline_message_start": {
           "conservative_route_reachable": 0,
           "difficulty_eligible_cfg_unreachable": 0,
           "timeline_schedule_candidate": 2,
           "total": 2
+        },
+        "timeline_unknown": {
+          "conservative_route_reachable": 0,
+          "difficulty_eligible_cfg_unreachable": 0,
+          "timeline_schedule_candidate": 0,
+          "total": 0
         },
         "timeline_wait_or_marker": {
           "conservative_route_reachable": 0,
@@ -43294,17 +43363,22 @@
           ],
           "difficulty_mask": 255,
           "event_classes": [
-            "timeline_unknown"
+            "timeline_message_start",
+            "scripted_enemy_cleanup",
+            "forced_enemy_hp_zero",
+            "item_resource",
+            "item_motion_control"
           ],
           "file_offset": 46984,
+          "native_semantics_key": "timeline:0x06",
           "opcode": 6,
           "opcode_category": "timeline",
           "opcode_hex": "0x06",
-          "opcode_name": "engine_event_06",
+          "opcode_name": "start_message_script_and_cleanup",
           "route_static_status": "difficulty_eligible_timeline_schedule_candidate",
           "scope": "timeline",
           "scope_index": 0,
-          "semantic_confidence": "unknown",
+          "semantic_confidence": "observed",
           "size": 12,
           "symbolic_id": "ecldata5.ecl:timeline:0:0x0000b788",
           "time": 7481
@@ -43555,17 +43629,22 @@
           ],
           "difficulty_mask": 255,
           "event_classes": [
-            "timeline_unknown"
+            "timeline_message_start",
+            "scripted_enemy_cleanup",
+            "forced_enemy_hp_zero",
+            "item_resource",
+            "item_motion_control"
           ],
           "file_offset": 47180,
+          "native_semantics_key": "timeline:0x06",
           "opcode": 6,
           "opcode_category": "timeline",
           "opcode_hex": "0x06",
-          "opcode_name": "engine_event_06",
+          "opcode_name": "start_message_script_and_cleanup",
           "route_static_status": "difficulty_eligible_timeline_schedule_candidate",
           "scope": "timeline",
           "scope_index": 0,
-          "semantic_confidence": "unknown",
+          "semantic_confidence": "observed",
           "size": 12,
           "symbolic_id": "ecldata5.ecl:timeline:0:0x0000b84c",
           "time": 7485
@@ -43811,7 +43890,7 @@
           "route_static_status": "conservative_route_reachable",
           "scope": "subroutine",
           "scope_index": 2,
-          "semantic_confidence": "inferred",
+          "semantic_confidence": "observed",
           "size": 20,
           "symbolic_id": "ecldata5.ecl:sub:2:0x000003d0",
           "time": 0
@@ -44709,7 +44788,7 @@
           "route_static_status": "conservative_route_reachable",
           "scope": "subroutine",
           "scope_index": 9,
-          "semantic_confidence": "inferred",
+          "semantic_confidence": "observed",
           "size": 20,
           "symbolic_id": "ecldata5.ecl:sub:9:0x00000d4c",
           "time": 0
@@ -45194,7 +45273,7 @@
           "route_static_status": "conservative_route_reachable",
           "scope": "subroutine",
           "scope_index": 10,
-          "semantic_confidence": "inferred",
+          "semantic_confidence": "observed",
           "size": 20,
           "symbolic_id": "ecldata5.ecl:sub:10:0x0000121c",
           "time": 0
@@ -45795,7 +45874,7 @@
           "route_static_status": "conservative_route_reachable",
           "scope": "subroutine",
           "scope_index": 15,
-          "semantic_confidence": "inferred",
+          "semantic_confidence": "observed",
           "size": 20,
           "symbolic_id": "ecldata5.ecl:sub:15:0x000018e8",
           "time": 0
@@ -46733,7 +46812,7 @@
           "route_static_status": "conservative_route_reachable",
           "scope": "subroutine",
           "scope_index": 22,
-          "semantic_confidence": "inferred",
+          "semantic_confidence": "observed",
           "size": 20,
           "symbolic_id": "ecldata5.ecl:sub:22:0x0000226c",
           "time": 0
@@ -48739,7 +48818,7 @@
           "route_static_status": "conservative_route_reachable",
           "scope": "subroutine",
           "scope_index": 39,
-          "semantic_confidence": "inferred",
+          "semantic_confidence": "observed",
           "size": 20,
           "symbolic_id": "ecldata5.ecl:sub:39:0x00003818",
           "time": 0
@@ -49587,7 +49666,7 @@
           "route_static_status": "conservative_route_reachable",
           "scope": "subroutine",
           "scope_index": 45,
-          "semantic_confidence": "inferred",
+          "semantic_confidence": "observed",
           "size": 20,
           "symbolic_id": "ecldata5.ecl:sub:45:0x0000432c",
           "time": 0
@@ -50744,7 +50823,7 @@
           "route_static_status": "conservative_route_reachable",
           "scope": "subroutine",
           "scope_index": 51,
-          "semantic_confidence": "inferred",
+          "semantic_confidence": "observed",
           "size": 20,
           "symbolic_id": "ecldata5.ecl:sub:51:0x00004e00",
           "time": 0
@@ -51223,7 +51302,7 @@
           "route_static_status": "conservative_route_reachable",
           "scope": "subroutine",
           "scope_index": 53,
-          "semantic_confidence": "inferred",
+          "semantic_confidence": "observed",
           "size": 20,
           "symbolic_id": "ecldata5.ecl:sub:53:0x000051e0",
           "time": 0
@@ -51886,7 +51965,7 @@
           "route_static_status": "conservative_route_reachable",
           "scope": "subroutine",
           "scope_index": 56,
-          "semantic_confidence": "inferred",
+          "semantic_confidence": "observed",
           "size": 20,
           "symbolic_id": "ecldata5.ecl:sub:56:0x00005710",
           "time": 0
@@ -52928,7 +53007,7 @@
           "route_static_status": "conservative_route_reachable",
           "scope": "subroutine",
           "scope_index": 62,
-          "semantic_confidence": "inferred",
+          "semantic_confidence": "observed",
           "size": 16,
           "symbolic_id": "ecldata5.ecl:sub:62:0x00005ff0",
           "time": 0
@@ -53568,7 +53647,7 @@
           "route_static_status": "conservative_route_reachable",
           "scope": "subroutine",
           "scope_index": 63,
-          "semantic_confidence": "inferred",
+          "semantic_confidence": "observed",
           "size": 16,
           "symbolic_id": "ecldata5.ecl:sub:63:0x00006840",
           "time": 0
@@ -54487,7 +54566,7 @@
           "route_static_status": "conservative_route_reachable",
           "scope": "subroutine",
           "scope_index": 66,
-          "semantic_confidence": "inferred",
+          "semantic_confidence": "observed",
           "size": 16,
           "symbolic_id": "ecldata5.ecl:sub:66:0x000072a0",
           "time": 0
@@ -55480,7 +55559,7 @@
           "route_static_status": "conservative_route_reachable",
           "scope": "subroutine",
           "scope_index": 74,
-          "semantic_confidence": "inferred",
+          "semantic_confidence": "observed",
           "size": 16,
           "symbolic_id": "ecldata5.ecl:sub:74:0x00007e74",
           "time": 0
@@ -55503,7 +55582,7 @@
           "route_static_status": "conservative_route_reachable",
           "scope": "subroutine",
           "scope_index": 74,
-          "semantic_confidence": "inferred",
+          "semantic_confidence": "observed",
           "size": 16,
           "symbolic_id": "ecldata5.ecl:sub:74:0x00007e84",
           "time": 0
@@ -55709,7 +55788,7 @@
           "route_static_status": "conservative_route_reachable",
           "scope": "subroutine",
           "scope_index": 75,
-          "semantic_confidence": "inferred",
+          "semantic_confidence": "observed",
           "size": 16,
           "symbolic_id": "ecldata5.ecl:sub:75:0x00007f70",
           "time": 0
@@ -56574,7 +56653,7 @@
           "route_static_status": "conservative_route_reachable",
           "scope": "subroutine",
           "scope_index": 78,
-          "semantic_confidence": "inferred",
+          "semantic_confidence": "observed",
           "size": 16,
           "symbolic_id": "ecldata5.ecl:sub:78:0x000089b8",
           "time": 0
@@ -58244,27 +58323,13 @@
         "natural_route_authority": false,
         "sha256": "d9140821aae21c9426f7ebb0a4e8334718265bdd011f20b7c026eda901639d4b"
       },
-      "unknown_semantic_occurrences": [
-        {
-          "opcode_hex": "0x06",
-          "opcode_name": "engine_event_06",
-          "route_static_status": "difficulty_eligible_timeline_schedule_candidate",
-          "symbolic_id": "ecldata5.ecl:timeline:0:0x0000b788"
-        },
-        {
-          "opcode_hex": "0x06",
-          "opcode_name": "engine_event_06",
-          "route_static_status": "difficulty_eligible_timeline_schedule_candidate",
-          "symbolic_id": "ecldata5.ecl:timeline:0:0x0000b84c"
-        }
-      ]
+      "unknown_semantic_occurrences": []
     },
     {
       "content_set_sha256": "46072579e3011a0062b52768d98f03b017dccebd02e086c1f1e587df5b8f2da0",
       "eligible_instruction_semantic_confidence": {
-        "inferred": 387,
-        "observed": 1809,
-        "unknown": 9
+        "inferred": 365,
+        "observed": 1840
       },
       "event_class_matrix": {
         "bullet_cancel": {
@@ -58300,8 +58365,8 @@
         "forced_enemy_hp_zero": {
           "conservative_route_reachable": 11,
           "difficulty_eligible_cfg_unreachable": 0,
-          "timeline_schedule_candidate": 0,
-          "total": 11
+          "timeline_schedule_candidate": 9,
+          "total": 20
         },
         "hostile_fire": {
           "conservative_route_reachable": 99,
@@ -58315,11 +58380,17 @@
           "timeline_schedule_candidate": 0,
           "total": 0
         },
+        "item_motion_control": {
+          "conservative_route_reachable": 0,
+          "difficulty_eligible_cfg_unreachable": 0,
+          "timeline_schedule_candidate": 9,
+          "total": 9
+        },
         "item_resource": {
           "conservative_route_reachable": 23,
           "difficulty_eligible_cfg_unreachable": 0,
-          "timeline_schedule_candidate": 0,
-          "total": 23
+          "timeline_schedule_candidate": 9,
+          "total": 32
         },
         "laser_lifecycle": {
           "conservative_route_reachable": 11,
@@ -58345,6 +58416,12 @@
           "timeline_schedule_candidate": 0,
           "total": 11
         },
+        "scripted_enemy_cleanup": {
+          "conservative_route_reachable": 0,
+          "difficulty_eligible_cfg_unreachable": 0,
+          "timeline_schedule_candidate": 9,
+          "total": 9
+        },
         "spell_lifecycle": {
           "conservative_route_reachable": 35,
           "difficulty_eligible_cfg_unreachable": 2,
@@ -58363,11 +58440,17 @@
           "timeline_schedule_candidate": 21,
           "total": 21
         },
-        "timeline_unknown": {
+        "timeline_message_start": {
           "conservative_route_reachable": 0,
           "difficulty_eligible_cfg_unreachable": 0,
           "timeline_schedule_candidate": 9,
           "total": 9
+        },
+        "timeline_unknown": {
+          "conservative_route_reachable": 0,
+          "difficulty_eligible_cfg_unreachable": 0,
+          "timeline_schedule_candidate": 0,
+          "total": 0
         },
         "timeline_wait_or_marker": {
           "conservative_route_reachable": 0,
@@ -58774,17 +58857,22 @@
           ],
           "difficulty_mask": 255,
           "event_classes": [
-            "timeline_unknown"
+            "timeline_message_start",
+            "scripted_enemy_cleanup",
+            "forced_enemy_hp_zero",
+            "item_resource",
+            "item_motion_control"
           ],
           "file_offset": 66820,
+          "native_semantics_key": "timeline:0x06",
           "opcode": 6,
           "opcode_category": "timeline",
           "opcode_hex": "0x06",
-          "opcode_name": "engine_event_06",
+          "opcode_name": "start_message_script_and_cleanup",
           "route_static_status": "difficulty_eligible_timeline_schedule_candidate",
           "scope": "timeline",
           "scope_index": 0,
-          "semantic_confidence": "unknown",
+          "semantic_confidence": "observed",
           "size": 12,
           "symbolic_id": "ecldata7.ecl:timeline:0:0x00010504",
           "time": 3510
@@ -58857,17 +58945,22 @@
           ],
           "difficulty_mask": 255,
           "event_classes": [
-            "timeline_unknown"
+            "timeline_message_start",
+            "scripted_enemy_cleanup",
+            "forced_enemy_hp_zero",
+            "item_resource",
+            "item_motion_control"
           ],
           "file_offset": 66868,
+          "native_semantics_key": "timeline:0x06",
           "opcode": 6,
           "opcode_category": "timeline",
           "opcode_hex": "0x06",
-          "opcode_name": "engine_event_06",
+          "opcode_name": "start_message_script_and_cleanup",
           "route_static_status": "difficulty_eligible_timeline_schedule_candidate",
           "scope": "timeline",
           "scope_index": 0,
-          "semantic_confidence": "unknown",
+          "semantic_confidence": "observed",
           "size": 12,
           "symbolic_id": "ecldata7.ecl:timeline:0:0x00010534",
           "time": 4112
@@ -58985,17 +59078,22 @@
           ],
           "difficulty_mask": 255,
           "event_classes": [
-            "timeline_unknown"
+            "timeline_message_start",
+            "scripted_enemy_cleanup",
+            "forced_enemy_hp_zero",
+            "item_resource",
+            "item_motion_control"
           ],
           "file_offset": 66956,
+          "native_semantics_key": "timeline:0x06",
           "opcode": 6,
           "opcode_category": "timeline",
           "opcode_hex": "0x06",
-          "opcode_name": "engine_event_06",
+          "opcode_name": "start_message_script_and_cleanup",
           "route_static_status": "difficulty_eligible_timeline_schedule_candidate",
           "scope": "timeline",
           "scope_index": 0,
-          "semantic_confidence": "unknown",
+          "semantic_confidence": "observed",
           "size": 12,
           "symbolic_id": "ecldata7.ecl:timeline:0:0x0001058c",
           "time": 4113
@@ -59006,17 +59104,22 @@
           ],
           "difficulty_mask": 255,
           "event_classes": [
-            "timeline_unknown"
+            "timeline_message_start",
+            "scripted_enemy_cleanup",
+            "forced_enemy_hp_zero",
+            "item_resource",
+            "item_motion_control"
           ],
           "file_offset": 66968,
+          "native_semantics_key": "timeline:0x06",
           "opcode": 6,
           "opcode_category": "timeline",
           "opcode_hex": "0x06",
-          "opcode_name": "engine_event_06",
+          "opcode_name": "start_message_script_and_cleanup",
           "route_static_status": "difficulty_eligible_timeline_schedule_candidate",
           "scope": "timeline",
           "scope_index": 0,
-          "semantic_confidence": "unknown",
+          "semantic_confidence": "observed",
           "size": 12,
           "symbolic_id": "ecldata7.ecl:timeline:0:0x00010598",
           "time": 4173
@@ -59093,17 +59196,22 @@
           ],
           "difficulty_mask": 255,
           "event_classes": [
-            "timeline_unknown"
+            "timeline_message_start",
+            "scripted_enemy_cleanup",
+            "forced_enemy_hp_zero",
+            "item_resource",
+            "item_motion_control"
           ],
           "file_offset": 67032,
+          "native_semantics_key": "timeline:0x06",
           "opcode": 6,
           "opcode_category": "timeline",
           "opcode_hex": "0x06",
-          "opcode_name": "engine_event_06",
+          "opcode_name": "start_message_script_and_cleanup",
           "route_static_status": "difficulty_eligible_timeline_schedule_candidate",
           "scope": "timeline",
           "scope_index": 0,
-          "semantic_confidence": "unknown",
+          "semantic_confidence": "observed",
           "size": 12,
           "symbolic_id": "ecldata7.ecl:timeline:0:0x000105d8",
           "time": 4234
@@ -59180,17 +59288,22 @@
           ],
           "difficulty_mask": 255,
           "event_classes": [
-            "timeline_unknown"
+            "timeline_message_start",
+            "scripted_enemy_cleanup",
+            "forced_enemy_hp_zero",
+            "item_resource",
+            "item_motion_control"
           ],
           "file_offset": 67096,
+          "native_semantics_key": "timeline:0x06",
           "opcode": 6,
           "opcode_category": "timeline",
           "opcode_hex": "0x06",
-          "opcode_name": "engine_event_06",
+          "opcode_name": "start_message_script_and_cleanup",
           "route_static_status": "difficulty_eligible_timeline_schedule_candidate",
           "scope": "timeline",
           "scope_index": 0,
-          "semantic_confidence": "unknown",
+          "semantic_confidence": "observed",
           "size": 12,
           "symbolic_id": "ecldata7.ecl:timeline:0:0x00010618",
           "time": 4235
@@ -59267,17 +59380,22 @@
           ],
           "difficulty_mask": 255,
           "event_classes": [
-            "timeline_unknown"
+            "timeline_message_start",
+            "scripted_enemy_cleanup",
+            "forced_enemy_hp_zero",
+            "item_resource",
+            "item_motion_control"
           ],
           "file_offset": 67160,
+          "native_semantics_key": "timeline:0x06",
           "opcode": 6,
           "opcode_category": "timeline",
           "opcode_hex": "0x06",
-          "opcode_name": "engine_event_06",
+          "opcode_name": "start_message_script_and_cleanup",
           "route_static_status": "difficulty_eligible_timeline_schedule_candidate",
           "scope": "timeline",
           "scope_index": 0,
-          "semantic_confidence": "unknown",
+          "semantic_confidence": "observed",
           "size": 12,
           "symbolic_id": "ecldata7.ecl:timeline:0:0x00010658",
           "time": 4236
@@ -59354,17 +59472,22 @@
           ],
           "difficulty_mask": 255,
           "event_classes": [
-            "timeline_unknown"
+            "timeline_message_start",
+            "scripted_enemy_cleanup",
+            "forced_enemy_hp_zero",
+            "item_resource",
+            "item_motion_control"
           ],
           "file_offset": 67224,
+          "native_semantics_key": "timeline:0x06",
           "opcode": 6,
           "opcode_category": "timeline",
           "opcode_hex": "0x06",
-          "opcode_name": "engine_event_06",
+          "opcode_name": "start_message_script_and_cleanup",
           "route_static_status": "difficulty_eligible_timeline_schedule_candidate",
           "scope": "timeline",
           "scope_index": 0,
-          "semantic_confidence": "unknown",
+          "semantic_confidence": "observed",
           "size": 12,
           "symbolic_id": "ecldata7.ecl:timeline:0:0x00010698",
           "time": 4237
@@ -59441,17 +59564,22 @@
           ],
           "difficulty_mask": 255,
           "event_classes": [
-            "timeline_unknown"
+            "timeline_message_start",
+            "scripted_enemy_cleanup",
+            "forced_enemy_hp_zero",
+            "item_resource",
+            "item_motion_control"
           ],
           "file_offset": 67288,
+          "native_semantics_key": "timeline:0x06",
           "opcode": 6,
           "opcode_category": "timeline",
           "opcode_hex": "0x06",
-          "opcode_name": "engine_event_06",
+          "opcode_name": "start_message_script_and_cleanup",
           "route_static_status": "difficulty_eligible_timeline_schedule_candidate",
           "scope": "timeline",
           "scope_index": 0,
-          "semantic_confidence": "unknown",
+          "semantic_confidence": "observed",
           "size": 12,
           "symbolic_id": "ecldata7.ecl:timeline:0:0x000106d8",
           "time": 4238
@@ -59517,7 +59645,7 @@
           "route_static_status": "conservative_route_reachable",
           "scope": "subroutine",
           "scope_index": 0,
-          "semantic_confidence": "inferred",
+          "semantic_confidence": "observed",
           "size": 20,
           "symbolic_id": "ecldata7.ecl:sub:0:0x00000204",
           "time": 0
@@ -60135,7 +60263,7 @@
           "route_static_status": "conservative_route_reachable",
           "scope": "subroutine",
           "scope_index": 7,
-          "semantic_confidence": "inferred",
+          "semantic_confidence": "observed",
           "size": 20,
           "symbolic_id": "ecldata7.ecl:sub:7:0x000009c8",
           "time": 0
@@ -60291,7 +60419,7 @@
           "route_static_status": "conservative_route_reachable",
           "scope": "subroutine",
           "scope_index": 9,
-          "semantic_confidence": "inferred",
+          "semantic_confidence": "observed",
           "size": 20,
           "symbolic_id": "ecldata7.ecl:sub:9:0x00000c70",
           "time": 0
@@ -61139,7 +61267,7 @@
           "route_static_status": "conservative_route_reachable",
           "scope": "subroutine",
           "scope_index": 15,
-          "semantic_confidence": "inferred",
+          "semantic_confidence": "observed",
           "size": 20,
           "symbolic_id": "ecldata7.ecl:sub:15:0x00001d28",
           "time": 0
@@ -61739,7 +61867,7 @@
           "route_static_status": "conservative_route_reachable",
           "scope": "subroutine",
           "scope_index": 19,
-          "semantic_confidence": "inferred",
+          "semantic_confidence": "observed",
           "size": 20,
           "symbolic_id": "ecldata7.ecl:sub:19:0x000023a0",
           "time": 0
@@ -61995,7 +62123,7 @@
           "route_static_status": "conservative_route_reachable",
           "scope": "subroutine",
           "scope_index": 19,
-          "semantic_confidence": "inferred",
+          "semantic_confidence": "observed",
           "size": 16,
           "symbolic_id": "ecldata7.ecl:sub:19:0x00002488",
           "time": 0
@@ -63074,7 +63202,7 @@
           "route_static_status": "conservative_route_reachable",
           "scope": "subroutine",
           "scope_index": 27,
-          "semantic_confidence": "inferred",
+          "semantic_confidence": "observed",
           "size": 20,
           "symbolic_id": "ecldata7.ecl:sub:27:0x00003aac",
           "time": 0
@@ -63819,7 +63947,7 @@
           "route_static_status": "conservative_route_reachable",
           "scope": "subroutine",
           "scope_index": 31,
-          "semantic_confidence": "inferred",
+          "semantic_confidence": "observed",
           "size": 20,
           "symbolic_id": "ecldata7.ecl:sub:31:0x0000433c",
           "time": 0
@@ -64500,7 +64628,7 @@
           "route_static_status": "conservative_route_reachable",
           "scope": "subroutine",
           "scope_index": 34,
-          "semantic_confidence": "inferred",
+          "semantic_confidence": "observed",
           "size": 20,
           "symbolic_id": "ecldata7.ecl:sub:34:0x00004be0",
           "time": 0
@@ -65429,7 +65557,7 @@
           "route_static_status": "conservative_route_reachable",
           "scope": "subroutine",
           "scope_index": 38,
-          "semantic_confidence": "inferred",
+          "semantic_confidence": "observed",
           "size": 20,
           "symbolic_id": "ecldata7.ecl:sub:38:0x0000553c",
           "time": 0
@@ -67557,7 +67685,7 @@
           "route_static_status": "conservative_route_reachable",
           "scope": "subroutine",
           "scope_index": 50,
-          "semantic_confidence": "inferred",
+          "semantic_confidence": "observed",
           "size": 16,
           "symbolic_id": "ecldata7.ecl:sub:50:0x00006b7c",
           "time": 0
@@ -68923,7 +69051,7 @@
           "route_static_status": "conservative_route_reachable",
           "scope": "subroutine",
           "scope_index": 55,
-          "semantic_confidence": "inferred",
+          "semantic_confidence": "observed",
           "size": 16,
           "symbolic_id": "ecldata7.ecl:sub:55:0x00007dc8",
           "time": 0
@@ -69913,7 +70041,7 @@
           "route_static_status": "conservative_route_reachable",
           "scope": "subroutine",
           "scope_index": 61,
-          "semantic_confidence": "inferred",
+          "semantic_confidence": "observed",
           "size": 16,
           "symbolic_id": "ecldata7.ecl:sub:61:0x00008e70",
           "time": 0
@@ -71090,7 +71218,7 @@
           "route_static_status": "conservative_route_reachable",
           "scope": "subroutine",
           "scope_index": 67,
-          "semantic_confidence": "inferred",
+          "semantic_confidence": "observed",
           "size": 16,
           "symbolic_id": "ecldata7.ecl:sub:67:0x00009db4",
           "time": 0
@@ -71749,7 +71877,7 @@
           "route_static_status": "conservative_route_reachable",
           "scope": "subroutine",
           "scope_index": 70,
-          "semantic_confidence": "inferred",
+          "semantic_confidence": "observed",
           "size": 16,
           "symbolic_id": "ecldata7.ecl:sub:70:0x0000a8d0",
           "time": 0
@@ -71772,7 +71900,7 @@
           "route_static_status": "conservative_route_reachable",
           "scope": "subroutine",
           "scope_index": 70,
-          "semantic_confidence": "inferred",
+          "semantic_confidence": "observed",
           "size": 16,
           "symbolic_id": "ecldata7.ecl:sub:70:0x0000a8e0",
           "time": 0
@@ -72076,7 +72204,7 @@
           "route_static_status": "conservative_route_reachable",
           "scope": "subroutine",
           "scope_index": 71,
-          "semantic_confidence": "inferred",
+          "semantic_confidence": "observed",
           "size": 16,
           "symbolic_id": "ecldata7.ecl:sub:71:0x0000aa44",
           "time": 0
@@ -74203,7 +74331,7 @@
           "route_static_status": "conservative_route_reachable",
           "scope": "subroutine",
           "scope_index": 77,
-          "semantic_confidence": "inferred",
+          "semantic_confidence": "observed",
           "size": 16,
           "symbolic_id": "ecldata7.ecl:sub:77:0x0000d7a8",
           "time": 0
@@ -74659,7 +74787,7 @@
           "route_static_status": "conservative_route_reachable",
           "scope": "subroutine",
           "scope_index": 80,
-          "semantic_confidence": "inferred",
+          "semantic_confidence": "observed",
           "size": 16,
           "symbolic_id": "ecldata7.ecl:sub:80:0x0000decc",
           "time": 0
@@ -75120,7 +75248,7 @@
           "route_static_status": "conservative_route_reachable",
           "scope": "subroutine",
           "scope_index": 82,
-          "semantic_confidence": "inferred",
+          "semantic_confidence": "observed",
           "size": 16,
           "symbolic_id": "ecldata7.ecl:sub:82:0x0000e65c",
           "time": 0
@@ -75551,7 +75679,7 @@
           "route_static_status": "conservative_route_reachable",
           "scope": "subroutine",
           "scope_index": 84,
-          "semantic_confidence": "inferred",
+          "semantic_confidence": "observed",
           "size": 16,
           "symbolic_id": "ecldata7.ecl:sub:84:0x0000ed74",
           "time": 0
@@ -76124,7 +76252,7 @@
           "route_static_status": "conservative_route_reachable",
           "scope": "subroutine",
           "scope_index": 87,
-          "semantic_confidence": "inferred",
+          "semantic_confidence": "observed",
           "size": 16,
           "symbolic_id": "ecldata7.ecl:sub:87:0x0000f608",
           "time": 0
@@ -76845,220 +76973,58 @@
         "natural_route_authority": false,
         "sha256": "7f1a847fdd7ceb5e35dfd3529a54961ab4d1c9e7607fbcfb577936465326ab0e"
       },
-      "unknown_semantic_occurrences": [
-        {
-          "opcode_hex": "0x06",
-          "opcode_name": "engine_event_06",
-          "route_static_status": "difficulty_eligible_timeline_schedule_candidate",
-          "symbolic_id": "ecldata7.ecl:timeline:0:0x00010504"
-        },
-        {
-          "opcode_hex": "0x06",
-          "opcode_name": "engine_event_06",
-          "route_static_status": "difficulty_eligible_timeline_schedule_candidate",
-          "symbolic_id": "ecldata7.ecl:timeline:0:0x00010534"
-        },
-        {
-          "opcode_hex": "0x06",
-          "opcode_name": "engine_event_06",
-          "route_static_status": "difficulty_eligible_timeline_schedule_candidate",
-          "symbolic_id": "ecldata7.ecl:timeline:0:0x0001058c"
-        },
-        {
-          "opcode_hex": "0x06",
-          "opcode_name": "engine_event_06",
-          "route_static_status": "difficulty_eligible_timeline_schedule_candidate",
-          "symbolic_id": "ecldata7.ecl:timeline:0:0x00010598"
-        },
-        {
-          "opcode_hex": "0x06",
-          "opcode_name": "engine_event_06",
-          "route_static_status": "difficulty_eligible_timeline_schedule_candidate",
-          "symbolic_id": "ecldata7.ecl:timeline:0:0x000105d8"
-        },
-        {
-          "opcode_hex": "0x06",
-          "opcode_name": "engine_event_06",
-          "route_static_status": "difficulty_eligible_timeline_schedule_candidate",
-          "symbolic_id": "ecldata7.ecl:timeline:0:0x00010618"
-        },
-        {
-          "opcode_hex": "0x06",
-          "opcode_name": "engine_event_06",
-          "route_static_status": "difficulty_eligible_timeline_schedule_candidate",
-          "symbolic_id": "ecldata7.ecl:timeline:0:0x00010658"
-        },
-        {
-          "opcode_hex": "0x06",
-          "opcode_name": "engine_event_06",
-          "route_static_status": "difficulty_eligible_timeline_schedule_candidate",
-          "symbolic_id": "ecldata7.ecl:timeline:0:0x00010698"
-        },
-        {
-          "opcode_hex": "0x06",
-          "opcode_name": "engine_event_06",
-          "route_static_status": "difficulty_eligible_timeline_schedule_candidate",
-          "symbolic_id": "ecldata7.ecl:timeline:0:0x000106d8"
-        }
-      ]
+      "unknown_semantic_occurrences": []
     }
   ],
-  "status": "static_atlas_foundation_physical_event_join_open",
+  "status": "static_opcode_semantics_complete_runtime_event_join_open",
   "symbolic_origin_contract": {
     "identity": "content-set digest + decoded ECL SHA-256 + scope/index + decoded file offset",
     "runtime_mapping": "after exact runtime-image normalization, runtime_pc equals runtime_ecl_base plus decoded file offset",
     "runtime_mapping_verified_per_occurrence": false
   },
   "taskbook_card": "CONTENT-02",
+  "timeline_opcode_semantics": {
+    "0x06": {
+      "argument_words": [
+        "message_script_selector"
+      ],
+      "confidence": "observed_static_native",
+      "name": "start_message_script_and_cleanup",
+      "native_dispatch": {
+        "enemy_cleanup": "0x0042efb0",
+        "item_motion_control": "0x004413e0",
+        "message_start": "0x0043396d",
+        "stage_timeline_step_case": "0x0042abd2",
+        "timeline_wrapper": "0x00439810"
+      },
+      "ordered_effects": [
+        {
+          "detail": "reset the message-script state and select the requested script, including native stage/route selector branches",
+          "kind": "message_state_reset_and_script_start"
+        },
+        {
+          "detail": "for each active non-boss enemy not excluded by flags2 bit 6, write current HP +0x2dfc to zero without clearing the active bit",
+          "kind": "eligible_enemy_forced_hp_zero"
+        },
+        {
+          "detail": "eligible enemies with primary flag 0x80 request type-6 score items before the item-motion pass",
+          "kind": "conditional_score_item_allocation"
+        },
+        {
+          "detail": "unlink the eligible enemy from its parent relation and start then clear a configured signed end-subroutine index",
+          "kind": "enemy_end_transition"
+        },
+        {
+          "detail": "set every active item, including newly allocated score items, to motion state 1 with velocity (0,-0.5,0); the next item update takes the homing path",
+          "kind": "force_all_active_items_homing"
+        }
+      ],
+      "resource_boundary": "the opcode changes item allocation and motion opportunities but does not itself commit a pickup or Power/lives/Bombs reward",
+      "runtime_execution_observed_per_occurrence": false
+    }
+  },
   "unknown_priority": {
-    "basis": "mandatory workload physical reach only; individual static instruction execution is not observed",
-    "stages": [
-      {
-        "event_execution_observed": false,
-        "occurrences": [
-          {
-            "opcode_hex": "0x06",
-            "opcode_name": "engine_event_06",
-            "route_static_status": "difficulty_eligible_timeline_schedule_candidate",
-            "symbolic_id": "ecldata3.ecl:timeline:0:0x0000b604"
-          },
-          {
-            "opcode_hex": "0x06",
-            "opcode_name": "engine_event_06",
-            "route_static_status": "difficulty_eligible_timeline_schedule_candidate",
-            "symbolic_id": "ecldata3.ecl:timeline:0:0x0000b634"
-          },
-          {
-            "opcode_hex": "0x06",
-            "opcode_name": "engine_event_06",
-            "route_static_status": "difficulty_eligible_timeline_schedule_candidate",
-            "symbolic_id": "ecldata3.ecl:timeline:0:0x0000b89c"
-          },
-          {
-            "opcode_hex": "0x06",
-            "opcode_name": "engine_event_06",
-            "route_static_status": "difficulty_eligible_timeline_schedule_candidate",
-            "symbolic_id": "ecldata3.ecl:timeline:0:0x0000b8f8"
-          }
-        ],
-        "stage": "stage3",
-        "static_unknown_occurrence_count": 4,
-        "workload_has_retained_physical_reach": true
-      },
-      {
-        "event_execution_observed": false,
-        "occurrences": [
-          {
-            "opcode_hex": "0x06",
-            "opcode_name": "engine_event_06",
-            "route_static_status": "difficulty_eligible_timeline_schedule_candidate",
-            "symbolic_id": "ecldata4a.ecl:timeline:0:0x0000b26c"
-          },
-          {
-            "opcode_hex": "0x06",
-            "opcode_name": "engine_event_06",
-            "route_static_status": "difficulty_eligible_timeline_schedule_candidate",
-            "symbolic_id": "ecldata4a.ecl:timeline:0:0x0000b2c4"
-          },
-          {
-            "opcode_hex": "0x06",
-            "opcode_name": "engine_event_06",
-            "route_static_status": "difficulty_eligible_timeline_schedule_candidate",
-            "symbolic_id": "ecldata4a.ecl:timeline:0:0x0000ba7c"
-          },
-          {
-            "opcode_hex": "0x06",
-            "opcode_name": "engine_event_06",
-            "route_static_status": "difficulty_eligible_timeline_schedule_candidate",
-            "symbolic_id": "ecldata4a.ecl:timeline:0:0x0000bad8"
-          }
-        ],
-        "stage": "stage4a",
-        "static_unknown_occurrence_count": 4,
-        "workload_has_retained_physical_reach": true
-      },
-      {
-        "event_execution_observed": false,
-        "occurrences": [
-          {
-            "opcode_hex": "0x06",
-            "opcode_name": "engine_event_06",
-            "route_static_status": "difficulty_eligible_timeline_schedule_candidate",
-            "symbolic_id": "ecldata5.ecl:timeline:0:0x0000b788"
-          },
-          {
-            "opcode_hex": "0x06",
-            "opcode_name": "engine_event_06",
-            "route_static_status": "difficulty_eligible_timeline_schedule_candidate",
-            "symbolic_id": "ecldata5.ecl:timeline:0:0x0000b84c"
-          }
-        ],
-        "stage": "stage5",
-        "static_unknown_occurrence_count": 2,
-        "workload_has_retained_physical_reach": true
-      },
-      {
-        "event_execution_observed": false,
-        "occurrences": [
-          {
-            "opcode_hex": "0x06",
-            "opcode_name": "engine_event_06",
-            "route_static_status": "difficulty_eligible_timeline_schedule_candidate",
-            "symbolic_id": "ecldata7.ecl:timeline:0:0x00010504"
-          },
-          {
-            "opcode_hex": "0x06",
-            "opcode_name": "engine_event_06",
-            "route_static_status": "difficulty_eligible_timeline_schedule_candidate",
-            "symbolic_id": "ecldata7.ecl:timeline:0:0x00010534"
-          },
-          {
-            "opcode_hex": "0x06",
-            "opcode_name": "engine_event_06",
-            "route_static_status": "difficulty_eligible_timeline_schedule_candidate",
-            "symbolic_id": "ecldata7.ecl:timeline:0:0x0001058c"
-          },
-          {
-            "opcode_hex": "0x06",
-            "opcode_name": "engine_event_06",
-            "route_static_status": "difficulty_eligible_timeline_schedule_candidate",
-            "symbolic_id": "ecldata7.ecl:timeline:0:0x00010598"
-          },
-          {
-            "opcode_hex": "0x06",
-            "opcode_name": "engine_event_06",
-            "route_static_status": "difficulty_eligible_timeline_schedule_candidate",
-            "symbolic_id": "ecldata7.ecl:timeline:0:0x000105d8"
-          },
-          {
-            "opcode_hex": "0x06",
-            "opcode_name": "engine_event_06",
-            "route_static_status": "difficulty_eligible_timeline_schedule_candidate",
-            "symbolic_id": "ecldata7.ecl:timeline:0:0x00010618"
-          },
-          {
-            "opcode_hex": "0x06",
-            "opcode_name": "engine_event_06",
-            "route_static_status": "difficulty_eligible_timeline_schedule_candidate",
-            "symbolic_id": "ecldata7.ecl:timeline:0:0x00010658"
-          },
-          {
-            "opcode_hex": "0x06",
-            "opcode_name": "engine_event_06",
-            "route_static_status": "difficulty_eligible_timeline_schedule_candidate",
-            "symbolic_id": "ecldata7.ecl:timeline:0:0x00010698"
-          },
-          {
-            "opcode_hex": "0x06",
-            "opcode_name": "engine_event_06",
-            "route_static_status": "difficulty_eligible_timeline_schedule_candidate",
-            "symbolic_id": "ecldata7.ecl:timeline:0:0x000106d8"
-          }
-        ],
-        "stage": "final_b",
-        "static_unknown_occurrence_count": 9,
-        "workload_has_retained_physical_reach": true
-      }
-    ]
+    "basis": "no mandatory-route unknown semantic occurrence remains; individual static instruction execution is still not observed",
+    "stages": []
   }
 }

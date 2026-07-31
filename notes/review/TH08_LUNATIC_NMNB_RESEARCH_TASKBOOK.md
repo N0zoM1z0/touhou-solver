@@ -1939,8 +1939,14 @@ Gate: Stage 3/4A/5/Final-B content versions pinned.
 
 Dependency: CONTENT-01.  
 Output: reachable event classes and symbolic runtime mapping.  
-Gate: unknown events explicitly listed and prioritized by physical
-reachability.
+Current checkpoint: the pinned atlas retains 2,885 occurrences; shipped
+native revalidation closes all mandatory-route static opcode semantics,
+including the 19 timeline-`0x06` message/cleanup/item-homing events. Shared
+unknown opcode `0x09` has no eligible occurrence in these four timelines.
+
+Remaining gate: join individual events by exact runtime image/program counter
+and prioritize observed physical reach without treating static candidates as
+executed events.
 
 #### ROOTS-01 — Stage-5 multi-root first-hit corpus
 

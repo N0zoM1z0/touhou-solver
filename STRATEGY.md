@@ -1995,7 +1995,8 @@ first.
   `notes/research/route_resources/POWER_PICKUP_CAPABILITY_LEDGER_CONTRACT_20260731.md`, and
   `notes/research/route_resources/ROUTE2_ITEM_DROP_OPPORTUNITY_ATLAS_CONTRACT_20260731.md`, and
   `notes/research/route_resources/ROUTE2_COMBAT_RESOURCE_CANDIDATE_BOARD_CONTRACT_20260731.md`, and
-  `notes/research/route_resources/ROUTE2_ITEM_ALLOCATION_PICKUP_TRACE_CONTRACT_20260731.md`.
+  `notes/research/route_resources/ROUTE2_ITEM_ALLOCATION_PICKUP_TRACE_CONTRACT_20260731.md`, and
+  `notes/research/content/MANDATORY_STAGE_STATIC_EVENT_ATLAS_CONTRACT_20260731.md`.
   The raw first-64 inventory now has physical trace-only observation
   authority. The Power-0 audit has first-hit-bounded route observation
   authority. The enemy/damage/item lifecycle ring and lowerer have
@@ -2018,7 +2019,11 @@ first.
   candidate authority only. The item/drop atlas has shipped-native
   recurrence/static opportunity authority only. The cross-atlas board has
   immutable static-cohort authority only. The Boss configuration atlas has
-  shipped-content/native-static full-configuration-mode authority only.
+  shipped-content/native-static full-configuration-mode authority only. The
+  mandatory event atlas has complete mandatory-route static opcode semantics;
+  timeline `0x06` has shipped-instruction/dataflow authority for ordered
+  message start, eligible-enemy HP zero/end transition, conditional score-item
+  allocation, and all-item homing, but no event-execution or timing authority.
   Runtime-observed generation/damage/end/item tracking and candidate-board
   joins, instruction execution, phase sequence, exposure causality,
   survival-feasible causal collection, targeting, and S18 live action

@@ -98,7 +98,7 @@ TIMELINE_OPCODE_NAMES = {
     0x03: "spawn_enemy_random_x_playfield",
     0x04: "spawn_enemy_random_x_range_variant",
     0x05: "spawn_enemy_random_x_playfield_variant",
-    0x06: "engine_event_06",
+    0x06: "start_message_script_and_cleanup",
     0x07: "conditional_timeline_stop",
     0x08: "set_enemy_field",
     0x09: "engine_event_09",

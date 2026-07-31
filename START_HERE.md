@@ -42,10 +42,11 @@ historical handoff.
   survival-filtered native branch lowerer, plus the pinned Route-2 normal-shot
   type/update/hit-callback content closure,
   `CONTENT-01` shipped content manifest, and `CONTENT-02` static
-  mandatory-event atlas are the current repository checkpoint; no new
-  physical trial was run.
-- Complete Linux discovery passes 1,522 tests in 14.637 seconds.
-- Complete Windows UNC discovery passes 1,522 tests in 31.108 seconds with
+  mandatory-event atlas with native-revalidated timeline-`0x06`
+  message/cleanup/item semantics are the current repository checkpoint; no
+  new physical trial was run.
+- Complete Linux discovery passes 1,530 tests in 15.474 seconds.
+- Complete Windows UNC discovery passes 1,530 tests in 31.422 seconds with
   the three existing skips.
 - No TH08, controller, supervisor, native-replay runner, or Windows test
   process is intentionally left running.
@@ -412,16 +413,22 @@ historical handoff.
   Stage 3/4A/5/Final B. Known route/difficulty predicates are folded, other
   branches remain conservative, and all four CFGs have zero unresolved
   dynamic subroutine edges.
-- The 19 unknown eligible mandatory-route occurrences are all timeline opcode
-  `0x06` (4/4/2/9 by stage). Retained runs reach every workload but do not
-  prove individual event execution; event-level runtime image/program-counter
-  joins and native dispatcher revalidation remain open.
+- The former 19 unknown eligible mandatory-route occurrences are all timeline
+  opcode `0x06` (4/4/2/9 by stage). Shipped native revalidation identifies
+  message-script start followed by eligible non-boss HP zero/end transitions,
+  conditional type-6 score-item allocation, and forced homing for every active
+  item. Mandatory-route static opcode semantics are complete; shared unknown
+  opcode `0x09` has no eligible occurrence in these timelines.
+- Retained runs reach every workload but do not prove individual event
+  execution. Exact runtime image/program-counter joins remain open and no
+  event-timing, causal combat/resource, planner, or live authority follows.
 - Retained atlas:
   `artifacts/runtime_reports/th08_mandatory_event_atlas_20260731.json`,
   SHA-256
-  `6b2580ebffa7658ede7ca756fb3718f969b2c365fa43f32c24e83b2733f16139`.
-  It grants static inventory authority only, not event timing, side-effect,
-  future-hazard, planner, or action authority.
+  `fc7156165a43de4e0a7dcaad79a00d6ff183423122d798098c522c2e005dad9c`.
+  It grants static inventory plus native opcode-`0x06` instruction/dataflow
+  authority only, not individual event execution/timing, future-hazard,
+  planner, or action authority.
 
 ### Latest physical and replay evidence
 
@@ -652,8 +659,9 @@ historical handoff.
   and event classes outside this root remain unresolved. Preserve
   fail-closed `UNKNOWN` behavior on mapping/thread/stack/transition changes.
 - The mandatory-stage static event atlas is a reusable content index, not
-  runtime execution evidence. Its 19 opcode-`0x06` candidates need exact
-  runtime-image/program-counter joins before `CONTENT-02` can close, but that
+  runtime execution evidence. Its 19 opcode-`0x06` candidates now have
+  native-static message/cleanup/item-homing semantics, but still need exact
+  runtime-image/program-counter joins before `CONTENT-02` can close. That
   capture debt must not block higher-ROI route/combat/resource work.
 - The rebuilt-model binding gate is now complete for the explicit
   player-mechanics layer, the slot-45 constant-velocity fixture, and the
@@ -1635,10 +1643,12 @@ Do not resume broad G5 work first.
    SHT runtime-slot and exact source-provenance conditions, then join the v4 lifecycle
    generation/damage stream before calling any HP change a kill.
    Do not launch a physical trial merely to fill any capture debt.
-   `CONTENT-01` is closed for shipped byte identity. `CONTENT-02` may now
-   build the mandatory-stage symbolic ECL event atlas and join native events
-   only by exact image/PC identity; do not use `thtk` names as runtime
-   side-effect authority and do not block on the failed external STD printer.
+   `CONTENT-01` is closed for shipped byte identity. `CONTENT-02` has complete
+   mandatory-route static opcode semantics, including native-revalidated
+   timeline `0x06`; its remaining gate is to join individual native events
+   only by exact image/PC identity. Do not use `thtk` names as runtime
+   side-effect authority, reinterpret static candidates as executed events,
+   or block on the failed external STD printer.
 1. Do not repeat C5, the 22-hit Stage-6B run, or the unchanged 74-hit full
    route. C5 exact delivery is closed for its declared source-local contract;
    the two failed workloads already supply their reachability, resource, and

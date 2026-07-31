@@ -33,7 +33,13 @@ class MandatoryEventAtlasTests(unittest.TestCase):
         )
         self.assertEqual(
             _event_classes("timeline", 0x06),
-            ("timeline_unknown",),
+            (
+                "timeline_message_start",
+                "scripted_enemy_cleanup",
+                "forced_enemy_hp_zero",
+                "item_resource",
+                "item_motion_control",
+            ),
         )
 
     def test_callback_detail_separates_literal_and_dynamic_indices(self) -> None:
@@ -94,6 +100,49 @@ class MandatoryEventAtlasTests(unittest.TestCase):
             report["classification"]["content_02_exit_gate_passed"]
         )
         self.assertFalse(report["authority"]["runtime_execution_authority"])
+        self.assertEqual(
+            report["authority"]["static_opcode_side_effect_authority"],
+            ["timeline:0x06"],
+        )
+        self.assertEqual(
+            report["mandatory_route_unknown_semantic_occurrence_count"], 0
+        )
+        self.assertEqual(report["unknown_priority"]["stages"], [])
+        message_semantics = report["timeline_opcode_semantics"]["0x06"]
+        self.assertEqual(
+            message_semantics["native_dispatch"]["stage_timeline_step_case"],
+            "0x0042abd2",
+        )
+        self.assertEqual(
+            [effect["kind"] for effect in message_semantics["ordered_effects"]],
+            [
+                "message_state_reset_and_script_start",
+                "eligible_enemy_forced_hp_zero",
+                "conditional_score_item_allocation",
+                "enemy_end_transition",
+                "force_all_active_items_homing",
+            ],
+        )
+        message_occurrences = [
+            occurrence
+            for stage in report["stages"]
+            for occurrence in stage["event_occurrences"]
+            if occurrence["opcode"] == 0x06
+        ]
+        self.assertEqual(len(message_occurrences), 19)
+        self.assertTrue(
+            all(
+                occurrence["semantic_confidence"] == "observed"
+                and occurrence["native_semantics_key"] == "timeline:0x06"
+                for occurrence in message_occurrences
+            )
+        )
+        self.assertEqual(
+            report["event_class_matrix"]["timeline_message_start"][
+                "timeline_schedule_candidate"
+            ],
+            19,
+        )
         self.assertGreater(
             report["event_class_matrix"]["hostile_fire"][
                 "conservative_route_reachable"

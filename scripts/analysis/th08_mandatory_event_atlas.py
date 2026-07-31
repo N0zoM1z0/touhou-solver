@@ -23,7 +23,7 @@ from th08_ecl_flow import FlowConfig, analyze_flow
 from th08_ecl_opcodes import opcode_spec
 
 
-SCHEMA = "th08-mandatory-event-atlas-v1"
+SCHEMA = "th08-mandatory-event-atlas-v2"
 TASKBOOK_CARD = "CONTENT-02"
 EXPECTED_CONTENT_MANIFEST_SHA256 = (
     "3a52b6f485ada63c833f77ae8cd1653f469ae4fadeef3c38336a737c7e753ae1"
@@ -31,7 +31,7 @@ EXPECTED_CONTENT_MANIFEST_SHA256 = (
 ROUTE_ID = 2
 DIFFICULTY_INDEX = 3
 DIFFICULTY_MASK = 0x08
-TIMELINE_UNKNOWN_OPCODES = frozenset({0x06, 0x09})
+TIMELINE_UNKNOWN_OPCODES = frozenset({0x09})
 
 
 @dataclass(frozen=True)
@@ -89,7 +89,71 @@ TIMELINE_EVENT_CLASSES = {
     ),
     "timeline_wait_or_marker": frozenset({0x07, 0x0A, 0x0D, 0x0E}),
     "timeline_control": frozenset({0x08, 0x10}),
+    "timeline_message_start": frozenset({0x06}),
+    "scripted_enemy_cleanup": frozenset({0x06}),
+    "forced_enemy_hp_zero": frozenset({0x06}),
+    "item_resource": frozenset({0x06}),
+    "item_motion_control": frozenset({0x06}),
     "timeline_unknown": TIMELINE_UNKNOWN_OPCODES,
+}
+
+TIMELINE_OPCODE_SEMANTICS = {
+    "0x06": {
+        "name": "start_message_script_and_cleanup",
+        "confidence": "observed_static_native",
+        "argument_words": ["message_script_selector"],
+        "native_dispatch": {
+            "stage_timeline_step_case": "0x0042abd2",
+            "timeline_wrapper": "0x00439810",
+            "message_start": "0x0043396d",
+            "enemy_cleanup": "0x0042efb0",
+            "item_motion_control": "0x004413e0",
+        },
+        "ordered_effects": [
+            {
+                "kind": "message_state_reset_and_script_start",
+                "detail": (
+                    "reset the message-script state and select the requested "
+                    "script, including native stage/route selector branches"
+                ),
+            },
+            {
+                "kind": "eligible_enemy_forced_hp_zero",
+                "detail": (
+                    "for each active non-boss enemy not excluded by flags2 "
+                    "bit 6, write current HP +0x2dfc to zero without clearing "
+                    "the active bit"
+                ),
+            },
+            {
+                "kind": "conditional_score_item_allocation",
+                "detail": (
+                    "eligible enemies with primary flag 0x80 request type-6 "
+                    "score items before the item-motion pass"
+                ),
+            },
+            {
+                "kind": "enemy_end_transition",
+                "detail": (
+                    "unlink the eligible enemy from its parent relation and "
+                    "start then clear a configured signed end-subroutine index"
+                ),
+            },
+            {
+                "kind": "force_all_active_items_homing",
+                "detail": (
+                    "set every active item, including newly allocated score "
+                    "items, to motion state 1 with velocity (0,-0.5,0); the "
+                    "next item update takes the homing path"
+                ),
+            },
+        ],
+        "resource_boundary": (
+            "the opcode changes item allocation and motion opportunities but "
+            "does not itself commit a pickup or Power/lives/Bombs reward"
+        ),
+        "runtime_execution_observed_per_occurrence": False,
+    }
 }
 
 
@@ -206,7 +270,7 @@ def _timeline_occurrence(
         instruction.opcode,
         f"unknown_timeline_{instruction.opcode:02x}",
     )
-    return {
+    result: dict[str, object] = {
         "symbolic_id": (
             f"{ecl.path.name}:timeline:{timeline_index}:"
             f"0x{instruction.offset:08x}"
@@ -228,6 +292,10 @@ def _timeline_occurrence(
         "argument_words": _argument_words(instruction.arguments),
         "route_static_status": "difficulty_eligible_timeline_schedule_candidate",
     }
+    opcode_key = f"0x{instruction.opcode:02x}"
+    if opcode_key in TIMELINE_OPCODE_SEMANTICS:
+        result["native_semantics_key"] = f"timeline:{opcode_key}"
+    return result
 
 
 def _content_assets(
@@ -510,7 +578,7 @@ def build_event_atlas(
     report: dict[str, object] = {
         "schema": SCHEMA,
         "taskbook_card": TASKBOOK_CARD,
-        "status": "static_atlas_foundation_physical_event_join_open",
+        "status": "static_opcode_semantics_complete_runtime_event_join_open",
         "immutable_content_manifest": {
             "path": (
                 "artifacts/runtime_reports/"
@@ -544,10 +612,14 @@ def build_event_atlas(
             int(stage["event_occurrence_count"]) for stage in stages
         ),
         "event_class_matrix": aggregate_matrix,
+        "timeline_opcode_semantics": TIMELINE_OPCODE_SEMANTICS,
+        "mandatory_route_unknown_semantic_occurrence_count": sum(
+            len(stage["unknown_semantic_occurrences"]) for stage in stages
+        ),
         "unknown_priority": {
             "basis": (
-                "mandatory workload physical reach only; individual static "
-                "instruction execution is not observed"
+                "no mandatory-route unknown semantic occurrence remains; "
+                "individual static instruction execution is still not observed"
             ),
             "stages": unknown_priority,
         },
@@ -558,6 +630,8 @@ def build_event_atlas(
             "lunatic_mask_applied": True,
             "route_and_difficulty_branches_folded_where_observable": True,
             "unknown_runtime_branches_preserved": True,
+            "mandatory_static_opcode_semantics_complete": True,
+            "native_timeline_06_static_side_effects_revalidated": True,
             "native_event_execution_join_complete": False,
             "content_02_exit_gate_passed": False,
         },
@@ -565,6 +639,8 @@ def build_event_atlas(
             "kind": "offline_conservative_static_event_atlas",
             "runtime_execution_authority": False,
             "event_side_effect_authority": False,
+            "static_opcode_side_effect_authority": ["timeline:0x06"],
+            "individual_event_side_effect_authority": False,
             "future_event_prediction_authority": False,
             "planner_or_action_authority": False,
             "physical_trial_run": False,
@@ -572,7 +648,8 @@ def build_event_atlas(
         "next_gate": {
             "requires_exact_runtime_image_and_pc_join": True,
             "requires_event_specific_native_execution_evidence": True,
-            "requires_unknown_timeline_06_09_revalidation": True,
+            "requires_mandatory_route_unknown_opcode_revalidation": False,
+            "shared_catalog_unknown_opcodes": ["0x09"],
             "do_not_block_other_high_roi_tasks_on_capture_debt": True,
         },
     }

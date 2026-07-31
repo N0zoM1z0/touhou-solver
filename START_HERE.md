@@ -14,8 +14,8 @@ authority.
 
 - Branch: `main`.
 - Last physical checkpoint:
-  `lunatic_route2_stage4a_unattended_20260731_133852`, based on immutable
-  live-code checkpoint `aae641f`.
+  `lunatic_route2_stage4a_unattended_20260731_142342`, based on immutable
+  live-code checkpoint `a980600`.
 - Native H=32 wind-tunnel checkpoint: `3d15953`.
 - Workspace-prune checkpoint: `be3e583` (`Prune TH08 active research
   workspace`). It removed dormant supplemental, candidate, prewarm, G5,
@@ -47,6 +47,7 @@ Latest user-authorized Lunatic Route-2 practice ring:
 | Stage 5 early-kill gate | `20260731_122855` | 13 | 6981 | 0 | accepted |
 | Stage 4A global/early-kill gate | `20260731_130103` | 16 | 1827 | 0 | accepted |
 | Stage 4A pre-exhaustion early-kill gate | `20260731_133852` | 11 | 4148 | 0 | accepted |
+| Stage 4A forecast/global investigation | `20260731_142342` | 18 | 1915 | 0 | accepted |
 
 The automatic older-root comparisons were 15→5, 10→13, and 19→12. They are
 observational only: RNG roots differ and the proposed WS-H strategies were
@@ -55,16 +56,21 @@ different-RNG: it physically applied 27 certified unfocus preferences,
 delayed first hit by 4857 frames relative to the listed Stage-5 baseline, but
 worsened total hits by one.
 
-The newest Stage-4A run is also different-RNG and therefore observational:
-relative to the preceding Stage-4A gate it moved 16→11 hits and first hit
-1827→4148. Its canonical first attempt is more useful than that aggregate:
-124 early-kill actions were physically applied, all before the first hit and
-only after a winning queried shadow-global set plus fresh issue
-certification. The last winning query was frame 3679, 469 frames before the
-hit. A 200-HP middle-wave enemy existed at frame 3864 near x=320 but the old
-HP gate exposed it only at frame 3900 at 15 HP. The shipped timeline names
-that fixed birth at time 3860, so the next correction moves observation
-before body/low-HP visibility.
+The newest Stage-4A run is different-RNG and its 18/1915 aggregate is
+observational. Its canonical nonspell first hit is decisive: at frame 1707
+the queried global set still allowed only `stay/up/up_fast`, but the live
+fresh-local transaction selected `down_left` because ordinary-stage global
+action authority is explicitly disabled. The global set became empty at
+1710; the fresh local set remained non-empty until frame 1909 and became empty
+only at 1912, three frames before impact. Across the run, 11,947 global
+queries constrained zero decisions; 4,119 distant recoveries were exposed and
+none selected.
+
+The physical forecast gate also falsified the current timeline observer as a
+general later-wave source. All 376 observations recycled the same timeline-0
+startup birth at time 1, x=30, and only three affected input. Full-health
+observed-body targeting remains useful, but zero-pointer timeline lifecycle
+must be disambiguated before the birth forecast is trusted again.
 
 Latest full game-start Lunatic Route-2 run:
 

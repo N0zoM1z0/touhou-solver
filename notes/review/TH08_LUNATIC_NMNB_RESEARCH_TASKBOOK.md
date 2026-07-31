@@ -248,6 +248,14 @@ Alternative methods:
 No heuristic may discard a safety branch or condition on hidden state without
 proof.
 
+Current first task: establish ordinary-stage exact global action authority, or
+an equivalent causal pre-exhaustion filter. In physical Stage-4A run
+`20260731_142342`, frame 1707 still had queried safe actions
+`stay/up/up_fast`, but the authority-free live transaction selected
+`down_left`. Global loss followed 205 frames before the hit; local loss
+appeared only three frames before it. Do not tune local scoring until this
+authority seam is closed.
+
 ### WS-D — Combat, Focus, and Power
 
 This is the highest-priority experiment after cleanup.
@@ -293,9 +301,13 @@ Current checkpoint:
 - full-health ordinary targeting and a stable-clock, live-byte-verified fixed
   spawn forecast are implemented default-off. Their retained-trace 18
   proposals are offline eligibility only;
-- physically falsify that causal observation path, then repeat the native
-  kill/prevented-birth result on a second root before promotion. This
-  checkpoint supports D1 but does not promote it.
+- the authorized physical gate retained full-health body sensing but
+  falsified the timeline forecast: all 376 observations recycled the same
+  time-1 startup birth and only three affected input;
+- preserve early kill, repair exact timeline lifecycle before re-enabling
+  forecast authority, and first establish ordinary-stage global action
+  authority. Then repeat the native kill/prevented-birth result on a second
+  root before promotion. This checkpoint supports D1 but does not promote it.
 
 #### D2: Focus as control
 

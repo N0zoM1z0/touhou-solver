@@ -106,7 +106,8 @@ For ordinary enemies, compare earlier native kills and prevented later
 hostile births only among actions already feasible under the survival
 constraint. Test across more than one root/stage before promotion.
 
-This is the highest-priority current hypothesis.
+Preserve this objective, but exact ordinary-stage global action authority is
+now the higher-priority dependency.
 
 Current evidence is mixed. A same-root Stage-5 branch observed one 20-HP
 enemy defeated and three additional hostile bullets suppressed every nine
@@ -134,13 +135,12 @@ old HP gate until frame 3900 at 15 HP.
 
 The default-off correction recognizes full-health ordinary non-boss enemies
 and, when no current target supersedes it, may forecast the next fixed birth
-from a stable native timeline clock. It requires exact equality between the
-live relocated instruction interval and the shipped ECL, refuses timeline
-barriers/dynamic spawns/transitions, and uses only a 240-frame horizon. This
-forecast has no safety authority: missing or losing shadow-global guidance,
-runtime disagreement, or fresh issue rejection preserves the survival
-baseline. It is implemented and deterministically tested but not yet
-physically validated.
+from a stable native timeline clock. The physical `20260731_142342` gate
+preserves the observed-body part but falsifies the forecast implementation:
+all 376 observations recycled the timeline-0 time-1 x=30 startup birth and
+only three affected input. A zero instruction pointer is currently aliased to
+timeline start without causal not-started/completed lifecycle identity.
+Disable forecast authority until that identity is exact.
 
 ### P2 — Focus as a dynamic action factor
 
@@ -176,6 +176,15 @@ Prefer proof-backed feasibility, dominance, canonicalization, and admissible
 bounds. MCTS, learned value functions, Monte Carlo, beam widening, and
 imitation may rank or propose candidates offline, but cannot prune hard-safety
 branches or gain live authority without an independent exact verifier.
+
+This is now the immediate implementation target for nonspells. Physical
+Stage-4A run `20260731_142342` produced 11,947 available ordinary/spell global
+queries but zero viability-constrained decisions and zero selected
+recoveries. At the canonical nonspell hit, frame 1707 still had the exact
+queried set `stay/up/up_fast`, while live selected `down_left`; global loss
+followed at 1710 and local loss only at 1912. Establish exact causal
+ordinary-stage authority, or an equivalent causal pre-exhaustion filter,
+before tuning local scores.
 
 ### P5 — Representative root corpus
 

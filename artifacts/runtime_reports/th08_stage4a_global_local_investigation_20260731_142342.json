@@ -1,0 +1,221 @@
+{
+  "schema": "th08-stage4a-global-local-investigation-v1",
+  "run_id": "lunatic_route2_stage4a_unattended_20260731_142342",
+  "live_code_checkpoint": "a98060029a7041462d193ef2ae4f9878664da038",
+  "scope": {
+    "workload": "Lunatic Stage 4A practice",
+    "frames": [
+      1,
+      45506
+    ],
+    "decisions": 12109,
+    "hits": 18,
+    "bombs": 0,
+    "route_complete": true,
+    "canonical_first_hit_phase": "nonspell",
+    "later_spell_evidence_role": "discovery_only"
+  },
+  "canonical_first_hit": {
+    "frame": 1915,
+    "player": [
+      20.169342041015625,
+      428.030517578125
+    ],
+    "primary_cause_class": "modeled_committed_prefix_collision",
+    "planner_failure_class": "global_viability_kernel_exhausted_before_hit",
+    "last_winning_global_query": {
+      "frame": 1707,
+      "lead_to_hit_frames": 208,
+      "player": [
+        21.399654388427734,
+        409.0577392578125
+      ],
+      "safe_actions": [
+        "stay",
+        "up",
+        "up_fast"
+      ],
+      "physically_selected_action": "down_left",
+      "physically_selected_action_inside_safe_set": false,
+      "fresh_issue_safe_action_count": 17,
+      "pipeline_clearance": 32.350616455078125,
+      "global_action_authority": false
+    },
+    "first_empty_global_query": {
+      "frame": 1710,
+      "lead_to_hit_frames": 205,
+      "reason": "robust action set is empty; distant recovery found",
+      "minimum_recovery_distance": 160.0,
+      "global_action_authority": false
+    },
+    "last_nonempty_fresh_issue_set": {
+      "frame": 1909,
+      "lead_to_hit_frames": 6,
+      "safe_action_count": 8,
+      "selected_action": "left",
+      "selected_certificate_minimum_clearance": 7.799117565155029
+    },
+    "first_empty_fresh_issue_set": {
+      "frame": 1912,
+      "lead_to_hit_frames": 3,
+      "planned_action": "up_fast",
+      "selected_least_bad_action": "right_fast",
+      "selected_predicted_collisions": 1,
+      "selected_certificate_minimum_clearance": -5.255441188812256
+    },
+    "hit_input": {
+      "active_action": "right_fast",
+      "mask": 129,
+      "pipeline_clearance": -5.091070175170898
+    }
+  },
+  "whole_run_global_delivery": {
+    "available_queries": 11947,
+    "winning_queries": 5341,
+    "empty_queries": 6606,
+    "viability_constrained_decisions": 0,
+    "recovery_guidance_available": 1671,
+    "recovery_guidance_selected": 0,
+    "distant_recovery_guidance_available": 4119,
+    "distant_recovery_guidance_selected": 0,
+    "selected_action_outside_reported_winning_set": 478,
+    "global_losing_local_prefix_safe": 2753,
+    "global_losing_local_prefix_unsafe": 128,
+    "global_winning_local_prefix_safe": 3093,
+    "global_winning_local_prefix_unsafe": 2
+  },
+  "spell_discovery": {
+    "57": {
+      "name": "夢境「二重大結界」",
+      "decisions": 1087,
+      "winning_queries": 795,
+      "empty_queries": 286,
+      "distant_recovery_queries": 54,
+      "selected_recoveries": 0,
+      "edge_decision_fraction": 0.6448942042318307,
+      "minimum_recovery_distance_q50_q90_max": [
+        35.77708763999664,
+        45.254833995939045,
+        48.0
+      ]
+    },
+    "65": {
+      "name": "神技「八方龍殺陣」",
+      "decisions": 908,
+      "winning_queries": 140,
+      "empty_queries": 760,
+      "distant_recovery_queries": 235,
+      "selected_recoveries": 0,
+      "edge_decision_fraction": 0.6332599118942731,
+      "minimum_recovery_distance_q50_q90_max": [
+        178.88543819998318,
+        314.350123270216,
+        350.90739519138094
+      ]
+    },
+    "69": {
+      "name": "回霊「夢想封印　侘」",
+      "decisions": 1064,
+      "winning_queries": 318,
+      "empty_queries": 740,
+      "distant_recovery_queries": 562,
+      "selected_recoveries": 0,
+      "edge_decision_fraction": 0.6146616541353384,
+      "minimum_recovery_distance_q50_q90_max": [
+        80.0,
+        176.0,
+        376.59527347007423
+      ]
+    },
+    "73": {
+      "name": "大結界「博麗弾幕結界」",
+      "decisions": 934,
+      "winning_queries": 361,
+      "empty_queries": 564,
+      "distant_recovery_queries": 386,
+      "selected_recoveries": 0,
+      "edge_decision_fraction": 0.2890792291220557,
+      "minimum_recovery_distance_q50_q90_max": [
+        48.0,
+        81.58431221748455,
+        187.275198571514
+      ]
+    }
+  },
+  "local_failure_separation": {
+    "hit_primary_classes": {
+      "modeled_committed_prefix_collision": 11,
+      "observed_bullet_overlap": 6,
+      "sensor_gap_or_unmodeled_hazard": 1
+    },
+    "planner_failure_classes": {
+      "global_viability_kernel_exhausted_before_hit": 17,
+      "late_collision_after_positive_causal_margin": 1
+    },
+    "positive_margin_birth_case": {
+      "hit_frame": 13689,
+      "spell_id": 57,
+      "last_alive_frame": 13686,
+      "last_alive_pipeline_clearance": 47.35703659057617,
+      "last_alive_active_bullets": 578,
+      "hit_active_bullets": 581,
+      "hit_bullet_slot": 1149,
+      "hit_bullet_velocity": [
+        -1.276203155517578,
+        1.5399043560028076
+      ],
+      "hit_clearance": -0.5955123901367188,
+      "interpretation": "A hazard absent from the last causal certificate became lethal within three physical frames; this is a future-birth coverage failure, not merely a ranking tie among already observed bullets."
+    },
+    "unmodeled_nonspell_case": {
+      "hit_frame": 22814,
+      "pipeline_clearance": 1.0049254894256592,
+      "exact_contact_candidate": null,
+      "primary_cause_class": "sensor_gap_or_unmodeled_hazard"
+    }
+  },
+  "spawn_forecast_delivery": {
+    "observations": 376,
+    "unique_targets": 1,
+    "only_target": {
+      "timeline_index": 0,
+      "instruction_offset": 41652,
+      "instruction_time": 1,
+      "lead_frames": 1,
+      "subroutine": 15,
+      "x": 30.0,
+      "y": -16.0
+    },
+    "proposals": 376,
+    "physically_applied": 3,
+    "applied_frames": [
+      401,
+      519,
+      528
+    ],
+    "source_level_alias": "The live forecaster maps a zero instruction pointer back to timeline start and does not distinguish not-yet-started from completed timeline lifecycle.",
+    "status": "physically_falsified_as_a_general_later-wave_forecast"
+  },
+  "conclusions": [
+    {
+      "label": "observed",
+      "text": "The ordinary-stage rolling global policy was diagnostic shadow only: it constrained zero decisions and selected zero recoveries."
+    },
+    {
+      "label": "observed",
+      "text": "The canonical nonspell hit had a winning global set 208 frames earlier, but the physically selected action was outside that set; the fresh local set did not become empty until three frames before impact."
+    },
+    {
+      "label": "observed",
+      "text": "Later spell phases repeatedly exposed distant recovery information while continuing to spend most decisions near a playfield edge, with zero recovery selection."
+    },
+    {
+      "label": "inferred",
+      "text": "The dominant local-trap symptom is caused first by missing global action authority, not by failure to discover every distant region."
+    },
+    {
+      "label": "hypothesized",
+      "text": "After exact causal ordinary-stage authority exists, remaining positive-margin collisions require future hostile-birth coverage or a fail-closed uncertainty envelope rather than a local scoring retune."
+    }
+  ]
+}

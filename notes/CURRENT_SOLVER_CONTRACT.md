@@ -139,6 +139,13 @@ spawn is byte-exact with the shipped decoded ECL. Dynamic-position spawns and
 any disagreement return no target. A forecast may change horizontal
 alignment but may not invent an unfocus-only action.
 
+Physical Stage-4A run `20260731_142342` falsified the current forecast
+implementation as a later-wave observer. Its 376 observations all named the
+same timeline-0 time-1 x=30 startup instruction. The zero-pointer fallback
+does not distinguish not-yet-started from completed timeline state. Until
+that lifecycle is made causal, forecast output has no objective authority;
+full-health currently observed bodies remain eligible under the other gates.
+
 These are objective proposals, not hard safety authority. A missing or losing
 queried global set, no improving action, unsupported forecast, deadline
 expiry, or fresh issue rejection preserves the baseline action. The chosen
@@ -164,9 +171,18 @@ The following Stage-4A gate exercised that pre-exhaustion membership check:
 and fresh issue certification. The last winning query was frame 3679. A
 200-HP middle-wave body appeared near x=320 at frame 3864, but the old HP gate
 selected it only at frame 3900 at 15 HP. The new full-health and byte-verified
-spawn observations directly address this delay. They remain unphysical until
-the next authorized trial and do not promote the diagnostic global policy to
-hard action authority.
+spawn observations directly addressed this delay.
+
+The authorized follow-up physically rejected the forecast implementation and
+exposed the larger authority failure. It completed with 18 hits and zero
+Bombs. Of 11,947 available global queries, 5,341 were winning and 4,119 losing
+queries exposed distant recovery, yet zero decisions were
+viability-constrained and zero recoveries were selected. At canonical
+nonspell hit 1915, the last winning query at 1707 allowed only
+`stay/up/up_fast`; the fresh-local transaction selected `down_left`. The
+global set became empty at 1710, while the fresh issue set became empty only
+at 1912. Ordinary-stage global action authority, or a causally equivalent
+pre-exhaustion filter, is therefore the next hard contract gap.
 
 ## Falsification And Promotion
 

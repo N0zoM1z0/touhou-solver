@@ -27,7 +27,6 @@ SOURCES = (
     NATIVE_ROOT / "src" / "local" / "hazards.cpp",
     NATIVE_ROOT / "src" / "local" / "bullet_decode.cpp",
     NATIVE_ROOT / "src" / "local" / "beam_reduce.cpp",
-    NATIVE_ROOT / "src" / "local" / "supplemental_workspace.cpp",
     NATIVE_ROOT / "src" / "pipeline" / "ordered_input_transaction.cpp",
     NATIVE_ROOT / "src" / "pipeline" / "direct_workspace.cpp",
     NATIVE_ROOT / "src" / "pipeline" / "direct_compat.cpp",

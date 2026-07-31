@@ -13,18 +13,7 @@ from dataclasses import asdict
 from datetime import datetime
 from pathlib import Path
 
-from analysis.th08_finalb_scale_live_delivery_report import (
-    build_report as build_finalb_scale_delivery_report,
-)
-from analysis.th08_priority17_publication_report import (
-    build_report as build_priority17_publication_report,
-)
 from th08_agent_hotkey import AgentHotkey
-from th08_live.bullet_birth_native import (
-    NATIVE_CALL_MODES,
-    NATIVE_CALL_MODE_GIL_HELD,
-    NATIVE_CALL_MODE_GIL_RELEASED,
-)
 from th08_automation.full_route_artifacts import (  # noqa: F401
     EXPECTED_ROUTE_STAGES,
     compare_full_dossiers,
@@ -67,8 +56,8 @@ from th08_practice_supervisor import (
     wait_for_patched_target,
     wait_for_title_menu,
 )
-from th08_live.scale_source_trace import FINAL_B_ECL_STATIC_SHA256
 from th08_runtime_agent import TARGET_EXE, Win32, release_injected_keys
+from th08_live.scale_source_trace import FINAL_B_ECL_STATIC_SHA256
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -224,42 +213,14 @@ def run_trial(args: argparse.Namespace, *, api: Win32) -> str:
         "runtime_ecl_static_sha256": args.runtime_ecl_static_sha256,
         "safety_value_horizon": 0,
         "trace_transform_runtime": False,
-        "trace_bullet_births": args.trace_bullet_births,
-        "trace_derived_pattern_sources": (
-            args.trace_derived_pattern_sources
-        ),
-        "trace_nonspell_main_vms": args.trace_nonspell_main_vms,
-        "trace_enemy_combat_progress": (
-            args.trace_enemy_combat_progress
-        ),
         "trace_enemy_mode_transitions": (
             args.trace_enemy_mode_transitions
-        ),
-        "trace_priority17_publications": (
-            args.trace_priority17_publications
         ),
         "trace_enemy_lifecycle_events": (
             args.trace_enemy_lifecycle_events
         ),
         "diagnostic_continue_root_only_scale": (
             args.diagnostic_continue_root_only_scale
-        ),
-        "trace_auxiliary_vm_batches": (
-            args.trace_auxiliary_vm_batches
-        ),
-        "auxiliary_vm_batch_every": args.auxiliary_vm_batch_every,
-        "auxiliary_vm_batch_spell_id": (
-            args.auxiliary_vm_batch_spell_id
-        ),
-        "auxiliary_vm_native_call_mode": (
-            args.auxiliary_vm_native_call_mode
-        ),
-        "bullet_birth_backend": args.bullet_birth_backend,
-        "bullet_birth_native_call_mode": (
-            args.bullet_birth_native_call_mode
-        ),
-        "corridor_background_low_priority": (
-            args.corridor_background_low_priority
         ),
         "viability_audit": False,
         "agent_duration_seconds": args.agent_duration,
@@ -276,19 +237,8 @@ def run_trial(args: argparse.Namespace, *, api: Win32) -> str:
             expected_difficulty=difficulty.menu_index,
             expected_stage=0,
             terminal_stage=None,
-            trace_bullet_births=args.trace_bullet_births,
-            trace_derived_pattern_sources=(
-                args.trace_derived_pattern_sources
-            ),
-            trace_nonspell_main_vms=args.trace_nonspell_main_vms,
-            trace_enemy_combat_progress=(
-                args.trace_enemy_combat_progress
-            ),
             trace_enemy_mode_transitions=(
                 args.trace_enemy_mode_transitions
-            ),
-            trace_priority17_publications=(
-                args.trace_priority17_publications
             ),
             trace_enemy_lifecycle_events=(
                 args.trace_enemy_lifecycle_events
@@ -296,29 +246,11 @@ def run_trial(args: argparse.Namespace, *, api: Win32) -> str:
             diagnostic_continue_root_only_scale=(
                 args.diagnostic_continue_root_only_scale
             ),
-            trace_auxiliary_vm_batches=(
-                args.trace_auxiliary_vm_batches
-            ),
-            auxiliary_vm_batch_every=args.auxiliary_vm_batch_every,
-            auxiliary_vm_batch_spell_id=(
-                args.auxiliary_vm_batch_spell_id
-            ),
-            auxiliary_vm_native_call_mode=(
-                args.auxiliary_vm_native_call_mode
-            ),
-            bullet_birth_backend=args.bullet_birth_backend,
-            bullet_birth_native_call_mode=(
-                args.bullet_birth_native_call_mode
-            ),
-            corridor_background_low_priority=(
-                args.corridor_background_low_priority
-            ),
             runtime_ecl_static_image=runtime_ecl_static_image,
             runtime_ecl_static_sha256=args.runtime_ecl_static_sha256,
             enable_finalb_scale_source_authority=(
                 args.enable_finalb_scale_source_authority
             ),
-            finalb_scale_delivery_auto_stop=False,
             safety_value_horizon=0,
             duration_seconds=args.agent_duration,
             detailed_summary=False,
@@ -433,57 +365,6 @@ def run_trial(args: argparse.Namespace, *, api: Win32) -> str:
             stall_timeout_seconds=args.stall_timeout,
         )
         session["agent_summary"] = agent.last_summary
-        if args.trace_priority17_publications:
-            priority17_report_path = (
-                RUNTIME_REPORT_DIR
-                / f"{run_id}.priority17_publication_report.json"
-            )
-            try:
-                priority17_report = (
-                    build_priority17_publication_report(trace)
-                )
-                priority17_report_path.write_text(
-                    json.dumps(
-                        priority17_report,
-                        ensure_ascii=False,
-                        indent=2,
-                        sort_keys=True,
-                    )
-                    + "\n",
-                    encoding="utf-8",
-                )
-                session["priority17_publication_report"] = {
-                    "path": str(priority17_report_path),
-                    "integrity_passed": (
-                        priority17_report["integrity"]["passed"]
-                    ),
-                }
-            except (OSError, ValueError) as error:
-                session["priority17_publication_report"] = {
-                    "path": str(priority17_report_path),
-                    "integrity_passed": False,
-                    "error": f"{type(error).__name__}: {error}",
-                }
-        if args.enable_finalb_scale_source_authority:
-            scale_report = build_finalb_scale_delivery_report(trace)
-            scale_report_path = (
-                RUNTIME_REPORT_DIR
-                / f"{run_id}.scale_delivery_report.json"
-            )
-            scale_report_path.write_text(
-                json.dumps(
-                    scale_report,
-                    ensure_ascii=False,
-                    indent=2,
-                    sort_keys=True,
-                )
-                + "\n",
-                encoding="utf-8",
-            )
-            session["scale_delivery_report"] = {
-                "path": str(scale_report_path),
-                "passed": scale_report["gate"]["passed"],
-            }
         accepted = bool(
             isinstance(agent.last_summary, dict)
             and agent.last_summary.get("termination_reason")
@@ -592,58 +473,12 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--stall-timeout", type=float, default=120.0)
     parser.add_argument("--status-seconds", type=float, default=30.0)
     parser.add_argument(
-        "--trace-bullet-births",
-        action="store_true",
-        help=(
-            "record default-off hostile-bullet activation and active-spell "
-            "main-VM intent telemetry; trace only"
-        ),
-    )
-    parser.add_argument(
-        "--bullet-birth-backend",
-        choices=("python", "native"),
-        default="python",
-        help="explicit trace-only hostile-bullet birth observer backend",
-    )
-    parser.add_argument(
-        "--trace-derived-pattern-sources",
-        action="store_true",
-        help=(
-            "add the failed-gate ready-parent transform shadow to an "
-            "explicit bullet-birth trace; diagnostic only"
-        ),
-    )
-    parser.add_argument(
-        "--trace-nonspell-main-vms",
-        action="store_true",
-        help=(
-            "record first-64 ordinary-enemy main-VM state from the existing "
-            "prefix capture; diagnostic only"
-        ),
-    )
-    parser.add_argument(
-        "--trace-enemy-combat-progress",
-        action="store_true",
-        help=(
-            "record first-64 raw ordinary-enemy HP/damage fields from the "
-            "existing prefix capture; trace only"
-        ),
-    )
-    parser.add_argument(
         "--trace-enemy-mode-transitions",
         action="store_true",
         help=(
             "frame-bracket player mode and first-64 enemy flags for the "
             "complete route; no mode-conditioned action authority, but "
             "trace cost may perturb cadence"
-        ),
-    )
-    parser.add_argument(
-        "--trace-priority17-publications",
-        action="store_true",
-        help=(
-            "install the reversible bounded priority-17 callback-exit ring "
-            "for the complete route; trace only, no action authority"
         ),
     )
     parser.add_argument(
@@ -663,38 +498,6 @@ def build_parser() -> argparse.ArgumentParser:
         ),
     )
     parser.add_argument(
-        "--trace-auxiliary-vm-batches",
-        action="store_true",
-        help="record bounded post-issue auxiliary ECL VM batches",
-    )
-    parser.add_argument(
-        "--auxiliary-vm-batch-every",
-        type=int,
-        default=16,
-        metavar="MANAGER_FRAMES",
-    )
-    parser.add_argument("--auxiliary-vm-batch-spell-id", type=int)
-    parser.add_argument(
-        "--auxiliary-vm-native-call-mode",
-        choices=NATIVE_CALL_MODES,
-        default=NATIVE_CALL_MODE_GIL_HELD,
-        help="explicit auxiliary-VM trace-only native GIL boundary",
-    )
-    parser.add_argument(
-        "--bullet-birth-native-call-mode",
-        choices=NATIVE_CALL_MODES,
-        default=NATIVE_CALL_MODE_GIL_RELEASED,
-        help="explicit trace-only native call GIL boundary",
-    )
-    parser.add_argument(
-        "--corridor-background-low-priority",
-        action="store_true",
-        help=(
-            "run only the Python corridor parent below normal priority; "
-            "default-off G5 contention experiment"
-        ),
-    )
-    parser.add_argument(
         "--runtime-ecl-static-image",
         type=Path,
         help="decoded ecldata7 image for the Final-B scale-source gate",
@@ -707,8 +510,8 @@ def build_parser() -> argparse.ArgumentParser:
         "--enable-finalb-scale-source-authority",
         action="store_true",
         help=(
-            "carry the default-off Final-B exact source experiment through "
-            "the complete original Game Start route"
+            "carry the exact Final-B scale schedule through the complete "
+            "original Game Start route"
         ),
     )
     parser.add_argument(
@@ -766,20 +569,18 @@ def main(argv: list[str] | None = None) -> int:
         or args.runtime_ecl_static_sha256 != FINAL_B_ECL_STATIC_SHA256
     ):
         raise ValueError(
-            "full-route Final-B scale delivery requires Lunatic and the "
+            "full-route Final-B scale authority requires Lunatic and the "
             "exact ecldata7 identity"
         )
     if (
         args.diagnostic_continue_root_only_scale
         and not (
             args.trace_enemy_mode_transitions
-            or args.trace_priority17_publications
         )
     ):
         raise ValueError(
             "diagnostic root-only scale continuation is scoped to the "
-            "whole-route enemy-mode observer or priority-17 publication "
-            "observer"
+            "whole-route enemy-mode observer"
         )
     if (
         args.diagnostic_continue_root_only_scale

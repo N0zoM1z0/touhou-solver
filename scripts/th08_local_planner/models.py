@@ -21,7 +21,6 @@ class LocalCertificateTiming:
     control_prefix_ms: float = 0.0
     planning_bullet_projection_ms: float = 0.0
     beam_search_ms: float = 0.0
-    supplemental_beam_ms: float = 0.0
     terminal_threat_ms: float = 0.0
     selection_finalize_ms: float = 0.0
 
@@ -158,18 +157,8 @@ class Decision:
     issue_recertification: IssueRecertification | None = None
     preloss_continuation_preference_active: bool = False
     planned_route_gate_deficit: float = 0.0
-    preloss_supplemental_beam_active: bool = False
-    preloss_supplemental_beam_width: int = 0
     preloss_historical_action: str | None = None
-    preloss_selected_from_supplemental: bool = False
-    preloss_supplemental_candidate_count: int = 0
     preloss_historical_route_gate_deficit: float = 0.0
-    preloss_supplemental_failure: str | None = None
-    preloss_supplemental_backend: str = "python"
-    preloss_supplemental_status: str = "disabled"
-    preloss_supplemental_completed: bool = False
-    preloss_supplemental_historical_fallback: bool = False
-    preloss_supplemental_background_compute_ms: float | None = None
     local_collisions: int = 0
 
 

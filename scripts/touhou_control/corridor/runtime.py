@@ -5,9 +5,7 @@ from __future__ import annotations
 from concurrent.futures import Future
 from dataclasses import dataclass, replace
 
-from ..pipeline_prewarm_service import PipelinePrewarmService
 from ..query_survival import PipelineSurvivalWorkspace
-from ..viability import RobustViabilityPolicy
 from .model import CorridorPlan
 
 
@@ -37,11 +35,7 @@ class CorridorPublication:
     audit_capsule: str | None = None
     audit_write_ms: float | None = None
     audit_error: str | None = None
-    postpublished_survival_policy: RobustViabilityPolicy | None = None
-    postpublished_survival_ms: float | None = None
-    postpublished_survival_parity: bool | None = None
     pipeline_survival_workspace_ms: float | None = None
-    pipeline_prewarm_start_error: str | None = None
 
 
 @dataclass(frozen=True)
@@ -50,7 +44,6 @@ class CorridorRuntimeHandles:
 
     audit_future: Future[tuple[float, str | None]] | None = None
     pipeline_survival_workspace: PipelineSurvivalWorkspace | None = None
-    pipeline_prewarm_service: PipelinePrewarmService | None = None
 
 
 @dataclass(frozen=True, init=False)
@@ -76,17 +69,10 @@ class CorridorSolution:
         audit_error: str | None = None,
         worker_ms: float | None = None,
         audit_future: Future[tuple[float, str | None]] | None = None,
-        postpublished_survival_policy: (
-            RobustViabilityPolicy | None
-        ) = None,
-        postpublished_survival_ms: float | None = None,
-        postpublished_survival_parity: bool | None = None,
         pipeline_survival_workspace: (
             PipelineSurvivalWorkspace | None
         ) = None,
         pipeline_survival_workspace_ms: float | None = None,
-        pipeline_prewarm_service: PipelinePrewarmService | None = None,
-        pipeline_prewarm_start_error: str | None = None,
         background_priority_lowered: bool = False,
         native_viability_worker_limit: int | None = None,
         native_viability_worker_limit_applied: bool = False,
@@ -126,20 +112,8 @@ class CorridorSolution:
                 audit_capsule=audit_capsule,
                 audit_write_ms=audit_write_ms,
                 audit_error=audit_error,
-                postpublished_survival_policy=(
-                    postpublished_survival_policy
-                ),
-                postpublished_survival_ms=(
-                    postpublished_survival_ms
-                ),
-                postpublished_survival_parity=(
-                    postpublished_survival_parity
-                ),
                 pipeline_survival_workspace_ms=(
                     pipeline_survival_workspace_ms
-                ),
-                pipeline_prewarm_start_error=(
-                    pipeline_prewarm_start_error
                 ),
             )
             handles = CorridorRuntimeHandles(
@@ -147,7 +121,6 @@ class CorridorSolution:
                 pipeline_survival_workspace=(
                     pipeline_survival_workspace
                 ),
-                pipeline_prewarm_service=pipeline_prewarm_service,
             )
         else:
             if source_frame is not None or plan is not None or solve_ms is not None:
@@ -233,20 +206,6 @@ class CorridorSolution:
         return self.handles.audit_future
 
     @property
-    def postpublished_survival_policy(
-        self,
-    ) -> RobustViabilityPolicy | None:
-        return self.publication.postpublished_survival_policy
-
-    @property
-    def postpublished_survival_ms(self) -> float | None:
-        return self.publication.postpublished_survival_ms
-
-    @property
-    def postpublished_survival_parity(self) -> bool | None:
-        return self.publication.postpublished_survival_parity
-
-    @property
     def pipeline_survival_workspace(
         self,
     ) -> PipelineSurvivalWorkspace | None:
@@ -255,16 +214,6 @@ class CorridorSolution:
     @property
     def pipeline_survival_workspace_ms(self) -> float | None:
         return self.publication.pipeline_survival_workspace_ms
-
-    @property
-    def pipeline_prewarm_service(
-        self,
-    ) -> PipelinePrewarmService | None:
-        return self.handles.pipeline_prewarm_service
-
-    @property
-    def pipeline_prewarm_start_error(self) -> str | None:
-        return self.publication.pipeline_prewarm_start_error
 
     @property
     def background_priority_lowered(self) -> bool:

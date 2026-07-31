@@ -33,27 +33,9 @@ def validate_local_planner_request(
     guidance = request.guidance
     config = request.config
     objective = request.objective
-    completed = request.completed_services
 
     if config.horizon <= 0 or config.beam_width <= 0:
         raise ValueError("planner horizon and beam width must be positive")
-    if config.preloss_supplemental_beam_width < 0:
-        raise ValueError("supplemental beam width cannot be negative")
-    deadline_ms = completed.supplemental_deadline_ms
-    if (
-        deadline_ms is not None
-        and (not math.isfinite(deadline_ms) or deadline_ms <= 0.0)
-    ):
-        raise ValueError(
-            "supplemental deadline must be a positive finite value"
-        )
-    if (
-        completed.supplemental_async_service is not None
-        and completed.supplemental_version is None
-    ):
-        raise ValueError(
-            "async supplemental publication requires an exact version"
-        )
     if config.beam_dedup_mode not in {
         "quantized",
         "first_action",

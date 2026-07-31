@@ -1,791 +1,135 @@
-# TH08 Player/Laser Global Time-Scale Semantics
+# TH08 Player/Laser Global Time-Scale Authority
 
-Status: **SEM-SCALE-C5 exact live delivery passed physically inside a 22-hit whole Stage-6B workload; clean survival and stage-wide source authority remain open**
+Last updated: 2026-07-31.
 
-Date: 2026-07-29
+## Problem
 
-Roadmap item: `SEM-SCALE`
+TH08's global gameplay scale is not a timeless scalar. One future frame may
+have distinct:
 
-Executable/offline checkpoints: `225ccc8`, `6a71ac1`, `555bbf8`;
-retained C1/C4 evidence: `1f639ef`, `f63b7ce`
+- scale visible to the priority-9 player update;
+- writes made by enemy ECL callbacks;
+- scale visible to the priority-14 laser update.
 
-This note is the physical/model contract for roadmap Phase 1B. It repairs the
-current live and offline assumption that player movement and laser lifecycle
-always advance at scale `1.0`. It does not promote source completeness,
-collision geometry, or survival authority.
+A hard certificate therefore needs an immutable sequence
+`(player_scale_bits[t], laser_scale_bits[t])`, not the current root value
+repeated through the horizon.
 
-## Evidence labels
+## Revalidated Native Semantics
 
-- **Observed**: directly supported by shipped instructions/dataflow, retained
-  runtime evidence, or a deterministic native probe.
-- **Inferred**: follows from observed instructions/order but has not been
-  observed for every physical history.
-- **Hypothesized**: plausible and outside authority until tested.
+Global float32 scale is stored at `0x017CE8E0`.
 
-Inherited IDA names, types, comments, and pseudocode variable names remain
-hypotheses until revalidated. Material IDB changes are recorded in the
-2026-07-29 research-log shard.
+Player update:
 
-## Problem contract
+- SHT-selected X/Y speeds are multiplied by player-axis scales;
+- those float32 values are multiplied by global scale at
+  `0x0044BA67..0x0044BA85`;
+- float32 deltas are stored at player `+0x3F8/+0x3FC`;
+- the deltas are added to position.
 
-### Physical objective
+Laser update:
 
-For Sakuya/Remilia control, reproduce the player displacement and laser
-motion/lifecycle that the shipped game executes under the global float32
-gameplay time scale. The corrected transition must remain causal across
-slowdown start, slowdown continuation, restore, direction/focus changes, and
-laser phase changes.
+- each active `0x59C` laser reads the laser-phase global scale;
+- head and length/speed-related motion use that scale;
+- the scaled timer is advanced later in the same update.
 
-This slice answers a mechanics question, not the full NMNB question. It does
-not prove that every future time-scale writer or laser birth is observed.
+Scale writers:
 
-### State and observations
+- callback 18 (`0x00424F90`) writes `1.0f / int32(arg1)`;
+- callback 28 (`0x004251B0`) writes the reciprocal and scales active bullet
+  velocities;
+- callback 29 (`0x00425290`) reverses bullet scaling/restores state and writes
+  the final scale.
 
-The control-relevant scale state is not one timeless scalar:
+These callbacks disprove a generic constant-root-scale assumption.
 
-- the raw float32 global value at `0x017CE8E0`;
-- the physical frame/epoch at which it was observed;
-- the scale visible to the priority-9 player update;
-- the scale visible to the priority-14 laser update;
-- every supported scale write between those two phases;
-- the exact number of future physical updates for which that phase-specific
-  schedule is covered; and
-- an immutable semantic version and coverage status.
+## Immutable Contract
 
-Player state contains float32 position, SHT-selected direction/focus speed,
-player axis scales, and the held/active input history. Laser state contains
-float32 head/tail/speed/current width, integer plus float32-fraction timer,
-phase, thresholds, flags, and active state.
+Scale bits, phase schedule, coverage, content identity, route/spell identity,
+and semantics version are part of every scale-sensitive request/publication.
 
-A root observation after a completed gameplay update is evidence for the
-scale that the next player update will see. It is not by itself evidence that
-the next laser update sees the same value: enemy ECL callbacks execute after
-the player and before the laser manager and may write the global in between.
+Rules:
 
-### Actions and actual issue semantics
+- player and laser transitions consume their own same-frame scale;
+- movement is a per-step float32 recurrence, not `speed * frames`;
+- incomplete, nonfinite, mismatched, or too-short schedules are `UNKNOWN`;
+- a lookup miss does not start cold proof work on the issue thread;
+- unit-scale historical evidence remains valid only under its old slice;
+- root-only continuation cannot authorize a hard certificate.
 
-Player actions are complete no-Bomb input masks subject to the existing
-active/held/pending and no-write contract. SEM-SCALE changes only the physical
-transition generated by an action; it does not change pickup delay, cadence,
-or write/no-write semantics.
+The exact primitive semantics version is
+`th08-player-laser-phase-scale-v1-0044ba67-00431bc9`.
 
-The issued action remains noncausal if it is certified with a future scale
-that was not observable or supported at issue time.
+## Final-B Exact Authority
 
-### Uncertainty and transitions
+The shipped `ecldata7.ecl` image is pinned by SHA-256
+`20b35dca3820438f0b90ae44e3362a7af27d2fc1ac7ae5888c477dc1c89a3734`.
 
-An exact future schedule is a sequence of phase-specific pairs
+For the accepted Final-B source:
 
-```text
-(player_scale_bits[t], laser_scale_bits[t]), t = 1..H
+- spell 190/subroutine 44;
+- root scale one quarter;
+- Bomb zero;
+- coherent main/aux ECL state and content identity;
+- the only scale write in the declared prefix is callback 18 at relative
+  frame 240;
+- player phases remain quarter-scale through frame 240;
+- laser phases use the prior same-frame ordering and restore to unit at the
+  declared write.
+
+The full-route supervisor captures/binds that typed schedule through
+`FinalBScaleScheduleAuthority`. Exact-version consumers may use only the
+remaining covered suffix. The checked-in launcher supplies the pinned ECL
+image and enables this authority:
+
+```bat
+run_th08_full_route_agent.bat
 ```
 
-with explicit coverage through `H`. A scalar root repeated forever is not an
-exact schedule.
+The accepted physical delivery run observed 111 decisions consuming offsets
+1 through 238 with quarter-scale roots, no fallback, and no fresh hit before
+the terminal window. This closes only that pinned Final-B schedule slice.
 
-Supported uncertainty may be represented as multiple complete causal
-schedules and universally quantified by the hard recurrence. Unsupported
-writers, missing auxiliary VMs, an incomplete ECL branch, unstable capture,
-or a schedule shorter than the certificate horizon make the result
-`UNKNOWN`. They must not be replaced by a constant-root assumption.
+## Diagnostic Root-Only Continuation
 
-The first implementation checkpoint may evaluate exact supplied schedules and
-fail closed for live non-unit/incomplete schedules. It must not claim that
-this temporary boundary completes future-source coverage.
+Practice Start lacks the full preceding route/ECL schedule. The explicit
+`--diagnostic-continue-root-only-scale` option may continue a whole focused
+diagnostic using the current root scale as an unknown-direction proxy.
 
-### Horizon and resources
+It:
 
-The primitive transition is one physical update. Longer player and laser
-projections are repeated one-update transitions with the scale selected for
-the relevant native phase. No algebraic `speed * frames` shortcut has
-exactness authority unless separately proved bitwise equivalent.
+- records the root scale and provenance;
+- does not claim a future schedule;
+- cannot combine with exact Final-B authority;
+- preserves hard no-Bomb and normal issue semantics;
+- exists only to obtain physical workload evidence when scale coverage would
+  otherwise stop at frame 1.
 
-Local certificate, control-prefix, beam, and laser horizons must all be
-covered. The 80-frame corridor may consume only a complete compatible
-schedule; otherwise it is unavailable under SEM-SCALE.
+Any native scale change inside a consumed horizon falsifies the proxy. Default
+flag-off behavior remains fail-closed.
 
-### Safety invariants
+## Authority Limits
 
-- hard no-Bomb remains the default;
-- scale bits and coverage are part of immutable request/publication identity;
-- player and laser phases use their own same-frame scale values;
-- all native float32 write boundaries are preserved;
-- no hard certificate silently repeats a root scale beyond covered frames;
-- incomplete or non-finite live scale state is `UNKNOWN`;
-- old unit-scale artifacts remain historical slices under their old model
-  versions; and
-- no old witness, cache, or policy gains the corrected identity implicitly.
+The exact Final-B schedule is live only for its pinned Route-2 identity.
+Nothing here proves:
 
-### Computation, publication, and fallback
+- all future scale writers in another stage/route;
+- Extra scale coverage;
+- generic action-conditioned ECL schedule closure;
+- correctness of a root-only constant schedule;
+- physical survival outside the retained slice.
 
-The corrected local primitive must fit the existing issue deadline. Exact
-version matching is required. A schedule miss cannot start cold proof work on
-the issue thread.
+If a new root encounters non-unit or varying scale without an exact schedule,
+return `UNKNOWN` and localize the source before planning through it.
 
-Until complete future-scale coverage is available, a non-unit or unstable
-live root cannot use the old local hard certificate. The temporary response
-must be explicit and auditable: either a supported schedule branch is
-available, or scale-sensitive hard authority is unavailable and the existing
-fail-closed issue policy is used without an exactness claim.
+## Focused Verification
 
-## Required model questions
+The active scale checks are:
 
-1. **Which histories merge?** Only histories with equal player/laser state,
-   active/held/pending input belief, phase-specific scale bits, coverage,
-   model version, and all other existing hazard identity may merge. Equal root
-   scale alone is insufficient.
-2. **Are all branches causal?** Nature may select only a schedule supported by
-   observations and source semantics available at that decision. The
-   controller cannot choose separately after learning a hidden same-frame ECL
-   write.
-3. **What physical question does an exact solve answer?** It answers
-   player/laser evolution for the declared complete schedules and already
-   declared hazards. It does not answer omitted future writers, births,
-   geometry defects, or full-route survival.
-4. **How is the claim falsified?** Any supported case where product,
-   independent raw recurrence, and native probe differ bitwise falsifies the
-   primitive. Any retained runtime scale transition that falls outside the
-   declared schedule or appears in the wrong phase falsifies the schedule
-   boundary.
-5. **Can it be consumed before issue time?** Only when the immutable schedule
-   and model version cover the complete consumer horizon before publication.
-   Otherwise the consumer must report a version/coverage miss and fall back.
+```bash
+PYTHONPATH=scripts python3 -m unittest discover -s tests \
+  -p 'test_th08_live_scale_schedule_authority.py'
+```
 
-## Revalidated shipped semantics
-
-The following are **observed statically** in the connected shipped-game IDB.
-
-### Per-frame order
-
-The registered gameplay order is player priority 9, enemy manager priority
-11, spell-card manager priority 12, and bullet/laser manager priority 14.
-Therefore an enemy ECL time-scale callback in one update:
-
-1. cannot affect that update's already-completed player displacement;
-2. can affect that update's later laser head and timer advance; and
-3. remains visible to the next update's player unless a later writer restores
-   it.
-
-This is why one scalar per physical frame is insufficient at a transition.
-
-### Player transition
-
-In `player_update_input_movement`:
-
-- `0x0044B641` and `0x0044B653` multiply the SHT-selected X/Y speeds by
-  player axis scales and store each result to a float32 local;
-- `0x0044BA4F` and `0x0044BA61` publish the pre-global-scale speeds to
-  separate player fields;
-- `0x0044BA67..0x0044BA73` and `0x0044BA79..0x0044BA85` multiply those
-  float32 locals by `g_gameplay_time_scale` and store float32 deltas to
-  player `+0x3F8/+0x3FC`; and
-- `0x0044BAA8..0x0044BAB6` and `0x0044BAD8..0x0044BAE6` add the deltas to
-  float32 position and store the results before the native clamp.
-
-Thus a scale `0.25` produces one quarter of the unit-scale displacement,
-subject to each intervening float32 store. Current live read-lag, committed
-prefix, beam, certificate, and corridor transitions omit this multiplier.
-
-### Laser transition
-
-For each active `0x59C` laser record in `bullet_manager_update`:
-
-- `0x00431BC9..0x00431BE1` loads the global float32 scale, multiplies speed
-  at `+0x56C`, adds head at `+0x55C`, and stores head to float32;
-- the manager then updates/clamps tail, constructs phase geometry, performs
-  warmup/active/fade collision checks, and applies same-update phase
-  fallthrough;
-- only at `0x004320E2..0x004320ED` does it call the native scaled timer
-  wrapper; and
-- the timer's integer/fraction transition is the already versioned
-  `th08-native-timer-components-v1-00447421` recurrence.
-
-The product must therefore use the current laser-phase scale for both head
-motion and the final timer advance, with float32 stores at the native field
-boundaries. Existing cached and corridor laser projections call
-`step_laser(..., time_scale=1.0)` implicitly.
-
-### Runtime writers
-
-The three solver-critical ECL writers revalidated in instructions, dataflow,
-and the callback dispatch table are:
-
-- callback 18, `0x00424F90`: store float32 `1.0f / int32(arg1)`;
-- callback 28, `0x004251B0`: store that reciprocal, then scale every active
-  bullet's three velocity components by the stored scale with float32 stores;
-  and
-- callback 29, `0x00425290`: multiply active bullet velocity by the
-  reciprocal of the current scale, restore selected state, and finally store
-  `1.0f`.
-
-Initialization/reset paths also write `1.0f`; they do not establish a
-per-frame constant-scale invariant. The current future-source model does not
-cover every callback/VM history, so a root-only observation cannot be
-promoted to complete future coverage.
-
-## IDA database corrections
-
-The following evidence-backed mutations were made on 2026-07-29:
-
-- `0x004251B0` renamed
-  `ecl_cb_apply_global_slowdown_and_scale_bullets`;
-- `0x00425290` renamed
-  `ecl_cb_restore_bullets_and_time_scale`;
-- `0x00423D70` renamed `vec3_scale_inplace`; and
-- instruction/dataflow comments were added at `0x004251B0`,
-  `0x00425290`, `0x00423D70`, `0x00431BC9`, and `0x0044BA67`.
-
-The inherited callback-18 name was revalidated rather than changed. Function
-prototypes remain separately reviewable; a descriptive rename is not proof
-that every callback side effect is modeled.
-
-## Authority slices
-
-### Historical unit-scale slice
-
-All SEM-TIMER Stage-5 physical rows had scale bits `0x3F800000` and fraction
-bits zero. They remain integration evidence only. They do not validate this
-correction.
-
-### Retained Final-B non-unit observations
-
-Three retained Lunatic Final-B raw sessions contain physical scale `0.25`
-during spell 190 and no active laser on the non-unit rows:
-
-- `lunatic_route2_stage6b_unattended_20260726_004142`: 68 rows,
-  frames `74791..75025`;
-- `lunatic_route2_stage6b_unattended_20260726_011639`: 78 rows,
-  frames `74726..74962`; and
-- `lunatic_route2_stage6b_unattended_20260726_163501`: 84 rows,
-  frames `73345..73585`.
-
-These are **observed root-scale capsules**, not complete action-history or
-future-schedule parity. Checkpoint `1f639ef` retains all 230 selected rows in
-`artifacts/benchmarks/th08_finalb_scale_root_capsule_20260729.json`, SHA-256
-`d0b48a68c883a00f6c0b73636461ebac09985bf8a935677f799c8671131a82e4`;
-its canonical payload digest is
-`e841ea9ecc3f2a03abe786305474bf407421e7348c6c1608d40a9c4f987656ab`.
-The three bound raw SHA-256 values are
-`2ba795ee89354fb2f02935a7de81f079f24845275b27e09379c593808171cdf0`,
-`d9075e4e2946d74cc3337d6e2a99a8680ee85c730f7f850b6a03e06c87a1524a`,
-and
-`b7384a0c7708f401c24abd80fe5e15f4370914bf10bf4e9e06967591adc355a2`.
-
-All selected read-lag horizons are zero or one, so root scale covers their
-input-conditional corrected player replay. The old unit-scale projection
-changes on 113 rows, with mean/p95/maximum delta
-`1.157934983/3.000009642/3.000020432` pixels. A native one-player-phase
-unit-versus-quarter comparison changes on 180 rows and reaches
-`3.000024815` pixels. This isolates scale semantics while holding the
-reconstructed historical desired movement state fixed; it does not prove the
-native active/pending input history. Repeating the root over the old
-multi-frame control-delay horizon is retained only as a noncausal diagnostic
-and reaches `12.000081728` pixels. Every selected row has zero active lasers
-and no Bomb emission, so this is neither laser evidence nor survival
-acceptance. The raw JSONL remains local and ignored.
-
-No retained Extra physical trace exists. Shipped Extra ECL provides a static
-scale-transition workload, but static reachability is not physical evidence.
-Extra remains an explicit later physical acceptance workload.
-
-## Implementation boundary and gates
-
-### SEM-SCALE-A — exact primitives
-
-- introduce one immutable semantics version and raw-bit phase schedule;
-- make player one-frame stepping and repeated schedule stepping preserve every
-  float32 store;
-- make laser head/tail/phase/timer stepping preserve float32 state and use the
-  native timer component primitive;
-- add an independent raw-bit Python recurrence that does not import product
-  transition helpers; and
-- add a tiny Linux/Windows native probe.
-
-Gate: bitwise agreement over unit, `1/2`, `1/3`, `1/4`, `1/12`,
-threshold-adjacent, stop/resume, clamp, direction/focus changes, timer carry,
-and warmup/active/fade fallthrough.
-
-Observed SEM-SCALE-A result:
-
-- immutable semantics identity is
-  `th08-player-laser-phase-scale-v1-0044ba67-00431bc9`;
-- the player and laser transitions, structurally independent raw-bit Python
-  oracle, and explicit-x87 Linux/Windows probes agree bitwise on all 17
-  deterministic cases: 36 player steps and 44 laser steps;
-- the separate seeded product/oracle sweep covers 4,096 player plus 2,048
-  laser cases with zero mismatch and digest
-  `9cd09a2ed69aba52f4f2c98dee3a7f22d124bfa585975483a87fa92e662a593d`;
-- retained Linux report
-  `artifacts/benchmarks/th08_player_laser_scale_differential_linux_20260729.json`
-  has SHA-256
-  `15f75b79dc3732014dae0e8a1f34801f4a31541f4e30026322453523c2387637`;
-- retained Windows report
-  `artifacts/benchmarks/th08_player_laser_scale_differential_windows_20260729.json`
-  has SHA-256
-  `e28c9d50d78f66595cbebf215571fd598e77a094f00840602d10c836bca07197`;
-- ignored probe binaries have SHA-256
-  `94573324286fcf95994a6dd22c3ff971a5aa7bbf5110fbef5a0b2b0639e163c9`
-  on Linux and
-  `929aeb2b0af8fb0c62ecf0199f95ba522ac4ea7b33dc09fb4b1bc57e7e5c5121`
-  on Windows; and
-- focused Ruff, nine SEM-SCALE tests, 17 laser tests, and complete Linux and
-  Windows discovery pass 1,084 tests; Windows retains the three existing
-  platform skips.
-
-This passes only the exact primitive gate. It supplies no live future-scale
-schedule, does not authorize a scale-sensitive hard certificate, and does
-not satisfy the retained Final-B/Extra or physical exit gates.
-
-### SEM-SCALE-B — identity and consumer propagation
-
-- capture scale bits at the live state/hazard boundary and retain stability;
-- add phase schedule/coverage to `CapturedIteration`,
-  `PhysicalHazardSnapshot`, corridor policy version, traces, and capsules;
-- pass exact covered scale through read-lag, committed prefix, robust local
-  certificates, Python/native local beam inputs, and laser lowerers;
-- forbid the corridor and any exact hard certificate when its schedule is
-  shorter than its horizon; and
-- preserve a clearly labeled historical unit-root compatibility slice without
-  calling it future-scale complete.
-
-Gate: optimized/scalar viable-state and safe-action-mask parity under complete
-constant schedules, plus explicit `UNKNOWN` on incomplete or varying corridor
-schedules.
-
-Observed SEM-SCALE-B result:
-
-- implementation checkpoint `6a71ac1`, from branch `main` handoff
-  `c19ffb0`; executable/offline primitive checkpoint `225ccc8`; the shipped
-  executable remains SHA-256
-  `330fbdbf58a710829d65277b4f312cfbb38d5448b3df523e79350b879213d924`;
-- live capture now reads the raw scale dword between two
-  `enemy_manager_frame` reads. An unstable bracket is discarded. A stable
-  root is retained as exactly one future player phase and zero future laser
-  phases; it is never expanded into a constant schedule;
-- `CapturedIteration`, `PhysicalHazardSnapshot`, local issue requests,
-  supplemental versions, corridor artifacts/pipeline versions, sensing
-  traces, and corridor audit metadata now carry the immutable schedule or its
-  serialized identity;
-- read-lag and committed-prefix projection, the Python baseline beam, robust
-  local certificates, and issue-time certificates consume explicit
-  player-phase bits. Player updates are repeated native-order float32 steps,
-  not `speed * frames`. Native beam reduction receives those already-scaled
-  positions;
-- laser timelines and corridor laser lowering consume explicit laser-phase
-  bits. The independent scalar local-pipeline oracle accepts a generic
-  per-step movement schedule and remains independent of the vectorized
-  product;
-- local hard validation requires complete player/laser coverage through the
-  longest control-delay, planning, threat, or certificate consumer. A
-  root-only schedule raises `IncompleteTimeScaleScheduleError`;
-- the current corridor recurrence is exact only for a complete unit schedule.
-  Root-only/short schedules are `IncompleteTimeScaleScheduleError`, and
-  complete non-unit or varying schedules are
-  `UnsupportedTimeScaleScheduleError`/`UNKNOWN`. No policy or cache identity
-  is published for either case;
-- historical flat planner and issue wrappers construct only the finite unit
-  prefix required by that call and label it
-  `historical_*_unit_assumption`. Historical replay/audit code uses the same
-  bounded compatibility label; it does not establish future completeness;
-- because no live future phase schedule producer exists yet, the live daemon
-  reaches `time_scale_authority_unknown` on root-only coverage, records the
-  exact bits/coverage/projection status, terminates, and relies on the
-  existing finalizer to release injected keys. It does not submit a corridor
-  solve or issue a local hard action;
-- the deterministic authority report passes all eight checks on Linux and
-  Windows: root-only local/corridor rejection, non-unit/varying corridor
-  rejection, complete-unit corridor identity, optimized/scalar certificate
-  safe-action/CVaR parity, and Python/native local-beam parity under a
-  complete constant non-unit schedule;
-- retained Linux report
-  `artifacts/benchmarks/th08_scale_schedule_authority_linux_20260729.json`
-  has SHA-256
-  `bc2ff09955e12bd9ffc629b20dfd93dc7ecbc46f35a4d29407859c042e5ea966`;
-- retained Windows report
-  `artifacts/benchmarks/th08_scale_schedule_authority_windows_20260729.json`
-  has SHA-256
-  `8a202bdd7c51f05bc7d59368c054333d19f2944ae2c09fda8d14a972d472f891`;
-  and
-- complete Linux and Windows discovery pass 1,087 tests in 11.752 and
-  25.138 seconds. Windows retains the three existing platform skips.
-
-This is an **observed offline authority-boundary result**. It is not observed
-live schedule completeness, physical survival, or a physical slowdown
-transition. No game was launched, no physical artifact was created, and no
-new IDA mutation was needed for B. SEM-SCALE-C must first supply compact
-Final-B root evidence and a causal complete-schedule producer/trace-only gate;
-physical action authority remains blocked.
-
-### SEM-SCALE-C — retained and physical falsifiers
-
-- retain compact Final-B `0.25` root observations with raw provenance;
-- replay them through the corrected player primitive and quantify every
-  changed projected position/action certificate;
-- implement and independently validate a causal phase-schedule producer that
-  covers read-lag, issue delay, local planning, certificate, and laser
-  horizons without repeating a root past its proof;
-- retain a static Extra scale workload separately from physical evidence;
-- take a trace-only scale metadata gate before live action authority; and
-- only after offline and trace gates, preregister the smallest focused
-  Final-B transition trial. Stage 3/4A/5 expansion remains blocked by
-  CE-0184 until its own ordered gates permit it.
-
-Observed SEM-SCALE-C1 result:
-
-- checkpoint `1f639ef` implements a streaming raw-hash/selection/replay tool,
-  a deterministic capsule, and fail-closed coverage checks;
-- the three physical sessions reproduce the same aggregate and source hashes
-  on Linux and Windows;
-- all 230 selected rows replay the historical unit helper exactly before the
-  corrected primitive is compared at the observed root bits;
-- root coverage is complete for every retained zero/one-frame read-lag
-  comparison, but no selected row contains an active laser and no root is
-  extended into causal future coverage;
-- complete Linux discovery passes 1,089 tests in 13.735 seconds; complete
-  Windows UNC discovery passes 1,089 in 28.586 seconds with the three
-  existing skips; and
-- no game was launched, no live solver path changed, no strategy was
-  promoted, and no IDA database mutation was needed for C1.
-
-C1 completes the first bullet and only the player-position part of the second
-bullet. Action-certificate replay needs the causal complete schedule and
-remains blocked.
-
-Observed SEM-SCALE-C2/C3 result:
-
-- checkpoint `555bbf8` adds
-  `th08-ecl-scale-schedule-v1-post-update-player-ecl-laser`;
-- each future update records the root/current player scale, executes all
-  supported ECL instructions ready at the current integer timer, records the
-  post-ECL laser scale, then advances the ECL timer using that post-write
-  scale;
-- the producer supports the literal VM-local loop and integer branch subset
-  needed by shipped Final-B sub44 and Extra sub86, callback 18/28 reciprocal
-  writes, callback 29 restore, and the control-relevant flag writes of
-  `spell_card_finish`;
-- a complete result requires an exact singleton scale-writer source set,
-  complete writer inventory and scheduler ordering, absence of installed
-  scale callbacks, absence of unmodeled phase transitions, coherent
-  post-update capture/external state, and supported control flow. Failure of
-  any requirement returns root-only or partial coverage;
-- ECL variable 10099 is evaluated from `g_spell_card_state` flags: active
-  state selects bit 2 and inactive state selects bit 9. Variable 10100 is the
-  integer current at spell-state `+0x110`; the runtime spell read now captures
-  that field in the same process-memory read. Future 10100 branches require an
-  explicit per-frame external schedule and are otherwise unknown;
-- `spell_card_finish` clears active bit 0, sets bit 9 only on the supported
-  active/capturable path, and clears transition bit `0x800`. Because a future
-  hit or Bomb can invalidate capture, using this branch requires the declared
-  no-hit/no-Bomb continuation. Losing histories do not gain a favorable
-  restore branch;
-- callback 28 and 29 writes retain explicit
-  `scales_active_bullet_velocity` metadata. The scale schedule can be exact
-  while live hazard authority remains blocked until those bullet side effects
-  are consumed;
-- the independent
-  `th08-ecl-scale-schedule-raw-oracle-v1-player-ecl-laser` decodes raw
-  instruction bytes itself, uses the separate exact timer oracle, and rounds
-  callback reciprocals from exact rational arithmetic;
-- isolated Final-B sub44 and Extra sub86 both restore `0.25 -> 1.0` at
-  future frame 241. Each has 241 quarter-scale player phases but only 240
-  quarter-scale laser phases. Final-B consumes 10099; Extra consumes no
-  external ECL variable;
-- historical Final-B session `004142` starts from stable ECL frame 74790,
-  PC offset `0x5c90`, elapsed 1, fraction zero, and quarter scale. The shipped
-  literal set at `0x5c6c` supplies inferred counter 6. Product and oracle
-  predict restore 237 updates later at ECL frame 75027, exactly the first
-  observed unit-scale row. Sessions `011639` and `163501` stop scale capture
-  at finish/freeze immediately around their predictions and are retained as
-  right censored, not passes;
-- retained report
-  `artifacts/benchmarks/th08_ecl_scale_schedule_capsule_20260729.json` has
-  SHA-256
-  `2c6cedcc5b30b4e9f805ff19cc7cbcd465f6123df2ccfda63e2fac21a8777d27`
-  and canonical payload digest
-  `77ff84d3d8fa8ae9dd5c076edd8881a0a6101457ec8603ba103ea4f55e2ba380`.
-  Linux/Windows renders are byte-identical; and
-- complete Linux discovery passes 1,096 tests in 14.353 seconds. The verified
-  Windows UNC loader passes 1,096 in 29.889 seconds with three existing
-  skips.
-
-IDA revalidation for C2/C3 renamed `0x004178A0`
-`spell_state_active_flag`, `0x0041FD90`
-`spell_state_active_and_flag_bit2`, `0x00405260`
-`spell_state_flag_bit9`, and `0x0041FDD0`
-`spell_state_timer_elapsed`. Comments at `0x0041FB4D`, `0x0041FB7C`, and
-`0x0041FDD0` record the 10099/10100 dataflow and `+0x110` current field.
-
-C2/C3 complete the isolated causal producer and static Extra bullets only.
-Checkpoint `ead1f21` implements the next default-off trace-only join:
-
-- `scripts/tools/th08_finalb_scale_source_observer.py` is a standalone
-  read-only waiter for Lunatic Final-B spell 190. It performs no input or
-  foreground operation;
-- it binds the loaded image exactly to shipped `ecldata7.ecl` SHA-256
-  `20b35dca3820438f0b90ae44e3362a7af27d2fc1ac7ae5888c477dc1c89a3734`;
-- one transaction brackets all 480 ordinary slots and a separate spell owner,
-  if outside that pool, with manager frame, route/difficulty/stage, complete
-  spell bytes, ECL context, root scale, Bomb-active, and predeath identity;
-- every active source retains main-VM PC/timer/locals, selected-VM installed
-  callback/function-record, and four auxiliary pointers. A complete result
-  requires one valid spell-owner main VM and no auxiliary context;
-- the installed callback fields were revalidated at `0x0041E852` as current
-  ECL VM `+0x10/+0x14`, not enemy base `+0x10/+0x14`. The main VM therefore
-  uses enemy `+0x808/+0x80C`; auxiliary active VMs carry their own fields;
-- the main VM completes before auxiliary indices 0 through 3, and enemy
-  motion at `0x0041ECA7` follows all selected VMs. IDA comments at
-  `0x0041E852` and `0x0041EBBC` retain this correction/order;
-- exact quarter scale, no current Bomb, stable retained predeath state, sub44
-  ownership, complete 300-frame causal synthesis, and absence of
-  callback-28/29 bullet velocity rescaling are mandatory. Any failure is
-  `UNKNOWN`; predeath contamination narrows clean-player/survival authority
-  instead of falsifying source semantics; and
-- the strict report tool independently rejects an incomplete source,
-  identity, schedule, or bullet-side-effect record.
-
-The implementation passes 1,107 Linux tests in 13.728 seconds and 1,107
-Windows tests in 29.427 seconds with the three existing skips.
-
-Observed SEM-SCALE-C4 physical result:
-
-- exact native replay `th8_13.rpy` is bound by SHA-256
-  `1026289ffec9f3dd1858378e81bbbbb84f568f041047a401dd86f74211c4a7f2`;
-  its offline parse is Route 2/Lunatic/Final B, 51,711 input records, input
-  digest
-  `90c75156cf36a1c1576f082b2fe2b435cec8395af09014a1ad6c10c02e7a060e`,
-  and zero Bomb presses;
-- attempt `20260729_211715` rejects the first spell-190 unit-scale root and a
-  36.834-ms capture that crossed manager frames; CE-0186 preserves the
-  invalid trigger/allocation assumptions;
-- attempt `20260729_213600` reaches the target but rejects the assumption that
-  stable replay/no-life-patch predeath residue must be zero; CE-0187
-  preserves the evidence-authority correction;
-- accepted attempt `20260729_215613` brackets manager frame 74787 in
-  7.734 ms with exact executable and runtime/static ECL identities, one valid
-  out-of-pool spell-owner main VM, zero active ordinary sources, zero
-  auxiliary contexts, installed callback zero, quarter scale, and Bomb zero;
-- the captured VM produces all 300 requested future frames and 199
-  instructions. Its only scale write is callback 18 at relative frame 240,
-  changing `0.25 -> 1.0`; callback 28/29 active-bullet velocity side effects
-  are absent; and
-- the strict report passes every identity, completeness, source, root,
-  schedule, restore, side-effect, and trace-only check. Capture/report
-  SHA-256 values are
-  `22e3d69d249b512f6c73e3816e3206373c89776b53f183fc0ebf7e1d71a2e48d`
-  and
-  `d4aa9b9c065bde6de3ba899ff95e4ff3eea10f166714e561c00743100d4e138a`.
-
-The accepted root retains predeath counter 7. Historical frame 74791 in
-session `004142` shows the same residue with no fresh hit edge and no Bomb;
-the no-life-decrement patch does not clear every death/predeath field. C4
-therefore observes a coherent complete scale source and infers the declared
-no-new-hit/no-Bomb continuation. It does not prove a clean zero-predeath
-root, live solver action, clean survival, or NMNB.
-
-Connected IDA was also updated for reproducibility: `0x0046E136` is renamed
-`title_replay_menu_update`; comments at `0x0046E29C` record compacted replay
-entry indexing, and `0x0046ED45` records the replay-mode/route/difficulty/stage
-launch state.
-
-Observed SEM-SCALE-C5 implementation result:
-
-- `FinalBScaleSourceTraceService` retains the typed schedule only after its
-  one-shot physical transaction is accepted; an explicit gameplay-epoch
-  reset rearms it;
-- `FinalBScaleScheduleAuthority` binds that schedule to exact
-  gameplay/route/difficulty/stage/spell identity. At current offset `d=0`,
-  the observed root must equal the captured root. At `d>0`, it must equal
-  original laser-phase scale `d-1`; the current future schedule is exactly
-  the original player/laser tuples sliced from `d`;
-- exact live use binds both player phase and predeath inside the
-  complete-source transaction. A nonzero phase or baseline remains explicit
-  contamination. Fresh hit, Bomb, predeath-baseline change, context, root,
-  source-frame, or horizon mismatch publishes root-only status. During an
-  explicit physical evidence run it waits without a new input write and
-  continues collecting the stage/route instead of terminating;
-- because original Practice Start selects only a stage, unit-scale rows
-  before the target source receive a 256-frame
-  `experimental_pretarget_unit_transport_unknown_direction` schedule. It can
-  move the controller but has `hard_authority=false`; a non-unit unknown row
-  waits without input;
-- the consumer is default-off and CLI/original-game supervisor plumbing
-  requires explicit Lunatic focused stage 7 or a full route beginning at
-  stage 0, hard no-Bomb, and exact `ecldata7.ecl` identity;
-- the corridor precheck refuses incomplete, non-unit, or varying schedules,
-  preserving its declared `UNKNOWN` boundary. The synchronous local
-  planner, issue transaction, certificates, and sensing trace consume the
-  exact complete schedule directly;
-- the retained C4 artifact is an executable regression: at offset 239 the
-  next player phase remains quarter while the next laser phase is unit; at
-  offset 240 the observed root and both remaining phase schedules are unit;
-- the unattended original-game entry point and strict streaming physical
-  report are
-  `run_th08_finalb_scale_live_trial.bat` and
-  `scripts/analysis/th08_finalb_scale_live_delivery_report.py`; and
-- complete Linux discovery passes 1,137 tests in 13.612 seconds. The exact
-  Windows UNC suite passes 1,137 in 30.825 seconds with three existing skips.
-  A first Windows attempt exposed only locale-dependent fixture decoding;
-  fixing the retained UTF-8 artifact read removes it on the complete rerun.
-
-C5-1 physically completed Stage 6B with 17,282 decisions, 19 hits, and zero
-Bomb masks. Its spell-190 hit at frame 73,477 left phase 3/predeath 7 across
-the quarter-scale source window, so the old phase-0 gate accepted no source.
-CE-0188 and
-`lunatic_route2_stage6b_finalb_scale_delivery_20260729_233720`
-retain the failure. This rejects the trigger, not the C4 schedule, and grants
-no action/survival authority.
-
-The corrected original Game Start run
-`lunatic_route2_fullrun_unattended_20260730_002115` then completed from Power
-0 through Final B with 60,877 decisions, 74 hits, zero Bomb masks, and exact
-cleanup. It physically validates the non-aborting evidence continuation, but
-not C5 delivery: Final B observed spells 174/178 for 299/311 decisions and
-never observed 182/186/190. All root scales remained unit and the strict C5
-report contains zero authority rows. CE-0189 separates late-spell
-reachability from source-capture correctness. No replay was created.
-
-The dossier-v4 coverage correction and complete-stage no-auto-stop supervisor
-pass 1,140 Linux tests in 13.404 seconds and 1,140 Windows tests in 29.833
-seconds, with the three existing Windows skips.
-
-Observed SEM-SCALE-C5 physical delivery result:
-
-- whole-stage run
-  `lunatic_route2_stage6b_finalb_scale_delivery_20260730_020015` completed
-  original-game Lunatic Stage 6B over frames `1..76050` with 18,332
-  decisions, 22 hit edges, zero Bomb masks, normal `route_complete`, and
-  exact game/controller cleanup;
-- the one complete source transaction captured manager frame 75,811 while
-  the controller decision/expected frame was 75,810. This one-frame
-  asynchronous capture is causal: no authority is backfilled at offset zero;
-  the first sampled exact row is offset 1;
-- the source is exact spell 190/sub44, quarter scale, Bomb zero, one
-  out-of-pool spell owner, no ordinary-pool source, player phase 3, and stable
-  predeath baseline 7. Phase/predeath contamination is reported and grants no
-  clean-player authority;
-- 111 sampled decisions consume the immutable exact schedule from offsets
-  1 through 238, all with quarter-scale roots, no fallback, no fresh hit, and
-  no Bomb;
-- the captured schedule's sole callback-18 write restores unit scale at
-  relative offset 239. The controller cadence does not sample that frame;
-  offset 240 observes the unit root simultaneously with
-  `scene_inactive=status=terminal_unload`. This terminal bracket is physical
-  restore evidence, not an active gameplay action row;
-- strict report schema v4 passes all 20 checks. The raw JSONL SHA-256 is
-  `cbad986f0bb627d88135e2a4ae31c48389b6e030657ad77e557b882585aedcfc`;
-  the corrected strict report SHA-256 is
-  `53cddd1162769010dbc467bf9d295e90e5389db3ffb4fce3d1c73c42076b08ec`;
-  and
-- schema v3 is retained separately. Its original Windows-CRLF render hashes
-  to
-  `b1aa5a0c27082303a19c7d90f7aba42661006c5892e351b68c3e0a80f65aa2b5`;
-  the tracked LF-normalized artifact hashes to
-  `9d3652466596f3a49cd67d0ff317f31685c92d23a6640bdf5ed9d47bd9d5dca7`.
-  It incorrectly required sampled exact rows at both offset zero and an
-  active restore row. CE-0190 preserves the falsified report assumption.
-
-The delivery-complete helper now recognizes the unit root at the restore
-offset derived from the captured schedule instead of hard-coding legacy
-offset 240. Connected IDA revalidation confirms that
-`enemy_manager_update` increments the manager counter before per-enemy ECL
-execution, while priority-9 `player_update` precedes priority-11
-enemy/ECL execution. IDA now names `0x017CE758`
-`g_game_timing_state` with type `Th08GameTimingState`; the evidence comment at
-`0x00424FB4` records the physical C5-2 asynchronous-capture/terminal-restore
-bracket.
-
-Focused scale-authority/report discovery passes 13/10 tests. Complete Linux
-discovery passes 1,143 tests in 13.481 seconds; the exact Windows UNC suite
-passes 1,143 in 29.925 seconds with the three existing skips. Regenerating
-strict v4 from the ignored raw JSONL is byte-identical to the retained report.
-
-This closes only the declared C5 exact schedule-delivery slice. The canonical
-fresh Stage-6B hit is nonspell frame 7,412, all 22 contacts follow global
-viability exhaustion, and the source occurs in contaminated phase 3 after
-earlier hits. The result does not prove clean Final-B survival, pre-target
-transport correctness, a normal Power-0 late-spell history, stage-wide source
-coverage, Extra, or Lunatic NMNB. The ordered roadmap therefore advances to
-`SEM-MODE`; it does not repeat C5 or the unchanged full route.
-
-No accepted SEM-SCALE result alone establishes Lunatic NMNB, Extra
-acceptance, global optimality, or complete future-source coverage.
-
-## Scoped diagnostic continuation for SEM-MODE physical evidence
-
-CE-0191 records that the first SEM-MODE-B physical attempt terminated at
-gameplay frame 1 on root-only time-scale coverage, before any decision or
-mode observation. That hard-authority behavior remains the default. A
-separate default-off exception is now permitted only when the complete
-whole-stage enemy-mode observer is also explicitly enabled.
-
-Its contract is:
-
-- **physical objective:** retain an uninterrupted original-game stage trace
-  for native player/enemy mode transitions, even after hits; it does not
-  establish hard survival;
-- **state and observations:** at each decision, use only the stable current
-  root scale, its source frame, current native state, and normal causal
-  sensing. No future ECL write is observed or guessed;
-- **actions and issue:** the ordinary hard-no-Bomb controller continues
-  issuing complete masks. The exception changes only scale availability and
-  never authorizes Bomb;
-- **uncertainty/transition:** the current root is repeated for the finite
-  120-frame consumer horizon. Omitted same-horizon ECL scale writes make this
-  an explicitly unknown-direction approximation. A fresh root is rebuilt at
-  the next decision; no proxy is cached across source frames or versions;
-- **safety/resources:** `stop-after-hits=0` preserves the whole-stage
-  research unit. Hits, clean completion, and planner certificates under this
-  proxy have no NMNB survival authority;
-- **deadline/fallback:** no cold source expansion occurs. The constant proxy
-  is built synchronously from one integer root. Without the explicit flag,
-  the existing `time_scale_authority_unknown -> terminate_and_release_keys`
-  path remains unchanged.
-
-Required model questions:
-
-1. Histories merge only when their observed root, source frame, and ordinary
-   controller observations agree; unobserved future writes are collapsed
-   optimistically or conservatively in an unknown direction, not proved
-   equivalent.
-2. The proxy contains no clairvoyant branch, but omits all future writer
-   branches rather than universally quantifying them.
-3. An exact solve answers only the declared constant-current-root proxy, not
-   the physical future-scale question.
-4. Any native scale change inside a consumed horizon falsifies the proxy for
-   that decision. The next observation can detect the change only
-   retrospectively.
-5. The proxy is available before issue, but diagnostic sensing and trace
-   publication may perturb cadence. The compact mode report therefore marks
-   `hard_authority=false` and `physical_survival_authority=false`.
-
-The launcher requires both
-`--trace-enemy-mode-transitions` and
-`--diagnostic-continue-root-only-scale`; it rejects combination with exact
-Final-B scale-source authority. Deterministic tests cover scoped flag
-delivery, rejection without the mode observer, root-only expansion,
-complete-schedule rejection, provenance, and no-Bomb/no-stop-after-hit
-preservation. Complete Linux/Windows discovery passes 1,167 tests in
-14.404/30.150 seconds with three existing Windows skips.
-
-Original-game run
-`lunatic_route2_stage5_unattended_20260730_041408` physically revalidates the
-scoped continuation behavior. Ten root-only observations use unit scale bits
-`1065353216` and
-`diagnostic_constant_current_root_unknown_direction`; every one retains
-`hard_authority=false`, and the complete Stage-5 controller reaches
-`route_complete` instead of terminating at frame 1. The result validates only
-diagnostic continuation and explicit provenance. The run has ten hits,
-extra mode-observer cost, no future scale-writer coverage, and
-`physical_survival_authority=false`; it cannot validate physical survival,
-an exact schedule, or a hard certificate. The default flag-off fail-close
-remains unchanged.
-
-## Current stopping rule
-
-C5-2 closes the declared source-local exact-delivery gate. Stop additional C5
-or unchanged full-route repetition. Keep incomplete scale coverage consumed
-as exact, cross-version cache hits, unsupported corridor use, or a live
-non-unit hard certificate without the complete schedule as durable
-counterexamples. Continue at `SEM-MODE`; any later physical falsifier remains
-a whole-stage original-game workload without THPRAC, precise-spell selection,
-or operator-time feature activation.
+Run a Final-B physical trial only when the scale producer/consumer or live
+issue path changes and the user authorizes it.

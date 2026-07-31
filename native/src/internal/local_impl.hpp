@@ -2,9 +2,6 @@
 
 #include <cstdint>
 
-struct TouhouLocalSupplementalQueryV1;
-struct TouhouLocalSupplementalOutputV1;
-
 int touhou_native_impl_local_hazards_v1(
     const float* positions_x,
     const float* positions_y,
@@ -101,65 +98,4 @@ int touhou_native_impl_local_beam_reduce_v1(
     int action_count,
     std::int32_t* output_indices,
     std::int32_t* output_count
-);
-
-int touhou_native_impl_local_supplemental_beam_reduce_v1(
-    const double* draft_x,
-    const double* draft_y,
-    const std::int32_t* first_action,
-    const std::int32_t* last_direction,
-    const std::uint8_t* last_focused,
-    const std::uint32_t* collected_mask,
-    const double* risk,
-    const std::int32_t* collisions,
-    const double* minimum_clearance,
-    int draft_count,
-    int step,
-    int beam_width,
-    double position_quantization,
-    int target_enabled,
-    double target_x,
-    double target_y,
-    int target_deadline,
-    double item_safety_clearance,
-    double playfield_left,
-    double playfield_right,
-    double playfield_top,
-    double playfield_bottom,
-    double recovery_reserve_distance,
-    double supplemental_reserve_distance,
-    double diagonal_speed,
-    double cardinal_speed,
-    const std::int32_t* certificate_collisions,
-    const double* certificate_minimum,
-    const std::uint8_t* survival_preferred,
-    const std::uint8_t* safety_preferred,
-    const double* recovery_distance,
-    const std::int32_t* repair_volume,
-    int action_count,
-    std::int32_t* output_indices,
-    std::int32_t* output_count
-);
-
-int touhou_native_impl_local_supplemental_workspace_create_v1(
-    void** output_workspace
-);
-
-int touhou_native_impl_local_supplemental_workspace_cancel_v1(
-    void* workspace_pointer
-);
-
-int touhou_native_impl_local_supplemental_workspace_active_v1(
-    void* workspace_pointer,
-    int* output_active
-);
-
-int touhou_native_impl_local_supplemental_workspace_destroy_v1(
-    void* workspace_pointer
-);
-
-int touhou_native_impl_local_supplemental_workspace_query_v1(
-    void* workspace_pointer,
-    const TouhouLocalSupplementalQueryV1* query,
-    TouhouLocalSupplementalOutputV1* output
 );

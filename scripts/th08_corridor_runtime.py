@@ -21,20 +21,6 @@ from th08_corridor_adapter import (
     prepare_lowered_th08_corridor,
 )
 from th08_corridor_audit import submit_corridor_audit
-from th08_corridor_prewarm import (
-    PIPELINE_PREWARM_DECISION_FRAMES,
-    PIPELINE_PREWARM_INITIAL_ROOT_FRAMES,
-    PIPELINE_PREWARM_SCHEDULE_FRAMES,
-    PIPELINE_PREWARM_SCHEDULE_ROOT_LIMIT,
-    PIPELINE_PREWARM_WORKER_COUNT,
-    PipelinePrewarmRetarget,
-    PipelinePrewarmShadowQuery,
-    close_pipeline_prewarm_owner,
-    close_retired_pipeline_prewarm_owners,
-    corridor_pipeline_prewarm_query,
-    corridor_pipeline_prewarm_retarget,
-    start_corridor_pipeline_prewarm,
-)
 from th08_time_scale import (
     TH08_UNIT_TIME_SCALE_BITS,
     Th08TimeScaleSchedule,
@@ -56,9 +42,6 @@ from touhou_control.query_survival import (
     ReachablePipelineRoot,
     StalePipelineWorkspaceError,
     SurvivalQueryProblem,
-)
-from touhou_control.candidate_verifier_service import (
-    CandidateVerifierTarget,
 )
 from touhou_control.viability import SafetyValueQuery, ViabilityQuery
 
@@ -153,7 +136,6 @@ def solve_corridor(
     context_key: tuple[int, int, int | None] | None = None,
     audit_capsule_dir: Path | None = None,
     audit_executor: ThreadPoolExecutor | None = None,
-    pipeline_prewarm_shadow: bool = False,
     background_low_priority: bool = False,
     native_viability_worker_limit: int | None = None,
     time_scale_schedule: Th08TimeScaleSchedule,
@@ -207,50 +189,22 @@ def solve_corridor(
         horizon_frames=TH08_CORRIDOR_CONFIG.horizon_frames,
         laser_time_scale_bits=laser_scale_bits,
     )
-    prewarm_service = None
-    prewarm_start_error: str | None = None
-    policy_version = (
-        source_frame,
-        snapshot_frame,
-        context_key,
-        time_scale_identity,
+    prepared_problem = prepare_lowered_th08_corridor(
+        hazards=hazards,
+        control_delay_candidates=control_delay_candidates,
+        nominal_control_delay=nominal_control_delay,
+        active_action=active_action,
+        safety_value_horizon_frames=safety_value_horizon_frames,
+        survival_labels=LIVE_SURVIVAL_LABELS,
+        retain_query_survival_problem=True,
+        refinement_grid_steps=LIVE_REFINEMENT_GRID_STEPS,
     )
-
-    try:
-        prepared_problem = prepare_lowered_th08_corridor(
-            hazards=hazards,
-            control_delay_candidates=control_delay_candidates,
-            nominal_control_delay=nominal_control_delay,
-            active_action=active_action,
-            safety_value_horizon_frames=safety_value_horizon_frames,
-            survival_labels=LIVE_SURVIVAL_LABELS,
-            retain_query_survival_problem=True,
-            refinement_grid_steps=LIVE_REFINEMENT_GRID_STEPS,
-        )
-        prewarm_elapsed_ms = 0.0
-        if pipeline_prewarm_shadow:
-            assert prepared_problem.survival_query_problem is not None
-            prewarm_start = start_corridor_pipeline_prewarm(
-                problem=prepared_problem.survival_query_problem,
-                player_x=player_x,
-                player_y=player_y,
-                active_action=active_action,
-                policy_version=policy_version,
-            )
-            prewarm_service = prewarm_start.service
-            prewarm_start_error = prewarm_start.error
-            prewarm_elapsed_ms = prewarm_start.elapsed_ms
-        plan = plan_prepared_lowered_th08_corridor(
-            player_x=player_x,
-            player_y=player_y,
-            prepared_problem=prepared_problem,
-            required_gate_lane=required_gate_lane,
-            pre_viability_elapsed_ms=prewarm_elapsed_ms,
-        )
-    except BaseException:
-        if prewarm_service is not None:
-            prewarm_service.close()
-        raise
+    plan = plan_prepared_lowered_th08_corridor(
+        player_x=player_x,
+        player_y=player_y,
+        prepared_problem=prepared_problem,
+        required_gate_lane=required_gate_lane,
+    )
     constraint_honored = (
         required_gate_lane is None
         or (plan.reachable and plan.lane == required_gate_lane)
@@ -311,14 +265,8 @@ def solve_corridor(
             audit_capsule=audit.capsule,
             audit_write_ms=audit.write_ms,
             audit_error=audit.error,
-            pipeline_prewarm_start_error=(
-                prewarm_start_error
-            ),
         ),
-        handles=CorridorRuntimeHandles(
-            audit_future=audit.future,
-            pipeline_prewarm_service=prewarm_service,
-        ),
+        handles=CorridorRuntimeHandles(audit_future=audit.future),
     )
 
 
@@ -399,61 +347,6 @@ def corridor_viability_query(
     return query
 
 
-def solve_postpublished_survival(
-    solution: CorridorSolution,
-) -> CorridorSolution:
-    """Build dense survival labels only after the Boolean solution exists."""
-
-    problem = solution.plan.survival_query_problem
-    policy = solution.plan.viability_policy
-    if problem is None or policy is None:
-        return solution.with_publication(
-            postpublished_survival_parity=False,
-        )
-    started = time.perf_counter()
-    survival = problem.build_postpublished_policy(policy, worker_count=1)
-    parity = (
-        bool((survival.viable == policy.viable).all())
-        and bool(
-            (
-                survival.safe_action_masks
-                == policy.safe_action_masks
-            ).all()
-        )
-    )
-    return solution.with_publication(
-        postpublished_survival_policy=survival,
-        postpublished_survival_ms=(
-            (time.perf_counter() - started) * 1000.0
-        ),
-        postpublished_survival_parity=parity,
-    )
-
-
-def corridor_postpublished_survival_query(
-    solution: CorridorSolution | None,
-    *,
-    current_frame: int,
-    player_x: float,
-    player_y: float,
-    observed_action: str,
-    max_age_frames: int,
-) -> ViabilityQuery | None:
-    """Query shadow labels without attaching them to live policy guidance."""
-
-    if solution is None or solution.postpublished_survival_policy is None:
-        return None
-    age = current_frame - solution.source_frame
-    if age < 0 or age > max_age_frames:
-        return None
-    return solution.postpublished_survival_policy.query(
-        frame=age,
-        x=player_x,
-        y=player_y,
-        active_action=observed_action,
-    )
-
-
 def _pipeline_policy_version(
     solution: CorridorSolution,
 ) -> tuple[object, ...]:
@@ -462,48 +355,6 @@ def _pipeline_policy_version(
         solution.snapshot_frame,
         solution.context_key,
         solution.time_scale_identity,
-    )
-
-
-def corridor_candidate_verifier_target(
-    solution: CorridorSolution | None,
-    *,
-    current_frame: int,
-    player_x: float,
-    player_y: float,
-    observed_action: str,
-    pending_command: PendingCommand | None,
-    max_age_frames: int,
-    horizon_frames: int,
-) -> tuple[SurvivalQueryProblem, CandidateVerifierTarget] | None:
-    """Construct one exact current root after Boolean publication."""
-
-    if solution is None or solution.plan.survival_query_problem is None:
-        return None
-    problem = solution.plan.survival_query_problem
-    age = current_frame - solution.source_frame
-    if (
-        age < 0
-        or age > max_age_frames
-        or age + horizon_frames > problem.horizon_frames
-    ):
-        return None
-    row, column, _ = problem.project_to_lattice(
-        x=player_x,
-        y=player_y,
-    )
-    return (
-        problem,
-        CandidateVerifierTarget(
-            policy_version=_pipeline_policy_version(solution),
-            root=ReachablePipelineRoot(
-                frame=age,
-                row=row,
-                column=column,
-                observed_action=observed_action,
-                pending_command=pending_command,
-            ),
-        ),
     )
 
 
@@ -565,23 +416,6 @@ def corridor_pipeline_survival_query(
         )
     except StalePipelineWorkspaceError:
         return None
-
-
-def close_pipeline_prewarm(
-    solution: CorridorSolution | None,
-) -> None:
-    """Cancel and join one solution's shadow service, if present."""
-
-    close_pipeline_prewarm_owner(solution)
-
-
-def close_retired_pipeline_prewarms(
-    candidates: tuple[CorridorSolution | None, ...],
-    retained: tuple[CorridorSolution | None, ...] = (),
-) -> None:
-    """Close candidate services that are not shared by retained solutions."""
-
-    close_retired_pipeline_prewarm_owners(candidates, retained)
 
 
 def corridor_safety_value_query(
@@ -657,23 +491,10 @@ __all__ = [
     "CorridorSolution",
     "LIVE_REFINEMENT_GRID_STEPS",
     "LIVE_SURVIVAL_LABELS",
-    "PIPELINE_PREWARM_DECISION_FRAMES",
-    "PIPELINE_PREWARM_INITIAL_ROOT_FRAMES",
-    "PIPELINE_PREWARM_SCHEDULE_FRAMES",
-    "PIPELINE_PREWARM_SCHEDULE_ROOT_LIMIT",
-    "PIPELINE_PREWARM_WORKER_COUNT",
     "SHADOW_REFINEMENT_GRID_STEPS",
     "SHADOW_SURVIVAL_LABELS",
-    "PipelinePrewarmRetarget",
-    "PipelinePrewarmShadowQuery",
-    "close_pipeline_prewarm",
-    "close_retired_pipeline_prewarms",
-    "corridor_candidate_verifier_target",
-    "corridor_pipeline_prewarm_query",
-    "corridor_pipeline_prewarm_retarget",
     "corridor_pipeline_survival_query",
     "corridor_policy_status",
-    "corridor_postpublished_survival_query",
     "corridor_safety_value_query",
     "corridor_submit_due",
     "corridor_target",
@@ -681,6 +502,5 @@ __all__ = [
     "prepare_pipeline_survival_workspace",
     "require_corridor_background_priority",
     "solve_corridor",
-    "solve_postpublished_survival",
     "stage_corridor_solution",
 ]

@@ -6,13 +6,6 @@ import json
 import os
 from pathlib import Path
 
-from th08_live.bullet_birth_native import (
-    NATIVE_CALL_MODES,
-    NATIVE_CALL_MODE_GIL_HELD,
-    NATIVE_CALL_MODE_GIL_RELEASED,
-)
-
-
 LONG_RUN_DURATION_SECONDS = 3600
 
 
@@ -60,31 +53,14 @@ def build_long_run_arguments(
     expected_stage: int | None = None,
     terminal_stage: int | None = None,
     trace_transform_runtime: bool = False,
-    trace_bullet_births: bool = False,
-    trace_derived_pattern_sources: bool = False,
-    trace_nonspell_main_vms: bool = False,
-    trace_enemy_combat_progress: bool = False,
     trace_enemy_mode_transitions: bool = False,
-    trace_priority17_publications: bool = False,
     trace_enemy_lifecycle_events: bool = False,
     diagnostic_continue_root_only_scale: bool = False,
-    trace_auxiliary_vm_batches: bool = False,
-    trace_auxiliary_ecl_events: bool = False,
-    auxiliary_vm_batch_every: int = 16,
-    auxiliary_vm_batch_spell_id: int | None = None,
-    auxiliary_vm_native_call_mode: str = NATIVE_CALL_MODE_GIL_HELD,
     runtime_ecl_static_image: Path | None = None,
     runtime_ecl_static_sha256: str | None = None,
     enable_finalb_scale_source_authority: bool = False,
-    finalb_scale_delivery_auto_stop: bool = False,
-    bullet_birth_backend: str = "python",
-    bullet_birth_native_call_mode: str = NATIVE_CALL_MODE_GIL_RELEASED,
     safety_value_horizon: int = 0,
     viability_audit_dir: Path | None = None,
-    postpublished_survival_shadow: bool = False,
-    pipeline_prewarm_shadow: bool = False,
-    candidate_verifier_shadow: bool = False,
-    corridor_background_low_priority: bool = False,
     input_clock_boundary_shadow: bool = False,
     input_clock_shadow_sample_ms: float = 1.0,
     local_pipeline_root_shadow_every: int = 0,
@@ -109,19 +85,6 @@ def build_long_run_arguments(
         raise ValueError("unknown local beam reducer")
     if bullet_decode_backend not in {"python", "native"}:
         raise ValueError("unknown bullet decode backend")
-    if bullet_birth_backend not in {"python", "native"}:
-        raise ValueError("unknown bullet birth backend")
-    if bullet_birth_native_call_mode not in NATIVE_CALL_MODES:
-        raise ValueError("unknown native bullet birth call mode")
-    if auxiliary_vm_native_call_mode not in NATIVE_CALL_MODES:
-        raise ValueError("unknown native auxiliary-VM call mode")
-    if auxiliary_vm_batch_every <= 0:
-        raise ValueError("auxiliary-VM batch cadence must be positive")
-    if (
-        auxiliary_vm_batch_spell_id is not None
-        and auxiliary_vm_batch_spell_id < 0
-    ):
-        raise ValueError("auxiliary-VM spell filter cannot be negative")
     if (runtime_ecl_static_image is None) != (
         runtime_ecl_static_sha256 is None
     ):
@@ -147,42 +110,12 @@ def build_long_run_arguments(
             "Final-B scale-source authority requires exact runtime ECL identity"
         )
     if (
-        finalb_scale_delivery_auto_stop
-        and not enable_finalb_scale_source_authority
-    ):
-        raise ValueError(
-            "Final-B scale-delivery auto-stop requires source authority"
-        )
-    if (
         diagnostic_continue_root_only_scale
         and enable_finalb_scale_source_authority
     ):
         raise ValueError(
             "diagnostic root-only scale continuation conflicts with exact "
             "Final-B scale-source authority"
-        )
-    if trace_auxiliary_ecl_events and not trace_auxiliary_vm_batches:
-        raise ValueError(
-            "auxiliary ECL event tracing requires auxiliary-VM batch tracing"
-        )
-    if trace_auxiliary_ecl_events and runtime_ecl_static_image is None:
-        raise ValueError(
-            "auxiliary ECL event tracing requires exact runtime ECL identity"
-        )
-    if trace_auxiliary_ecl_events and (
-        difficulty != 3 or expected_stage != 5
-    ):
-        raise ValueError(
-            "the contracted auxiliary ECL event service is limited to "
-            "Lunatic Stage 5"
-        )
-    if trace_derived_pattern_sources and not trace_bullet_births:
-        raise ValueError(
-            "derived-pattern source tracing requires bullet-birth tracing"
-        )
-    if trace_nonspell_main_vms and not trace_bullet_births:
-        raise ValueError(
-            "nonspell main-VM tracing requires bullet-birth tracing"
         )
     arguments = [
         str(output),
@@ -215,49 +148,12 @@ def build_long_run_arguments(
         arguments.extend(("--terminal-stage", str(terminal_stage)))
     if trace_transform_runtime:
         arguments.append("--trace-transform-runtime")
-    if trace_bullet_births:
-        arguments.extend(
-            (
-                "--trace-bullet-births",
-                "--bullet-birth-backend",
-                bullet_birth_backend,
-                "--bullet-birth-native-call-mode",
-                bullet_birth_native_call_mode,
-            )
-        )
-    if trace_derived_pattern_sources:
-        arguments.append("--trace-derived-pattern-sources")
-    if trace_nonspell_main_vms:
-        arguments.append("--trace-nonspell-main-vms")
-    if trace_enemy_combat_progress:
-        arguments.append("--trace-enemy-combat-progress")
     if trace_enemy_mode_transitions:
         arguments.append("--trace-enemy-mode-transitions")
-    if trace_priority17_publications:
-        arguments.append("--trace-priority17-publications")
     if trace_enemy_lifecycle_events:
         arguments.append("--trace-enemy-lifecycle-events")
     if diagnostic_continue_root_only_scale:
         arguments.append("--diagnostic-continue-root-only-scale")
-    if trace_auxiliary_vm_batches:
-        arguments.extend(
-            (
-                "--trace-auxiliary-vm-batches",
-                "--auxiliary-vm-batch-every",
-                str(auxiliary_vm_batch_every),
-                "--auxiliary-vm-native-call-mode",
-                auxiliary_vm_native_call_mode,
-            )
-        )
-        if trace_auxiliary_ecl_events:
-            arguments.append("--trace-auxiliary-ecl-events")
-        if auxiliary_vm_batch_spell_id is not None:
-            arguments.extend(
-                (
-                    "--auxiliary-vm-batch-spell-id",
-                    str(auxiliary_vm_batch_spell_id),
-                )
-            )
     if runtime_ecl_static_image is not None:
         arguments.extend(
             (
@@ -269,8 +165,6 @@ def build_long_run_arguments(
         )
     if enable_finalb_scale_source_authority:
         arguments.append("--enable-finalb-scale-source-authority")
-    if finalb_scale_delivery_auto_stop:
-        arguments.append("--finalb-scale-delivery-auto-stop")
     if safety_value_horizon:
         arguments.extend(
             ("--safety-value-horizon", str(safety_value_horizon))
@@ -279,14 +173,6 @@ def build_long_run_arguments(
         arguments.extend(
             ("--viability-audit-dir", str(viability_audit_dir))
         )
-    if postpublished_survival_shadow:
-        arguments.append("--postpublished-survival-shadow")
-    if pipeline_prewarm_shadow:
-        arguments.append("--pipeline-prewarm-shadow")
-    if candidate_verifier_shadow:
-        arguments.append("--candidate-verifier-shadow")
-    if corridor_background_low_priority:
-        arguments.append("--corridor-background-low-priority")
     if input_clock_boundary_shadow:
         arguments.extend(
             (

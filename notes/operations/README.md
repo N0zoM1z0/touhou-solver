@@ -1,9 +1,8 @@
-# Physical-Run Operations
+# Physical Operations
 
-- [THPRAC practice protocol](THPRAC_PRACTICE_PROTOCOL.md)
-- [unattended practice automation](UNATTENDED_PRACTICE_AUTOMATION.md)
-- [native replay physical falsification](NATIVE_REPLAY_PHYSICAL_FALSIFICATION.md)
-- [Final-B SEM-SCALE live delivery gate](FINALB_SEM_SCALE_LIVE_DELIVERY_GATE.md)
+Use `UNATTENDED_PRACTICE_AUTOMATION.md` for supervised practice/full-route
+operation and replay retention.
 
-The current verified commands, menu constants, retention rules, and cleanup
-boundary remain in `../../START_HERE.md` and `../../AGENTS.md`.
+Never launch physical gameplay without explicit user authorization. The live
+skill `.agents/skills/th08-run-and-retain-physical-trial` is the sole retained
+workspace skill.

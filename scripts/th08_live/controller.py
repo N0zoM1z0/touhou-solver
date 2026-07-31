@@ -34,23 +34,14 @@ from th08_corridor_runtime import (
     LIVE_SURVIVAL_LABELS,
     SHADOW_REFINEMENT_GRID_STEPS,
     SHADOW_SURVIVAL_LABELS,
-    corridor_candidate_verifier_target as _corridor_candidate_verifier_target,
     corridor_policy_status as _corridor_policy_status,  # noqa: F401
-    corridor_pipeline_prewarm_retarget as _corridor_pipeline_prewarm_retarget,
     corridor_submit_due as _corridor_submit_due,
     corridor_target as _corridor_target,  # noqa: F401 - compatibility export
     corridor_viability_query as _corridor_viability_query,  # noqa: F401
-    require_corridor_background_priority,
     solve_corridor as _solve_corridor,
-    solve_postpublished_survival as _solve_postpublished_survival,
     stage_corridor_solution as _stage_corridor_solution,
-    close_retired_pipeline_prewarms as _close_retired_pipeline_prewarms,
 )
 from th08_corridor_adapter import TH08_CORRIDOR_CONFIG
-from th08_ecl_birth import (
-    analyze_ecl_birth_intents,
-    observe_deferred_fire_state,
-)
 from th08_ecl_runtime import (
     EclLookaheadResult,
     EclInstructionCache,
@@ -95,59 +86,16 @@ from th08_live import (
     serialize_semantic_clock_event as _serialize_semantic_clock_event,
     serialize_semantic_clock_observation as _serialize_semantic_clock_observation,
 )
-from th08_live.birth_trace import (
-    birth_trace_requires_immediate_flush,
-    build_bullet_birth_trace_record,
-)
-from th08_live.birth_contention import (
-    capture_birth_observer_future_states,
-)
-from th08_live.bullet_birth_stage import (
-    BulletBirthStageDependencies,
-    BulletBirthStageRequest,
-    run_bullet_birth_stage,
-)
-from th08_live.enemy_combat_progress_stage import (
-    EnemyCombatProgressStageRequest,
-    run_enemy_combat_progress_stage,
-)
 from th08_live.runtime_ecl_identity import (
     RuntimeEclIdentityService,
     RuntimeEclPhysicalProvenance,
 )
 from th08_live.scale_schedule_authority import (
     FinalBScaleScheduleAuthority,
-    FinalBScaleScheduleResolution,
 )
 from th08_live.scale_source_trace import (
     FinalBScaleSourceTraceConfiguration,
     FinalBScaleSourceTraceService,
-)
-from th08_live.auxiliary_vm import (
-    AuxiliaryVmBatchTraceService,
-    native_auxiliary_vm_batch_available,
-)
-from th08_live.auxiliary_vm.coalesced_envelope import (
-    COALESCED_ENVELOPE_FIELD,
-    pack_auxiliary_vm_batch,
-)
-from th08_live.auxiliary_vm.event_service import (
-    AuxiliaryEclEventConfiguration,
-    AuxiliaryEclEventTraceService,
-)
-from th08_live.derived_pattern_source import observe_derived_pattern_sources
-from th08_live.derived_pattern_source_native import (
-    NativeDerivedPatternSourceObserver,
-)
-from th08_live.bullet_birth import (
-    BulletBirthTracker,
-)
-from th08_live.bullet_birth_native import (
-    NATIVE_CALL_MODES,
-    NATIVE_CALL_MODE_GIL_HELD,
-    NATIVE_CALL_MODE_GIL_RELEASED,
-    NativeBulletBirthTracker,
-    native_bullet_birth_available,
 )
 from th08_live.ecl_capture import capture_main_ecl
 from th08_live.bullet_decode import (  # noqa: F401
@@ -180,12 +128,6 @@ from th08_live.bullet_decode import (  # noqa: F401
     finite as _finite,
     native_bullet_half_extents as _native_bullet_half_extents,
     planning_bullet_active_slots as _planning_bullet_active_slots,
-)
-from th08_live.candidate_trace import (
-    build_candidate_verifier_trace_record,
-    candidate_outcome_record as _candidate_outcome_record,  # noqa: F401
-    candidate_shadow_publications as _candidate_shadow_publications,
-    candidate_snapshot_record as _candidate_snapshot_record,  # noqa: F401
 )
 from th08_live.corridor_trace import build_corridor_trace_record
 from th08_live.cli import LiveParserDefaults, build_live_parser
@@ -366,8 +308,6 @@ from th08_live.pipeline_shadow import build_pipeline_shadow_snapshot
 from th08_local_planner import (  # noqa: F401
     ActuatorPipeline,
     BaselineBeamContext,
-    CompletedServiceResults,
-    CompletedSupplementalLookup,
     DamageDecisionFields,
     Decision,
     DecisionTelemetry,  # noqa: F401 - compatibility export
@@ -390,11 +330,9 @@ from th08_local_planner import (  # noqa: F401
     ProposalAssemblyContext,
     RobustActionCertificate,
     SearchNode,
-    SupplementalDecisionFields,
     assemble_local_decision,
     prepare_planner_pass,
     run_baseline_beam,
-    lookup_completed_supplemental,
 )
 from th08_runtime_agent import (
     ADDR_ENGINE_FLAGS,
@@ -411,11 +349,6 @@ from th08_runtime_agent import (
     send_scan_key,
     verify_target,
 )
-from th08_runtime.priority17_publication_probe import (
-    Priority17PublicationBatch,
-    Priority17PublicationProbe,
-    Priority17ProbeUnsafeStateError,
-)
 from th08_runtime.enemy_lifecycle_probe import (
     EnemyLifecycleBatch,
     EnemyLifecycleProbe,
@@ -428,12 +361,6 @@ from touhou_control.async_policy import (
     delay_support_envelope,
 )
 from touhou_control.delay import AdaptiveControlDelay
-from touhou_control.query_survival import PendingCommand
-from touhou_control.candidate_verifier_service import (
-    CandidateVerifierOutcome,
-    CandidateVerifierSnapshot,
-    CandidateVerifierTarget,
-)
 from touhou_control.epochs import (
     ActionIssueAlignment,  # noqa: F401 - compatibility export
     FrameWindow,
@@ -449,13 +376,6 @@ from touhou_control.phase_progress import (  # noqa: F401
     PhaseProgressTracker,
     ProgressCandidate,
     select_progress_action,
-)
-from touhou_control.supplemental_local_beam import (  # noqa: F401
-    ExactVersionSupplementalService,
-    SupplementalAction,
-    SupplementalNode,
-    search_supplemental_local_beam,
-    search_supplemental_local_beam_native,
 )
 ECL_CALLBACK_LOOKAHEAD_FRAMES = 256
 ECL_BIRTH_LOOKAHEAD_FRAMES = 80
@@ -514,9 +434,6 @@ CORRIDOR_POLICY_MINIMUM_LEAD_FRAMES = max(
 ENEMY_DORMANT_MEMORY_FRAMES = TH08_CORRIDOR_CONFIG.horizon_frames
 CORRIDOR_MIN_COMMIT_FRAMES = 32
 CORRIDOR_INITIAL_SUBMIT_FRAME = -1_000_000
-CANDIDATE_VERIFIER_HORIZON_FRAMES = 32
-CANDIDATE_VERIFIER_DECISION_FRAMES = (4, 5, 6)
-CANDIDATE_VERIFIER_TIMEOUT_MS = 10
 STAGE_TRANSITION_TIMEOUT_SECONDS = 90.0
 TERMINAL_INACTIVE_GRACE_SECONDS = 5.0
 
@@ -571,19 +488,6 @@ def _diagnostic_constant_root_time_scale(
     )
 
 
-def _finalb_scale_delivery_complete(
-    resolution: FinalBScaleScheduleResolution | None,
-) -> bool:
-    return (
-        resolution is not None
-        and resolution.planner_scale_authority
-        and resolution.frame_offset is not None
-        and resolution.frame_offset > 0
-        and resolution.schedule.root_scale_bits
-        == TH08_UNIT_TIME_SCALE_BITS
-    )
-
-
 def _local_certificate_timing_record(
     timing: LocalCertificateTiming,
 ) -> dict[str, int | float]:
@@ -612,7 +516,6 @@ def _local_certificate_timing_record(
             timing.planning_bullet_projection_ms
         ),
         "beam_search_ms": timing.beam_search_ms,
-        "supplemental_beam_ms": timing.supplemental_beam_ms,
         "terminal_threat_ms": timing.terminal_threat_ms,
         "selection_finalize_ms": timing.selection_finalize_ms,
         "project_and_certify_ms": (
@@ -835,7 +738,6 @@ def recertify_action_for_fresh_hazards(
 
 _LOCAL_HAZARD_BACKEND = "numpy"
 _LOCAL_BEAM_REDUCER = "python"
-_LOCAL_SUPPLEMENTAL_BACKEND = "python"
 _LOCAL_BULLET_DECODER = "python"
 
 
@@ -861,23 +763,6 @@ def _configure_local_beam_reducer(backend: str) -> None:
     ):
         raise RuntimeError("native local beam reducer is unavailable")
     _LOCAL_BEAM_REDUCER = backend
-
-
-def _configure_local_supplemental_backend(backend: str) -> None:
-    global _LOCAL_SUPPLEMENTAL_BACKEND
-    if backend not in {"python", "native"}:
-        raise ValueError(
-            f"unknown local supplemental backend {backend!r}"
-        )
-    if (
-        backend == "native"
-        and native_backend._load_local_supplemental_workspace_functions()
-        is None
-    ):
-        raise RuntimeError(
-            "native supplemental rollout workspace is unavailable"
-        )
-    _LOCAL_SUPPLEMENTAL_BACKEND = backend
 
 
 def _configure_local_bullet_decoder(backend: str) -> None:
@@ -1160,7 +1045,6 @@ def _planner_pass_dependencies() -> PlannerPassDependencies:
     return PlannerPassDependencies(
         planner_actions=_PLANNER_ACTIONS,
         local_beam_reducer=_LOCAL_BEAM_REDUCER,
-        local_supplemental_backend=_LOCAL_SUPPLEMENTAL_BACKEND,
         bomb_mask=BOMB,
         focus_mask=FOCUS,
         shot_mask=SHOT,
@@ -1189,13 +1073,8 @@ def _planner_pass_dependencies() -> PlannerPassDependencies:
         robust_action_certificates=_robust_action_certificates,
         terminal_threat_scores=_terminal_threat_scores,
         assemble_local_decision=assemble_local_decision,
-        lookup_completed_supplemental=lookup_completed_supplemental,
         run_baseline_beam=run_baseline_beam,
         select_progress_action=select_progress_action,
-        search_supplemental_local_beam=search_supplemental_local_beam,
-        search_supplemental_local_beam_native=(
-            search_supplemental_local_beam_native
-        ),
     )
 
 
@@ -1332,12 +1211,6 @@ def choose_action(
     recovery_control_reserve: bool = True,
     losing_control_reserve: bool = False,
     preloss_continuation_preference: bool = False,
-    preloss_supplemental_beam_width: int = 0,
-    preloss_supplemental_deadline_ms: float | None = None,
-    preloss_supplemental_async_service: (
-        ExactVersionSupplementalService | None
-    ) = None,
-    preloss_supplemental_version: object | None = None,
     preserve_previous_direction_inertia: bool = True,
     beam_dedup_mode: str = "quantized",
     relax_stale_viability_contradiction: bool = False,
@@ -1415,9 +1288,6 @@ def choose_action(
                 preloss_continuation_preference=(
                     preloss_continuation_preference
                 ),
-                preloss_supplemental_beam_width=(
-                    preloss_supplemental_beam_width
-                ),
                 preserve_previous_direction_inertia=(
                     preserve_previous_direction_inertia
                 ),
@@ -1435,15 +1305,6 @@ def choose_action(
                 damage_target_x=damage_target_x,
                 damage_target_half_width=damage_target_half_width,
                 damageable=damageable,
-            ),
-            completed_services=CompletedServiceResults(
-                supplemental_deadline_ms=(
-                    preloss_supplemental_deadline_ms
-                ),
-                supplemental_async_service=(
-                    preloss_supplemental_async_service
-                ),
-                supplemental_version=preloss_supplemental_version,
             ),
         )
     )
@@ -1555,13 +1416,6 @@ def _prepare_live_run(args: argparse.Namespace) -> None:
         raise ValueError(
             "local pipeline root shadow cadence cannot be negative"
         )
-    if args.auxiliary_vm_batch_every <= 0:
-        raise ValueError("auxiliary-VM batch cadence must be positive")
-    if (
-        args.auxiliary_vm_batch_spell_id is not None
-        and args.auxiliary_vm_batch_spell_id < 0
-    ):
-        raise ValueError("auxiliary-VM spell filter cannot be negative")
     runtime_ecl_static_image = getattr(
         args,
         "runtime_ecl_static_image",
@@ -1585,36 +1439,6 @@ def _prepare_live_run(args: argparse.Namespace) -> None:
         raise ValueError(
             "runtime ECL identity requires an explicit expected stage"
         )
-    trace_auxiliary_ecl_events = bool(
-        getattr(args, "trace_auxiliary_ecl_events", False)
-    )
-    if trace_auxiliary_ecl_events and not getattr(
-        args,
-        "trace_auxiliary_vm_batches",
-        False,
-    ):
-        raise ValueError(
-            "auxiliary ECL event tracing requires auxiliary-VM batch tracing"
-        )
-    if trace_auxiliary_ecl_events and runtime_ecl_static_image is None:
-        raise ValueError(
-            "auxiliary ECL event tracing requires exact runtime ECL identity"
-        )
-    if trace_auxiliary_ecl_events and (
-        args.difficulty != 3 or args.expected_stage != 5
-    ):
-        raise ValueError(
-            "the contracted auxiliary ECL event service is limited to "
-            "Lunatic Stage 5"
-        )
-    if (
-        getattr(args, "trace_priority17_publications", False)
-        and getattr(args, "trace_enemy_lifecycle_events", False)
-    ):
-        raise ValueError(
-            "priority-17 and enemy-lifecycle runtime probes must be captured "
-            "in separate trials"
-        )
     enable_finalb_scale_source_authority = bool(
         getattr(args, "enable_finalb_scale_source_authority", False)
     )
@@ -1636,59 +1460,9 @@ def _prepare_live_run(args: argparse.Namespace) -> None:
         raise ValueError(
             "Final-B scale-source authority requires exact runtime ECL identity"
         )
-    if (
-        getattr(args, "finalb_scale_delivery_auto_stop", False)
-        and not enable_finalb_scale_source_authority
-    ):
-        raise ValueError(
-            "Final-B scale-delivery auto-stop requires source authority"
-        )
     _configure_local_hazard_backend(args.local_hazard_backend)
     _configure_local_beam_reducer(args.local_beam_reducer)
     _configure_local_bullet_decoder(args.bullet_decode_backend)
-    if (
-        getattr(args, "trace_bullet_births", False)
-        and getattr(args, "bullet_birth_backend", "python") == "native"
-        and not native_bullet_birth_available(
-            getattr(
-                args,
-                "bullet_birth_native_call_mode",
-                NATIVE_CALL_MODE_GIL_RELEASED,
-            )
-        )
-    ):
-        raise RuntimeError(
-            "native bullet-birth backend was selected but its trace "
-            "library is unavailable"
-        )
-    if (
-        getattr(args, "trace_derived_pattern_sources", False)
-        and not getattr(args, "trace_bullet_births", False)
-    ):
-        raise ValueError(
-            "derived-pattern source tracing requires bullet-birth tracing"
-        )
-    if (
-        getattr(args, "trace_nonspell_main_vms", False)
-        and not getattr(args, "trace_bullet_births", False)
-    ):
-        raise ValueError(
-            "nonspell main-VM tracing requires bullet-birth tracing"
-        )
-    if (
-        getattr(args, "trace_auxiliary_vm_batches", False)
-        and not native_auxiliary_vm_batch_available(
-            getattr(
-                args,
-                "auxiliary_vm_native_call_mode",
-                "gil-held",
-            )
-        )
-    ):
-        raise RuntimeError(
-            "auxiliary-VM batch tracing was selected but its native "
-            "trace library is unavailable"
-        )
     if (
         args.stage_transition_timeout <= 0.0
         or args.terminal_inactive_grace <= 0.0
@@ -1704,43 +1478,6 @@ def run(args: argparse.Namespace) -> int:
         target_exe=TARGET_EXE,
     ) as session:
         return _run_live_session(args, session)
-
-
-def _build_birth_trace_observers(
-    *,
-    trace_bullet_births: bool,
-    trace_derived_pattern_sources: bool,
-    backend: str,
-    native_call_mode: str,
-) -> tuple[
-    BulletBirthTracker | NativeBulletBirthTracker | None,
-    NativeDerivedPatternSourceObserver | None,
-]:
-    if trace_derived_pattern_sources and not trace_bullet_births:
-        raise ValueError(
-            "derived-pattern source tracing requires bullet-birth tracing"
-        )
-    tracker = (
-        (
-            NativeBulletBirthTracker(native_call_mode=native_call_mode)
-            if backend == "native"
-            else BulletBirthTracker()
-        )
-        if trace_bullet_births
-        else None
-    )
-    source = (
-        (
-            NativeDerivedPatternSourceObserver(
-                native_call_mode=native_call_mode,
-            )
-            if backend == "native"
-            else None
-        )
-        if trace_derived_pattern_sources
-        else None
-    )
-    return tracker, source
 
 
 def _run_live_session(
@@ -1768,7 +1505,6 @@ def _run_live_session(
     gameplay_armed = False
     termination_reason = "duration"
     corridor_future: Future[CorridorSolution] | None = None
-    corridor_survival_future: Future[CorridorSolution] | None = None
     enemy_future: Future[EnemyPoolSnapshot] | None = None
     enemy_snapshot: EnemyPoolSnapshot | None = None
     enemy_last_submit = CORRIDOR_INITIAL_SUBMIT_FRAME
@@ -1831,32 +1567,9 @@ def _run_live_session(
         minimum_frames=CORRIDOR_POLICY_MINIMUM_LEAD_FRAMES,
     )
     ecl_instruction_cache = EclInstructionCache()
-    trace_bullet_births = bool(
-        getattr(args, "trace_bullet_births", False)
-    )
-    trace_derived_pattern_sources = bool(
-        getattr(args, "trace_derived_pattern_sources", False)
-    )
-    trace_nonspell_main_vms = bool(
-        getattr(args, "trace_nonspell_main_vms", False)
-    )
-    trace_enemy_combat_progress = bool(
-        getattr(args, "trace_enemy_combat_progress", False)
-    )
     trace_enemy_mode_transitions = bool(
         getattr(args, "trace_enemy_mode_transitions", False)
     )
-    trace_priority17_publications = bool(
-        getattr(args, "trace_priority17_publications", False)
-    )
-    priority17_probe: Priority17PublicationProbe | None = None
-    priority17_probe_last_serial: int | None = None
-    priority17_probe_installation: dict[str, object] = {
-        "schema": "th08-priority17-publication-probe-v1",
-        "role": "trace_only_no_action_authority",
-        "status": "disabled",
-        "action_authority": False,
-    }
     trace_enemy_lifecycle_events = bool(
         getattr(args, "trace_enemy_lifecycle_events", False)
     )
@@ -1876,14 +1589,7 @@ def _run_live_session(
             False,
         )
     )
-    trace_auxiliary_vm_batches = bool(
-        getattr(args, "trace_auxiliary_vm_batches", False)
-    )
-    trace_auxiliary_ecl_events = bool(
-        getattr(args, "trace_auxiliary_ecl_events", False)
-    )
     runtime_ecl_identity_service: RuntimeEclIdentityService | None = None
-    auxiliary_ecl_event_service: AuxiliaryEclEventTraceService | None = None
     finalb_scale_schedule_authority: (
         FinalBScaleScheduleAuthority | None
     ) = None
@@ -1908,16 +1614,6 @@ def _run_live_session(
             expected_difficulty_index=args.difficulty,
             expected_stage_route_index=args.expected_stage,
         )
-        if trace_auxiliary_ecl_events:
-            auxiliary_ecl_event_service = AuxiliaryEclEventTraceService(
-                AuxiliaryEclEventConfiguration(
-                    static_path=runtime_ecl_static_path,
-                    expected_static_sha256=args.runtime_ecl_static_sha256,
-                    expected_route_id=2,
-                    expected_difficulty_index=args.difficulty,
-                    expected_stage_route_index=args.expected_stage,
-                )
-            )
         if getattr(args, "enable_finalb_scale_source_authority", False):
             finalb_scale_schedule_authority = (
                 FinalBScaleScheduleAuthority(
@@ -1934,56 +1630,13 @@ def _run_live_session(
                     )
                 )
             )
-    auxiliary_vm_batch_service = (
-        AuxiliaryVmBatchTraceService(
-            cadence_frames=args.auxiliary_vm_batch_every,
-            spell_id_filter=args.auxiliary_vm_batch_spell_id,
-            native_call_mode=args.auxiliary_vm_native_call_mode,
-            event_service=auxiliary_ecl_event_service,
-        )
-        if trace_auxiliary_vm_batches
-        else None
-    )
-    auxiliary_vm_batch_envelope_sequence = 0
-    previous_enemy_combat_progress_emit_ms: float | None = None
-    bullet_birth_backend = getattr(
-        args,
-        "bullet_birth_backend",
-        "python",
-    )
-    bullet_birth_native_call_mode = getattr(
-        args,
-        "bullet_birth_native_call_mode",
-        NATIVE_CALL_MODE_GIL_RELEASED,
-    )
-    (
-        bullet_birth_tracker,
-        derived_pattern_source_observer,
-    ) = _build_birth_trace_observers(
-        trace_bullet_births=trace_bullet_births,
-        trace_derived_pattern_sources=trace_derived_pattern_sources,
-        backend=bullet_birth_backend,
-        native_call_mode=bullet_birth_native_call_mode,
-    )
-    previous_birth_trace_emit_ms: float | None = None
     previous_iteration_ms: float | None = None
     previous_trace_ms: float | None = None
     service_resources = LiveServiceResources(
         local_only=args.local_only,
-        postpublished_survival_shadow=(
-            args.postpublished_survival_shadow
-        ),
-        pipeline_prewarm_shadow=args.pipeline_prewarm_shadow,
-        candidate_verifier_shadow=args.candidate_verifier_shadow,
         viability_audit_enabled=args.viability_audit_dir is not None,
-        candidate_horizon_frames=CANDIDATE_VERIFIER_HORIZON_FRAMES,
-        candidate_decision_frames=CANDIDATE_VERIFIER_DECISION_FRAMES,
-        candidate_timeout_ms=CANDIDATE_VERIFIER_TIMEOUT_MS,
-        close_pipeline_prewarms=_close_retired_pipeline_prewarms,
     )
     corridor_executor = service_resources.corridor_executor
-    survival_executor = service_resources.survival_executor
-    candidate_verifier = service_resources.candidate_verifier
     audit_executor = service_resources.audit_executor
     enemy_executor = service_resources.enemy_executor
     issue_controller = IssueController(
@@ -1994,32 +1647,12 @@ def _run_live_session(
     )
     policy_coordinator = PolicyCoordinator()
 
-    def retire_pipeline_solutions(
-        candidates: tuple[CorridorSolution | None, ...],
-        retained: tuple[CorridorSolution | None, ...] = (),
-    ) -> None:
-        service_resources.retire_pipeline_solutions(
-            candidates,
-            retained=retained,
-        )
-
     def input_clock_policy_snapshot() -> dict[str, object]:
         return {
             "published_solution_present": corridor_solution is not None,
             "pending_solution_present": corridor_pending_solution is not None,
             "solve_future_pending": (
                 corridor_future is not None and not corridor_future.done()
-            ),
-            "survival_future_pending": (
-                corridor_survival_future is not None
-                and not corridor_survival_future.done()
-            ),
-            "would_retire_solution_count": sum(
-                solution is not None
-                for solution in (
-                    corridor_solution,
-                    corridor_pending_solution,
-                )
             ),
         }
 
@@ -2078,25 +1711,6 @@ def _run_live_session(
         identity = verify_target(reader)
         verified_image_path = Path(str(identity["image_path"]))
         trace_sink.emit({"kind": "identity", **identity})
-        if trace_priority17_publications:
-            try:
-                priority17_probe = Priority17PublicationProbe.install(
-                    api,
-                    pid,
-                )
-                priority17_probe_installation = (
-                    priority17_probe.installation_record()
-                )
-            except Priority17ProbeUnsafeStateError:
-                raise
-            except Exception as error:
-                priority17_probe_installation = {
-                    "schema": "th08-priority17-publication-probe-v1",
-                    "role": "trace_only_no_action_authority",
-                    "status": "unavailable",
-                    "error": f"{type(error).__name__}: {error}",
-                    "action_authority": False,
-                }
         if trace_enemy_lifecycle_events:
             try:
                 enemy_lifecycle_probe = EnemyLifecycleProbe.install(
@@ -2183,9 +1797,6 @@ def _run_live_session(
                     "control_delay_guard_frames": (
                         LIVE_CONTROL_DELAY_GUARD_FRAMES
                     ),
-                    "priority17_publication_probe": (
-                        priority17_probe_installation
-                    ),
                     "enemy_lifecycle_probe": (
                         enemy_lifecycle_probe_installation
                     ),
@@ -2226,13 +1837,6 @@ def _run_live_session(
                             False,
                         )
                         else "disabled"
-                    ),
-                    "finalb_scale_delivery_auto_stop": bool(
-                        getattr(
-                            args,
-                            "finalb_scale_delivery_auto_stop",
-                            False,
-                        )
                     ),
                     "diagnostic_continue_root_only_scale": (
                         diagnostic_continue_root_only_scale
@@ -2293,15 +1897,6 @@ def _run_live_session(
                         {
                             "live": LIVE_SURVIVAL_LABELS,
                             "shadow": SHADOW_SURVIVAL_LABELS,
-                            "postpublished_compute": (
-                                args.postpublished_survival_shadow
-                            ),
-                            "pipeline_prepublication_shadow": (
-                                args.pipeline_prewarm_shadow
-                            ),
-                            "candidate_verifier_shadow": (
-                                args.candidate_verifier_shadow
-                            ),
                             "reason": (
                                 "shadow_isolated_after_serialized_delivery_"
                                 "rejection"
@@ -2313,9 +1908,6 @@ def _run_live_session(
                     ),
                     "viability_horizon_frames": (
                         TH08_CORRIDOR_CONFIG.horizon_frames
-                    ),
-                    "corridor_background_low_priority": (
-                        args.corridor_background_low_priority
                     ),
                     "corridor_native_viability_workers": (
                         args.corridor_native_workers
@@ -2433,18 +2025,6 @@ def _run_live_session(
             raise RuntimeError("physical gameplay input is already active")
         _require_foreground(api, pid)
         gameplay_armed = True
-        if priority17_probe is not None:
-            priority17_baseline = priority17_probe.read_since(None)
-            priority17_probe_last_serial = (
-                priority17_baseline.observed_serial
-            )
-            trace_sink.emit(
-                {
-                    "kind": "priority17_publication_probe_baseline",
-                    **priority17_baseline.compact_record(),
-                },
-                flush=True,
-            )
         if enemy_lifecycle_probe is not None:
             enemy_lifecycle_baseline = enemy_lifecycle_probe.read_since(None)
             enemy_lifecycle_probe_last_serial = (
@@ -2523,22 +2103,12 @@ def _run_live_session(
                     )
                     previous_mask = 0
                     previous_direction = 0
-                    retire_pipeline_solutions(
-                        (corridor_solution, corridor_pending_solution)
-                    )
                     corridor_solution = None
                     corridor_pending_solution = None
                     for memory in enemy_body_memories:
                         memory.clear()
-                    if bullet_birth_tracker is not None:
-                        bullet_birth_tracker.reset()
                     if corridor_future is not None and corridor_future.cancel():
                         corridor_future = None
-                    if (
-                        corridor_survival_future is not None
-                        and corridor_survival_future.cancel()
-                    ):
-                        corridor_survival_future = None
                     trace_sink.emit(
                         {
                                 "kind": "scene_inactive",
@@ -2622,10 +2192,6 @@ def _run_live_session(
                 delay_estimator.reset()
                 previous_iteration_ms = None
                 previous_trace_ms = None
-                previous_birth_trace_emit_ms = None
-                retire_pipeline_solutions(
-                    (corridor_solution, corridor_pending_solution)
-                )
                 corridor_solution = None
                 corridor_pending_solution = None
                 corridor_last_submit = CORRIDOR_INITIAL_SUBMIT_FRAME
@@ -2634,15 +2200,8 @@ def _run_live_session(
                 for memory in enemy_body_memories:
                     memory.clear()
                 ecl_instruction_cache.clear()
-                if bullet_birth_tracker is not None:
-                    bullet_birth_tracker.reset()
                 if corridor_future is not None and corridor_future.cancel():
                     corridor_future = None
-                if (
-                    corridor_survival_future is not None
-                    and corridor_survival_future.cancel()
-                ):
-                    corridor_survival_future = None
                 auto_confirm.eligible_since = None
                 auto_confirm.released = False
                 last_frame_progress = now
@@ -2819,9 +2378,6 @@ def _run_live_session(
             if not state["gameplay_active"]:
                 time.sleep(args.poll_ms / 1000.0)
                 continue
-            priority17_publication_batch: (
-                Priority17PublicationBatch | None
-            ) = None
             enemy_lifecycle_batch: EnemyLifecycleBatch | None = None
             if state["route_id"] != 2:
                 termination_reason = "gameplay_ended"
@@ -2890,9 +2446,6 @@ def _run_live_session(
                 memory.set_context(corridor_context)
             if corridor_context_changed:
                 boss_phase_tracker.reset()
-                retire_pipeline_solutions(
-                    (corridor_solution, corridor_pending_solution)
-                )
                 corridor_solution = None
                 corridor_pending_solution = None
                 if (
@@ -2900,11 +2453,6 @@ def _run_live_session(
                     and corridor_future.cancel()
                 ):
                     corridor_future = None
-                if (
-                    corridor_survival_future is not None
-                    and corridor_survival_future.cancel()
-                ):
-                    corridor_survival_future = None
             iterations += 1
             if iterations % 30 == 0:
                 _require_foreground(api, pid)
@@ -2955,10 +2503,8 @@ def _run_live_session(
                 enemy_mode_prefix_capture = (
                     capture_player_enemy_mode_prefix(
                         reader,
-                        include_main_ecl_vms=trace_nonspell_main_vms,
-                        include_combat_progress=(
-                            trace_enemy_combat_progress
-                        ),
+                        include_main_ecl_vms=False,
+                        include_combat_progress=False,
                     )
                 )
                 enemy_prefix_snapshot = (
@@ -2968,10 +2514,8 @@ def _run_live_session(
                 enemy_prefix_snapshot = (
                     capture_enemy_pool_prefix_contiguous(
                         reader,
-                        include_main_ecl_vms=trace_nonspell_main_vms,
-                        include_combat_progress=(
-                            trace_enemy_combat_progress
-                        ),
+                        include_main_ecl_vms=False,
+                        include_combat_progress=False,
                     )
                 )
             enemy_prefix_capture_ms = (
@@ -3237,9 +2781,6 @@ def _run_live_session(
                 previous_direction = 0
                 decision_frame_deltas.clear()
                 delay_estimator.reset()
-                retire_pipeline_solutions(
-                    (corridor_solution, corridor_pending_solution)
-                )
                 corridor_solution = None
                 corridor_pending_solution = None
                 corridor_context = None
@@ -3248,12 +2789,8 @@ def _run_live_session(
                     memory.clear()
                 boss_phase_tracker.reset()
                 ecl_instruction_cache.clear()
-                if bullet_birth_tracker is not None:
-                    bullet_birth_tracker.reset()
                 if corridor_future is not None:
                     corridor_future.cancel()
-                if corridor_survival_future is not None:
-                    corridor_survival_future.cancel()
                 trace_sink.emit(
                     {
                             "kind": "sensor_epoch_discontinuity",
@@ -3604,30 +3141,7 @@ def _run_live_session(
                     break
             corridor_started = time.perf_counter()
             corridor_updated = False
-            if (
-                corridor_survival_future is not None
-                and corridor_survival_future.done()
-            ):
-                labeled_solution = corridor_survival_future.result()
-                corridor_survival_future = None
-                if (
-                    corridor_solution is not None
-                    and corridor_solution.source_frame
-                    == labeled_solution.source_frame
-                    and corridor_solution.context_key
-                    == labeled_solution.context_key
-                ):
-                    corridor_solution = labeled_solution
-                elif (
-                    corridor_pending_solution is not None
-                    and corridor_pending_solution.source_frame
-                    == labeled_solution.source_frame
-                    and corridor_pending_solution.context_key
-                    == labeled_solution.context_key
-                ):
-                    corridor_pending_solution = labeled_solution
             if corridor_pending_solution is not None:
-                prior_active = corridor_solution
                 pending_candidate = corridor_pending_solution
                 (
                     corridor_solution,
@@ -3644,25 +3158,14 @@ def _run_live_session(
                         current_frame=counter_after_read,
                     )
                     corridor_updated = True
-                retire_arguments = (
-                    (prior_active, pending_candidate),
-                    (corridor_solution, corridor_pending_solution),
-                )
-                retire_pipeline_solutions(*retire_arguments)
             if corridor_future is not None and corridor_future.done():
                 completed_solution = corridor_future.result()
                 corridor_future = None
-                require_corridor_background_priority(
-                    completed_solution,
-                    requested=args.corridor_background_low_priority,
-                )
                 corridor_policy_lead.observe(
                     completed_solution.worker_ms
                     if completed_solution.worker_ms is not None
                     else completed_solution.solve_ms
                 )
-                prior_active = corridor_solution
-                prior_pending = corridor_pending_solution
                 (
                     corridor_solution,
                     corridor_pending_solution,
@@ -3681,15 +3184,6 @@ def _run_live_session(
                         current_frame=counter_after_read,
                     )
                     corridor_updated = True
-                retire_arguments = (
-                    (
-                        prior_active,
-                        prior_pending,
-                        completed_solution,
-                    ),
-                    (corridor_solution, corridor_pending_solution),
-                )
-                retire_pipeline_solutions(*retire_arguments)
             if (
                 corridor_executor is not None
                 and corridor_future is None
@@ -3762,12 +3256,7 @@ def _run_live_session(
                     context_key=corridor_context,
                     audit_capsule_dir=args.viability_audit_dir,
                     audit_executor=audit_executor,
-                    pipeline_prewarm_shadow=(
-                        args.pipeline_prewarm_shadow
-                    ),
-                    background_low_priority=(
-                        args.corridor_background_low_priority
-                    ),
+                    background_low_priority=False,
                     native_viability_worker_limit=(
                         args.corridor_native_workers
                     ),
@@ -3776,42 +3265,11 @@ def _run_live_session(
                     ),
                 )
                 corridor_last_submit = counter_after_read
-            if (
-                args.postpublished_survival_shadow
-                and survival_executor is not None
-                and corridor_survival_future is None
-            ):
-                survival_candidate = (
-                    corridor_pending_solution or corridor_solution
-                )
-                if (
-                    survival_candidate is not None
-                    and survival_candidate.context_key == corridor_context
-                    and survival_candidate.postpublished_survival_parity
-                    is None
-                ):
-                    corridor_survival_future = survival_executor.submit(
-                        _solve_postpublished_survival,
-                        survival_candidate,
-                    )
             observed_input_action = _action_name_from_mask(
                 captured_iteration.native_active_mask
             )
             pending_command_estimate = delay_estimator.pending_estimate(
                 frame=counter_after_read,
-            )
-            pipeline_pending_command = (
-                PendingCommand(
-                    _action_name_from_mask(
-                        pending_command_estimate.expected_mask
-                    ),
-                    pending_command_estimate.remaining_frames,
-                )
-                if (
-                    pending_command_estimate is not None
-                    and pending_command_estimate.remaining_frames
-                )
-                else None
             )
             policy_query_request = PolicyQueryRequest(
                 solution=corridor_solution,
@@ -3826,13 +3284,11 @@ def _run_live_session(
                     captured_iteration.held_desired_mask
                 ),
                 observed_action=observed_input_action,
-                pending_command=pipeline_pending_command,
                 lookahead_frames=args.corridor_lookahead,
                 max_age_frames=args.corridor_max_age,
                 current_delay_frames=(
                     captured_iteration.delay_estimate.support
                 ),
-                pipeline_prewarm_shadow=args.pipeline_prewarm_shadow,
             )
             primary_policy_query = policy_coordinator.query_primary(
                 policy_query_request
@@ -3862,86 +3318,9 @@ def _run_live_session(
                 pipeline_shadow_snapshot.local_root
             )
             local_pipeline_root_record = pipeline_shadow_snapshot.record
-            candidate_verifier_target: (
-                CandidateVerifierTarget | None
-            ) = None
-            candidate_verifier_revision: int | None = None
-            candidate_verifier_submit_ms = 0.0
-            candidate_verifier_submit_error: str | None = None
-            candidate_verifier_eligibility = (
-                "boolean_losing"
-                if (
-                    viability_query is not None
-                    and viability_query.available
-                    and not viability_query.state_viable
-                )
-                else (
-                    "boolean_viable"
-                    if (
-                        viability_query is not None
-                        and viability_query.available
-                    )
-                    else "policy_unavailable"
-                )
-            )
-            if (
-                candidate_verifier is not None
-                and candidate_verifier_eligibility == "boolean_losing"
-            ):
-                candidate_request = (
-                    _corridor_candidate_verifier_target(
-                        corridor_solution,
-                        current_frame=counter_after_read,
-                        player_x=projected_player_x,
-                        player_y=projected_player_y,
-                        observed_action=observed_input_action,
-                        pending_command=pipeline_pending_command,
-                        max_age_frames=args.corridor_max_age,
-                        horizon_frames=(
-                            CANDIDATE_VERIFIER_HORIZON_FRAMES
-                        ),
-                    )
-                )
-                if candidate_request is not None:
-                    (
-                        candidate_problem,
-                        candidate_verifier_target,
-                    ) = candidate_request
-                    candidate_submit_started = time.perf_counter()
-                    try:
-                        candidate_verifier_revision = (
-                            candidate_verifier.submit(
-                                problem=candidate_problem,
-                                target=candidate_verifier_target,
-                            )
-                        )
-                    except Exception as error:
-                        candidate_verifier_submit_error = (
-                            f"{type(error).__name__}: {error}"
-                        )
-                    candidate_verifier_submit_ms = (
-                        time.perf_counter() - candidate_submit_started
-                    ) * 1000.0
-            elif candidate_verifier is not None:
-                candidate_submit_started = time.perf_counter()
-                try:
-                    candidate_verifier.discard_target()
-                except Exception as error:
-                    candidate_verifier_submit_error = (
-                        f"{type(error).__name__}: {error}"
-                    )
-                candidate_verifier_submit_ms = (
-                    time.perf_counter() - candidate_submit_started
-                ) * 1000.0
             policy_queries = policy_coordinator.complete_query(
                 policy_query_request,
                 primary_policy_query,
-            )
-            pipeline_prewarm_query = (
-                policy_queries.pipeline_prewarm_query
-            )
-            postpublished_survival_query = (
-                policy_queries.postpublished_survival_query
             )
             safety_value_query = policy_queries.safety_value_query
             policy_guidance = policy_queries.guidance
@@ -4195,9 +3574,6 @@ def _run_live_session(
                 previous_direction = 0
                 decision_frame_deltas.clear()
                 delay_estimator.reset()
-                retire_pipeline_solutions(
-                    (corridor_solution, corridor_pending_solution)
-                )
                 corridor_solution = None
                 corridor_pending_solution = None
                 corridor_context = None
@@ -4206,12 +3582,8 @@ def _run_live_session(
                     memory.clear()
                 boss_phase_tracker.reset()
                 ecl_instruction_cache.clear()
-                if bullet_birth_tracker is not None:
-                    bullet_birth_tracker.reset()
                 if corridor_future is not None:
                     corridor_future.cancel()
-                if corridor_survival_future is not None:
-                    corridor_survival_future.cancel()
                 trace_sink.emit(
                     {
                             "kind": "action_epoch_discontinuity",
@@ -4283,67 +3655,9 @@ def _run_live_session(
             can_deathbomb = issue_overrides.can_deathbomb
             auto_confirm_event = issue_overrides.auto_confirm_event
             last_bomb_counter = issue_overrides.last_bomb_counter
-            candidate_verifier_outcome: (
-                CandidateVerifierOutcome | None
-            ) = None
-            candidate_verifier_snapshot: (
-                CandidateVerifierSnapshot | None
-            ) = None
-            candidate_verifier_lookup_ms = 0.0
-            candidate_publication_ms = 0.0
-            candidate_verifier_lookup_error: str | None = None
-            candidate_shadow_publications: tuple[
-                dict[str, object], ...
-            ] = ()
-            if candidate_verifier is not None:
-                candidate_lookup_started = time.perf_counter()
-                try:
-                    if candidate_verifier_target is not None:
-                        candidate_verifier_outcome = (
-                            candidate_verifier.lookup(
-                                candidate_verifier_target
-                            )
-                        )
-                    candidate_verifier_snapshot = (
-                        candidate_verifier.snapshot()
-                    )
-                except Exception as error:
-                    candidate_verifier_lookup_error = (
-                        f"{type(error).__name__}: {error}"
-                    )
-                candidate_verifier_lookup_ms = (
-                    time.perf_counter() - candidate_lookup_started
-                ) * 1000.0
-                candidate_publication_started = time.perf_counter()
-                candidate_shadow_publications = (
-                    _candidate_shadow_publications(
-                        candidate_verifier_outcome,
-                        issue_action_certificates=(
-                            decision.issue_action_certificates
-                        ),
-                        issued_action=_action_name_from_mask(
-                            decision.mask
-                        ),
-                        issue_frame=counter_at_action,
-                        deadline_missed=action_deadline_missed,
-                        input_override=bool(
-                            can_deathbomb
-                            or auto_confirm_event is not None
-                        ),
-                    )
-                )
-                candidate_publication_ms = (
-                    time.perf_counter() - candidate_publication_started
-                ) * 1000.0
             # Read only after every pre-issue early exit. Commit the observed
             # serial after the decision row is flushed so an exception cannot
             # consume ring evidence without retaining it.
-            if priority17_probe is not None:
-                priority17_publication_batch = (
-                    priority17_probe.read_since(
-                        priority17_probe_last_serial
-                    )
-                )
             if enemy_lifecycle_probe is not None:
                 enemy_lifecycle_batch = enemy_lifecycle_probe.read_since(
                     enemy_lifecycle_probe_last_serial
@@ -4369,11 +3683,7 @@ def _run_live_session(
                 ),
                 issue_controller=issue_controller,
                 delay_recorder=delay_estimator,
-                publication_serial_sampler=(
-                    priority17_probe.sample_serial
-                    if priority17_probe is not None
-                    else None
-                ),
+                publication_serial_sampler=None,
                 clock=time.perf_counter,
             )
             fresh_issue_result = physical_issue.issue
@@ -4383,47 +3693,6 @@ def _run_live_session(
             observe_to_issue_ms = fresh_issue_result.observe_to_issue_ms
             previous_mask = physical_issue.previous_mask
             previous_direction = physical_issue.previous_direction
-            if trace_enemy_combat_progress:
-                enemy_combat_progress_inventory = (
-                    enemy_prefix_snapshot.combat_progress_inventory
-                )
-                if enemy_combat_progress_inventory is None:
-                    raise RuntimeError(
-                        "combat-progress tracing omitted its capture inventory"
-                    )
-                enemy_combat_progress_stage = (
-                    run_enemy_combat_progress_stage(
-                        EnemyCombatProgressStageRequest(
-                            trace_sink=trace_sink,
-                            inventory=enemy_combat_progress_inventory,
-                            route_id=int(state["route_id"]),
-                            difficulty_index=int(
-                                state["difficulty_index"]
-                            ),
-                            stage_route_index=int(
-                                state["stage_route_index"]
-                            ),
-                            gameplay_epoch=gameplay_epoch,
-                            decision_frame=counter_at_action,
-                            frame_before=(
-                                enemy_prefix_snapshot.frame_before
-                            ),
-                            frame_after=(
-                                enemy_prefix_snapshot.frame_after
-                            ),
-                            capture_attempts=(
-                                enemy_prefix_snapshot.attempts
-                            ),
-                            capture_ms=enemy_prefix_capture_ms,
-                            previous_emit_ms=(
-                                previous_enemy_combat_progress_emit_ms
-                            ),
-                        )
-                    )
-                )
-                previous_enemy_combat_progress_emit_ms = (
-                    enemy_combat_progress_stage.emit_ms
-                )
             if runtime_ecl_identity_service is not None:
                 runtime_ecl_identity_service.observe_if_due(
                     reader,
@@ -4448,68 +3717,6 @@ def _run_live_session(
                         ),
                     ),
                 )
-            if (
-                auxiliary_ecl_event_service is not None
-                and runtime_ecl_identity_service is not None
-            ):
-                auxiliary_ecl_event_preparation = (
-                    auxiliary_ecl_event_service.prepare_if_needed(
-                        runtime_ecl_identity_service.accepted_version,
-                        gameplay_epoch=gameplay_epoch,
-                        stage_route_index=int(
-                            state["stage_route_index"]
-                        ),
-                        decision_frame=counter_at_action,
-                        snapshot_frame=int(
-                            state["enemy_manager_frame"]
-                        ),
-                    )
-                )
-                if auxiliary_ecl_event_preparation is not None:
-                    trace_sink.emit(
-                        auxiliary_ecl_event_preparation,
-                        flush=True,
-                    )
-            auxiliary_vm_batch_envelope: dict[str, object] | None = None
-            if auxiliary_vm_batch_service is not None:
-                current_spell_id = (
-                    int(spell_state["spell_id"])
-                    if spell_state["active"]
-                    else None
-                )
-                auxiliary_vm_batch_record = (
-                    auxiliary_vm_batch_service.observe_if_due(
-                        reader,
-                        decision_frame=counter_at_action,
-                        manager_frame=int(
-                            state["enemy_manager_frame"]
-                        ),
-                        gameplay_epoch=gameplay_epoch,
-                        stage_route_index=int(
-                            state["stage_route_index"]
-                        ),
-                        spell_id=current_spell_id,
-                        runtime_ecl_version=(
-                            runtime_ecl_identity_service.accepted_version
-                            if runtime_ecl_identity_service is not None
-                            else None
-                        ),
-                    )
-                )
-                if auxiliary_vm_batch_record is not None:
-                    auxiliary_vm_batch_envelope = pack_auxiliary_vm_batch(
-                        auxiliary_vm_batch_record,
-                        sequence=auxiliary_vm_batch_envelope_sequence,
-                        decision_frame=counter_at_action,
-                        gameplay_epoch=gameplay_epoch,
-                        snapshot_frame=int(
-                            state["enemy_manager_frame"]
-                        ),
-                        stage_route_index=int(
-                            state["stage_route_index"]
-                        ),
-                    )
-                    auxiliary_vm_batch_envelope_sequence += 1
             local_pipeline_certificate_shadow: (
                 dict[str, object] | None
             ) = None
@@ -4571,149 +3778,13 @@ def _run_live_session(
                             ),
                         }
                     )
-            pipeline_prewarm_retarget = (
-                _corridor_pipeline_prewarm_retarget(
-                    corridor_solution,
-                    root=(
-                        pipeline_prewarm_query.root
-                        if pipeline_prewarm_query is not None
-                        else None
-                    ),
-                    selected_action=_action_name_from_mask(decision.mask),
-                    physical_x=projected_player_x,
-                    physical_y=projected_player_y,
-                    command_issue_offset=(
-                        action_alignment.post_capture_advance
-                    ),
-                    preferred_decision_frame=max(
-                        2,
-                        min(
-                            9,
-                            round(
-                                (
-                                    previous_iteration_ms
-                                    if previous_iteration_ms is not None
-                                    else 50.0
-                                )
-                                / (1000.0 / 60.0)
-                            )
-                            + 1,
-                        ),
-                    ),
-                )
-                if args.pipeline_prewarm_shadow
-                else None
-            )
             current_phase = int(player["phase"])
             current_bombs = resources["bombs"]
             current_power = resources["power"]
-            if trace_bullet_births:
-                bullet_birth_stage = run_bullet_birth_stage(
-                    BulletBirthStageRequest(
-                        trace_sink=trace_sink,
-                        tracker=bullet_birth_tracker,
-                        derived_source_observer=(
-                            derived_pattern_source_observer
-                        ),
-                        trace_derived_sources=(
-                            trace_derived_pattern_sources
-                        ),
-                        bullet_blob=bullet_blob,
-                        bullet_frame_before=bullet_frame_before,
-                        bullet_frame_after=bullet_frame_after,
-                        corridor_future=corridor_future,
-                        survival_future=corridor_survival_future,
-                        enemy_future=enemy_future,
-                        ecl_vm_snapshot=ecl_vm_snapshot,
-                        instruction_at=(
-                            ecl_instruction_cache.cached_instruction
-                        ),
-                        intent_horizon_frames=(
-                            ECL_BIRTH_LOOKAHEAD_FRAMES
-                        ),
-                        difficulty_index=int(
-                            state["difficulty_index"]
-                        ),
-                        spell_enemy_pointer=spell_enemy_pointer,
-                        observed_enemy_pointer=(
-                            spell_enemy_body_guard.body.pointer
-                            if spell_enemy_body_guard is not None
-                            else None
-                        ),
-                        observed_enemy_flags=(
-                            spell_enemy_body_guard.body.flags
-                            if spell_enemy_body_guard is not None
-                            else None
-                        ),
-                        boss_guard_frame_before=boss_guard_frame_before,
-                        boss_guard_frame_after=boss_guard_frame_after,
-                        ecl_frame_before=ecl_frame_before,
-                        ecl_frame_after=ecl_frame_after,
-                        ecl_event_frame_offset=ecl_event_frame_offset,
-                        ecl_event_frame_uncertainty=(
-                            ecl_event_frame_uncertainty
-                        ),
-                        issue_frame=counter_at_action,
-                        snapshot_frame=int(
-                            state["enemy_manager_frame"]
-                        ),
-                        gameplay_epoch=gameplay_epoch,
-                        stage_route_index=int(
-                            state["stage_route_index"]
-                        ),
-                        observation_backend=bullet_birth_backend,
-                        native_call_mode=(
-                            bullet_birth_native_call_mode
-                        ),
-                        previous_emit_ms=(
-                            previous_birth_trace_emit_ms
-                        ),
-                        nonspell_main_vm_inventory=(
-                            enemy_prefix_snapshot
-                            .main_ecl_vm_inventory
-                        ),
-                        enemy_prefix_frame_before=(
-                            enemy_prefix_snapshot.frame_before
-                        ),
-                        enemy_prefix_frame_after=(
-                            enemy_prefix_snapshot.frame_after
-                        ),
-                        enemy_prefix_capture_ms=(
-                            enemy_prefix_capture_ms
-                        ),
-                    ),
-                    dependencies=BulletBirthStageDependencies(
-                        observe_deferred_fire=(
-                            observe_deferred_fire_state
-                        ),
-                        capture_future_states=(
-                            capture_birth_observer_future_states
-                        ),
-                        observe_derived_sources=(
-                            observe_derived_pattern_sources
-                        ),
-                        analyze_intents=analyze_ecl_birth_intents,
-                        build_record=build_bullet_birth_trace_record,
-                        requires_immediate_flush=(
-                            birth_trace_requires_immediate_flush
-                        ),
-                        native_tracker_type=(
-                            NativeBulletBirthTracker
-                        ),
-                        wall_clock=time.perf_counter,
-                        cpu_clock=time.thread_time,
-                    ),
-                )
-                previous_birth_trace_emit_ms = (
-                    bullet_birth_stage.emit_ms
-                )
             trace_ms = 0.0
             if (
-                trace_bullet_births
-                or trace_enemy_mode_transitions
-                or trace_priority17_publications
+                trace_enemy_mode_transitions
                 or trace_enemy_lifecycle_events
-                or trace_auxiliary_vm_batches
                 or iterations % args.log_every == 0
                 or decision.bomb
                 or current_phase != previous_phase
@@ -4857,22 +3928,6 @@ def _run_live_session(
                     ),
                 )
                 record.update(control_trace_fields)
-                if trace_priority17_publications:
-                    record["priority17_publication_probe"] = {
-                        "role": "trace_only_no_action_authority",
-                        "installation_status": (
-                            priority17_probe_installation["status"]
-                        ),
-                        "capture": (
-                            priority17_publication_batch.compact_record()
-                            if priority17_publication_batch is not None
-                            else None
-                        ),
-                        "issue": (
-                            physical_issue.publication_serial_bracket.compact_record()
-                        ),
-                        "action_authority": False,
-                    }
                 if trace_enemy_lifecycle_events:
                     record["enemy_lifecycle_probe"] = {
                         "role": "trace_only_no_action_authority",
@@ -4937,28 +3992,6 @@ def _run_live_session(
                     )
                 )
                 record.update(timing_trace_fields)
-                candidate_record = build_candidate_verifier_trace_record(
-                    enabled=candidate_verifier is not None,
-                    target=candidate_verifier_target,
-                    eligibility=candidate_verifier_eligibility,
-                    submit_revision=candidate_verifier_revision,
-                    submit_ms=candidate_verifier_submit_ms,
-                    lookup_ms=candidate_verifier_lookup_ms,
-                    publication_ms=candidate_publication_ms,
-                    submit_error=candidate_verifier_submit_error,
-                    lookup_error=candidate_verifier_lookup_error,
-                    outcome=candidate_verifier_outcome,
-                    snapshot=candidate_verifier_snapshot,
-                    publications=candidate_shadow_publications,
-                    issued_mask=decision.mask,
-                    action_name_from_mask=_action_name_from_mask,
-                )
-                if candidate_record is not None:
-                    record["candidate_verifier_shadow"] = candidate_record
-                if auxiliary_vm_batch_envelope is not None:
-                    record[COALESCED_ENVELOPE_FIELD] = (
-                        auxiliary_vm_batch_envelope
-                    )
                 if hit_contact_observation is not None:
                     record["hit_contact_observation"] = (
                         hit_contact_observation
@@ -4970,13 +4003,6 @@ def _run_live_session(
                     query_frame=counter_after_read,
                     max_age_frames=args.corridor_max_age,
                     viability_query=viability_query,
-                    postpublished_survival_query=(
-                        postpublished_survival_query
-                    ),
-                    pipeline_prewarm_query=pipeline_prewarm_query,
-                    pipeline_prewarm_retarget=(
-                        pipeline_prewarm_retarget
-                    ),
                     safety_value_query=safety_value_query,
                     policy_lead=corridor_policy_lead,
                     commitment=corridor_commitment,
@@ -5018,13 +4044,6 @@ def _run_live_session(
                     measure=True,
                 )
             if (
-                priority17_publication_batch is not None
-                and priority17_publication_batch.observed_serial is not None
-            ):
-                priority17_probe_last_serial = (
-                    priority17_publication_batch.observed_serial
-                )
-            if (
                 enemy_lifecycle_batch is not None
                 and enemy_lifecycle_batch.observed_serial is not None
             ):
@@ -5046,18 +4065,6 @@ def _run_live_session(
             previous_power = current_power
             previous_action_phase = phase_now
             previous_counter = counter_at_action
-            if (
-                getattr(
-                    args,
-                    "finalb_scale_delivery_auto_stop",
-                    False,
-                )
-                and _finalb_scale_delivery_complete(
-                    scale_authority_resolution
-                )
-            ):
-                termination_reason = "finalb_scale_delivery_complete"
-                break
             if (
                 stop_after_frame is not None
                 and counter_at_action >= stop_after_frame
@@ -5216,64 +4223,6 @@ def _run_live_session(
                             },
                             flush=True,
                         )
-                if priority17_probe is not None:
-                    try:
-                        final_batch = priority17_probe.read_since(
-                            priority17_probe_last_serial
-                        )
-                        if final_batch.observed_serial is not None:
-                            priority17_probe_last_serial = (
-                                final_batch.observed_serial
-                            )
-                        trace_sink.emit(
-                            {
-                                "kind": (
-                                    "priority17_publication_probe_final"
-                                ),
-                                "phase": "after_key_release",
-                                **final_batch.compact_record(),
-                            },
-                            flush=True,
-                        )
-                    except Exception as error:
-                        trace_sink.emit(
-                            {
-                                "kind": (
-                                    "priority17_publication_probe_final"
-                                ),
-                                "schema": (
-                                    "th08-priority17-publication-probe-v1"
-                                ),
-                                "phase": "after_key_release",
-                                "role": (
-                                    "trace_only_no_action_authority"
-                                ),
-                                "status": "read_error",
-                                "error": (
-                                    f"{type(error).__name__}: {error}"
-                                ),
-                                "action_authority": False,
-                            },
-                            flush=True,
-                        )
-                    try:
-                        priority17_probe.close()
-                    except Exception as error:
-                        trace_sink.emit(
-                            {
-                                "kind": (
-                                    "priority17_publication_probe_cleanup_error"
-                                ),
-                                "schema": (
-                                    "th08-priority17-publication-probe-v1"
-                                ),
-                                "error": (
-                                    f"{type(error).__name__}: {error}"
-                                ),
-                                "action_authority": False,
-                            },
-                            flush=True,
-                        )
                 should_pause = False
                 try:
                     should_pause = bool(
@@ -5290,12 +4239,8 @@ def _run_live_session(
                         time.sleep(0.06)
                     finally:
                         send_scan_key(api, scan_code=0x01, pressed=False)
-                retire_pipeline_solutions(
-                    (corridor_solution, corridor_pending_solution)
-                )
                 service_resources.close(
                     corridor_future=corridor_future,
-                    survival_future=corridor_survival_future,
                     enemy_future=enemy_future,
                 )
             finally:
@@ -5313,9 +4258,6 @@ def build_parser() -> argparse.ArgumentParser:
         corridor_max_age_frames=CORRIDOR_MAX_AGE_FRAMES,
         stage_transition_timeout_seconds=STAGE_TRANSITION_TIMEOUT_SECONDS,
         terminal_inactive_grace_seconds=TERMINAL_INACTIVE_GRACE_SECONDS,
-        native_call_modes=tuple(NATIVE_CALL_MODES),
-        native_call_mode_gil_held=NATIVE_CALL_MODE_GIL_HELD,
-        native_call_mode_gil_released=NATIVE_CALL_MODE_GIL_RELEASED,
     )
     return build_live_parser(defaults, description=__doc__)
 

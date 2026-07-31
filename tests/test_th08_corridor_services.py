@@ -1,25 +1,16 @@
 #!/usr/bin/env python3
-"""Tests for corridor audit and prewarm lifecycle ownership."""
+"""Tests for corridor audit lifecycle ownership."""
 
 from __future__ import annotations
 
 import tempfile
 import unittest
 from concurrent.futures import ThreadPoolExecutor
-from dataclasses import dataclass
 from pathlib import Path
-from types import SimpleNamespace
-from unittest.mock import Mock, patch
+from unittest.mock import patch
 
 from th08_corridor_adapter import LoweredCorridorHazards
 from th08_corridor_audit import submit_corridor_audit
-from th08_corridor_prewarm import (
-    close_pipeline_prewarm_owner,
-    close_retired_pipeline_prewarm_owners,
-    corridor_pipeline_prewarm_query,
-    corridor_pipeline_prewarm_retarget,
-)
-from touhou_control.query_survival import ReachablePipelineRoot
 
 
 EMPTY_HAZARDS = LoweredCorridorHazards((), (), ())
@@ -50,18 +41,6 @@ def submit_arguments(root: Path) -> dict[str, object]:
         "plan_reachable": True,
         "hazards": EMPTY_HAZARDS,
     }
-
-
-@dataclass
-class Owner:
-    pipeline_prewarm_service: object | None
-
-
-@dataclass
-class VersionedOwner(Owner):
-    source_frame: int = 100
-    snapshot_frame: int | None = 90
-    context_key: tuple[int, int, int | None] | None = (0, 3, 57)
 
 
 class Th08CorridorServicesTests(unittest.TestCase):
@@ -114,100 +93,6 @@ class Th08CorridorServicesTests(unittest.TestCase):
                 )
         self.assertIsNone(submission.write_ms)
         self.assertIsNone(submission.error)
-
-    def test_prewarm_lifecycle_closes_each_unretained_service_once(
-        self,
-    ) -> None:
-        retained_service = Mock()
-        retired_service = Mock()
-        retained = Owner(retained_service)
-        retired = Owner(retired_service)
-
-        close_retired_pipeline_prewarm_owners(
-            (retired, retired, retained, None),
-            (retained,),
-        )
-        retained_service.close.assert_not_called()
-        retired_service.close.assert_called_once_with()
-
-        close_pipeline_prewarm_owner(retained)
-        retained_service.close.assert_called_once_with()
-
-    def test_prewarm_query_keeps_exact_version_and_root_identity(
-        self,
-    ) -> None:
-        result = object()
-        snapshot = object()
-        problem = Mock(horizon_frames=80)
-        problem.project_to_lattice.return_value = (5, 6, 0.25)
-        service = Mock(
-            policy_version=(100, 90, (0, 3, 57)),
-            problem=problem,
-        )
-        service.lookup.return_value = result
-        service.snapshot.return_value = snapshot
-        owner = VersionedOwner(service)
-
-        query = corridor_pipeline_prewarm_query(
-            owner,
-            current_frame=104,
-            player_x=192.0,
-            player_y=400.0,
-            observed_action="stay",
-            pending_command=None,
-            max_age_frames=79,
-        )
-
-        self.assertEqual(query.status, "hit")
-        self.assertEqual(
-            query.root,
-            ReachablePipelineRoot(4, 5, 6, "stay", None),
-        )
-        self.assertIs(query.result, result)
-        self.assertIs(query.service, snapshot)
-        service.lookup.assert_called_once_with(query.root)
-
-    def test_prewarm_retarget_preserves_bounded_schedule(self) -> None:
-        root = ReachablePipelineRoot(4, 5, 6, "stay", None)
-        next_root = ReachablePipelineRoot(8, 7, 8, "left", None)
-        service = Mock(
-            policy_version=(100, 90, (0, 3, 57)),
-            problem=object(),
-        )
-        service.retarget.return_value = 9
-        owner = VersionedOwner(service)
-        schedule = SimpleNamespace(
-            roots=(next_root,),
-            candidate_count=3,
-        )
-
-        with patch(
-            "th08_corridor_prewarm.schedule_pipeline_frontier",
-            return_value=schedule,
-        ) as scheduler:
-            retarget = corridor_pipeline_prewarm_retarget(
-                owner,
-                root=root,
-                selected_action="left",
-                physical_x=188.0,
-                physical_y=396.0,
-                command_issue_offset=1,
-                preferred_decision_frame=5,
-            )
-
-        self.assertEqual(retarget.status, "queued")
-        self.assertEqual(retarget.revision, 9)
-        self.assertEqual(retarget.root_count, 1)
-        self.assertEqual(retarget.candidate_root_count, 3)
-        self.assertEqual(
-            scheduler.call_args.kwargs[
-                "scheduling_frame_support"
-            ],
-            (2, 3, 4, 5, 6, 7, 8, 9),
-        )
-        self.assertEqual(scheduler.call_args.kwargs["root_limit"], 2)
-        service.retarget.assert_called_once_with((next_root,))
-
 
 if __name__ == "__main__":
     unittest.main()

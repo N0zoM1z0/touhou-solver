@@ -10,7 +10,6 @@ from th08_live.scale_schedule_authority import (
 from th08_live.sensing_trace import _time_scale_schedule_hard_authority
 from th08_live.controller import (
     _corridor_scale_schedule_supported,
-    _finalb_scale_delivery_complete,
 )
 from th08_time_scale import (
     SCALE_COVERAGE_COMPLETE,
@@ -400,7 +399,6 @@ class FinalBScaleScheduleAuthorityTests(unittest.TestCase):
             scale_bits=TH08_UNIT_TIME_SCALE_BITS,
         )
         self.assertTrue(restored.planner_scale_authority)
-        self.assertTrue(_finalb_scale_delivery_complete(restored))
         self.assertEqual(restored.schedule.complete_horizon, 60)
         self.assertTrue(
             all(
@@ -425,7 +423,6 @@ class FinalBScaleScheduleAuthorityTests(unittest.TestCase):
             source_frame=source + 1,
             scale_bits=QUARTER_SCALE_BITS,
         )
-        self.assertFalse(_finalb_scale_delivery_complete(still_scaled))
 
         restored = _resolve(
             authority,
@@ -433,7 +430,6 @@ class FinalBScaleScheduleAuthorityTests(unittest.TestCase):
             scale_bits=TH08_UNIT_TIME_SCALE_BITS,
         )
         self.assertTrue(restored.planner_scale_authority)
-        self.assertTrue(_finalb_scale_delivery_complete(restored))
 
 
 if __name__ == "__main__":

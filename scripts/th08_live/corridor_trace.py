@@ -14,108 +14,6 @@ def _finite_float_or_none(value: object) -> float | None:
     return parsed if math.isfinite(parsed) else None
 
 
-def _pipeline_prewarm_record(
-    *,
-    report_solution: Any,
-    query: Any,
-    retarget: Any,
-    issued_action: str,
-) -> dict[str, object]:
-    result = query.result
-    root = query.root
-    service = query.service
-    latest = service.latest_outcome if service is not None else None
-    scheduler = service.scheduler if service is not None else None
-    return {
-        "role": "shadow_no_action_authority",
-        "start_error": report_solution.pipeline_prewarm_start_error,
-        "status": query.status,
-        "lookup_ms": query.lookup_ms,
-        "root": (
-            {
-                "frame": root.frame,
-                "row": root.row,
-                "column": root.column,
-                "observed_action": root.observed_action,
-                "pending_action": (
-                    root.pending_command.action
-                    if root.pending_command is not None
-                    else None
-                ),
-                "pending_remaining_frames": (
-                    root.pending_command.remaining_frames
-                    if root.pending_command is not None
-                    else ()
-                ),
-            }
-            if root is not None
-            else None
-        ),
-        "result": (
-            {
-                "winning": result.winning,
-                "survival_frames": result.state_label.guaranteed_frames,
-                "bottleneck_margin": result.state_label.bottleneck_margin,
-                "best_actions": result.best_actions,
-                "issued_in_best": issued_action in result.best_actions,
-            }
-            if result is not None
-            else None
-        ),
-        "retarget": (
-            {
-                "status": retarget.status,
-                "revision": retarget.revision,
-                "root_count": retarget.root_count,
-                "candidate_root_count": retarget.candidate_root_count,
-                "elapsed_ms": retarget.elapsed_ms,
-            }
-            if retarget is not None
-            else None
-        ),
-        "service": (
-            {
-                "worker_count": service.worker_count,
-                "background_low_priority": service.background_low_priority,
-                "submitted_revision": service.submitted_revision,
-                "completed_revision": service.completed_revision,
-                "ready_revision": service.ready_revision,
-                "target_running": service.target_running,
-                "target_queued": service.target_queued,
-                "target_replacement_count": service.target_replacement_count,
-                "lookup_count": service.lookup_count,
-                "lookup_hit_count": service.lookup_hit_count,
-                "lookup_miss_count": service.lookup_miss_count,
-                "created_elapsed_ms": service.created_elapsed_ms,
-                "latest_outcome": (
-                    {
-                        "revision": latest.revision,
-                        "root_count": latest.root_count,
-                        "seed_count": latest.seed_count,
-                        "status": latest.status,
-                        "enumeration_ms": latest.enumeration_ms,
-                        "seed_ms": latest.seed_ms,
-                        "specialization_ms": latest.specialization_ms,
-                        "elapsed_ms": latest.elapsed_ms,
-                        "error": latest.error,
-                    }
-                    if latest is not None
-                    else None
-                ),
-                "seed_submitted": (
-                    scheduler.seed_submitted if scheduler is not None else 0
-                ),
-                "seed_completed": (
-                    scheduler.seed_completed if scheduler is not None else 0
-                ),
-                "seed_ready": scheduler.seed_ready if scheduler is not None else False,
-            }
-            if service is not None
-            else None
-        ),
-    }
-
-
 def build_corridor_trace_record(
     *,
     active_solution: Any,
@@ -124,9 +22,6 @@ def build_corridor_trace_record(
     query_frame: int,
     max_age_frames: int,
     viability_query: Any,
-    postpublished_survival_query: Any,
-    pipeline_prewarm_query: Any,
-    pipeline_prewarm_retarget: Any,
     safety_value_query: Any,
     policy_lead: Any,
     commitment: Any,
@@ -180,10 +75,6 @@ def build_corridor_trace_record(
         "viability_grid_step": plan.viability_grid_step,
         "survival_backend": (
             plan.survival_policy.backend if plan.survival_policy is not None else None
-        ),
-        "postpublished_survival_ms": report_solution.postpublished_survival_ms,
-        "postpublished_survival_parity": (
-            report_solution.postpublished_survival_parity
         ),
         "solver_timing_ms": dict(plan.solver_timing_ms),
         "audit_capsule": report_solution.audit_capsule,
@@ -270,28 +161,6 @@ def build_corridor_trace_record(
             ),
             "reason": viability_query.reason,
         }
-    if postpublished_survival_query is not None:
-        record["postpublished_survival_shadow"] = {
-            "role": "shadow_no_action_authority",
-            "available": postpublished_survival_query.available,
-            "state_viable": postpublished_survival_query.state_viable,
-            "survival_frames": postpublished_survival_query.survival_frames,
-            "survival_bottleneck_margin": (
-                postpublished_survival_query.survival_bottleneck_margin
-            ),
-            "survival_best_actions": (
-                postpublished_survival_query.survival_best_actions
-            ),
-            "observed_input_action": observed_input_action,
-            "issued_action": decision.action,
-        }
-    if pipeline_prewarm_query is not None:
-        record["pipeline_prewarm_shadow"] = _pipeline_prewarm_record(
-            report_solution=report_solution,
-            query=pipeline_prewarm_query,
-            retarget=pipeline_prewarm_retarget,
-            issued_action=action_name_from_mask(decision.mask),
-        )
     record["pending_command"] = (
         {
             "desired_action": action_name_from_mask(

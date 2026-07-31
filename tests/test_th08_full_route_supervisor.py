@@ -46,15 +46,6 @@ class FullRouteSupervisorTests(unittest.TestCase):
         self.assertEqual(args.difficulty.menu_index, 2)
         self.assertTrue(args.leave_game_running)
 
-    def test_corridor_background_priority_is_explicitly_opt_in(self) -> None:
-        default_args = build_parser().parse_args([])
-        enabled_args = build_parser().parse_args(
-            ["--corridor-background-low-priority"]
-        )
-
-        self.assertFalse(default_args.corridor_background_low_priority)
-        self.assertTrue(enabled_args.corridor_background_low_priority)
-
     def test_full_route_scale_source_contract_is_explicit(self) -> None:
         args = build_parser().parse_args(
             [
@@ -72,15 +63,6 @@ class FullRouteSupervisorTests(unittest.TestCase):
             FINAL_B_ECL_STATIC_SHA256,
         )
 
-    def test_enemy_combat_progress_is_explicitly_opt_in(self) -> None:
-        default_args = build_parser().parse_args([])
-        enabled_args = build_parser().parse_args(
-            ["--trace-enemy-combat-progress"]
-        )
-
-        self.assertFalse(default_args.trace_enemy_combat_progress)
-        self.assertTrue(enabled_args.trace_enemy_combat_progress)
-
     def test_enemy_mode_capture_is_complete_route_diagnostic_opt_in(self) -> None:
         default_args = build_parser().parse_args([])
         enabled_args = build_parser().parse_args(
@@ -89,17 +71,6 @@ class FullRouteSupervisorTests(unittest.TestCase):
 
         self.assertFalse(default_args.trace_enemy_mode_transitions)
         self.assertTrue(enabled_args.trace_enemy_mode_transitions)
-
-    def test_priority17_publication_capture_is_complete_route_opt_in(
-        self,
-    ) -> None:
-        default_args = build_parser().parse_args([])
-        enabled_args = build_parser().parse_args(
-            ["--trace-priority17-publications"]
-        )
-
-        self.assertFalse(default_args.trace_priority17_publications)
-        self.assertTrue(enabled_args.trace_priority17_publications)
 
     def test_enemy_lifecycle_capture_is_complete_route_opt_in(self) -> None:
         default_args = build_parser().parse_args([])

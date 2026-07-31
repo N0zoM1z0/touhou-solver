@@ -10,7 +10,6 @@ from pathlib import Path
 from unittest.mock import patch
 
 import numpy as np
-import th08_corridor_runtime as corridor_runtime_module
 
 from corridor_planner import CorridorPlan
 from th08_corridor_audit import CorridorAuditSubmission
@@ -23,14 +22,11 @@ from th08_corridor_runtime import (
     LIVE_SURVIVAL_LABELS,
     SHADOW_REFINEMENT_GRID_STEPS,
     SHADOW_SURVIVAL_LABELS,
-    corridor_candidate_verifier_target,
     corridor_pipeline_survival_query,
-    corridor_postpublished_survival_query,
     corridor_viability_query,
     prepare_pipeline_survival_workspace,
     require_corridor_background_priority,
     solve_corridor,
-    solve_postpublished_survival,
 )
 from touhou_control.viability import (
     ControlAction,
@@ -226,51 +222,6 @@ class Th08CorridorRuntimeTests(unittest.TestCase):
             solution.plan.survival_query_problem.clearance_volume.shape[0],
             81,
         )
-        candidate = corridor_candidate_verifier_target(
-            solution,
-            current_frame=100,
-            player_x=192.0,
-            player_y=400.0,
-            observed_action="stay",
-            pending_command=None,
-            max_age_frames=79,
-            horizon_frames=32,
-        )
-        self.assertIsNotNone(candidate)
-        assert candidate is not None
-        candidate_problem, candidate_target = candidate
-        self.assertIs(
-            candidate_problem,
-            solution.plan.survival_query_problem,
-        )
-        self.assertEqual(candidate_target.root.frame, 0)
-        self.assertIsNone(
-            corridor_candidate_verifier_target(
-                solution,
-                current_frame=150,
-                player_x=192.0,
-                player_y=400.0,
-                observed_action="stay",
-                pending_command=None,
-                max_age_frames=79,
-                horizon_frames=32,
-            )
-        )
-        labeled = solve_postpublished_survival(solution)
-        self.assertIsNone(labeled.plan.survival_policy)
-        self.assertIsNotNone(labeled.postpublished_survival_policy)
-        self.assertTrue(labeled.postpublished_survival_parity)
-        query = corridor_postpublished_survival_query(
-            labeled,
-            current_frame=100,
-            player_x=192.0,
-            player_y=400.0,
-            observed_action="stay",
-            max_age_frames=79,
-        )
-        self.assertIsNotNone(query)
-        assert query is not None
-        self.assertIsNotNone(query.survival_frames)
         workspace_solution = prepare_pipeline_survival_workspace(solution)
         self.assertIsNotNone(
             workspace_solution.pipeline_survival_workspace,
@@ -294,74 +245,6 @@ class Th08CorridorRuntimeTests(unittest.TestCase):
             "native_augmented_pipeline_workspace",
         )
         workspace_solution.pipeline_survival_workspace.close()
-
-    def test_pipeline_prewarm_starts_from_prepared_problem_before_solve(
-        self,
-    ) -> None:
-        events: list[str] = []
-        service = object()
-        original_prepare = (
-            corridor_runtime_module.prepare_lowered_th08_corridor
-        )
-        original_solve = (
-            corridor_runtime_module.plan_prepared_lowered_th08_corridor
-        )
-
-        def checked_prepare(**kwargs):
-            prepared = original_prepare(**kwargs)
-            events.append("prepare")
-            return prepared
-
-        def checked_service(**kwargs):
-            self.assertEqual(events, ["prepare"])
-            self.assertEqual(kwargs["problem"].horizon_frames, 80)
-            events.append("prewarm")
-            return service
-
-        def checked_solve(**kwargs):
-            self.assertEqual(events, ["prepare", "prewarm"])
-            prepared_problem = kwargs["prepared_problem"]
-            self.assertIsNotNone(
-                prepared_problem.survival_query_problem
-            )
-            events.append("solve")
-            return original_solve(**kwargs)
-
-        with (
-            patch(
-                "th08_corridor_runtime.prepare_lowered_th08_corridor",
-                side_effect=checked_prepare,
-            ),
-            patch(
-                "th08_corridor_prewarm.PipelinePrewarmService",
-                side_effect=checked_service,
-            ),
-            patch(
-                "th08_corridor_runtime."
-                "plan_prepared_lowered_th08_corridor",
-                side_effect=checked_solve,
-            ),
-        ):
-            solution = solve_corridor(
-                source_frame=100,
-                snapshot_frame=90,
-                forecast_lead_frames=10,
-                player_x=192.0,
-                player_y=400.0,
-                bullets=(),
-                lasers=(),
-                enemy_bodies=(),
-                snapshot_lag=0,
-                control_delay_candidates=(1, 2),
-                nominal_control_delay=1,
-                active_action="stay",
-                time_scale_schedule=_UNIT_SCALE,
-                pipeline_prewarm_shadow=True,
-            )
-
-        self.assertEqual(events, ["prepare", "prewarm", "solve"])
-        self.assertIs(solution.pipeline_prewarm_service, service)
-        self.assertIsNone(solution.pipeline_prewarm_start_error)
 
     def test_audit_values_and_future_are_split_on_solution(self) -> None:
         future: Future[tuple[float, str | None]] = Future()

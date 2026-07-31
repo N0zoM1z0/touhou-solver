@@ -1,4 +1,4 @@
-"""Baseline local beam expansion, independent of supplemental publication."""
+"""Baseline local beam expansion."""
 
 from __future__ import annotations
 

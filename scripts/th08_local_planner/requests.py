@@ -68,7 +68,6 @@ class PlannerConfig:
     recovery_control_reserve: bool = True
     losing_control_reserve: bool = False
     preloss_continuation_preference: bool = False
-    preloss_supplemental_beam_width: int = 0
     preserve_previous_direction_inertia: bool = True
     beam_dedup_mode: str = "quantized"
     relax_stale_viability_contradiction: bool = False
@@ -85,24 +84,10 @@ class ObjectiveContext:
 
 
 @dataclass(frozen=True)
-class CompletedServiceResults:
-    """Exact-version supplemental publication lookup inputs.
-
-    The service remains lookup-only on the decision path.  Its result must
-    already have completed for the supplied immutable version.
-    """
-
-    supplemental_deadline_ms: float | None = None
-    supplemental_async_service: Any | None = None
-    supplemental_version: Any | None = None
-
-
-@dataclass(frozen=True)
 class LocalPlannerRequest:
     physical: PhysicalHazardSnapshot
     actuator: ActuatorPipeline
     guidance: GlobalGuidance = GlobalGuidance()
     config: PlannerConfig = PlannerConfig()
     objective: ObjectiveContext = ObjectiveContext()
-    completed_services: CompletedServiceResults = CompletedServiceResults()
     mode: PlannerMode = PlannerMode.STANDARD

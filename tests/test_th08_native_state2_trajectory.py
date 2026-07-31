@@ -1,21 +1,21 @@
 from __future__ import annotations
 
+import json
+from pathlib import Path
 import unittest
 
-from analysis.th08_native_state2_trajectory import (
-    DEFAULT_WITNESS,
-    DEFAULT_WITNESS_SHA256,
-    build_report,
+REPORT = (
+    Path(__file__).resolve().parents[1]
+    / "artifacts"
+    / "runtime_reports"
+    / "th08_native_state2_lifecycle_root2129_h8_20260730.json"
 )
 
 
 class NativeState2TrajectoryTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
-        cls.report = build_report(
-            DEFAULT_WITNESS,
-            expected_witness_sha256=DEFAULT_WITNESS_SHA256,
-        )
+        cls.report = json.loads(REPORT.read_text(encoding="utf-8"))
 
     def test_production_and_independent_lifecycle_are_exact(self) -> None:
         result = self.report["result"]

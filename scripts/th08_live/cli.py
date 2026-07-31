@@ -20,9 +20,6 @@ class LiveParserDefaults:
     corridor_max_age_frames: int
     stage_transition_timeout_seconds: float
     terminal_inactive_grace_seconds: float
-    native_call_modes: tuple[str, ...]
-    native_call_mode_gil_held: str
-    native_call_mode_gil_released: str
 
 
 def build_live_parser(
@@ -102,14 +99,6 @@ def build_live_parser(
         ),
     )
     parser.add_argument(
-        "--corridor-background-low-priority",
-        action="store_true",
-        help=(
-            "run only the Python corridor parent below normal priority; "
-            "default-off G5 contention experiment"
-        ),
-    )
-    parser.add_argument(
         "--safety-value-horizon",
         type=int,
         default=0,
@@ -127,31 +116,6 @@ def build_live_parser(
             "endpoints by delay-scaled reversible boundary reserve; enabled "
             "for the versioned Stage-5 physical gate, with "
             "--no-losing-control-reserve as the exact rollback"
-        ),
-    )
-    parser.add_argument(
-        "--postpublished-survival-shadow",
-        action="store_true",
-        help=(
-            "compute dense survival labels only after Boolean publication; "
-            "labels use an isolated executor and have no action authority"
-        ),
-    )
-    parser.add_argument(
-        "--pipeline-prewarm-shadow",
-        action="store_true",
-        help=(
-            "start exact-root seeds when clearance is ready and record "
-            "lookup-only current-version hits; never changes live actions"
-        ),
-    )
-    parser.add_argument(
-        "--candidate-verifier-shadow",
-        action="store_true",
-        help=(
-            "verify a bounded attainable policy portfolio beside local "
-            "planning and consume only exact-root shadow hits; never changes "
-            "live actions"
         ),
     )
     parser.add_argument(
@@ -290,64 +254,12 @@ def build_live_parser(
         help="include transform-relevant bullets from the full native pool",
     )
     parser.add_argument(
-        "--trace-bullet-births",
-        action="store_true",
-        help=(
-            "record default-off hostile-bullet activation evidence and "
-            "fail-closed active-spell main-VM fire intent; diagnostic trace "
-            "only, never changes live actions"
-        ),
-    )
-    parser.add_argument(
-        "--bullet-birth-backend",
-        choices=("python", "native"),
-        default="python",
-        help=(
-            "select the explicit retrospective birth observer backend; "
-            "used only with --trace-bullet-births"
-        ),
-    )
-    parser.add_argument(
-        "--trace-derived-pattern-sources",
-        action="store_true",
-        help=(
-            "add the failed-gate ready-parent transform shadow to an "
-            "explicit bullet-birth trace; diagnostic only"
-        ),
-    )
-    parser.add_argument(
-        "--trace-nonspell-main-vms",
-        action="store_true",
-        help=(
-            "decode first-64 ordinary-enemy main VMs from the existing "
-            "prefix capture into an explicit bullet-birth trace; "
-            "diagnostic only, no instruction reads"
-        ),
-    )
-    parser.add_argument(
-        "--trace-enemy-combat-progress",
-        action="store_true",
-        help=(
-            "decode first-64 ordinary-enemy raw HP/damage fields from the "
-            "existing prefix capture; trace only, never changes live actions"
-        ),
-    )
-    parser.add_argument(
         "--trace-enemy-mode-transitions",
         action="store_true",
         help=(
             "capture active input and player +3/+5/+8 around the existing "
             "first-64 enemy-prefix read; mode fields have no action "
             "authority, while diagnostic reads/retries may perturb cadence"
-        ),
-    )
-    parser.add_argument(
-        "--trace-priority17-publications",
-        action="store_true",
-        help=(
-            "install the reversible bounded priority-17 callback-exit "
-            "publication ring and bracket real input dispatches with its "
-            "serial; trace only, runtime instrumentation, no action authority"
         ),
     )
     parser.add_argument(
@@ -370,47 +282,6 @@ def build_live_parser(
         ),
     )
     parser.add_argument(
-        "--trace-auxiliary-vm-batches",
-        action="store_true",
-        help=(
-            "capture a bounded post-issue first-64 auxiliary ECL VM batch "
-            "at an explicit changed-manager-frame cadence; trace only"
-        ),
-    )
-    parser.add_argument(
-        "--trace-auxiliary-ecl-events",
-        action="store_true",
-        help=(
-            "retain replay-capable auxiliary VM state and derive the "
-            "contracted Stage-5 literal-fire event class after capture; "
-            "trace only, requires exact runtime ECL identity"
-        ),
-    )
-    parser.add_argument(
-        "--auxiliary-vm-batch-every",
-        type=int,
-        default=16,
-        metavar="MANAGER_FRAMES",
-        help=(
-            "changed enemy-manager frames between post-issue auxiliary-VM "
-            "batch attempts"
-        ),
-    )
-    parser.add_argument(
-        "--auxiliary-vm-batch-spell-id",
-        type=int,
-        help="optional exact spell-id filter for auxiliary-VM batch tracing",
-    )
-    parser.add_argument(
-        "--auxiliary-vm-native-call-mode",
-        choices=defaults.native_call_modes,
-        default=defaults.native_call_mode_gil_held,
-        help=(
-            "select whether the trace-only native auxiliary-VM batch call "
-            "releases or holds the Python GIL"
-        ),
-    )
-    parser.add_argument(
         "--runtime-ecl-static-image",
         type=Path,
         help=(
@@ -429,23 +300,6 @@ def build_live_parser(
             "enable the exact Final-B spell-190 complete-source schedule "
             "consumer; requires Lunatic stage 7, hard no-Bomb, and exact "
             "runtime ECL identity"
-        ),
-    )
-    parser.add_argument(
-        "--finalb-scale-delivery-auto-stop",
-        action="store_true",
-        help=(
-            "stop after the exact Final-B unit restore; focused gate only, "
-            "disabled for complete-route evidence"
-        ),
-    )
-    parser.add_argument(
-        "--bullet-birth-native-call-mode",
-        choices=defaults.native_call_modes,
-        default=defaults.native_call_mode_gil_released,
-        help=(
-            "select whether the trace-only native birth call releases or "
-            "holds the Python GIL"
         ),
     )
     bomb_group = parser.add_mutually_exclusive_group()

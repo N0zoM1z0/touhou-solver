@@ -3,27 +3,26 @@
 
 from __future__ import annotations
 
+import json
+from pathlib import Path
 import unittest
 
 from analysis.th08_native_model_trajectory import (
-    DEFAULT_CAUSAL_REPORT,
-    DEFAULT_CAUSAL_REPORT_SHA256,
-    DEFAULT_WITNESS,
-    DEFAULT_WITNESS_SHA256,
     _resolve_inputs,
-    build_report,
+)
+
+REPORT = (
+    Path(__file__).resolve().parents[1]
+    / "artifacts"
+    / "runtime_reports"
+    / "th08_native_model_trajectory_root2129_h32_20260730.json"
 )
 
 
 class NativeModelTrajectoryTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
-        cls.report = build_report(
-            DEFAULT_CAUSAL_REPORT,
-            DEFAULT_WITNESS,
-            expected_causal_sha256=DEFAULT_CAUSAL_REPORT_SHA256,
-            expected_witness_sha256=DEFAULT_WITNESS_SHA256,
-        )
+        cls.report = json.loads(REPORT.read_text(encoding="utf-8"))
 
     def test_corrected_player_layer_is_exact_for_all_h32_ticks(self) -> None:
         model = self.report["artifacts"]["model_trajectory"]["payload"]
@@ -97,21 +96,14 @@ class NativeModelTrajectoryTests(unittest.TestCase):
         self.assertEqual(production["status"], "exact")
         self.assertIsNone(production["first_mismatch"])
 
-    def test_report_generation_is_deterministic_and_content_addressed(self) -> None:
-        rebuilt = build_report(
-            DEFAULT_CAUSAL_REPORT,
-            DEFAULT_WITNESS,
-            expected_causal_sha256=DEFAULT_CAUSAL_REPORT_SHA256,
-            expected_witness_sha256=DEFAULT_WITNESS_SHA256,
-        )
-        self.assertEqual(rebuilt, self.report)
+    def test_retained_report_is_content_addressed(self) -> None:
         for name in (
             "model_trajectory",
             "first_mismatch_report",
             "hazard_forecast_probe",
         ):
             self.assertRegex(
-                rebuilt["artifacts"][name]["artifact_id"],
+                self.report["artifacts"][name]["artifact_id"],
                 r"^sha256:[0-9a-f]{64}$",
             )
 

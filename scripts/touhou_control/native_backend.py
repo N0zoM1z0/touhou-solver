@@ -32,22 +32,12 @@ from .native.library import (
 )
 from .native.local import (
     DecodedBulletPool as DecodedBulletPool,
-    LocalSupplementalNativeCancelledError as LocalSupplementalNativeCancelledError,
-    LocalSupplementalNativeDeadlineError as LocalSupplementalNativeDeadlineError,
-    LocalSupplementalNativeResult as LocalSupplementalNativeResult,
-    LocalSupplementalNativeWorkspace as LocalSupplementalNativeWorkspace,
-    _LocalSupplementalOutputV1 as _LocalSupplementalOutputV1,
-    _LocalSupplementalQueryV1 as _LocalSupplementalQueryV1,
-    _frame_major_fields as _frame_major_fields,
     _load_bullet_pool_decode_function as _load_bullet_pool_decode_function,
     _load_local_beam_reduce_function as _load_local_beam_reduce_function,
     _load_local_hazards_function as _load_local_hazards_function,
-    _load_local_supplemental_beam_reduce_function as _load_local_supplemental_beam_reduce_function,
-    _load_local_supplemental_workspace_functions as _load_local_supplemental_workspace_functions,
     decode_bullet_pool as decode_bullet_pool,
     query_local_hazards as query_local_hazards,
     reduce_local_beam as reduce_local_beam,
-    reduce_local_supplemental_beam as reduce_local_supplemental_beam,
 )
 from .native.pipeline import (
     PipelineSurvivalNativeWorkspace as PipelineSurvivalNativeWorkspace,

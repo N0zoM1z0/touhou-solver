@@ -14,18 +14,7 @@ from dataclasses import asdict
 from datetime import datetime
 from pathlib import Path
 
-from analysis.th08_finalb_scale_live_delivery_report import (
-    build_report as build_finalb_scale_delivery_report,
-)
-from analysis.th08_priority17_publication_report import (
-    build_report as build_priority17_publication_report,
-)
 from th08_agent_hotkey import AgentHotkey
-from th08_live.bullet_birth_native import (
-    NATIVE_CALL_MODES,
-    NATIVE_CALL_MODE_GIL_HELD,
-    NATIVE_CALL_MODE_GIL_RELEASED,
-)
 from th08_automation.practice_artifacts import (
     TrialArtifacts,
     materialize_artifacts as _materialize_artifacts,
@@ -84,14 +73,12 @@ from th08_automation.practice_windows import (  # noqa: F401
     wait_for_patched_target,
 )
 from th08_runtime_agent import TARGET_EXE, Win32, release_injected_keys
-from th08_live.scale_source_trace import FINAL_B_ECL_STATIC_SHA256
 
 
 ROOT = Path(__file__).resolve().parents[2]
 RUNTIME_REPORT_DIR = ROOT / "artifacts" / "runtime_reports"
 RUN_NOTE_DIR = ROOT / "notes" / "runs"
 REPLAY_ARCHIVE_DIR = ROOT / "artifacts" / "replays" / "archive"
-FINALB_SCALE_DELIVERY_AUTO_STOP = False
 DEFAULT_GAME_DIR = (
     Path("D:/Entertainment/Game/Touhou")
     / "[th08] \u4e1c\u65b9\u6c38\u591c\u6284 (\u65e5\u6587\u7248)"
@@ -237,11 +224,7 @@ def run_trial(
 
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     difficulty = args.difficulty
-    run_kind = (
-        "finalb_scale_delivery"
-        if args.enable_finalb_scale_source_authority
-        else "unattended"
-    )
+    run_kind = "unattended"
     run_id = (
         f"{difficulty.key}_route2_stage{stage.key}_{run_kind}_{timestamp}"
     )
@@ -265,36 +248,14 @@ def run_trial(
         "menu_plan": [asdict(tap) for tap in menu_plan],
         "hard_no_bomb": True,
         "trace_transform_runtime": args.trace_transform_runtime,
-        "trace_bullet_births": args.trace_bullet_births,
-        "trace_derived_pattern_sources": (
-            args.trace_derived_pattern_sources
-        ),
-        "trace_nonspell_main_vms": args.trace_nonspell_main_vms,
-        "trace_enemy_combat_progress": (
-            args.trace_enemy_combat_progress
-        ),
         "trace_enemy_mode_transitions": (
             args.trace_enemy_mode_transitions
-        ),
-        "trace_priority17_publications": (
-            args.trace_priority17_publications
         ),
         "trace_enemy_lifecycle_events": (
             args.trace_enemy_lifecycle_events
         ),
         "diagnostic_continue_root_only_scale": (
             args.diagnostic_continue_root_only_scale
-        ),
-        "trace_auxiliary_vm_batches": (
-            args.trace_auxiliary_vm_batches
-        ),
-        "trace_auxiliary_ecl_events": args.trace_auxiliary_ecl_events,
-        "auxiliary_vm_batch_every": args.auxiliary_vm_batch_every,
-        "auxiliary_vm_batch_spell_id": (
-            args.auxiliary_vm_batch_spell_id
-        ),
-        "auxiliary_vm_native_call_mode": (
-            args.auxiliary_vm_native_call_mode
         ),
         "runtime_ecl_static_image": (
             str(runtime_ecl_static_image)
@@ -304,24 +265,7 @@ def run_trial(
         "runtime_ecl_static_sha256": (
             args.runtime_ecl_static_sha256
         ),
-        "finalb_scale_source_authority": (
-            args.enable_finalb_scale_source_authority
-        ),
-        "bullet_birth_backend": args.bullet_birth_backend,
-        "bullet_birth_native_call_mode": (
-            args.bullet_birth_native_call_mode
-        ),
         "viability_audit": args.viability_audit,
-        "postpublished_survival_shadow": (
-            args.postpublished_survival_shadow
-        ),
-        "pipeline_prewarm_shadow": args.pipeline_prewarm_shadow,
-        "candidate_verifier_shadow": (
-            args.candidate_verifier_shadow
-        ),
-        "corridor_background_low_priority": (
-            args.corridor_background_low_priority
-        ),
         "input_clock_boundary_shadow": (
             args.input_clock_boundary_shadow
         ),
@@ -348,19 +292,8 @@ def run_trial(
             expected_stage=stage.route_index,
             terminal_stage=stage.route_index,
             trace_transform_runtime=args.trace_transform_runtime,
-            trace_bullet_births=args.trace_bullet_births,
-            trace_derived_pattern_sources=(
-                args.trace_derived_pattern_sources
-            ),
-            trace_nonspell_main_vms=args.trace_nonspell_main_vms,
-            trace_enemy_combat_progress=(
-                args.trace_enemy_combat_progress
-            ),
             trace_enemy_mode_transitions=(
                 args.trace_enemy_mode_transitions
-            ),
-            trace_priority17_publications=(
-                args.trace_priority17_publications
             ),
             trace_enemy_lifecycle_events=(
                 args.trace_enemy_lifecycle_events
@@ -368,33 +301,8 @@ def run_trial(
             diagnostic_continue_root_only_scale=(
                 args.diagnostic_continue_root_only_scale
             ),
-            trace_auxiliary_vm_batches=(
-                args.trace_auxiliary_vm_batches
-            ),
-            trace_auxiliary_ecl_events=(
-                args.trace_auxiliary_ecl_events
-            ),
-            auxiliary_vm_batch_every=args.auxiliary_vm_batch_every,
-            auxiliary_vm_batch_spell_id=(
-                args.auxiliary_vm_batch_spell_id
-            ),
-            auxiliary_vm_native_call_mode=(
-                args.auxiliary_vm_native_call_mode
-            ),
             runtime_ecl_static_image=runtime_ecl_static_image,
             runtime_ecl_static_sha256=args.runtime_ecl_static_sha256,
-            enable_finalb_scale_source_authority=(
-                args.enable_finalb_scale_source_authority
-            ),
-            # Retain C5 as a nested gate without shrinking the physical
-            # research workload below the complete Stage-6B unit.
-            finalb_scale_delivery_auto_stop=(
-                FINALB_SCALE_DELIVERY_AUTO_STOP
-            ),
-            bullet_birth_backend=args.bullet_birth_backend,
-            bullet_birth_native_call_mode=(
-                args.bullet_birth_native_call_mode
-            ),
             safety_value_horizon=args.safety_value_horizon,
             viability_audit_dir=(
                 ROOT
@@ -404,16 +312,6 @@ def run_trial(
                 / run_id
                 if args.viability_audit
                 else None
-            ),
-            postpublished_survival_shadow=(
-                args.postpublished_survival_shadow
-            ),
-            pipeline_prewarm_shadow=args.pipeline_prewarm_shadow,
-            candidate_verifier_shadow=(
-                args.candidate_verifier_shadow
-            ),
-            corridor_background_low_priority=(
-                args.corridor_background_low_priority
             ),
             input_clock_boundary_shadow=(
                 args.input_clock_boundary_shadow
@@ -427,9 +325,7 @@ def run_trial(
             local_hazard_backend=args.local_hazard_backend,
             local_beam_reducer=args.local_beam_reducer,
             bullet_decode_backend=args.bullet_decode_backend,
-            detailed_summary=(
-                not args.enable_finalb_scale_source_authority
-            ),
+            detailed_summary=True,
         )
         batch_process, batch_log = launch_patch_batch(
             game_dir=game_dir,
@@ -567,81 +463,13 @@ def run_trial(
             stall_timeout_seconds=args.stall_timeout,
         )
         session["agent_summary"] = agent.last_summary
-        if args.trace_priority17_publications:
-            priority17_report_path = (
-                RUNTIME_REPORT_DIR
-                / f"{run_id}.priority17_publication_report.json"
-            )
-            try:
-                priority17_report = (
-                    build_priority17_publication_report(trace)
-                )
-                priority17_report_path.write_text(
-                    json.dumps(
-                        priority17_report,
-                        ensure_ascii=False,
-                        indent=2,
-                        sort_keys=True,
-                    )
-                    + "\n",
-                    encoding="utf-8",
-                )
-                session["priority17_publication_report"] = {
-                    "path": str(priority17_report_path),
-                    "integrity_passed": (
-                        priority17_report["integrity"]["passed"]
-                    ),
-                }
-            except (OSError, ValueError) as error:
-                session["priority17_publication_report"] = {
-                    "path": str(priority17_report_path),
-                    "integrity_passed": False,
-                    "error": f"{type(error).__name__}: {error}",
-                }
-        focused_delivery_report = None
-        focused_delivery_report_path = None
-        if args.enable_finalb_scale_source_authority:
-            focused_delivery_report = (
-                build_finalb_scale_delivery_report(trace)
-            )
-            focused_delivery_report_path = (
-                RUNTIME_REPORT_DIR
-                / f"{run_id}.scale_delivery_report.json"
-            )
-            focused_delivery_report_path.write_text(
-                json.dumps(
-                    focused_delivery_report,
-                    ensure_ascii=False,
-                    indent=2,
-                    sort_keys=True,
-                )
-                + "\n",
-                encoding="utf-8",
-            )
-            session["scale_delivery_report"] = {
-                "path": str(focused_delivery_report_path),
-                "passed": focused_delivery_report["gate"]["passed"],
-            }
-        focused_delivery_accepted = bool(
-            focused_delivery_report is not None
-            and focused_delivery_report["gate"]["passed"]
-        )
-        accepted = (
-            focused_delivery_accepted
-            if args.enable_finalb_scale_source_authority
-            else accepted_practice_termination(agent.last_summary)
-        )
+        accepted = accepted_practice_termination(agent.last_summary)
         session["trial_accepted"] = accepted
-        session["acceptance_scope"] = (
-            "focused_finalb_scale_delivery"
-            if args.enable_finalb_scale_source_authority
-            else "complete_practice_stage"
-        )
+        session["acceptance_scope"] = "complete_practice_stage"
         if not args.leave_game_running:
             if (
                 accepted
                 and args.save_replay_slot is not None
-                and not args.enable_finalb_scale_source_authority
             ):
                 session["post_stage_replay_save"] = (
                     save_completed_practice_replay(
@@ -662,7 +490,7 @@ def run_trial(
                     "attempted": False,
                     "reason": "accepted replay was saved and verified",
                 }
-            elif accepted and not args.enable_finalb_scale_source_authority:
+            elif accepted:
                 session["post_stage_no_save"] = (
                     select_no_save_before_termination(
                         api,
@@ -671,19 +499,10 @@ def run_trial(
                         tap_gap_ms=args.tap_gap_ms,
                     )
                 )
-            elif accepted:
-                session["post_stage_no_save"] = {
-                    "attempted": False,
-                    "reason": "focused gate ended before the stage save prompt",
-                }
             else:
                 session["post_stage_no_save"] = {
                     "attempted": False,
-                    "reason": (
-                        "focused strict report did not pass"
-                        if args.enable_finalb_scale_source_authority
-                        else "trial did not terminate with route_complete"
-                    ),
+                    "reason": "trial did not terminate with route_complete",
                 }
             session["game_terminated_after_trial"] = terminate_exact_target(
                 api,
@@ -707,9 +526,7 @@ def run_trial(
             difficulty=difficulty,
             trace=trace,
             session_json=session_json,
-            compare_to_baseline=(
-                not args.enable_finalb_scale_source_authority
-            ),
+            compare_to_baseline=True,
         )
         print(f"trial artifacts: {artifacts.dossier_markdown}", flush=True)
         return artifacts
@@ -797,58 +614,12 @@ def build_parser() -> argparse.ArgumentParser:
         help="retain transform-relevant bullets from the complete native pool",
     )
     parser.add_argument(
-        "--trace-bullet-births",
-        action="store_true",
-        help=(
-            "record default-off hostile-bullet activation and active-spell "
-            "main-VM intent telemetry; trace only"
-        ),
-    )
-    parser.add_argument(
-        "--bullet-birth-backend",
-        choices=("python", "native"),
-        default="python",
-        help="explicit trace-only hostile-bullet birth observer backend",
-    )
-    parser.add_argument(
-        "--trace-derived-pattern-sources",
-        action="store_true",
-        help=(
-            "add the failed-gate ready-parent transform shadow to an "
-            "explicit bullet-birth trace; diagnostic only"
-        ),
-    )
-    parser.add_argument(
-        "--trace-nonspell-main-vms",
-        action="store_true",
-        help=(
-            "record first-64 ordinary-enemy main-VM state from the existing "
-            "prefix capture; diagnostic only"
-        ),
-    )
-    parser.add_argument(
-        "--trace-enemy-combat-progress",
-        action="store_true",
-        help=(
-            "record first-64 raw ordinary-enemy HP/damage fields from the "
-            "existing prefix capture; trace only"
-        ),
-    )
-    parser.add_argument(
         "--trace-enemy-mode-transitions",
         action="store_true",
         help=(
             "frame-bracket player mode and first-64 enemy flags for the "
             "whole stage; no mode-conditioned action authority, but trace "
             "cost may perturb cadence"
-        ),
-    )
-    parser.add_argument(
-        "--trace-priority17-publications",
-        action="store_true",
-        help=(
-            "install the reversible bounded priority-17 callback-exit ring "
-            "for the whole stage; trace only, no action authority"
         ),
     )
     parser.add_argument(
@@ -868,32 +639,6 @@ def build_parser() -> argparse.ArgumentParser:
         ),
     )
     parser.add_argument(
-        "--trace-auxiliary-vm-batches",
-        action="store_true",
-        help="record bounded post-issue auxiliary ECL VM batches",
-    )
-    parser.add_argument(
-        "--trace-auxiliary-ecl-events",
-        action="store_true",
-        help=(
-            "derive replay-capable Stage-5 auxiliary literal-fire events "
-            "after each selected batch; trace only"
-        ),
-    )
-    parser.add_argument(
-        "--auxiliary-vm-batch-every",
-        type=int,
-        default=16,
-        metavar="MANAGER_FRAMES",
-    )
-    parser.add_argument("--auxiliary-vm-batch-spell-id", type=int)
-    parser.add_argument(
-        "--auxiliary-vm-native-call-mode",
-        choices=NATIVE_CALL_MODES,
-        default=NATIVE_CALL_MODE_GIL_HELD,
-        help="explicit auxiliary-VM trace-only native GIL boundary",
-    )
-    parser.add_argument(
         "--runtime-ecl-static-image",
         type=Path,
         help=(
@@ -904,28 +649,6 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--runtime-ecl-static-sha256",
         help="required immutable SHA-256 for --runtime-ecl-static-image",
-    )
-    parser.add_argument(
-        "--enable-finalb-scale-source-authority",
-        action="store_true",
-        help=(
-            "run the explicit Stage-6B SEM-SCALE-C5 transport/delivery "
-            "experiment and stop after the exact spell-190 unit restore"
-        ),
-    )
-    parser.add_argument(
-        "--bullet-birth-native-call-mode",
-        choices=NATIVE_CALL_MODES,
-        default=NATIVE_CALL_MODE_GIL_RELEASED,
-        help="explicit trace-only native call GIL boundary",
-    )
-    parser.add_argument(
-        "--corridor-background-low-priority",
-        action="store_true",
-        help=(
-            "run only the Python corridor parent below normal priority; "
-            "default-off G5 contention experiment"
-        ),
     )
     parser.add_argument(
         "--safety-value-horizon",
@@ -942,30 +665,6 @@ def build_parser() -> argparse.ArgumentParser:
         help=(
             "retain ignored neutral policy capsules for offline "
             "multi-resolution audit; do not treat timing as a baseline"
-        ),
-    )
-    parser.add_argument(
-        "--postpublished-survival-shadow",
-        action="store_true",
-        help=(
-            "compute post-Boolean survival labels for telemetry only; "
-            "an isolated executor prevents worker serialization"
-        ),
-    )
-    parser.add_argument(
-        "--pipeline-prewarm-shadow",
-        action="store_true",
-        help=(
-            "start exact-root prewarm after clearance and record lookup-only "
-            "telemetry; never changes live actions"
-        ),
-    )
-    parser.add_argument(
-        "--candidate-verifier-shadow",
-        action="store_true",
-        help=(
-            "run bounded exact candidate verification beside local planning "
-            "for telemetry only; never changes live actions"
         ),
     )
     parser.add_argument(
@@ -1067,13 +766,6 @@ def main(argv: list[str] | None = None) -> int:
             "--save-replay-slot requires one supervised iteration and cannot "
             "be combined with --leave-game-running or --forever"
         )
-    if (
-        args.save_replay_slot is not None
-        and args.enable_finalb_scale_source_authority
-    ):
-        raise ValueError(
-            "--save-replay-slot requires a complete accepted practice stage"
-        )
     if args.safety_value_horizon < 0:
         raise ValueError("--safety-value-horizon cannot be negative")
     if args.input_clock_shadow_sample_ms <= 0.0:
@@ -1089,60 +781,6 @@ def main(argv: list[str] | None = None) -> int:
     ):
         raise ValueError(
             "runtime ECL identity requires both a static image and SHA-256"
-        )
-    if args.trace_auxiliary_ecl_events and not args.trace_auxiliary_vm_batches:
-        raise ValueError(
-            "auxiliary ECL event tracing requires auxiliary-VM batch tracing"
-        )
-    if (
-        args.trace_auxiliary_ecl_events
-        and args.runtime_ecl_static_image is None
-    ):
-        raise ValueError(
-            "auxiliary ECL event tracing requires exact runtime ECL identity"
-        )
-    if args.trace_auxiliary_ecl_events and (
-        args.difficulty.menu_index != 3 or args.stage.route_index != 5
-    ):
-        raise ValueError(
-            "the contracted auxiliary ECL event service is limited to "
-            "Lunatic Stage 5"
-        )
-    if args.enable_finalb_scale_source_authority and (
-        args.difficulty.menu_index != 3
-        or args.stage.route_index != 7
-        or args.runtime_ecl_static_image is None
-        or args.runtime_ecl_static_sha256 != FINAL_B_ECL_STATIC_SHA256
-    ):
-        raise ValueError(
-            "Final-B scale delivery requires Lunatic stage 6b and the exact "
-            "ecldata7 identity"
-        )
-    if args.enable_finalb_scale_source_authority and any(
-        (
-            args.trace_transform_runtime,
-            args.trace_bullet_births,
-            args.trace_derived_pattern_sources,
-            args.trace_nonspell_main_vms,
-            args.trace_enemy_combat_progress,
-            args.trace_enemy_mode_transitions,
-            args.trace_priority17_publications,
-            args.diagnostic_continue_root_only_scale,
-            args.trace_auxiliary_vm_batches,
-            args.trace_auxiliary_ecl_events,
-            args.safety_value_horizon != 0,
-            args.viability_audit,
-            args.postpublished_survival_shadow,
-            args.pipeline_prewarm_shadow,
-            args.candidate_verifier_shadow,
-            args.corridor_background_low_priority,
-            args.input_clock_boundary_shadow,
-            args.local_pipeline_root_shadow_every != 0,
-        )
-    ):
-        raise ValueError(
-            "Final-B scale delivery cannot be combined with another "
-            "experiment flag"
         )
     if min(
         args.cooldown,

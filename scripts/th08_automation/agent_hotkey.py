@@ -22,11 +22,6 @@ from th08_automation.agent_contract import (
 from th08_corridor_adapter import prewarm_th08_corridor
 from th08_live_dodge_agent import build_parser as build_agent_parser
 from th08_live_dodge_agent import run as run_agent
-from th08_live.bullet_birth_native import (
-    NATIVE_CALL_MODES,
-    NATIVE_CALL_MODE_GIL_HELD,
-    NATIVE_CALL_MODE_GIL_RELEASED,
-)
 from th08_runtime_agent import (
     ADDR_NO_LIFE_DECREMENT_PATCH,
     TARGET_EXE,
@@ -67,35 +62,14 @@ class AgentHotkey:
         expected_stage: int | None = None,
         terminal_stage: int | None = None,
         trace_transform_runtime: bool = False,
-        trace_bullet_births: bool = False,
-        trace_derived_pattern_sources: bool = False,
-        trace_nonspell_main_vms: bool = False,
-        trace_enemy_combat_progress: bool = False,
         trace_enemy_mode_transitions: bool = False,
-        trace_priority17_publications: bool = False,
         trace_enemy_lifecycle_events: bool = False,
         diagnostic_continue_root_only_scale: bool = False,
-        trace_auxiliary_vm_batches: bool = False,
-        trace_auxiliary_ecl_events: bool = False,
-        auxiliary_vm_batch_every: int = 16,
-        auxiliary_vm_batch_spell_id: int | None = None,
-        auxiliary_vm_native_call_mode: str = (
-            NATIVE_CALL_MODE_GIL_HELD
-        ),
         runtime_ecl_static_image: Path | None = None,
         runtime_ecl_static_sha256: str | None = None,
         enable_finalb_scale_source_authority: bool = False,
-        finalb_scale_delivery_auto_stop: bool = False,
-        bullet_birth_backend: str = "python",
-        bullet_birth_native_call_mode: str = (
-            NATIVE_CALL_MODE_GIL_RELEASED
-        ),
         safety_value_horizon: int = 0,
         viability_audit_dir: Path | None = None,
-        postpublished_survival_shadow: bool = False,
-        pipeline_prewarm_shadow: bool = False,
-        candidate_verifier_shadow: bool = False,
-        corridor_background_low_priority: bool = False,
         input_clock_boundary_shadow: bool = False,
         input_clock_shadow_sample_ms: float = 1.0,
         local_pipeline_root_shadow_every: int = 0,
@@ -146,19 +120,6 @@ class AgentHotkey:
             )
         if bullet_decode_backend not in {"python", "native"}:
             raise ValueError("unknown bullet decode backend")
-        if bullet_birth_backend not in {"python", "native"}:
-            raise ValueError("unknown bullet birth backend")
-        if bullet_birth_native_call_mode not in NATIVE_CALL_MODES:
-            raise ValueError("unknown native bullet birth call mode")
-        if auxiliary_vm_native_call_mode not in NATIVE_CALL_MODES:
-            raise ValueError("unknown native auxiliary-VM call mode")
-        if auxiliary_vm_batch_every <= 0:
-            raise ValueError("auxiliary-VM batch cadence must be positive")
-        if (
-            auxiliary_vm_batch_spell_id is not None
-            and auxiliary_vm_batch_spell_id < 0
-        ):
-            raise ValueError("auxiliary-VM spell filter cannot be negative")
         if (runtime_ecl_static_image is None) != (
             runtime_ecl_static_sha256 is None
         ):
@@ -185,73 +146,24 @@ class AgentHotkey:
                 "Final-B scale-source authority requires exact runtime ECL "
                 "identity"
             )
-        if (
-            finalb_scale_delivery_auto_stop
-            and not enable_finalb_scale_source_authority
-        ):
-            raise ValueError(
-                "Final-B scale-delivery auto-stop requires source authority"
-            )
-        if trace_auxiliary_ecl_events and not trace_auxiliary_vm_batches:
-            raise ValueError(
-                "auxiliary ECL event tracing requires auxiliary-VM batch tracing"
-            )
-        if trace_auxiliary_ecl_events and runtime_ecl_static_image is None:
-            raise ValueError(
-                "auxiliary ECL event tracing requires exact runtime ECL identity"
-            )
-        if trace_auxiliary_ecl_events and (
-            expected_difficulty != 3 or expected_stage != 5
-        ):
-            raise ValueError(
-                "the contracted auxiliary ECL event service is limited to "
-                "Lunatic Stage 5"
-            )
         self.expected_difficulty = expected_difficulty
         self.expected_stage = expected_stage
         self.terminal_stage = terminal_stage
         self.trace_transform_runtime = trace_transform_runtime
-        self.trace_bullet_births = trace_bullet_births
-        self.trace_derived_pattern_sources = trace_derived_pattern_sources
-        self.trace_nonspell_main_vms = trace_nonspell_main_vms
-        self.trace_enemy_combat_progress = trace_enemy_combat_progress
         self.trace_enemy_mode_transitions = trace_enemy_mode_transitions
-        self.trace_priority17_publications = (
-            trace_priority17_publications
-        )
         self.trace_enemy_lifecycle_events = (
             trace_enemy_lifecycle_events
         )
         self.diagnostic_continue_root_only_scale = (
             diagnostic_continue_root_only_scale
         )
-        self.trace_auxiliary_vm_batches = trace_auxiliary_vm_batches
-        self.trace_auxiliary_ecl_events = trace_auxiliary_ecl_events
-        self.auxiliary_vm_batch_every = auxiliary_vm_batch_every
-        self.auxiliary_vm_batch_spell_id = auxiliary_vm_batch_spell_id
-        self.auxiliary_vm_native_call_mode = (
-            auxiliary_vm_native_call_mode
-        )
         self.runtime_ecl_static_image = runtime_ecl_static_image
         self.runtime_ecl_static_sha256 = runtime_ecl_static_sha256
         self.enable_finalb_scale_source_authority = (
             enable_finalb_scale_source_authority
         )
-        self.finalb_scale_delivery_auto_stop = (
-            finalb_scale_delivery_auto_stop
-        )
-        self.bullet_birth_backend = bullet_birth_backend
-        self.bullet_birth_native_call_mode = bullet_birth_native_call_mode
         self.safety_value_horizon = safety_value_horizon
         self.viability_audit_dir = viability_audit_dir
-        self.postpublished_survival_shadow = (
-            postpublished_survival_shadow
-        )
-        self.pipeline_prewarm_shadow = pipeline_prewarm_shadow
-        self.candidate_verifier_shadow = candidate_verifier_shadow
-        self.corridor_background_low_priority = (
-            corridor_background_low_priority
-        )
         self.input_clock_boundary_shadow = input_clock_boundary_shadow
         self.input_clock_shadow_sample_ms = input_clock_shadow_sample_ms
         self.local_pipeline_root_shadow_every = (
@@ -390,38 +302,14 @@ class AgentHotkey:
                 expected_stage=self.expected_stage,
                 terminal_stage=self.terminal_stage,
                 trace_transform_runtime=self.trace_transform_runtime,
-                trace_bullet_births=self.trace_bullet_births,
-                trace_derived_pattern_sources=(
-                    self.trace_derived_pattern_sources
-                ),
-                trace_nonspell_main_vms=self.trace_nonspell_main_vms,
-                trace_enemy_combat_progress=(
-                    self.trace_enemy_combat_progress
-                ),
                 trace_enemy_mode_transitions=(
                     self.trace_enemy_mode_transitions
-                ),
-                trace_priority17_publications=(
-                    self.trace_priority17_publications
                 ),
                 trace_enemy_lifecycle_events=(
                     self.trace_enemy_lifecycle_events
                 ),
                 diagnostic_continue_root_only_scale=(
                     self.diagnostic_continue_root_only_scale
-                ),
-                trace_auxiliary_vm_batches=(
-                    self.trace_auxiliary_vm_batches
-                ),
-                trace_auxiliary_ecl_events=(
-                    self.trace_auxiliary_ecl_events
-                ),
-                auxiliary_vm_batch_every=self.auxiliary_vm_batch_every,
-                auxiliary_vm_batch_spell_id=(
-                    self.auxiliary_vm_batch_spell_id
-                ),
-                auxiliary_vm_native_call_mode=(
-                    self.auxiliary_vm_native_call_mode
                 ),
                 runtime_ecl_static_image=(
                     self.runtime_ecl_static_image
@@ -432,25 +320,8 @@ class AgentHotkey:
                 enable_finalb_scale_source_authority=(
                     self.enable_finalb_scale_source_authority
                 ),
-                finalb_scale_delivery_auto_stop=(
-                    self.finalb_scale_delivery_auto_stop
-                ),
-                bullet_birth_backend=self.bullet_birth_backend,
-                bullet_birth_native_call_mode=(
-                    self.bullet_birth_native_call_mode
-                ),
                 safety_value_horizon=self.safety_value_horizon,
                 viability_audit_dir=self.viability_audit_dir,
-                postpublished_survival_shadow=(
-                    self.postpublished_survival_shadow
-                ),
-                pipeline_prewarm_shadow=self.pipeline_prewarm_shadow,
-                candidate_verifier_shadow=(
-                    self.candidate_verifier_shadow
-                ),
-                corridor_background_low_priority=(
-                    self.corridor_background_low_priority
-                ),
                 input_clock_boundary_shadow=(
                     self.input_clock_boundary_shadow
                 ),

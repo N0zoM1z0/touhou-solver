@@ -18,7 +18,6 @@ import struct
 import time
 from typing import Callable, Protocol
 
-from th08_ecl_auxiliary import build_exact_runtime_instruction_index
 from th08_ecl_callback_model import CALLBACK_ADDRESSES
 from th08_ecl_runtime import (
     ECL_VM_SNAPSHOT_SIZE,
@@ -56,6 +55,7 @@ from th08_live.runtime_ecl_image import (
     capture_runtime_ecl_image,
     compare_runtime_ecl_image,
 )
+from th08_live.runtime_ecl_index import build_exact_runtime_instruction_index
 from th08_runtime.game_state import (
     ADDR_DIFFICULTY_INDEX,
     ADDR_ENEMY_MANAGER_FRAME,

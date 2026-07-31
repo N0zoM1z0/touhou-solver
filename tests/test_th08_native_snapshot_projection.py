@@ -5,7 +5,7 @@ import unittest
 from types import SimpleNamespace
 
 from th08_live.bullet_decode import BULLET_STATE_OFFSET
-from th08_live.auxiliary_vm.model import (
+from th08_runtime.auxiliary_ecl_state import (
     ACTIVE_VM_AUXILIARY_MARKER_OFFSET,
     ACTIVE_VM_BYTES,
     CONTEXT_ACTIVE_VM_OFFSET,

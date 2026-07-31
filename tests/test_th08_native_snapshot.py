@@ -38,7 +38,7 @@ from th08_runtime.native_snapshot import (
     snapshot_excluded_allocation_bases,
     verify_native_dirty_pages,
 )
-from th08_runtime.priority17_publication_probe import (
+from th08_runtime.windows_probe import (
     MEM_COMMIT,
     PAGE_EXECUTE_READWRITE,
 )

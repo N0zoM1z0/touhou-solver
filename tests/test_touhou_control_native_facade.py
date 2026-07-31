@@ -52,31 +52,10 @@ class NativeBackendFacadeTests(unittest.TestCase):
             "_load_local_beam_reduce_function": (
                 local._load_local_beam_reduce_function
             ),
-            "_load_local_supplemental_beam_reduce_function": (
-                local._load_local_supplemental_beam_reduce_function
-            ),
-            "_load_local_supplemental_workspace_functions": (
-                local._load_local_supplemental_workspace_functions
-            ),
             "DecodedBulletPool": local.DecodedBulletPool,
-            "LocalSupplementalNativeCancelledError": (
-                local.LocalSupplementalNativeCancelledError
-            ),
-            "LocalSupplementalNativeDeadlineError": (
-                local.LocalSupplementalNativeDeadlineError
-            ),
-            "LocalSupplementalNativeResult": (
-                local.LocalSupplementalNativeResult
-            ),
-            "LocalSupplementalNativeWorkspace": (
-                local.LocalSupplementalNativeWorkspace
-            ),
             "query_local_hazards": local.query_local_hazards,
             "decode_bullet_pool": local.decode_bullet_pool,
             "reduce_local_beam": local.reduce_local_beam,
-            "reduce_local_supplemental_beam": (
-                local.reduce_local_supplemental_beam
-            ),
             "_load_viability_function": viability._load_viability_function,
             "_load_viability_worker_limit_function": (
                 viability._load_viability_worker_limit_function
@@ -142,13 +121,6 @@ class NativeBackendFacadeTests(unittest.TestCase):
         self.assertTrue(
             local.DecodedBulletPool.__dataclass_params__.frozen
         )
-        self.assertTrue(
-            dataclasses.is_dataclass(local.LocalSupplementalNativeResult)
-        )
-        self.assertTrue(
-            local.LocalSupplementalNativeResult.__dataclass_params__.frozen
-        )
-
     def test_domain_loader_uses_shared_cache_without_caching_miss(self) -> None:
         fake_library = SimpleNamespace()
 
@@ -172,41 +144,6 @@ class NativeBackendFacadeTests(unittest.TestCase):
                 geometry._load_trajectory_clearance_function(),
                 function,
             )
-
-    def test_domain_function_group_is_cached_only_when_complete(self) -> None:
-        symbols = (
-            "touhou_local_supplemental_workspace_create_v1",
-            "touhou_local_supplemental_workspace_query_v1",
-            "touhou_local_supplemental_workspace_cancel_v1",
-            "touhou_local_supplemental_workspace_active_v1",
-            "touhou_local_supplemental_workspace_destroy_v1",
-        )
-        functions = []
-        for _symbol in symbols:
-            def function() -> None:
-                pass
-
-            functions.append(function)
-        fake_library = SimpleNamespace(
-            **dict(zip(symbols[:-1], functions[:-1], strict=True))
-        )
-        with (
-            mock.patch.object(local, "_load_library", return_value=fake_library),
-            mock.patch.object(library, "_FUNCTION_GROUP_CACHE", {}),
-        ):
-            self.assertIsNone(
-                local._load_local_supplemental_workspace_functions()
-            )
-            setattr(fake_library, symbols[-1], functions[-1])
-            loaded = local._load_local_supplemental_workspace_functions()
-            self.assertEqual(loaded, tuple(functions))
-            for symbol in symbols:
-                delattr(fake_library, symbol)
-            self.assertIs(
-                local._load_local_supplemental_workspace_functions(),
-                loaded,
-            )
-
 
 if __name__ == "__main__":
     unittest.main()

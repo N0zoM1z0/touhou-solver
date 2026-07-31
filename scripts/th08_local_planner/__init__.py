@@ -2,7 +2,6 @@
 
 from .requests import (
     ActuatorPipeline,
-    CompletedServiceResults,
     GlobalGuidance,
     LocalPlannerRequest,
     ObjectiveContext,
@@ -39,21 +38,14 @@ from .ranking import EndpointRanker
 from .assembly import (
     DamageDecisionFields,
     ProposalAssemblyContext,
-    SupplementalDecisionFields,
     assemble_local_decision,
 )
 from .beam import BaselineBeamContext, run_baseline_beam
-from .supplemental import (
-    CompletedSupplementalLookup,
-    lookup_completed_supplemental,
-)
 
 __all__ = [
     "ActionCertificateSet",
     "BaselineBeamContext",
     "ActuatorPipeline",
-    "CompletedServiceResults",
-    "CompletedSupplementalLookup",
     "Decision",
     "DecisionTelemetry",
     "DamageDecisionFields",
@@ -78,12 +70,10 @@ __all__ = [
     "PreparedLocalHazards",
     "RobustActionCertificate",
     "SearchNode",
-    "SupplementalDecisionFields",
     "ValidatedPlannerRequest",
     "prepare_local_hazards",
     "prepare_planner_pass",
     "run_hard_preflight",
-    "lookup_completed_supplemental",
     "run_baseline_beam",
     "assemble_local_decision",
     "validate_local_planner_request",

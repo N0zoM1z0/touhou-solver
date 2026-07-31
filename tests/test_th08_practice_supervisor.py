@@ -21,7 +21,6 @@ from th08_automation.practice_menu import (
     parse_practice_stage,
 )
 from th08_practice_supervisor import (
-    FINALB_SCALE_DELIVERY_AUTO_STOP,
     ROOT,
     _progress_text,
     build_patch_batch_command,
@@ -33,9 +32,6 @@ from th08_practice_supervisor import (
 
 
 class PracticeSupervisorTests(unittest.TestCase):
-    def test_finalb_scale_delivery_keeps_whole_stage_scope(self) -> None:
-        self.assertFalse(FINALB_SCALE_DELIVERY_AUTO_STOP)
-
     def test_stage_menu_order_matches_original_practice_screen(self) -> None:
         expected = {
             "1": (0, 0),
@@ -167,15 +163,11 @@ class PracticeSupervisorTests(unittest.TestCase):
         self.assertTrue(args.kill_existing)
         self.assertEqual(args.safety_value_horizon, 32)
         self.assertTrue(args.viability_audit)
-        self.assertFalse(args.pipeline_prewarm_shadow)
-        self.assertFalse(args.candidate_verifier_shadow)
         self.assertFalse(args.input_clock_boundary_shadow)
         self.assertEqual(args.input_clock_shadow_sample_ms, 1.0)
         self.assertEqual(args.difficulty.key, "lunatic")
         self.assertIsNone(args.runtime_ecl_static_image)
         self.assertIsNone(args.runtime_ecl_static_sha256)
-        self.assertFalse(args.trace_auxiliary_ecl_events)
-        self.assertFalse(args.enable_finalb_scale_source_authority)
 
     def test_replay_save_slot_is_explicit_and_bounded(self) -> None:
         args = supervisor.build_parser().parse_args(
@@ -197,8 +189,6 @@ class PracticeSupervisorTests(unittest.TestCase):
                 "artifacts/decoded/ecldata5.ecl",
                 "--runtime-ecl-static-sha256",
                 "1" * 64,
-                "--trace-auxiliary-vm-batches",
-                "--trace-auxiliary-ecl-events",
                 "--armed",
             ]
         )
@@ -207,25 +197,6 @@ class PracticeSupervisorTests(unittest.TestCase):
             Path("artifacts/decoded/ecldata5.ecl"),
         )
         self.assertEqual(args.runtime_ecl_static_sha256, "1" * 64)
-        self.assertTrue(args.trace_auxiliary_ecl_events)
-
-        finalb = build_parser().parse_args(
-            [
-                "--stage",
-                "6b",
-                "--runtime-ecl-static-image",
-                "artifacts/decoded/ecldata7.ecl",
-                "--runtime-ecl-static-sha256",
-                (
-                    "20b35dca3820438f0b90ae44e3362a7a"
-                    "f27d2fc1ac7ae5888c477dc1c89a3734"
-                ),
-                "--enable-finalb-scale-source-authority",
-                "--armed",
-            ]
-        )
-        self.assertEqual(finalb.stage.route_index, 7)
-        self.assertTrue(finalb.enable_finalb_scale_source_authority)
 
     def test_runtime_ecl_identity_is_validated_before_launch(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
@@ -252,15 +223,6 @@ class PracticeSupervisorTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "requires both"):
             resolve_runtime_ecl_static_image(None, "0" * 64)
 
-    def test_enemy_combat_progress_is_explicitly_opt_in(self) -> None:
-        default_args = build_parser().parse_args([])
-        enabled_args = build_parser().parse_args(
-            ["--trace-enemy-combat-progress"]
-        )
-
-        self.assertFalse(default_args.trace_enemy_combat_progress)
-        self.assertTrue(enabled_args.trace_enemy_combat_progress)
-
     def test_enemy_mode_capture_is_whole_stage_diagnostic_opt_in(self) -> None:
         default_args = build_parser().parse_args([])
         enabled_args = build_parser().parse_args(
@@ -269,16 +231,6 @@ class PracticeSupervisorTests(unittest.TestCase):
 
         self.assertFalse(default_args.trace_enemy_mode_transitions)
         self.assertTrue(enabled_args.trace_enemy_mode_transitions)
-        self.assertFalse(FINALB_SCALE_DELIVERY_AUTO_STOP)
-
-    def test_priority17_publication_capture_is_whole_stage_opt_in(self) -> None:
-        default_args = build_parser().parse_args([])
-        enabled_args = build_parser().parse_args(
-            ["--trace-priority17-publications"]
-        )
-
-        self.assertFalse(default_args.trace_priority17_publications)
-        self.assertTrue(enabled_args.trace_priority17_publications)
 
     def test_enemy_lifecycle_capture_is_whole_stage_opt_in(self) -> None:
         default_args = build_parser().parse_args([])
@@ -330,9 +282,6 @@ class PracticeSupervisorTests(unittest.TestCase):
         self.assertFalse(
             run_trial.call_args.args[0].trace_enemy_mode_transitions
         )
-        self.assertFalse(
-            run_trial.call_args.args[0].trace_priority17_publications
-        )
         self.assertTrue(
             run_trial.call_args.args[0].diagnostic_continue_root_only_scale
         )
@@ -381,16 +330,6 @@ class PracticeSupervisorTests(unittest.TestCase):
     def test_shadow_services_are_explicitly_opt_in(self) -> None:
         cases = (
             (
-                "5",
-                ("--pipeline-prewarm-shadow",),
-                "pipeline_prewarm_shadow",
-            ),
-            (
-                "6b",
-                ("--candidate-verifier-shadow",),
-                "candidate_verifier_shadow",
-            ),
-            (
                 "4a",
                 (
                     "--input-clock-boundary-shadow",
@@ -408,22 +347,6 @@ class PracticeSupervisorTests(unittest.TestCase):
                 self.assertTrue(getattr(args, attribute))
                 if attribute == "input_clock_boundary_shadow":
                     self.assertEqual(args.input_clock_shadow_sample_ms, 2.5)
-
-    def test_corridor_background_priority_is_explicitly_opt_in(self) -> None:
-        default_args = build_parser().parse_args(
-            ["--stage", "4a", "--armed"]
-        )
-        enabled_args = build_parser().parse_args(
-            [
-                "--stage",
-                "4a",
-                "--corridor-background-low-priority",
-                "--armed",
-            ]
-        )
-
-        self.assertFalse(default_args.corridor_background_low_priority)
-        self.assertTrue(enabled_args.corridor_background_low_priority)
 
     def test_native_backends_default_with_explicit_rollbacks(self) -> None:
         cases = (

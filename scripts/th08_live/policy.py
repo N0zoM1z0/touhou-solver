@@ -6,8 +6,6 @@ from dataclasses import dataclass
 from typing import Any, Callable
 
 from th08_corridor_runtime import (
-    corridor_pipeline_prewarm_query,
-    corridor_postpublished_survival_query,
     corridor_safety_value_query,
     corridor_target,
     corridor_viability_query,
@@ -27,11 +25,9 @@ class PolicyQueryRequest:
     player_y: float
     active_action: str
     observed_action: str
-    pending_command: Any | None
     lookahead_frames: int
     max_age_frames: int
     current_delay_frames: tuple[int, ...]
-    pipeline_prewarm_shadow: bool
 
 
 @dataclass(frozen=True)
@@ -43,8 +39,6 @@ class PrimaryPolicyQuery:
 @dataclass(frozen=True)
 class PolicyQuerySnapshot:
     primary: PrimaryPolicyQuery
-    pipeline_prewarm_query: Any | None
-    postpublished_survival_query: Any | None
     safety_value_query: Any | None
     guidance: LocalPolicyGuidance
 
@@ -57,12 +51,6 @@ class PolicyCoordinator:
         *,
         target_query: Callable[..., Any] = corridor_target,
         viability_query: Callable[..., Any] = corridor_viability_query,
-        pipeline_prewarm_query: Callable[..., Any] = (
-            corridor_pipeline_prewarm_query
-        ),
-        postpublished_survival_query: Callable[..., Any] = (
-            corridor_postpublished_survival_query
-        ),
         safety_value_query: Callable[..., Any] = (
             corridor_safety_value_query
         ),
@@ -72,10 +60,6 @@ class PolicyCoordinator:
     ) -> None:
         self._target_query = target_query
         self._viability_query = viability_query
-        self._pipeline_prewarm_query = pipeline_prewarm_query
-        self._postpublished_survival_query = (
-            postpublished_survival_query
-        )
         self._safety_value_query = safety_value_query
         self._guidance_assembler = guidance_assembler
 
@@ -107,29 +91,6 @@ class PolicyCoordinator:
         request: PolicyQueryRequest,
         primary: PrimaryPolicyQuery,
     ) -> PolicyQuerySnapshot:
-        pipeline_prewarm = (
-            self._pipeline_prewarm_query(
-                request.solution,
-                current_frame=request.query_frame,
-                player_x=request.player_x,
-                player_y=request.player_y,
-                observed_action=request.observed_action,
-                pending_command=request.pending_command,
-                max_age_frames=request.max_age_frames,
-            )
-            if request.pipeline_prewarm_shadow
-            else None
-        )
-        postpublished_survival = (
-            self._postpublished_survival_query(
-                request.solution,
-                current_frame=request.query_frame,
-                player_x=request.player_x,
-                player_y=request.player_y,
-                observed_action=request.observed_action,
-                max_age_frames=request.max_age_frames,
-            )
-        )
         safety_value = self._safety_value_query(
             request.solution,
             current_frame=request.query_frame,
@@ -155,8 +116,6 @@ class PolicyCoordinator:
         )
         return PolicyQuerySnapshot(
             primary=primary,
-            pipeline_prewarm_query=pipeline_prewarm,
-            postpublished_survival_query=postpublished_survival,
             safety_value_query=safety_value,
             guidance=guidance,
         )

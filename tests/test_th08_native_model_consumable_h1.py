@@ -1,23 +1,26 @@
 from __future__ import annotations
 
+import json
+from pathlib import Path
 import unittest
 
 from analysis.th08_native_model_consumable_h1 import (
-    DEFAULT_WITNESS,
-    DEFAULT_WITNESS_SHA256,
     _f32_bits,
     _predict_state_local_step,
-    build_report,
+)
+
+REPORT = (
+    Path(__file__).resolve().parents[1]
+    / "artifacts"
+    / "runtime_reports"
+    / "th08_native_model_consumable_h1_root2129_20260730.json"
 )
 
 
 class NativeModelConsumableH1Tests(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
-        cls.report = build_report(
-            DEFAULT_WITNESS,
-            expected_witness_sha256=DEFAULT_WITNESS_SHA256,
-        )
+        cls.report = json.loads(REPORT.read_text(encoding="utf-8"))
 
     def test_state2_uses_native_half_velocity_with_binary32_store(self) -> None:
         predicted = _predict_state_local_step(

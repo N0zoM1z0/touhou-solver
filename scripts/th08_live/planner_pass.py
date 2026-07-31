@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import math
 import time
+from dataclasses import replace
 
 from th08_local_planner import (
     Decision,
@@ -19,18 +20,11 @@ from th08_live.planner_pass_finalize import (
     PlannerFinalizationContext,
     finalize_planner_pass,
 )
-from th08_live.planner_pass_supplemental import (
-    presubmit_supplemental_stage,
-    run_supplemental_stage,
-)
 from th08_live.planner_pass_types import (
     LocalCertificateTimingAccumulator,
     PlannerModeTransition,
     PlannerPassDependencies,
 )
-from th08_time_scale import TH08_UNIT_TIME_SCALE_BITS
-
-
 def _run_local_planner_pass(
     request: LocalPlannerRequest,
     preparation: PlannerPassPreparation,
@@ -76,9 +70,6 @@ def _run_local_planner_pass(
     preloss_continuation_preference = (
         config.preloss_continuation_preference
     )
-    preloss_supplemental_beam_width = (
-        config.preloss_supplemental_beam_width
-    )
     validated = preparation.validated
     target_deadline = validated.target_deadline
     repair_by_action = validated.repair_by_action
@@ -121,19 +112,6 @@ def _run_local_planner_pass(
         diagnostic_losing_reserve_distance
         if preloss_continuation_preference_active
         else 0.0
-    )
-    preloss_supplemental_beam_active = bool(
-        preloss_continuation_preference_active
-        and preloss_supplemental_beam_width > 0
-        and not selected_items
-        and all(
-            bits == TH08_UNIT_TIME_SCALE_BITS
-            for bits in (
-                physical.time_scale_schedule.require_player_horizon(
-                    control_delay_frames + config.horizon
-                )[control_delay_frames:]
-            )
-        )
     )
     effective_threat_horizon = potential_threat_horizon
     control_prefix_started_ns = time.perf_counter_ns()
@@ -294,15 +272,6 @@ def _run_local_planner_pass(
         planner_preparation=preparation,
         dependencies=dependencies,
     )
-    supplemental_submission = presubmit_supplemental_stage(
-        baseline_stage,
-        active=preloss_supplemental_beam_active,
-        initial_node=initial_node,
-        bullet_frames=bullet_frames,
-        laser_frames=laser_frames,
-        supplemental_reserve_distance=preloss_reserve_distance,
-        timing=_certificate_timing_accumulator,
-    )
     baseline_result = run_baseline_stage(
         baseline_stage,
         initial_beam=beam,
@@ -310,29 +279,62 @@ def _run_local_planner_pass(
         laser_frames=laser_frames,
         pruning_key=pruning_key,
     )
-    beam_started_ns = baseline_result.started_ns
     beam = list(baseline_result.beam)
-
-    supplemental_result = run_supplemental_stage(
-        baseline_stage,
-        submission=supplemental_submission,
-        baseline_beam=beam,
-        initial_node=initial_node,
+    if not beam:
+        beam = [
+            SearchNode(
+                initial_node.x,
+                initial_node.y,
+                neutral,
+                neutral,
+                1e12,
+                1,
+                -9999.0,
+                -9999.0,
+                0,
+                0.0,
+            )
+        ]
+    positioned_beam: list[SearchNode] = []
+    for node in beam:
+        if target_x is None or target_y is None:
+            position_cost = (
+                ((node.x - 192.0) / 96.0) ** 2
+                + ((node.y - 400.0) / 128.0) ** 2
+            )
+        else:
+            position_cost = 0.25 * (
+                ((node.x - target_x) / 8.0) ** 2
+                + ((node.y - target_y) / 8.0) ** 2
+            )
+        positioned_beam.append(
+            replace(node, risk=node.risk + position_cost)
+        )
+    beam = positioned_beam
+    _certificate_timing_accumulator.beam_search_ms += (
+        time.perf_counter_ns() - baseline_result.started_ns
+    ) / 1_000_000.0
+    terminal_started_ns = time.perf_counter_ns()
+    terminal_threats = dependencies.terminal_threat_scores(
+        beam,
+        start_step=config.horizon,
+        end_step=effective_threat_horizon,
+        control_delay_frames=control_delay_frames,
         bullet_frames=bullet_frames,
         laser_frames=laser_frames,
-        beam_started_ns=beam_started_ns,
-        continuation_preference_active=(
-            preloss_continuation_preference_active
-        ),
-        supplemental_beam_active=preloss_supplemental_beam_active,
-        supplemental_reserve_distance=preloss_reserve_distance,
-        effective_threat_horizon=effective_threat_horizon,
-        timing=_certificate_timing_accumulator,
+        enemy_bodies=enemy_bodies,
     )
+    _certificate_timing_accumulator.terminal_threat_ms += (
+        time.perf_counter_ns() - terminal_started_ns
+    ) / 1_000_000.0
     return finalize_planner_pass(
         PlannerFinalizationContext(
             baseline_stage=baseline_stage,
-            supplemental=supplemental_result,
+            beam=tuple(beam),
+            terminal_threats=terminal_threats,
+            continuation_preference_active=(
+                preloss_continuation_preference_active
+            ),
             prefix_clearance=prefix_clearance,
             observed_player_x=observed_player_x,
             observed_player_y=observed_player_y,

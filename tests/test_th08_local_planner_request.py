@@ -7,7 +7,6 @@ from unittest.mock import patch
 import th08_live_dodge_agent as live
 from th08_local_planner import (
     ActuatorPipeline,
-    CompletedServiceResults,
     GlobalGuidance,
     LocalPlannerRequest,
     ObjectiveContext,
@@ -112,7 +111,6 @@ class LocalPlannerRequestTests(unittest.TestCase):
             recovery_control_reserve=False,
             losing_control_reserve=True,
             preloss_continuation_preference=True,
-            preloss_supplemental_beam_width=13,
             preserve_previous_direction_inertia=False,
             beam_dedup_mode="first_action",
             relax_stale_viability_contradiction=True,
@@ -124,11 +122,6 @@ class LocalPlannerRequestTests(unittest.TestCase):
             damage_target_x=200.0,
             damage_target_half_width=8.0,
             damageable=True,
-        )
-        completed = CompletedServiceResults(
-            supplemental_deadline_ms=1.25,
-            supplemental_async_service="service",
-            supplemental_version=("version", 1),
         )
         sentinel = live.Decision(
             mask=live.SHOT,
@@ -144,7 +137,6 @@ class LocalPlannerRequestTests(unittest.TestCase):
             guidance=guidance,
             config=config,
             objective=objective,
-            completed_services=completed,
         )
 
         with patch.object(
@@ -190,10 +182,6 @@ class LocalPlannerRequestTests(unittest.TestCase):
                 recovery_control_reserve=False,
                 losing_control_reserve=True,
                 preloss_continuation_preference=True,
-                preloss_supplemental_beam_width=13,
-                preloss_supplemental_deadline_ms=1.25,
-                preloss_supplemental_async_service="service",
-                preloss_supplemental_version=("version", 1),
                 preserve_previous_direction_inertia=False,
                 beam_dedup_mode="first_action",
                 relax_stale_viability_contradiction=True,

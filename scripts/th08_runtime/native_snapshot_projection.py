@@ -33,8 +33,9 @@ from th08_live.enemy_sensor import (
     decode_player_lethal_aabb,
 )
 from th08_live.hazard_decode import decode_lasers
-from th08_live.auxiliary_vm.model import (
+from th08_runtime.auxiliary_ecl_state import (
     ACTIVE_VM_BYTES,
+    AuxiliaryEclVmState,
     CONTEXT_ACTIVE_VM_OFFSET,
     CONTEXT_CALL_DEPTH_OFFSET,
     CONTEXT_TARGET_OFFSET,
@@ -49,7 +50,6 @@ from th08_live.sensor import (
     LASER_POOL_SIZE,
     LASER_STRIDE,
 )
-from th08_ecl_auxiliary_core.model import AuxiliaryEclVmState
 from th08_ecl_runtime import EclInstructionCache, ENEMY_MAIN_ECL_VM_OFFSET
 from th08_native_future_body_root import TH08_TIMELINE_RUNTIME_BASE
 from th08_runtime.game_state import ADDR_PLAYER

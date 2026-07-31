@@ -24,21 +24,6 @@ class DamageDecisionFields:
 
 
 @dataclass(frozen=True)
-class SupplementalDecisionFields:
-    active: bool
-    selected_from_supplemental: bool
-    candidate_count: int
-    failure: str | None
-    backend: str
-    status: str
-    completed: bool
-    historical_fallback: bool
-    background_compute_ms: float | None
-    historical_action: str | None
-    historical_route_gate_deficit: float
-
-
-@dataclass(frozen=True)
 class ProposalAssemblyContext:
     request: LocalPlannerRequest
     validated: ValidatedPlannerRequest
@@ -50,7 +35,8 @@ class ProposalAssemblyContext:
     terminal_threat: tuple[int, float]
     prefix_clearance: float
     damage: DamageDecisionFields
-    supplemental: SupplementalDecisionFields
+    historical_action: str | None
+    historical_route_gate_deficit: float
     route_gate_deficit: float
     local_collisions: int
 
@@ -96,7 +82,6 @@ def assemble_local_decision(
         if math.isinf(context.prefix_clearance)
         else context.prefix_clearance
     )
-    supplemental = context.supplemental
     damage = context.damage
     preflight = context.preflight
     validated = context.validated
@@ -174,34 +159,12 @@ def assemble_local_decision(
         ),
         preloss_continuation_preference_active=(
             request.config.preloss_continuation_preference
-            and supplemental.historical_action is not None
+            and context.historical_action is not None
         ),
         planned_route_gate_deficit=context.route_gate_deficit,
-        preloss_supplemental_beam_active=supplemental.active,
-        preloss_supplemental_beam_width=(
-            request.config.preloss_supplemental_beam_width
-            if supplemental.active
-            else 0
-        ),
-        preloss_historical_action=supplemental.historical_action,
-        preloss_selected_from_supplemental=(
-            supplemental.selected_from_supplemental
-        ),
-        preloss_supplemental_candidate_count=(
-            supplemental.candidate_count
-        ),
+        preloss_historical_action=context.historical_action,
         preloss_historical_route_gate_deficit=(
-            supplemental.historical_route_gate_deficit
-        ),
-        preloss_supplemental_failure=supplemental.failure,
-        preloss_supplemental_backend=supplemental.backend,
-        preloss_supplemental_status=supplemental.status,
-        preloss_supplemental_completed=supplemental.completed,
-        preloss_supplemental_historical_fallback=(
-            supplemental.historical_fallback
-        ),
-        preloss_supplemental_background_compute_ms=(
-            supplemental.background_compute_ms
+            context.historical_route_gate_deficit
         ),
         local_collisions=context.local_collisions,
     )

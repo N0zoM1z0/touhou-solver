@@ -61,7 +61,7 @@ class Th08RunDossierTests(unittest.TestCase):
             Path(__file__).resolve().parents[1]
             / "artifacts"
             / "runtime_reports"
-            / "lunatic_route2_fullrun_unattended_20260725_083917.dossier.json"
+            / "lunatic_route2_fullrun_unattended_20260730_222529.dossier.json"
         )
         dossier = json.loads(path.read_text(encoding="utf-8"))
         dossier["acceptance_target"]["difficulty"] = "Hard"

@@ -29,7 +29,6 @@ class LocalCertificateTimingAccumulator:
     control_prefix_ms: float = 0.0
     planning_bullet_projection_ms: float = 0.0
     beam_search_ms: float = 0.0
-    supplemental_beam_ms: float = 0.0
     terminal_threat_ms: float = 0.0
     selection_finalize_ms: float = 0.0
 
@@ -50,7 +49,6 @@ class LocalCertificateTimingAccumulator:
                 self.planning_bullet_projection_ms
             ),
             beam_search_ms=self.beam_search_ms,
-            supplemental_beam_ms=self.supplemental_beam_ms,
             terminal_threat_ms=self.terminal_threat_ms,
             selection_finalize_ms=self.selection_finalize_ms,
         )
@@ -69,7 +67,6 @@ class PlannerPassDependencies:
 
     planner_actions: tuple[PlannerAction, ...]
     local_beam_reducer: str
-    local_supplemental_backend: str
     bomb_mask: int
     focus_mask: int
     shot_mask: int
@@ -96,11 +93,8 @@ class PlannerPassDependencies:
     robust_action_certificates: Callable[..., Any]
     terminal_threat_scores: Callable[..., Any]
     assemble_local_decision: Callable[..., Decision]
-    lookup_completed_supplemental: Callable[..., Any]
     run_baseline_beam: Callable[..., Any]
     select_progress_action: Callable[..., Any]
-    search_supplemental_local_beam: Callable[..., Any]
-    search_supplemental_local_beam_native: Callable[..., Any]
 
 
 __all__ = [

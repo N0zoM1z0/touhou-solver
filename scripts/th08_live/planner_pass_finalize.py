@@ -16,10 +16,8 @@ from th08_local_planner import (
     ProposalAssemblyContext,
     RobustActionCertificate,
     SearchNode,
-    SupplementalDecisionFields,
 )
 from th08_live.planner_pass_baseline import BaselineStagePreparation
-from th08_live.planner_pass_supplemental import SupplementalStageResult
 from th08_live.planner_pass_types import (
     LocalCertificateTimingAccumulator,
     PlannerModeTransition,
@@ -30,7 +28,9 @@ from touhou_control.phase_progress import ProgressCandidate
 @dataclass(frozen=True)
 class PlannerFinalizationContext:
     baseline_stage: BaselineStagePreparation
-    supplemental: SupplementalStageResult
+    beam: tuple[SearchNode, ...]
+    terminal_threats: dict[SearchNode, tuple[int, float]]
+    continuation_preference_active: bool
     prefix_clearance: float
     observed_player_x: float
     observed_player_y: float
@@ -47,7 +47,6 @@ def finalize_planner_pass(
     """Select, assemble, and optionally request the historical relaxed retry."""
 
     stage = context.baseline_stage
-    supplemental = context.supplemental
     request = stage.request
     preparation = stage.planner_preparation
     dependencies = stage.dependencies
@@ -60,12 +59,11 @@ def finalize_planner_pass(
     prepared = preparation.hazards
     preflight = preparation.preflight
     actions = dependencies.planner_actions
-    beam = list(supplemental.baseline_beam)
-    supplemental_beam = list(supplemental.supplemental_beam)
-    endpoint_pool = [*beam, *supplemental_beam]
-    terminal_threats = supplemental.terminal_threats
+    beam = list(context.beam)
+    endpoint_pool = beam
+    terminal_threats = context.terminal_threats
     continuation_preference_active = (
-        supplemental.continuation_preference_active
+        context.continuation_preference_active
     )
     effective_allowed_first_actions = (
         preflight.effective_allowed_first_actions
@@ -113,8 +111,6 @@ def finalize_planner_pass(
     robust_certificate: RobustActionCertificate | None = None
     historical_best = min(beam, key=historical_selection_key)
     historical_route_gate_deficit = route_gate_deficit(historical_best)
-    selected_from_supplemental = False
-    supplemental_candidate_count = 0
 
     if continuation_preference_active:
         actions_by_name: dict[str, PlannerAction] = {}
@@ -283,7 +279,6 @@ def finalize_planner_pass(
             if continuation_key >= historical_continuation_key:
                 continue
             admitted.append(node)
-        supplemental_candidate_count = len(admitted)
         best = (
             min(
                 admitted,
@@ -314,9 +309,6 @@ def finalize_planner_pass(
             )
             if admitted
             else historical_best
-        )
-        selected_from_supplemental = (
-            id(best) in supplemental.supplemental_source_ids
         )
         for node in endpoint_pool:
             action_name = node.first_action.name
@@ -495,34 +487,13 @@ def finalize_planner_pass(
                 eligible_action_count=damage_eligible_action_count,
                 reason=damage_reason,
             ),
-            supplemental=SupplementalDecisionFields(
-                active=supplemental.supplemental_beam_active,
-                selected_from_supplemental=selected_from_supplemental,
-                candidate_count=supplemental_candidate_count,
-                failure=supplemental.failure,
-                backend=(
-                    "exact_async_native"
-                    if request.completed_services
-                    .supplemental_async_service
-                    is not None
-                    else dependencies.local_supplemental_backend
-                ),
-                status=supplemental.status,
-                completed=supplemental.completed,
-                historical_fallback=(
-                    supplemental.historical_fallback
-                ),
-                background_compute_ms=(
-                    supplemental.background_compute_ms
-                ),
-                historical_action=(
-                    historical_best.first_action.name
-                    if continuation_preference_active
-                    else None
-                ),
-                historical_route_gate_deficit=(
-                    historical_route_gate_deficit
-                ),
+            historical_action=(
+                historical_best.first_action.name
+                if continuation_preference_active
+                else None
+            ),
+            historical_route_gate_deficit=(
+                historical_route_gate_deficit
             ),
             route_gate_deficit=route_gate_deficit(best),
             local_collisions=best.collisions,

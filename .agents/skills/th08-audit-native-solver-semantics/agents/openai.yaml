@@ -1,4 +1,0 @@
-interface:
-  display_name: "TH08 Scoped Native-to-Solver Audit"
-  short_description: "Run focused TH08 native-to-solver semantic checks"
-  default_prompt: "Use $th08-audit-native-solver-semantics to investigate the smallest relevant TH08 native-to-solver semantic scope, reusing retained evidence; expand to a comprehensive audit only when I explicitly request it."

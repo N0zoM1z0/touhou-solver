@@ -213,39 +213,9 @@ def build_decision_control_trace_fields(
             ),
             "planned_route_gate_deficit": decision.planned_route_gate_deficit,
             "local_collisions": decision.local_collisions,
-            "preloss_supplemental_beam_active": (
-                decision.preloss_supplemental_beam_active
-            ),
-            "preloss_supplemental_beam_width": (
-                decision.preloss_supplemental_beam_width
-            ),
             "preloss_historical_action": decision.preloss_historical_action,
-            "preloss_selected_from_supplemental": (
-                decision.preloss_selected_from_supplemental
-            ),
-            "preloss_supplemental_candidate_count": (
-                decision.preloss_supplemental_candidate_count
-            ),
             "preloss_historical_route_gate_deficit": (
                 decision.preloss_historical_route_gate_deficit
-            ),
-            "preloss_supplemental_failure": (
-                decision.preloss_supplemental_failure
-            ),
-            "preloss_supplemental_backend": (
-                decision.preloss_supplemental_backend
-            ),
-            "preloss_supplemental_status": (
-                decision.preloss_supplemental_status
-            ),
-            "preloss_supplemental_completed": (
-                decision.preloss_supplemental_completed
-            ),
-            "preloss_supplemental_historical_fallback": (
-                decision.preloss_supplemental_historical_fallback
-            ),
-            "preloss_supplemental_background_compute_ms": (
-                decision.preloss_supplemental_background_compute_ms
             ),
             "viability_safety_value_preferred": (
                 decision.viability_safety_value_preferred

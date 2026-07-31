@@ -47,7 +47,7 @@ from .game_state import (
     RUN_STATE_LIVES_OFFSET,
     RUN_STATE_POWER_OFFSET,
 )
-from .priority17_publication_probe import (
+from .windows_probe import (
     MEM_COMMIT,
     MEM_RELEASE,
     MEM_RESERVE,
@@ -56,7 +56,7 @@ from .priority17_publication_probe import (
     PROCESS_VM_OPERATION,
     PROCESS_VM_READ,
     PROCESS_VM_WRITE,
-    Priority17ProbeUnsafeStateError,
+    ProbeUnsafeStateError,
     _configure_api,
     _read_memory,
     _release_suspended_threads,
@@ -2152,7 +2152,7 @@ class EnemyLifecycleProbe:
             for _attempt in range(8):
                 try:
                     candidate = _suspend_target_threads(api, pid)
-                except Priority17ProbeUnsafeStateError as error:
+                except ProbeUnsafeStateError as error:
                     target_suspend_unsafe = True
                     raise EnemyLifecycleProbeUnsafeStateError(
                         "lifecycle activation could not restore target suspension"

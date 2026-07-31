@@ -25,7 +25,7 @@ import struct
 import time
 from typing import Any, Iterable
 
-from .priority17_publication_probe import (
+from .windows_probe import (
     INVALID_HANDLE_VALUE,
     MEM_COMMIT,
     MEM_RELEASE,

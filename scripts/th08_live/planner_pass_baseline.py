@@ -46,7 +46,7 @@ def prepare_baseline_stage(
     planner_preparation: PlannerPassPreparation,
     dependencies: PlannerPassDependencies,
 ) -> BaselineStagePreparation:
-    """Prepare reducer metadata shared with baseline and supplemental lanes."""
+    """Prepare reducer metadata for the active baseline beam."""
 
     selected_items = planner_preparation.hazards.selected_items
     validated = planner_preparation.validated

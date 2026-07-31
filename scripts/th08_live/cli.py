@@ -124,9 +124,9 @@ def build_live_parser(
         action=argparse.BooleanOptionalAction,
         default=False,
         help=(
-            "enable the default-off signed ordinary-nonspell "
-            "prepublication predecessor; incomplete future birth/event "
-            "coverage remains fail-closed"
+            "enable the default-off 4px Boolean-lower ordinary-nonspell "
+            "global authority and causal active-policy layer predecessor; "
+            "incomplete future birth/event coverage remains fail-closed"
         ),
     )
     parser.add_argument(

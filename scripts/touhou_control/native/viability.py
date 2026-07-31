@@ -75,8 +75,8 @@ def set_current_thread_viability_worker_limit(
 ) -> bool:
     """Bound native viability fan-out on the calling Python thread."""
 
-    if not 1 <= worker_limit <= 4:
-        raise ValueError("native viability worker limit must be 1..4")
+    if not 1 <= worker_limit <= 16:
+        raise ValueError("native viability worker limit must be 1..16")
     function = _load_viability_worker_limit_function()
     if function is None:
         return False

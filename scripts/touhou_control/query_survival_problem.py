@@ -34,6 +34,8 @@ class SurvivalQueryProblem:
     delay_frames: tuple[int, ...]
     nominal_delay: int
     config: ViabilityConfig
+    terminal_state_margins: np.ndarray | None = None
+    terminal_action_margins: np.ndarray | None = None
 
     def __post_init__(self) -> None:
         x_axis = np.ascontiguousarray(self.x_axis, dtype=np.float32)
@@ -46,12 +48,61 @@ class SurvivalQueryProblem:
             raise ValueError("survival problem clearance shape is invalid")
         if clearance.shape[0] < 2:
             raise ValueError("survival problem needs a future frame")
+        terminal_state = (
+            None
+            if self.terminal_state_margins is None
+            else np.ascontiguousarray(
+                self.terminal_state_margins,
+                dtype=np.float32,
+            )
+        )
+        terminal_action = (
+            None
+            if self.terminal_action_margins is None
+            else np.ascontiguousarray(
+                self.terminal_action_margins,
+                dtype=np.float32,
+            )
+        )
+        if (terminal_state is None) != (terminal_action is None):
+            raise ValueError(
+                "terminal state and action margins must be supplied together"
+            )
+        if terminal_state is not None:
+            expected_state_shape = (
+                len(self.actions),
+                len(y_axis),
+                len(x_axis),
+            )
+            expected_action_shape = (
+                len(self.actions),
+                len(self.actions),
+                len(y_axis),
+                len(x_axis),
+            )
+            if terminal_state.shape != expected_state_shape:
+                raise ValueError(
+                    "terminal state margins must have shape "
+                    f"{expected_state_shape}"
+                )
+            assert terminal_action is not None
+            if terminal_action.shape != expected_action_shape:
+                raise ValueError(
+                    "terminal action margins must have shape "
+                    f"{expected_action_shape}"
+                )
         x_axis.setflags(write=False)
         y_axis.setflags(write=False)
         clearance.setflags(write=False)
+        if terminal_state is not None:
+            terminal_state.setflags(write=False)
+            assert terminal_action is not None
+            terminal_action.setflags(write=False)
         object.__setattr__(self, "x_axis", x_axis)
         object.__setattr__(self, "y_axis", y_axis)
         object.__setattr__(self, "clearance_volume", clearance)
+        object.__setattr__(self, "terminal_state_margins", terminal_state)
+        object.__setattr__(self, "terminal_action_margins", terminal_action)
 
     @property
     def horizon_frames(self) -> int:
@@ -113,6 +164,11 @@ class SurvivalQueryProblem:
     def build_full_policy(self) -> RobustViabilityPolicy:
         """Build dense fused labels after the Boolean result is publishable."""
 
+        if self.terminal_state_margins is not None:
+            raise ValueError(
+                "dense fused labels do not support terminal continuation "
+                "margins"
+            )
         return build_robust_viability_policy(
             x_axis=self.x_axis,
             y_axis=self.y_axis,
@@ -132,6 +188,11 @@ class SurvivalQueryProblem:
     ) -> RobustViabilityPolicy:
         """Reuse Boolean arrays and label only states already known losing."""
 
+        if self.terminal_state_margins is not None:
+            raise ValueError(
+                "postpublished labels do not support terminal continuation "
+                "margins"
+            )
         arrays = native_backend.build_losing_survival_label_arrays(
             x_axis=self.x_axis,
             y_axis=self.y_axis,

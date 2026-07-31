@@ -341,7 +341,7 @@ class NativeAbiSymbolTests(unittest.TestCase):
     def test_built_libraries_match_checked_in_export_manifest(self) -> None:
         expected = _manifest_symbols()
         self.assertEqual(expected, tuple(sorted(set(expected))))
-        self.assertEqual(len(expected), 42)
+        self.assertEqual(len(expected), 44)
         targets = (
             (
                 shutil.which("nm"),

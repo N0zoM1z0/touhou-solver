@@ -146,6 +146,8 @@ private:
 public:
     BeliefPipelineSurvivalWorkspace(
         const float* clearance,
+        const float* terminal_state_margins,
+        const float* terminal_action_margins,
         int frame_count,
         int row_count,
         int column_count,
@@ -169,6 +171,8 @@ public:
         bool clamp_to_bounds
     )
         : clearance_(clearance),
+          terminal_state_margins_(terminal_state_margins),
+          terminal_action_margins_(terminal_action_margins),
           frame_count_(frame_count),
           row_count_(row_count),
           column_count_(column_count),
@@ -532,6 +536,209 @@ public:
                 }
             }
         }
+        *output_unresolved_action_mask = unresolved_mask;
+        *output_deadline_expired = deadline_expired ? 1 : 0;
+        output_stats[0] = static_cast<std::uint64_t>(
+            threshold_memo_[0].size() + threshold_memo_[1].size()
+        );
+        output_stats[1] = static_cast<std::uint64_t>(
+            output_stats[0] - threshold_memo_before
+        );
+        output_stats[2] = counters_.memo_hits - before.memo_hits;
+        output_stats[3] = (
+            counters_.action_upper_prunes
+            - before.action_upper_prunes
+        );
+        output_stats[4] = (
+            counters_.branch_incumbent_prunes
+            - before.branch_incumbent_prunes
+        );
+        output_stats[5] = (
+            counters_.observation_merges - before.observation_merges
+        );
+        output_stats[6] = 0;
+        output_stats[7] = (
+            counters_.hidden_simulations - before.hidden_simulations
+        );
+        return 0;
+    }
+
+    int certify_exact(
+        int start_frame,
+        int start_row,
+        int start_column,
+        int observed_action,
+        int pending_action,
+        const int* pending_remaining_frames,
+        int pending_remaining_count,
+        int root_continuation_budget,
+        std::uint16_t target_frames,
+        float target_margin,
+        int timeout_ms,
+        std::uint64_t* output_winning_action_mask,
+        std::uint64_t* output_unresolved_action_mask,
+        int* output_deadline_expired,
+        std::uint64_t* output_stats
+    ) {
+        const int query_budget = (
+            root_continuation_budget < 0
+            ? continuation_budget_
+            : root_continuation_budget
+        );
+        if (
+            remaining_delay_bucket_size_ != 0
+            || continuation_policy_mode_ != 0
+            || start_frame < 0 || start_frame >= frame_count_
+            || start_row < 0 || start_row >= row_count_
+            || start_column < 0 || start_column >= column_count_
+            || observed_action < 0 || observed_action >= action_count_
+            || pending_action < -1 || pending_action >= action_count_
+            || pending_remaining_count < 0
+            || pending_remaining_count > BELIEF_PIPELINE_MAX_REMAINING
+            || query_budget < 0
+            || query_budget > continuation_budget_
+            || target_frames > frame_count_ - 1 - start_frame
+            || !std::isfinite(target_margin)
+            || timeout_ms < 0
+            || (
+                pending_action < 0
+                && pending_remaining_count != 0
+            )
+            || (
+                pending_action >= 0
+                && (
+                    pending_remaining_frames == nullptr
+                    || pending_remaining_count == 0
+                )
+            )
+        ) {
+            return 1;
+        }
+        std::uint64_t remaining_mask = std::uint64_t{1};
+        if (pending_action >= 0) {
+            remaining_mask = 0;
+            for (int index = 0; index < pending_remaining_count; ++index) {
+                const int remaining = pending_remaining_frames[index];
+                if (
+                    remaining <= 0
+                    || remaining > BELIEF_PIPELINE_MAX_REMAINING
+                    || (
+                        index > 0
+                        && pending_remaining_frames[index - 1]
+                            >= remaining
+                    )
+                ) {
+                    return 1;
+                }
+                remaining_mask |= std::uint64_t{1} << remaining;
+            }
+        }
+
+        std::lock_guard<std::mutex> guard(mutex_);
+        QueryScope scope(this, timeout_ms);
+        check_abort(true);
+        const Counters before = counters_;
+        BeliefPipelineState state{
+            start_frame,
+            start_row,
+            start_column,
+            observed_action,
+            pending_action,
+            query_budget,
+            remaining_mask,
+        };
+        state = canonicalize(state);
+        const int target_frame = start_frame + target_frames;
+        const std::uint32_t target_margin_bits = float_bits(target_margin);
+        const bool same_threshold_session = (
+            threshold_session_active_
+            && threshold_session_root_ == state
+            && threshold_session_target_frame_ == target_frame
+            && threshold_session_target_margin_bits_
+                == target_margin_bits
+        );
+        if (!same_threshold_session) {
+            threshold_memo_[0].clear();
+            threshold_memo_[1].clear();
+            threshold_root_status_.fill(
+                ThresholdRootStatus::unknown
+            );
+            threshold_session_active_ = true;
+            threshold_session_root_ = state;
+            threshold_session_target_frame_ = target_frame;
+            threshold_session_target_margin_bits_ =
+                target_margin_bits;
+        }
+        threshold_target_frame_ = target_frame;
+        threshold_target_margin_ = target_margin;
+        const std::size_t threshold_memo_before = (
+            threshold_memo_[0].size() + threshold_memo_[1].size()
+        );
+
+        bool deadline_expired = false;
+        if (
+            state.frame == frame_count_ - 1
+            || current_margin(state) <= target_margin
+        ) {
+            threshold_root_status_.fill(
+                ThresholdRootStatus::rejected
+            );
+        } else {
+            int action = 0;
+            try {
+                for (; action < action_count_; ++action) {
+                    ThresholdRootStatus& status =
+                        threshold_root_status_[action];
+                    if (status != ThresholdRootStatus::unknown) {
+                        continue;
+                    }
+                    check_abort();
+                    const PreparedAction prepared = prepare_action(
+                        state,
+                        action,
+                        true,
+                        true,
+                        true
+                    );
+                    if (
+                        prepared.threshold_rejected
+                        || !threshold_label_exceeds(
+                            state.frame,
+                            prepared.upper,
+                            true
+                        )
+                    ) {
+                        ++counters_.action_upper_prunes;
+                        status = ThresholdRootStatus::rejected;
+                        continue;
+                    }
+                    status = (
+                        threshold_action_exceeds(
+                            state,
+                            prepared,
+                            true
+                        )
+                        ? ThresholdRootStatus::exceeds
+                        : ThresholdRootStatus::rejected
+                    );
+                }
+            } catch (const PipelineDeadlineSignal&) {
+                deadline_expired = true;
+            }
+        }
+
+        std::uint64_t winning_mask = 0;
+        std::uint64_t unresolved_mask = 0;
+        for (int action = 0; action < action_count_; ++action) {
+            const ThresholdRootStatus status =
+                threshold_root_status_[action];
+            if (status == ThresholdRootStatus::exceeds) {
+                winning_mask |= std::uint64_t{1} << action;
+            } else if (status == ThresholdRootStatus::unknown) {
+                unresolved_mask |= std::uint64_t{1} << action;
+            }
+        }
+        *output_winning_action_mask = winning_mask;
         *output_unresolved_action_mask = unresolved_mask;
         *output_deadline_expired = deadline_expired ? 1 : 0;
         output_stats[0] = static_cast<std::uint64_t>(
@@ -970,7 +1177,7 @@ private:
     }
 
     float current_margin(const BeliefPipelineState& state) const {
-        return (
+        float margin = (
             clearance_[clearance_index(
                 state.frame,
                 state.row,
@@ -979,6 +1186,34 @@ private:
                 column_count_
             )] - required_clearance_
         );
+        if (
+            state.frame == frame_count_ - 1
+            && terminal_state_margins_ != nullptr
+        ) {
+            const std::size_t spatial_index =
+                static_cast<std::size_t>(state.row) * column_count_
+                + state.column;
+            const std::size_t plane_size =
+                static_cast<std::size_t>(row_count_) * column_count_;
+            const float continuation_margin = (
+                state.pending >= 0
+                ? terminal_action_margins_[
+                    (
+                        static_cast<std::size_t>(state.active)
+                            * action_count_
+                        + state.pending
+                    ) * plane_size
+                    + spatial_index
+                ]
+                : terminal_state_margins_[
+                    static_cast<std::size_t>(state.active)
+                        * plane_size
+                    + spatial_index
+                ]
+            );
+            margin = std::min(margin, continuation_margin);
+        }
+        return margin;
     }
 
     BeliefPipelineState canonicalize(
@@ -1846,6 +2081,8 @@ private:
     }
 
     const float* clearance_;
+    const float* terminal_state_margins_;
+    const float* terminal_action_margins_;
     int frame_count_;
     int row_count_;
     int column_count_;
@@ -2010,6 +2247,137 @@ int touhou_native_impl_belief_pipeline_workspace_create_v7(
     try {
         *output_workspace = new BeliefPipelineSurvivalWorkspace(
             clearance,
+            nullptr,
+            nullptr,
+            frame_count,
+            row_count,
+            column_count,
+            x_start,
+            x_step,
+            y_start,
+            y_step,
+            velocity_x,
+            velocity_y,
+            action_count,
+            base_action_mask,
+            budgeted_action_mask,
+            continuation_budget,
+            remaining_delay_bucket_size,
+            continuation_policy_mode,
+            delay_frames,
+            delay_count,
+            cadence_frames,
+            cadence_count,
+            required_clearance,
+            clamp_to_bounds != 0
+        );
+    } catch (...) {
+        *output_workspace = nullptr;
+        return 4;
+    }
+    return 0;
+}
+
+int touhou_native_impl_belief_pipeline_workspace_create_v8(
+    const float* clearance,
+    const float* terminal_state_margins,
+    const float* terminal_action_margins,
+    int frame_count,
+    int row_count,
+    int column_count,
+    double x_start,
+    double x_step,
+    double y_start,
+    double y_step,
+    const double* velocity_x,
+    const double* velocity_y,
+    int action_count,
+    std::uint64_t base_action_mask,
+    std::uint64_t budgeted_action_mask,
+    int continuation_budget,
+    int remaining_delay_bucket_size,
+    int continuation_policy_mode,
+    const int* delay_frames,
+    int delay_count,
+    const int* cadence_frames,
+    int cadence_count,
+    float required_clearance,
+    int clamp_to_bounds,
+    void** output_workspace
+) {
+    if (
+        (terminal_state_margins == nullptr)
+        != (terminal_action_margins == nullptr)
+    ) {
+        return 1;
+    }
+    if (
+        clearance == nullptr || velocity_x == nullptr
+        || velocity_y == nullptr || delay_frames == nullptr
+        || cadence_frames == nullptr || output_workspace == nullptr
+    ) {
+        return 1;
+    }
+    if (
+        frame_count < 2 || frame_count - 1 > 65535
+        || row_count < 2 || row_count > 1024
+        || column_count < 2 || column_count > 1024
+        || x_step <= 0.0 || y_step <= 0.0
+        || action_count < 1
+        || action_count > BELIEF_PIPELINE_MAX_ACTIONS
+        || base_action_mask == 0
+        || continuation_budget < 0 || continuation_budget > 65535
+        || remaining_delay_bucket_size < 0
+        || remaining_delay_bucket_size > BELIEF_PIPELINE_MAX_REMAINING
+        || continuation_policy_mode < 0
+        || continuation_policy_mode > action_count
+        || (
+            (base_action_mask | budgeted_action_mask)
+            & ~(
+                action_count == 64
+                ? std::numeric_limits<std::uint64_t>::max()
+                : (
+                    (std::uint64_t{1} << action_count)
+                    - std::uint64_t{1}
+                )
+            )
+        ) != 0
+        || (base_action_mask & budgeted_action_mask) != 0
+        || delay_count < 1 || delay_count > PIPELINE_MAX_DELAYS
+        || cadence_count < 1
+        || cadence_count > PIPELINE_MAX_DECISION_FRAMES
+        || delay_frames[delay_count - 1]
+            > BELIEF_PIPELINE_MAX_REMAINING
+    ) {
+        return 2;
+    }
+    for (int index = 0; index < delay_count; ++index) {
+        if (
+            delay_frames[index] < 0
+            || (
+                index > 0
+                && delay_frames[index - 1] >= delay_frames[index]
+            )
+        ) {
+            return 3;
+        }
+    }
+    for (int index = 0; index < cadence_count; ++index) {
+        if (
+            cadence_frames[index] <= 0
+            || (
+                index > 0
+                && cadence_frames[index - 1] >= cadence_frames[index]
+            )
+        ) {
+            return 3;
+        }
+    }
+    try {
+        *output_workspace = new BeliefPipelineSurvivalWorkspace(
+            clearance,
+            terminal_state_margins,
+            terminal_action_margins,
             frame_count,
             row_count,
             column_count,
@@ -2137,6 +2505,62 @@ int touhou_native_impl_belief_pipeline_workspace_certify_upper_v3(
             lower_frames,
             lower_margin,
             timeout_ms,
+            output_unresolved_action_mask,
+            output_deadline_expired,
+            output_stats
+        );
+    } catch (const PipelineCancelledSignal&) {
+        return PIPELINE_RESULT_CANCELLED;
+    } catch (const PipelineDeadlineSignal&) {
+        return PIPELINE_RESULT_DEADLINE;
+    } catch (...) {
+        return 2;
+    }
+}
+
+int touhou_native_impl_belief_pipeline_workspace_certify_exact_v1(
+    void* workspace,
+    int start_frame,
+    int start_row,
+    int start_column,
+    int observed_action,
+    int pending_action,
+    const int* pending_remaining_frames,
+    int pending_remaining_count,
+    int continuation_action_budget,
+    std::uint16_t target_frames,
+    float target_margin,
+    int timeout_ms,
+    std::uint64_t* output_winning_action_mask,
+    std::uint64_t* output_unresolved_action_mask,
+    int* output_deadline_expired,
+    std::uint64_t* output_stats
+) {
+    if (
+        workspace == nullptr
+        || output_winning_action_mask == nullptr
+        || output_unresolved_action_mask == nullptr
+        || output_deadline_expired == nullptr
+        || output_stats == nullptr
+    ) {
+        return 1;
+    }
+    try {
+        return static_cast<BeliefPipelineSurvivalWorkspace*>(
+            workspace
+        )->certify_exact(
+            start_frame,
+            start_row,
+            start_column,
+            observed_action,
+            pending_action,
+            pending_remaining_frames,
+            pending_remaining_count,
+            continuation_action_budget,
+            target_frames,
+            target_margin,
+            timeout_ms,
+            output_winning_action_mask,
             output_unresolved_action_mask,
             output_deadline_expired,
             output_stats

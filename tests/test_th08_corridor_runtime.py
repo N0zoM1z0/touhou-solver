@@ -345,7 +345,7 @@ class Th08CorridorRuntimeTests(unittest.TestCase):
         self.assertFalse(solution.background_priority_lowered)
 
     def test_background_worker_limit_rejects_out_of_range_values(self) -> None:
-        with self.assertRaisesRegex(ValueError, "must be 1..4"):
+        with self.assertRaisesRegex(ValueError, "must be 1..16"):
             solve_corridor(
                 source_frame=100,
                 snapshot_frame=90,

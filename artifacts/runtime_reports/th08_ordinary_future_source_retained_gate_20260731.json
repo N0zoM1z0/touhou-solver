@@ -27,7 +27,7 @@
     ],
     "prefix_hold_frames": 10,
     "corridor_horizon_frames": 80,
-    "safety_value_horizon_frames": 32,
+    "safety_value_horizon_frames": 80,
     "future_geometry_before_publication": "consumed_by_exact_local_pipeline_prefix",
     "future_geometry_after_publication": "consumed_by_corridor_hazard_space_policy",
     "unsupported_source_semantics": "fail_closed"
@@ -116,7 +116,7 @@
             }
           ]
         },
-        "closure_wall_ms": 19.94536600250285,
+        "closure_wall_ms": 17.477823988883756,
         "source_count": 12,
         "auxiliary_count": 0,
         "silent_child_count": 0,
@@ -133,8 +133,8 @@
         ],
         "reachable": false,
         "reason": "initial robust viability action set is empty",
-        "solve_ms": 607.3877899907529,
-        "solve_wall_ms": 608.3000319922576,
+        "solve_ms": 1116.464268998243,
+        "solve_wall_ms": 1116.991048998898,
         "viability_backend": "native",
         "viable_state_count_layer0": 3820,
         "initial_safe_action_count": 0,
@@ -362,30 +362,12 @@
         "state_eligible": true,
         "coverage_complete": true,
         "authority_eligible": true,
-        "applicable": true,
-        "reason": "prepublication_viable_actions_found",
-        "allowed_actions": [
-          "stay",
-          "left",
-          "down",
-          "down_left",
-          "down_right",
-          "left_fast",
-          "down_fast",
-          "down_left_fast"
-        ],
-        "candidate_viable_actions": [
-          "stay",
-          "left",
-          "down",
-          "down_left",
-          "down_right",
-          "left_fast",
-          "down_fast",
-          "down_left_fast"
-        ],
+        "applicable": false,
+        "reason": "prepublication_viable_predecessor_empty",
+        "allowed_actions": [],
+        "candidate_viable_actions": [],
         "recovery_actions": [
-          "stay"
+          "down_right"
         ],
         "current_frame": 816,
         "publication_frame": 832,
@@ -469,10 +451,10 @@
           {
             "action": "stay",
             "branch_count": 7,
-            "viable_branch_count": 7,
+            "viable_branch_count": 0,
             "unavailable_branch_count": 0,
-            "all_branches_viable": true,
-            "worst_certified_margin": 21.279503399823493,
+            "all_branches_viable": false,
+            "worst_certified_margin": -8.731743281389885,
             "worst_recovery_distance": 0.0,
             "terminal_active_actions": [
               "stay"
@@ -481,10 +463,10 @@
           {
             "action": "left",
             "branch_count": 7,
-            "viable_branch_count": 7,
+            "viable_branch_count": 1,
             "unavailable_branch_count": 0,
-            "all_branches_viable": true,
-            "worst_certified_margin": 12.148993234352034,
+            "all_branches_viable": false,
+            "worst_certified_margin": -7.305948701464406,
             "worst_recovery_distance": 0.0,
             "terminal_active_actions": [
               "left"
@@ -493,10 +475,10 @@
           {
             "action": "right",
             "branch_count": 7,
-            "viable_branch_count": 6,
+            "viable_branch_count": 1,
             "unavailable_branch_count": 0,
             "all_branches_viable": false,
-            "worst_certified_margin": -0.9109841778677055,
+            "worst_certified_margin": -10.130548912493218,
             "worst_recovery_distance": null,
             "terminal_active_actions": [
               "right"
@@ -517,10 +499,10 @@
           {
             "action": "down",
             "branch_count": 7,
-            "viable_branch_count": 7,
+            "viable_branch_count": 0,
             "unavailable_branch_count": 0,
-            "all_branches_viable": true,
-            "worst_certified_margin": 11.337592594053115,
+            "all_branches_viable": false,
+            "worst_certified_margin": -8.251702793214951,
             "worst_recovery_distance": 0.0,
             "terminal_active_actions": [
               "down"
@@ -553,10 +535,10 @@
           {
             "action": "down_left",
             "branch_count": 7,
-            "viable_branch_count": 7,
+            "viable_branch_count": 0,
             "unavailable_branch_count": 0,
-            "all_branches_viable": true,
-            "worst_certified_margin": 20.508677170753955,
+            "all_branches_viable": false,
+            "worst_certified_margin": -7.073501898765086,
             "worst_recovery_distance": 0.0,
             "terminal_active_actions": [
               "down_left"
@@ -565,10 +547,10 @@
           {
             "action": "down_right",
             "branch_count": 7,
-            "viable_branch_count": 7,
+            "viable_branch_count": 0,
             "unavailable_branch_count": 0,
-            "all_branches_viable": true,
-            "worst_certified_margin": 1.3572935202133465,
+            "all_branches_viable": false,
+            "worst_certified_margin": -6.923497762440462,
             "worst_recovery_distance": 0.0,
             "terminal_active_actions": [
               "down_right"
@@ -577,10 +559,10 @@
           {
             "action": "left_fast",
             "branch_count": 7,
-            "viable_branch_count": 7,
+            "viable_branch_count": 0,
             "unavailable_branch_count": 0,
-            "all_branches_viable": true,
-            "worst_certified_margin": 1.5954405068294832,
+            "all_branches_viable": false,
+            "worst_certified_margin": -9.782510638342636,
             "worst_recovery_distance": null,
             "terminal_active_actions": [
               "left_fast"
@@ -613,10 +595,10 @@
           {
             "action": "down_fast",
             "branch_count": 7,
-            "viable_branch_count": 7,
+            "viable_branch_count": 0,
             "unavailable_branch_count": 0,
-            "all_branches_viable": true,
-            "worst_certified_margin": 7.713357567681534,
+            "all_branches_viable": false,
+            "worst_certified_margin": -7.146848082648056,
             "worst_recovery_distance": 0.0,
             "terminal_active_actions": [
               "down_fast"
@@ -649,10 +631,10 @@
           {
             "action": "down_left_fast",
             "branch_count": 7,
-            "viable_branch_count": 7,
+            "viable_branch_count": 1,
             "unavailable_branch_count": 0,
-            "all_branches_viable": true,
-            "worst_certified_margin": 18.299530082136645,
+            "all_branches_viable": false,
+            "worst_certified_margin": -7.086906608175271,
             "worst_recovery_distance": 0.0,
             "terminal_active_actions": [
               "down_left_fast"
@@ -661,7 +643,7 @@
           {
             "action": "down_right_fast",
             "branch_count": 7,
-            "viable_branch_count": 2,
+            "viable_branch_count": 0,
             "unavailable_branch_count": 0,
             "all_branches_viable": false,
             "worst_certified_margin": -10.117021462116128,
@@ -682,8 +664,8 @@
         "issued_action": "up_left_fast",
         "issued_action_allowed": false,
         "issued_action_margin": -18.845321743481964,
-        "best_action": "stay",
-        "best_margin": 21.279503399823493
+        "best_action": "down_right",
+        "best_margin": -6.923497762440462
       }
     },
     {
@@ -769,7 +751,7 @@
             }
           ]
         },
-        "closure_wall_ms": 18.197897996287793,
+        "closure_wall_ms": 16.442110005300492,
         "source_count": 12,
         "auxiliary_count": 0,
         "silent_child_count": 0,
@@ -786,8 +768,8 @@
         ],
         "reachable": false,
         "reason": "initial robust viability action set is empty",
-        "solve_ms": 592.0349410007475,
-        "solve_wall_ms": 592.1603250026237,
+        "solve_ms": 1095.9275880013593,
+        "solve_wall_ms": 1096.040186996106,
         "viability_backend": "native",
         "viable_state_count_layer0": 3677,
         "initial_safe_action_count": 0,
@@ -1011,22 +993,10 @@
         "state_eligible": true,
         "coverage_complete": true,
         "authority_eligible": true,
-        "applicable": true,
-        "reason": "prepublication_viable_actions_found",
-        "allowed_actions": [
-          "down",
-          "down_left",
-          "down_right",
-          "down_fast",
-          "down_left_fast"
-        ],
-        "candidate_viable_actions": [
-          "down",
-          "down_left",
-          "down_right",
-          "down_fast",
-          "down_left_fast"
-        ],
+        "applicable": false,
+        "reason": "prepublication_viable_predecessor_empty",
+        "allowed_actions": [],
+        "candidate_viable_actions": [],
         "recovery_actions": [
           "down_left"
         ],
@@ -1111,7 +1081,7 @@
             "viable_branch_count": 0,
             "unavailable_branch_count": 0,
             "all_branches_viable": false,
-            "worst_certified_margin": -9.89327974403097,
+            "worst_certified_margin": -13.967948593988005,
             "worst_recovery_distance": 112.0,
             "terminal_active_actions": [
               "stay"
@@ -1123,7 +1093,7 @@
             "viable_branch_count": 0,
             "unavailable_branch_count": 0,
             "all_branches_viable": false,
-            "worst_certified_margin": -14.536721911723609,
+            "worst_certified_margin": -16.599003520305153,
             "worst_recovery_distance": 80.0,
             "terminal_active_actions": [
               "left"
@@ -1132,10 +1102,10 @@
           {
             "action": "right",
             "branch_count": 7,
-            "viable_branch_count": 4,
+            "viable_branch_count": 0,
             "unavailable_branch_count": 0,
             "all_branches_viable": false,
-            "worst_certified_margin": -4.943963921058867,
+            "worst_certified_margin": -13.630449546327208,
             "worst_recovery_distance": 150.94369811290565,
             "terminal_active_actions": [
               "right"
@@ -1147,7 +1117,7 @@
             "viable_branch_count": 0,
             "unavailable_branch_count": 0,
             "all_branches_viable": false,
-            "worst_certified_margin": -17.17858935114142,
+            "worst_certified_margin": -17.307695872747864,
             "worst_recovery_distance": 101.19288512538814,
             "terminal_active_actions": [
               "up"
@@ -1156,10 +1126,10 @@
           {
             "action": "down",
             "branch_count": 7,
-            "viable_branch_count": 7,
+            "viable_branch_count": 0,
             "unavailable_branch_count": 0,
-            "all_branches_viable": true,
-            "worst_certified_margin": 4.483365520245728,
+            "all_branches_viable": false,
+            "worst_certified_margin": -14.791500583880248,
             "worst_recovery_distance": 112.0,
             "terminal_active_actions": [
               "down"
@@ -1192,10 +1162,10 @@
           {
             "action": "down_left",
             "branch_count": 1,
-            "viable_branch_count": 1,
+            "viable_branch_count": 0,
             "unavailable_branch_count": 0,
-            "all_branches_viable": true,
-            "worst_certified_margin": 11.159803144664961,
+            "all_branches_viable": false,
+            "worst_certified_margin": -6.1639826371953905,
             "worst_recovery_distance": 80.0,
             "terminal_active_actions": [
               "down_left"
@@ -1204,10 +1174,10 @@
           {
             "action": "down_right",
             "branch_count": 7,
-            "viable_branch_count": 7,
+            "viable_branch_count": 0,
             "unavailable_branch_count": 0,
-            "all_branches_viable": true,
-            "worst_certified_margin": 1.6777194636952615,
+            "all_branches_viable": false,
+            "worst_certified_margin": -12.045351634632375,
             "worst_recovery_distance": 144.0,
             "terminal_active_actions": [
               "down_right"
@@ -1216,10 +1186,10 @@
           {
             "action": "left_fast",
             "branch_count": 7,
-            "viable_branch_count": 1,
+            "viable_branch_count": 0,
             "unavailable_branch_count": 0,
             "all_branches_viable": false,
-            "worst_certified_margin": -13.531592684196854,
+            "worst_certified_margin": -14.397306280540848,
             "worst_recovery_distance": 64.0,
             "terminal_active_actions": [
               "left_fast"
@@ -1228,7 +1198,7 @@
           {
             "action": "right_fast",
             "branch_count": 7,
-            "viable_branch_count": 1,
+            "viable_branch_count": 0,
             "unavailable_branch_count": 0,
             "all_branches_viable": false,
             "worst_certified_margin": -18.316862421440504,
@@ -1252,10 +1222,10 @@
           {
             "action": "down_fast",
             "branch_count": 7,
-            "viable_branch_count": 7,
+            "viable_branch_count": 0,
             "unavailable_branch_count": 0,
-            "all_branches_viable": true,
-            "worst_certified_margin": 6.436587333679199,
+            "all_branches_viable": false,
+            "worst_certified_margin": -12.838278770446777,
             "worst_recovery_distance": 112.0,
             "terminal_active_actions": [
               "down_fast"
@@ -1288,10 +1258,10 @@
           {
             "action": "down_left_fast",
             "branch_count": 7,
-            "viable_branch_count": 7,
+            "viable_branch_count": 0,
             "unavailable_branch_count": 0,
-            "all_branches_viable": true,
-            "worst_certified_margin": 5.629175545481627,
+            "all_branches_viable": false,
+            "worst_certified_margin": -10.197797415944155,
             "worst_recovery_distance": 64.0,
             "terminal_active_actions": [
               "down_left_fast"
@@ -1300,10 +1270,10 @@
           {
             "action": "down_right_fast",
             "branch_count": 7,
-            "viable_branch_count": 4,
+            "viable_branch_count": 0,
             "unavailable_branch_count": 0,
             "all_branches_viable": false,
-            "worst_certified_margin": -1.6671700477600098,
+            "worst_certified_margin": -13.547502888278434,
             "worst_recovery_distance": 176.0,
             "terminal_active_actions": [
               "down_right_fast"
@@ -1313,16 +1283,16 @@
       },
       "directional_summary": {
         "active_action": "down_left",
-        "active_action_allowed": true,
-        "active_action_margin": 11.159803144664961,
+        "active_action_allowed": false,
+        "active_action_margin": -6.1639826371953905,
         "held_action": "down_left",
-        "held_action_allowed": true,
-        "held_action_margin": 11.159803144664961,
+        "held_action_allowed": false,
+        "held_action_margin": -6.1639826371953905,
         "issued_action": "down_left",
-        "issued_action_allowed": true,
-        "issued_action_margin": 11.159803144664961,
+        "issued_action_allowed": false,
+        "issued_action_margin": -6.1639826371953905,
         "best_action": "down_left",
-        "best_margin": 11.159803144664961
+        "best_margin": -6.1639826371953905
       }
     },
     {
@@ -1408,7 +1378,7 @@
             }
           ]
         },
-        "closure_wall_ms": 17.36963501025457,
+        "closure_wall_ms": 15.741278999485075,
         "source_count": 12,
         "auxiliary_count": 0,
         "silent_child_count": 0,
@@ -1425,8 +1395,8 @@
         ],
         "reachable": false,
         "reason": "initial robust viability action set is empty",
-        "solve_ms": 573.7789569975575,
-        "solve_wall_ms": 573.8811880000867,
+        "solve_ms": 1162.6195069984533,
+        "solve_wall_ms": 1162.7210510050645,
         "viability_backend": "native",
         "viable_state_count_layer0": 3929,
         "initial_safe_action_count": 0,
@@ -1649,20 +1619,10 @@
         "state_eligible": true,
         "coverage_complete": true,
         "authority_eligible": true,
-        "applicable": true,
-        "reason": "prepublication_viable_actions_found",
-        "allowed_actions": [
-          "down",
-          "down_left",
-          "down_fast",
-          "down_left_fast"
-        ],
-        "candidate_viable_actions": [
-          "down",
-          "down_left",
-          "down_fast",
-          "down_left_fast"
-        ],
+        "applicable": false,
+        "reason": "prepublication_viable_predecessor_empty",
+        "allowed_actions": [],
+        "candidate_viable_actions": [],
         "recovery_actions": [
           "down_left_fast"
         ],
@@ -1755,10 +1715,10 @@
           {
             "action": "left",
             "branch_count": 7,
-            "viable_branch_count": 2,
+            "viable_branch_count": 0,
             "unavailable_branch_count": 0,
             "all_branches_viable": false,
-            "worst_certified_margin": -4.878509276033332,
+            "worst_certified_margin": -14.714515917421272,
             "worst_recovery_distance": 64.0,
             "terminal_active_actions": [
               "left"
@@ -1767,10 +1727,10 @@
           {
             "action": "right",
             "branch_count": 7,
-            "viable_branch_count": 1,
+            "viable_branch_count": 0,
             "unavailable_branch_count": 0,
             "all_branches_viable": false,
-            "worst_certified_margin": -6.098830519504146,
+            "worst_certified_margin": -14.14758658974373,
             "worst_recovery_distance": 150.94369811290565,
             "terminal_active_actions": [
               "right"
@@ -1791,10 +1751,10 @@
           {
             "action": "down",
             "branch_count": 7,
-            "viable_branch_count": 7,
+            "viable_branch_count": 0,
             "unavailable_branch_count": 0,
-            "all_branches_viable": true,
-            "worst_certified_margin": 2.5019168853759766,
+            "all_branches_viable": false,
+            "worst_certified_margin": -12.688287258148193,
             "worst_recovery_distance": 96.0,
             "terminal_active_actions": [
               "down"
@@ -1827,10 +1787,10 @@
           {
             "action": "down_left",
             "branch_count": 1,
-            "viable_branch_count": 1,
+            "viable_branch_count": 0,
             "unavailable_branch_count": 0,
-            "all_branches_viable": true,
-            "worst_certified_margin": 3.2099539304084095,
+            "all_branches_viable": false,
+            "worst_certified_margin": -10.02915510889823,
             "worst_recovery_distance": 80.0,
             "terminal_active_actions": [
               "down_left"
@@ -1839,10 +1799,10 @@
           {
             "action": "down_right",
             "branch_count": 7,
-            "viable_branch_count": 4,
+            "viable_branch_count": 0,
             "unavailable_branch_count": 0,
             "all_branches_viable": false,
-            "worst_certified_margin": -1.4864581103690568,
+            "worst_certified_margin": -15.214033505934495,
             "worst_recovery_distance": 144.0,
             "terminal_active_actions": [
               "down_right"
@@ -1854,7 +1814,7 @@
             "viable_branch_count": 0,
             "unavailable_branch_count": 0,
             "all_branches_viable": false,
-            "worst_certified_margin": -10.534425805251981,
+            "worst_certified_margin": -13.12403924290457,
             "worst_recovery_distance": 48.0,
             "terminal_active_actions": [
               "left_fast"
@@ -1887,10 +1847,10 @@
           {
             "action": "down_fast",
             "branch_count": 7,
-            "viable_branch_count": 7,
+            "viable_branch_count": 0,
             "unavailable_branch_count": 0,
-            "all_branches_viable": true,
-            "worst_certified_margin": 2.5019168853759766,
+            "all_branches_viable": false,
+            "worst_certified_margin": -12.688287258148193,
             "worst_recovery_distance": 96.0,
             "terminal_active_actions": [
               "down_fast"
@@ -1923,10 +1883,10 @@
           {
             "action": "down_left_fast",
             "branch_count": 7,
-            "viable_branch_count": 7,
+            "viable_branch_count": 0,
             "unavailable_branch_count": 0,
-            "all_branches_viable": true,
-            "worst_certified_margin": 4.241105079650879,
+            "all_branches_viable": false,
+            "worst_certified_margin": -8.925130844116211,
             "worst_recovery_distance": 64.0,
             "terminal_active_actions": [
               "down_left_fast"
@@ -1935,10 +1895,10 @@
           {
             "action": "down_right_fast",
             "branch_count": 7,
-            "viable_branch_count": 4,
+            "viable_branch_count": 0,
             "unavailable_branch_count": 0,
             "all_branches_viable": false,
-            "worst_certified_margin": -2.5901260375976562,
+            "worst_certified_margin": -13.015283346176147,
             "worst_recovery_distance": 160.0,
             "terminal_active_actions": [
               "down_right_fast"
@@ -1948,16 +1908,16 @@
       },
       "directional_summary": {
         "active_action": "down_left",
-        "active_action_allowed": true,
-        "active_action_margin": 3.2099539304084095,
+        "active_action_allowed": false,
+        "active_action_margin": -10.02915510889823,
         "held_action": "down_left",
-        "held_action_allowed": true,
-        "held_action_margin": 3.2099539304084095,
+        "held_action_allowed": false,
+        "held_action_margin": -10.02915510889823,
         "issued_action": "down_left",
-        "issued_action_allowed": true,
-        "issued_action_margin": 3.2099539304084095,
+        "issued_action_allowed": false,
+        "issued_action_margin": -10.02915510889823,
         "best_action": "down_left_fast",
-        "best_margin": 4.241105079650879
+        "best_margin": -8.925130844116211
       }
     },
     {
@@ -2048,7 +2008,7 @@
             }
           ]
         },
-        "closure_wall_ms": 18.305602003238164,
+        "closure_wall_ms": 17.815950006479397,
         "source_count": 12,
         "auxiliary_count": 0,
         "silent_child_count": 0,
@@ -2065,8 +2025,8 @@
         ],
         "reachable": false,
         "reason": "initial robust viability action set is empty",
-        "solve_ms": 591.4281529985601,
-        "solve_wall_ms": 591.5450340107782,
+        "solve_ms": 1117.1255160006694,
+        "solve_wall_ms": 1117.2337290045107,
         "viability_backend": "native",
         "viable_state_count_layer0": 4355,
         "initial_safe_action_count": 0,
@@ -2294,7 +2254,8 @@
         "allowed_actions": [],
         "candidate_viable_actions": [],
         "recovery_actions": [
-          "right_fast"
+          "down",
+          "down_fast"
         ],
         "current_frame": 848,
         "publication_frame": 864,
@@ -2373,10 +2334,10 @@
           {
             "action": "stay",
             "branch_count": 28,
-            "viable_branch_count": 1,
+            "viable_branch_count": 0,
             "unavailable_branch_count": 0,
             "all_branches_viable": false,
-            "worst_certified_margin": -13.35630624328612,
+            "worst_certified_margin": -15.658927131042468,
             "worst_recovery_distance": 57.688820407423826,
             "terminal_active_actions": [
               "stay"
@@ -2388,7 +2349,7 @@
             "viable_branch_count": 0,
             "unavailable_branch_count": 0,
             "all_branches_viable": false,
-            "worst_certified_margin": -14.978278495338639,
+            "worst_certified_margin": -15.978636123207291,
             "worst_recovery_distance": 101.19288512538814,
             "terminal_active_actions": [
               "left"
@@ -2400,7 +2361,7 @@
             "viable_branch_count": 0,
             "unavailable_branch_count": 0,
             "all_branches_viable": false,
-            "worst_certified_margin": -13.57515693376839,
+            "worst_certified_margin": -16.18404365251839,
             "worst_recovery_distance": 35.77708763999664,
             "terminal_active_actions": [
               "right"
@@ -2421,10 +2382,10 @@
           {
             "action": "down",
             "branch_count": 28,
-            "viable_branch_count": 2,
+            "viable_branch_count": 0,
             "unavailable_branch_count": 0,
             "all_branches_viable": false,
-            "worst_certified_margin": -10.062866449356079,
+            "worst_certified_margin": -12.365487337112427,
             "worst_recovery_distance": 57.688820407423826,
             "terminal_active_actions": [
               "down"
@@ -2460,7 +2421,7 @@
             "viable_branch_count": 0,
             "unavailable_branch_count": 0,
             "all_branches_viable": false,
-            "worst_certified_margin": -10.581413269042969,
+            "worst_certified_margin": -12.884034156799316,
             "worst_recovery_distance": 101.19288512538814,
             "terminal_active_actions": [
               "down_left"
@@ -2472,7 +2433,7 @@
             "viable_branch_count": 0,
             "unavailable_branch_count": 0,
             "all_branches_viable": false,
-            "worst_certified_margin": -11.288561582565308,
+            "worst_certified_margin": -13.897448301315308,
             "worst_recovery_distance": 45.254833995939045,
             "terminal_active_actions": [
               "down_right"
@@ -2484,7 +2445,7 @@
             "viable_branch_count": 0,
             "unavailable_branch_count": 0,
             "all_branches_viable": false,
-            "worst_certified_margin": -14.594065356597888,
+            "worst_certified_margin": -16.552265334472644,
             "worst_recovery_distance": 101.19288512538814,
             "terminal_active_actions": [
               "left_fast"
@@ -2493,10 +2454,10 @@
           {
             "action": "right_fast",
             "branch_count": 4,
-            "viable_branch_count": 2,
+            "viable_branch_count": 0,
             "unavailable_branch_count": 0,
             "all_branches_viable": false,
-            "worst_certified_margin": -5.962125945434558,
+            "worst_certified_margin": -16.845700908050524,
             "worst_recovery_distance": 45.254833995939045,
             "terminal_active_actions": [
               "right_fast"
@@ -2517,10 +2478,10 @@
           {
             "action": "down_fast",
             "branch_count": 28,
-            "viable_branch_count": 2,
+            "viable_branch_count": 0,
             "unavailable_branch_count": 0,
             "all_branches_viable": false,
-            "worst_certified_margin": -10.062866449356079,
+            "worst_certified_margin": -12.365487337112427,
             "worst_recovery_distance": 57.688820407423826,
             "terminal_active_actions": [
               "down_fast"
@@ -2544,7 +2505,7 @@
             "viable_branch_count": 0,
             "unavailable_branch_count": 0,
             "all_branches_viable": false,
-            "worst_certified_margin": -16.31163912969587,
+            "worst_certified_margin": -17.388146698055245,
             "worst_recovery_distance": null,
             "terminal_active_actions": [
               "up_right_fast"
@@ -2553,10 +2514,10 @@
           {
             "action": "down_left_fast",
             "branch_count": 28,
-            "viable_branch_count": 1,
+            "viable_branch_count": 0,
             "unavailable_branch_count": 0,
             "all_branches_viable": false,
-            "worst_certified_margin": -6.967718839645386,
+            "worst_certified_margin": -13.660846471786499,
             "worst_recovery_distance": 101.19288512538814,
             "terminal_active_actions": [
               "down_left_fast"
@@ -2568,7 +2529,7 @@
             "viable_branch_count": 0,
             "unavailable_branch_count": 0,
             "all_branches_viable": false,
-            "worst_certified_margin": -6.871025085449219,
+            "worst_certified_margin": -14.239881038665771,
             "worst_recovery_distance": 35.77708763999664,
             "terminal_active_actions": [
               "down_right_fast"
@@ -2579,15 +2540,15 @@
       "directional_summary": {
         "active_action": "down_right_fast",
         "active_action_allowed": false,
-        "active_action_margin": -6.871025085449219,
+        "active_action_margin": -14.239881038665771,
         "held_action": "right_fast",
         "held_action_allowed": false,
-        "held_action_margin": -5.962125945434558,
+        "held_action_margin": -16.845700908050524,
         "issued_action": "right_fast",
         "issued_action_allowed": false,
-        "issued_action_margin": -5.962125945434558,
-        "best_action": "right_fast",
-        "best_margin": -5.962125945434558
+        "issued_action_margin": -16.845700908050524,
+        "best_action": "down",
+        "best_margin": -12.365487337112427
       }
     },
     {
@@ -2673,7 +2634,7 @@
             }
           ]
         },
-        "closure_wall_ms": 15.820915999938734,
+        "closure_wall_ms": 16.232082998612896,
         "source_count": 12,
         "auxiliary_count": 0,
         "silent_child_count": 0,
@@ -2690,8 +2651,8 @@
         ],
         "reachable": false,
         "reason": "initial robust viability action set is empty",
-        "solve_ms": 593.8464040082181,
-        "solve_wall_ms": 593.9376569876913,
+        "solve_ms": 1101.8013919965597,
+        "solve_wall_ms": 1101.8873719876865,
         "viability_backend": "native",
         "viable_state_count_layer0": 7811,
         "initial_safe_action_count": 0,
@@ -3202,12 +3163,15 @@
     "future_geometry_consumed_across_publication_lead": true,
     "signed_per_action_terminal_values": true,
     "coverage_version_exact_authority_all_roots": true,
-    "nontrivial_exact_allowed_set_before_exhaustion": true,
+    "nontrivial_exact_allowed_set_before_exhaustion": false,
     "retained_losing_active_action_excluded": true,
-    "positive_directional_recovery_retained": true,
+    "positive_directional_recovery_retained": false,
     "pending_command_pickup_branches_exact": true,
-    "hard_gate_passed": true,
-    "blockers": [],
-    "physical_disposition": "stage4a_physical_gate_authorized"
+    "hard_gate_passed": false,
+    "blockers": [
+      "nontrivial_exact_allowed_set_before_exhaustion",
+      "positive_directional_recovery_retained"
+    ],
+    "physical_disposition": "do_not_run_until_hard_gate_passes"
   }
 }

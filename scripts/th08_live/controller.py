@@ -249,6 +249,7 @@ from touhou_control.prepublication import (
     build_causal_prepublication_filter,
     unavailable_causal_prepublication_filter,
 )
+from touhou_control.viability import RobustViabilityPolicy
 from th08_live.movement import (
     BOMB,
     DOWN,
@@ -468,6 +469,17 @@ CORRIDOR_POLICY_MINIMUM_LEAD_FRAMES = max(
     2 * TH08_CORRIDOR_CONFIG.frames_per_layer,
     LIVE_CONTROL_DELAY_MAX + LIVE_ACTION_HOLD_MAX,
 )
+ORDINARY_AUTHORITY_GRID_STEP = 4.0
+ORDINARY_AUTHORITY_CELL_RADIUS = (
+    math.sqrt(2.0) * ORDINARY_AUTHORITY_GRID_STEP / 2.0
+)
+ORDINARY_AUTHORITY_CORRIDOR_CONFIG = replace(
+    TH08_CORRIDOR_CONFIG,
+    grid_step=ORDINARY_AUTHORITY_GRID_STEP,
+    required_clearance=ORDINARY_AUTHORITY_CELL_RADIUS,
+)
+ORDINARY_AUTHORITY_NATIVE_WORKERS = 16
+ORDINARY_AUTHORITY_MIN_TERMINAL_LEAD = LIVE_ACTION_HOLD_MAX + 1
 DIAGNOSTIC_ROOT_ONLY_SCALE_HORIZON = max(
     MAX_ACTION_CONTIGUOUS_ADVANCE_FRAMES,
     MAX_SENSOR_EPOCH_EXTENT_FRAMES
@@ -546,6 +558,73 @@ def _diagnostic_constant_root_time_scale(
     )
 
 
+def _ordinary_lower_kernel(
+    solution: CorridorSolution | None,
+) -> RobustViabilityPolicy | None:
+    if solution is None or solution.plan.viability_policy is None:
+        return None
+    policy = solution.plan.viability_policy
+    if (
+        len(policy.x_axis) < 2
+        or not math.isclose(
+            float(policy.x_axis[1] - policy.x_axis[0]),
+            ORDINARY_AUTHORITY_GRID_STEP,
+        )
+        or not math.isclose(
+            float(policy.config.required_clearance),
+            ORDINARY_AUTHORITY_CELL_RADIUS,
+        )
+    ):
+        return None
+    return policy
+
+
+def _ordinary_solution_hazard_authority(
+    solution: CorridorSolution | None,
+) -> bool:
+    policy = _ordinary_lower_kernel(solution)
+    if solution is None or policy is None:
+        return False
+    coverage = solution.future_hazard_coverage
+    projection = solution.future_hazard_projection
+    required_version = corridor_hazard_version(solution)
+    return bool(
+        isinstance(projection, OrdinaryFutureHazardProjection)
+        and projection.version == required_version
+        and coverage is not None
+        and coverage.complete
+        and coverage.root_frame <= solution.source_frame
+        and coverage.horizon_frame
+        >= solution.source_frame + policy.horizon_frames
+        and coverage.slabs
+        and all(
+            slab.version == required_version
+            for slab in coverage.slabs
+        )
+    )
+
+
+def _ordinary_target_query_frame(
+    *,
+    policy: RobustViabilityPolicy,
+    policy_age: int,
+) -> int | None:
+    if policy_age < 0:
+        return None
+    frames_per_layer = policy.config.frames_per_layer
+    target_layer = math.ceil(
+        (
+            policy_age
+            + ORDINARY_AUTHORITY_MIN_TERMINAL_LEAD
+        )
+        / frames_per_layer
+    )
+    target_frame = target_layer * frames_per_layer
+    if target_frame >= policy.horizon_frames:
+        return None
+    return target_frame
+
+
 def _ordinary_nonspell_preexhaustion_filter(
     *,
     enabled: bool,
@@ -559,6 +638,8 @@ def _ordinary_nonspell_preexhaustion_filter(
     current_frame: int,
     future_solution: CorridorSolution | None,
     future_hazard_coverage: HazardCoverageAssessment | None,
+    future_policy_query_frame: int = 0,
+    future_policy_source_frame: int | None = None,
     prefix_certified_frames: int = 0,
     prefix_safe_actions: tuple[str, ...] | None = None,
 ) -> CausalPrepublicationFilter:
@@ -608,15 +689,24 @@ def _ordinary_nonspell_preexhaustion_filter(
         action_velocities=_ORDINARY_PREEXHAUSTION_VELOCITIES,
         delay_frames=pickup_delay_frames,
         current_frame=current_frame,
-        publication_frame=future_solution.source_frame,
+        publication_frame=(
+            future_solution.source_frame + future_policy_query_frame
+        ),
         prefix_certified_frames=prefix_certified_frames,
         prefix_safe_actions=prefix_safe_actions,
         start_x=player_x,
         start_y=player_y,
-        future_safety_policy=future_solution.plan.safety_value_policy,
+        future_safety_policy=None,
+        future_viability_policy=future_solution.plan.viability_policy,
         future_recovery_policy=future_solution.plan.viability_policy,
         hazard_coverage=future_hazard_coverage,
         required_hazard_version=corridor_hazard_version(future_solution),
+        policy_query_frame=future_policy_query_frame,
+        policy_source_frame=(
+            future_solution.source_frame
+            if future_policy_source_frame is None
+            else future_policy_source_frame
+        ),
     )
 
 
@@ -1859,13 +1949,10 @@ def _run_live_session(
     ordinary_preexhaustion_authority = bool(
         getattr(args, "ordinary_preexhaustion_authority", False)
     )
-    ordinary_safety_value_horizon = max(
-        args.safety_value_horizon,
-        (
-            TH08_CORRIDOR_CONFIG.horizon_frames
-            if ordinary_preexhaustion_authority
-            else 0
-        ),
+    ordinary_safety_value_horizon = (
+        0
+        if ordinary_preexhaustion_authority
+        else args.safety_value_horizon
     )
 
     enemy_lifecycle_probe: EnemyLifecycleProbe | None = None
@@ -2232,7 +2319,31 @@ def _run_live_session(
                         if not args.local_only
                         else "disabled"
                     ),
-                    "viability_grid_step": TH08_CORRIDOR_CONFIG.grid_step,
+                    "viability_grid_step": (
+                        ORDINARY_AUTHORITY_GRID_STEP
+                        if ordinary_preexhaustion_authority
+                        else TH08_CORRIDOR_CONFIG.grid_step
+                    ),
+                    "ordinary_viability_authority": {
+                        "enabled": ordinary_preexhaustion_authority,
+                        "scope": "ordinary_nonspell_only",
+                        "future_kernel": (
+                            "4px_boolean_lower_cell_radius_inflated"
+                            if ordinary_preexhaustion_authority
+                            else "disabled"
+                        ),
+                        "terminal_adapter": (
+                            "active_policy_next_layer_causal_held_no_write"
+                            if ordinary_preexhaustion_authority
+                            else "disabled"
+                        ),
+                        "minimum_terminal_lead_frames": (
+                            ORDINARY_AUTHORITY_MIN_TERMINAL_LEAD
+                        ),
+                        "future_source_coverage": (
+                            "exact_version_required_fail_closed"
+                        ),
+                    },
                     "viability_refinement_grid_steps": (
                         LIVE_REFINEMENT_GRID_STEPS
                     ),
@@ -2260,6 +2371,9 @@ def _run_live_session(
                     ),
                     "corridor_native_viability_workers": (
                         args.corridor_native_workers
+                    ),
+                    "ordinary_authority_native_viability_workers": (
+                        ORDINARY_AUTHORITY_NATIVE_WORKERS
                     ),
                     "local_planner_horizon_frames": args.horizon,
                     "local_terminal_threat_horizon_frames": (
@@ -2291,17 +2405,12 @@ def _run_live_session(
                         ordinary_safety_value_horizon
                     ),
                     "safety_value_role": (
-                        (
-                            "continuous_position_prepublication_"
-                            "action_certificate"
-                        )
-                        if ordinary_preexhaustion_authority
-                        else "empty_kernel_soft_preference"
+                        "empty_kernel_soft_preference"
                         if ordinary_safety_value_horizon
                         else "disabled"
                     ),
                     "safety_value_action_values_retained": (
-                        ordinary_preexhaustion_authority
+                        False
                     ),
                     "native_planner_backend": native_backend.available(),
                     "viability_quantifiers": (
@@ -3820,7 +3929,7 @@ def _run_live_session(
                         ordinary_safety_value_horizon
                     ),
                     retain_safety_action_values=(
-                        ordinary_preexhaustion_authority
+                        False
                     ),
                     required_gate_lane=(
                         corridor_commitment.active_lane(counter_after_read)
@@ -3830,10 +3939,23 @@ def _run_live_session(
                     audit_executor=audit_executor,
                     background_low_priority=False,
                     native_viability_worker_limit=(
-                        args.corridor_native_workers
+                        ORDINARY_AUTHORITY_NATIVE_WORKERS
+                        if (
+                            ordinary_preexhaustion_authority
+                            and not bool(spell_state["active"])
+                        )
+                        else args.corridor_native_workers
                     ),
                     time_scale_schedule=(
                         captured_iteration.time_scale_schedule
+                    ),
+                    corridor_config=(
+                        ORDINARY_AUTHORITY_CORRIDOR_CONFIG
+                        if (
+                            ordinary_preexhaustion_authority
+                            and not bool(spell_state["active"])
+                        )
+                        else TH08_CORRIDOR_CONFIG
                     ),
                 )
                 corridor_last_submit = counter_after_read
@@ -3902,6 +4024,16 @@ def _run_live_session(
                     captured_iteration.time_scale_schedule
                 )
             )
+            if (
+                corridor_action_authority
+                and ordinary_preexhaustion_authority
+                and not bool(spell_state["active"])
+            ):
+                corridor_action_authority = (
+                    _ordinary_solution_hazard_authority(
+                        corridor_solution
+                    )
+                )
             if corridor_action_authority:
                 actionable_corridor_target = corridor_target
                 actionable_policy_guidance = policy_guidance
@@ -3945,20 +4077,37 @@ def _run_live_session(
             ordinary_future_hazard_coverage = None
             ordinary_prefix_certified_frames = 0
             ordinary_prefix_safe_actions: tuple[str, ...] | None = None
-            if corridor_pending_solution is not None:
-                future_viability_policy = (
-                    corridor_pending_solution.plan.viability_policy
+            ordinary_authority_solution: CorridorSolution | None = None
+            ordinary_future_policy_query_frame = 0
+            future_viability_policy = _ordinary_lower_kernel(
+                corridor_solution
+            )
+            if (
+                future_viability_policy is not None
+                and _ordinary_solution_hazard_authority(
+                    corridor_solution
                 )
-                ordinary_required_hazard_horizon = (
-                    corridor_pending_solution.source_frame
-                    + (
-                        future_viability_policy.horizon_frames
-                        if future_viability_policy is not None
-                        else PLANNER_THREAT_HORIZON
+            ):
+                policy_age = (
+                    captured_iteration.snapshot_frame
+                    - corridor_solution.source_frame
+                )
+                candidate_query_frame = _ordinary_target_query_frame(
+                    policy=future_viability_policy,
+                    policy_age=policy_age,
+                )
+                if candidate_query_frame is not None:
+                    ordinary_authority_solution = corridor_solution
+                    ordinary_future_policy_query_frame = (
+                        candidate_query_frame
                     )
+            if ordinary_authority_solution is not None:
+                ordinary_required_hazard_horizon = (
+                    ordinary_authority_solution.source_frame
+                    + future_viability_policy.horizon_frames
                 )
                 published_future_coverage = (
-                    corridor_pending_solution.future_hazard_coverage
+                    ordinary_authority_solution.future_hazard_coverage
                 )
                 if (
                     published_future_coverage is not None
@@ -3986,11 +4135,12 @@ def _run_live_session(
                             - captured_iteration.snapshot_frame
                         ),
                         hazard_version=corridor_hazard_version(
-                            corridor_pending_solution
+                            ordinary_authority_solution
                         ),
                     )
                 ordinary_publication_lead = (
-                    corridor_pending_solution.source_frame
+                    ordinary_authority_solution.source_frame
+                    + ordinary_future_policy_query_frame
                     - captured_iteration.snapshot_frame
                 )
                 if (
@@ -4017,7 +4167,7 @@ def _run_live_session(
                         + max(ordinary_prefix_delay_frames)
                     )
                     published_future_projection = (
-                        corridor_pending_solution.future_hazard_projection
+                        ordinary_authority_solution.future_hazard_projection
                     )
                     future_projection_offset = (
                         captured_iteration.snapshot_frame
@@ -4035,7 +4185,7 @@ def _run_live_session(
                         )
                         and published_future_projection.version
                         == corridor_hazard_version(
-                            corridor_pending_solution
+                            ordinary_authority_solution
                         )
                         and published_future_projection.coverage.complete
                         and future_projection_offset >= 0
@@ -4111,9 +4261,17 @@ def _run_live_session(
                     player_x=player_control_root.x,
                     player_y=player_control_root.y,
                     current_frame=captured_iteration.snapshot_frame,
-                    future_solution=corridor_pending_solution,
+                    future_solution=ordinary_authority_solution,
                     future_hazard_coverage=(
                         ordinary_future_hazard_coverage
+                    ),
+                    future_policy_query_frame=(
+                        ordinary_future_policy_query_frame
+                    ),
+                    future_policy_source_frame=(
+                        ordinary_authority_solution.source_frame
+                        if ordinary_authority_solution is not None
+                        else None
                     ),
                     prefix_certified_frames=(
                         ordinary_prefix_certified_frames

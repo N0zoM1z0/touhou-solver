@@ -159,6 +159,31 @@ class _ConstantSafetyPolicy:
         )
 
 
+class _BooleanLowerPolicy:
+    x_axis = _RectangularSafetyPolicy.x_axis
+    y_axis = _RectangularSafetyPolicy.y_axis
+    config = SimpleNamespace(required_clearance=3.0)
+    horizon_frames = 8
+
+    def __init__(self, *, position_error: float = 1.0):
+        self.position_error = position_error
+
+    def query(self, *, frame, x, y, active_action):
+        del x, y
+        return ViabilityQuery(
+            available=True,
+            layer=frame,
+            row=0,
+            column=0,
+            active_action=active_action,
+            state_viable=True,
+            safe_actions=("left",),
+            repair_volumes=(),
+            position_error=self.position_error,
+            reason="fixture_boolean_lower",
+        )
+
+
 def _coverage(*, complete: bool):
     coverage_class = (
         HazardCoverageClass.BOUNDED_ENVELOPE
@@ -332,6 +357,44 @@ class CausalPrepublicationFilterTests(unittest.TestCase):
                 action.unavailable_branch_count > 0
                 for action in result.actions
             )
+        )
+
+    def test_boolean_lower_kernel_checks_pending_action_membership(self):
+        result = self._build(
+            root=LocalPipelineRoot(
+                active_action="right",
+                held_desired_action="left",
+                pending_action="left",
+                remaining_delay_support=(3,),
+            ),
+            publication_frame=102,
+            future_safety_policy=None,
+            future_viability_policy=_BooleanLowerPolicy(),
+            future_recovery_policy=None,
+            policy_query_frame=2,
+            policy_source_frame=100,
+        )
+
+        self.assertTrue(result.authority_eligible)
+        self.assertIn("left", result.allowed_actions or ())
+        self.assertNotIn("right", result.allowed_actions or ())
+        self.assertEqual(result.policy_query_frame, 2)
+
+    def test_boolean_lower_kernel_consumes_cell_radius(self):
+        result = self._build(
+            future_safety_policy=None,
+            future_viability_policy=_BooleanLowerPolicy(
+                position_error=3.0,
+            ),
+            future_recovery_policy=None,
+            policy_query_frame=4,
+            policy_source_frame=100,
+        )
+
+        self.assertEqual(result.candidate_viable_actions, ())
+        self.assertEqual(
+            result.reason,
+            "prepublication_viable_predecessor_empty",
         )
 
     def test_prefix_hazard_set_is_part_of_the_predecessor(self):

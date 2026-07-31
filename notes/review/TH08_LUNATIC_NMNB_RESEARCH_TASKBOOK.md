@@ -248,8 +248,7 @@ Alternative methods:
 No heuristic may discard a safety branch or condition on hidden state without
 proof.
 
-The future-hazard hard gate for the new set-valued ordinary pre-publication
-predecessor is now closed deterministically. Stage-4A run
+The future-source geometry/version gate is closed deterministically. Stage-4A run
 `20260731_152921` enabled the experiment but all 7,202 nonspell decisions
 failed an invalid `player+0xE2A68 == 0` gate, producing zero action
 constraints and zero early-kill applications. Native code shows that field is
@@ -257,21 +256,21 @@ a retained deathbomb-window limit. Counterfactual roots with only the gate
 removed still permit `down_left` at global exhaustion and alias all 17
 actions under an uncontrollable prefix and at the saturated corner. The
 replacement now uses phase-only transition semantics, fresh prefix
-certificates, exact active/held/pending pickup branches, full signed per-action
-terminal values, continuous-position error subtraction, and exact publication
-version binding.
+certificates, exact active/held/pending pickup branches, a 4px Boolean lower
+kernel with cell-radius clearance, and exact active-policy version binding.
 
 Collision-control projection v12 and the fail-closed ordinary source executor
 now cover the manager singleton, ordinary main/auxiliary ECL, callback gates,
 emission descriptors, motion/phase state, and timeline births for the full
 268-frame source horizon. The exact annular-sector/AABB projection is consumed
 both before and after global publication. Observation-aligned native replay
-roots 816/831/834/848/908 rebuild f817/833/835/850/910 with signed values:
-f817 has a nontrivial eight-action set that excludes the retained losing
-active/issued actions, f833/f835 remain directional, and the exact predecessor
-first empties at f850. Complete Linux and Windows gates pass. The next task is
-the already authorized single Stage-4A physical falsifier; local scoring
-remains later.
+roots 816/831/834/848/908 first falsify the old result: at the real H=80 the
+16px signed predecessor is empty at all five roots. The factorized 4px lower
+gate recovers exactly `left_fast/down_left_fast` at f817 and excludes the
+retained losing active/issued actions; f833/f835/f850/f910 remain empty.
+Native exact recurrence and the live adapter agree, with no unresolved
+action. Complete Linux and Windows gates pass. The next task is the already
+authorized single Stage-4A physical falsifier; local scoring remains later.
 
 ### WS-D — Combat, Focus, and Power
 

@@ -50,17 +50,16 @@ unit time scale, a completed future policy/version, and fresh hazards. Phases
 `player+0xE2A68` deathbomb-window limit.
 
 For every complete selected action, nature chooses every old/new pickup
-branch. The fresh signed-clearance prefix must cover the publication lead.
-Each terminal root queries full-horizon signed safety values, retains every
-future action value, and subtracts live-to-lattice position error. A terminal
-pending held command must itself have positive certified action value.
-Selecting held remains no-write; zero residual pickup is included
-conservatively in the future delay set.
+branch. The fresh signed-clearance prefix holds that selected mask with no
+further writes until the next queryable active-policy layer. The terminal set
+is a 4px Boolean lower kernel whose required clearance includes the 2.828px
+cell radius. A terminal pending command must itself belong to the layer's
+safe action set. Selecting held remains no-write.
 
 Coverage must span every physical frame from the current observation through
-the publication lead and the future policy horizon. Its slabs must match the
-required hazard version exactly. Missing prefix certification, unavailable
-signed action values, interval/version mismatch, or unknown future
+the held prefix and the remaining active-policy horizon. Its slabs must match
+the required hazard version exactly. Missing prefix certification, a
+non-4px/expired policy layer, interval/version mismatch, or unknown future
 birth/event geometry yields `allowed_actions = None`.
 
 For supported ordinary nonspells, native collision-control projection v12
@@ -89,15 +88,18 @@ an uncontrollable prefix or playfield clamp dominates scalar minimum reserve.
 This finite boundary calculation may remain diagnostic, but its allowed set
 must not be treated as survival authority.
 
-The set-valued predecessor, phase/pipeline/publication mechanics, and bounded
-ordinary future-source coverage now pass the retained deterministic gate.
-Observation-aligned immutable replay roots 816/831/834/848/908 supply fresh
-signed per-action terminal values for f817/833/835/850/910. Every root has
-complete interval/version coverage and zero unavailable terminal branches.
-The f817 hard set has eight actions and excludes active `up_fast` and issued
-`up_left_fast`; f833/f835 remain nonempty; f850/f910 correctly retain empty
-predecessors. The feature remains default-off until the authorized Stage-4A
-physical trial establishes live delivery and effect.
+The future-source closure and version binding pass. Recomputing the former
+16px signed predecessor at the real H=80 makes all five retained roots empty;
+its earlier f817 eight-action result was an H=32 artifact.
+
+The factorized 4px lower gate uses observation-aligned immutable replay roots
+816/831/834/848/908. Native exact recurrence and the live adapter agree that
+f817 permits only `left_fast/down_left_fast`, excluding active `up_fast` and
+issued `up_left_fast`; f833/f835/f850/f910 remain empty and fail closed. All
+roots have complete interval/version coverage and no unresolved action.
+Windows measured f817 future-kernel/certificate delivery at 1420/21 ms. The
+feature remains default-off until the authorized Stage-4A physical trial
+establishes live delivery and effect.
 
 Removed supplemental, candidate-verifier, prewarm, G5, and priority-17 lanes
 have no active code or strategy authority.
@@ -238,7 +240,7 @@ configuration but never reached action authority. Native semantics invalidate
 its zero-`+0xE2A68` gate, and retained-root counterfactuals invalidate scalar
 boundary reserve as an equivalent global filter. No Stage-5 follow-up or
 local-ranking evaluation is authorized from this result. The replacement
-now supplies the set-valued pickup/publication predecessor and bounded
+now supplies the factorized 4px pickup/active-layer predecessor and bounded
 future-birth/event coverage. The unresolved promotion condition is physical
 Stage-4A delivery/effectiveness under deadline-safe hard no-Bomb, followed by
 a rotated workload if it materially improves.

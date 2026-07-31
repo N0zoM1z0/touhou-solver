@@ -57,6 +57,15 @@ class RecoveryPolicy(Protocol):
     ) -> ViabilityQuery: ...
 
 
+class HazardSpaceViabilityPolicy(RecoveryPolicy, Protocol):
+    """Boolean lower-kernel query surface for exact set membership."""
+
+    x_axis: object
+    y_axis: object
+    config: object
+    horizon_frames: int
+
+
 @dataclass(frozen=True)
 class PrepublicationActionAssessment:
     """Worst terminal-set result for one complete selected action."""
@@ -282,16 +291,17 @@ def build_causal_prepublication_filter(
     future_recovery_policy: RecoveryPolicy | None,
     hazard_coverage: HazardCoverageAssessment | None,
     required_hazard_version: VersionIdentity | None = None,
+    future_viability_policy: HazardSpaceViabilityPolicy | None = None,
+    policy_query_frame: int = 0,
+    policy_source_frame: int | None = None,
 ) -> CausalPrepublicationFilter:
     """Compute the robust predecessor of one future hazard-space kernel.
 
-    ``publication_frame`` is the first physical frame governed by
-    ``future_safety_policy``.  The signed policy is queried at layer/frame
-    zero after every action-conditioned pickup branch reaches that epoch.
-    Every certificate subtracts the exact live-to-lattice projection error.
-    A command still pending at the epoch is accepted only when that exact
-    held command has positive certified action value; this preserves
-    no-write semantics instead of resampling delay.
+    ``publication_frame`` is the physical terminal epoch. A signed policy or
+    a conservative Boolean lower kernel is queried at ``policy_query_frame``
+    after every action-conditioned pickup branch reaches that epoch. A
+    command still pending there must itself be a certified future action;
+    this preserves no-write semantics instead of resampling delay.
     """
 
     if not enabled:
@@ -311,7 +321,10 @@ def build_causal_prepublication_filter(
             coverage=hazard_coverage,
             required_hazard_version=required_hazard_version,
         )
-    if future_safety_policy is None:
+    if (
+        future_safety_policy is None
+        and future_viability_policy is None
+    ):
         return unavailable_causal_prepublication_filter(
             enabled=True,
             reason="future_safety_policy_unavailable",
@@ -320,6 +333,19 @@ def build_causal_prepublication_filter(
             coverage=hazard_coverage,
             required_hazard_version=required_hazard_version,
         )
+    if (
+        future_safety_policy is not None
+        and future_viability_policy is not None
+    ):
+        raise ValueError(
+            "signed and Boolean future policies are mutually exclusive"
+        )
+    future_policy = (
+        future_safety_policy
+        if future_safety_policy is not None
+        else future_viability_policy
+    )
+    assert future_policy is not None
     if (
         not selected_actions
         or len(set(selected_actions)) != len(selected_actions)
@@ -342,6 +368,31 @@ def build_causal_prepublication_filter(
             coverage=hazard_coverage,
             required_hazard_version=required_hazard_version,
         )
+    if (
+        policy_query_frame < 0
+        or policy_query_frame >= future_policy.horizon_frames
+    ):
+        return unavailable_causal_prepublication_filter(
+            enabled=True,
+            reason="future_policy_query_epoch_unavailable",
+            state_eligible=True,
+            pickup_delay_frames=delay_frames,
+            coverage=hazard_coverage,
+            required_hazard_version=required_hazard_version,
+        )
+    resolved_policy_source_frame = (
+        publication_frame - policy_query_frame
+        if policy_source_frame is None
+        else policy_source_frame
+    )
+    if (
+        resolved_policy_source_frame < 0
+        or resolved_policy_source_frame + policy_query_frame
+        != publication_frame
+    ):
+        raise ValueError(
+            "future policy source/query frames do not match terminal epoch"
+        )
     if prefix_certified_frames < 0:
         raise ValueError("prefix certificate horizon cannot be negative")
     if not math.isfinite(start_x) or not math.isfinite(start_y):
@@ -358,10 +409,10 @@ def build_causal_prepublication_filter(
     if missing:
         raise ValueError(f"missing action velocities: {sorted(missing)}")
 
-    left, right, top, bottom = _axis_bounds(future_safety_policy)
+    left, right, top, bottom = _axis_bounds(future_policy)
     try:
         required_clearance = float(
-            future_safety_policy.config.required_clearance
+            future_policy.config.required_clearance
         )
     except (AttributeError, TypeError, ValueError) as error:
         raise ValueError(
@@ -402,8 +453,8 @@ def build_causal_prepublication_filter(
                 y = min(bottom, max(top, y + velocity_y))
             terminal_active = branch.active_actions[-1]
             terminal_actions.add(terminal_active)
-            safety_query = future_safety_policy.query(
-                frame=0,
+            policy_query = future_policy.query(
+                frame=policy_query_frame,
                 x=x,
                 y=y,
                 active_action=terminal_active,
@@ -417,40 +468,66 @@ def build_causal_prepublication_filter(
                 )
                 else None
             )
-            if pending_action is not None:
-                certified_margin = (
-                    safety_query.action_value(pending_action)
-                    - safety_query.position_error
-                    - required_clearance
-                    if safety_query.available
-                    and safety_query.action_values
-                    else -math.inf
+            if future_safety_policy is not None:
+                safety_query = policy_query
+                if pending_action is not None:
+                    certified_margin = (
+                        safety_query.action_value(pending_action)
+                        - safety_query.position_error
+                        - required_clearance
+                        if safety_query.available
+                        and safety_query.action_values
+                        else -math.inf
+                    )
+                else:
+                    certified_margin = (
+                        safety_query.state_value
+                        - safety_query.position_error
+                        - required_clearance
+                        if safety_query.available
+                        else -math.inf
+                    )
+                branch_viable = bool(
+                    safety_query.available and certified_margin > 0.0
+                )
+                branch_unavailable = bool(
+                    not safety_query.available
+                    or (
+                        pending_action is not None
+                        and not safety_query.action_values
+                    )
                 )
             else:
+                viability_query = policy_query
+                boolean_member = bool(
+                    (
+                        pending_action in viability_query.safe_actions
+                        if pending_action is not None
+                        else viability_query.state_viable
+                    )
+                    if viability_query.available
+                    else False
+                )
+                position_certified = bool(
+                    viability_query.available
+                    and viability_query.position_error
+                    < required_clearance
+                )
+                branch_viable = boolean_member and position_certified
                 certified_margin = (
-                    safety_query.state_value
-                    - safety_query.position_error
-                    - required_clearance
-                    if safety_query.available
+                    required_clearance - viability_query.position_error
+                    if branch_viable
                     else -math.inf
                 )
-            branch_viable = bool(
-                safety_query.available and certified_margin > 0.0
-            )
+                branch_unavailable = not viability_query.available
             viable_count += int(branch_viable)
-            unavailable_count += int(
-                not safety_query.available
-                or (
-                    pending_action is not None
-                    and not safety_query.action_values
-                )
-            )
+            unavailable_count += int(branch_unavailable)
             certified_margins.append(certified_margin)
             if future_recovery_policy is not None:
                 recovery_distances.append(
                     _query_recovery_distance(
                         future_recovery_policy.query(
-                            frame=0,
+                            frame=policy_query_frame,
                             x=x,
                             y=y,
                             active_action=terminal_active,
@@ -528,7 +605,7 @@ def build_causal_prepublication_filter(
         hazard_coverage is not None and hazard_coverage.complete
     )
     required_coverage_horizon = (
-        publication_frame + future_safety_policy.horizon_frames
+        resolved_policy_source_frame + future_policy.horizon_frames
     )
     coverage_interval_matches = bool(
         hazard_coverage is not None
@@ -582,7 +659,7 @@ def build_causal_prepublication_filter(
         current_frame=current_frame,
         publication_frame=publication_frame,
         publication_lead_frames=lead_frames,
-        policy_query_frame=0,
+        policy_query_frame=policy_query_frame,
         pickup_delay_frames=delay_frames,
         prefix_certified_frames=prefix_certified_frames,
         prefix_safe_actions=prefix_safe_actions,
@@ -598,6 +675,7 @@ def build_causal_prepublication_filter(
 __all__ = [
     "CausalPrepublicationFilter",
     "HazardSpaceSafetyPolicy",
+    "HazardSpaceViabilityPolicy",
     "PrepublicationActionAssessment",
     "RecoveryPolicy",
     "build_causal_prepublication_filter",

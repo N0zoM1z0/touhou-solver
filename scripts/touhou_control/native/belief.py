@@ -16,7 +16,7 @@ from .library import (
 
 
 def _load_belief_pipeline_workspace_functions():
-    key = "belief_pipeline_workspace_v7"
+    key = "belief_pipeline_workspace_v8"
     cached = cached_function_group(key)
     if cached is not None:
         return cached
@@ -24,10 +24,13 @@ def _load_belief_pipeline_workspace_functions():
     if library is None:
         return None
     try:
-        create = library.touhou_belief_pipeline_workspace_create_v7
+        create = library.touhou_belief_pipeline_workspace_create_v8
         query = library.touhou_belief_pipeline_workspace_query_v3
         certify = (
             library.touhou_belief_pipeline_workspace_certify_upper_v3
+        )
+        certify_exact = (
+            library.touhou_belief_pipeline_workspace_certify_exact_v1
         )
         recommend = (
             library
@@ -38,6 +41,8 @@ def _load_belief_pipeline_workspace_functions():
     except AttributeError:
         return None
     create.argtypes = [
+        ctypes.POINTER(ctypes.c_float),
+        ctypes.POINTER(ctypes.c_float),
         ctypes.POINTER(ctypes.c_float),
         ctypes.c_int,
         ctypes.c_int,
@@ -100,6 +105,25 @@ def _load_belief_pipeline_workspace_functions():
         ctypes.POINTER(ctypes.c_uint64),
     ]
     certify.restype = ctypes.c_int
+    certify_exact.argtypes = [
+        ctypes.c_void_p,
+        ctypes.c_int,
+        ctypes.c_int,
+        ctypes.c_int,
+        ctypes.c_int,
+        ctypes.c_int,
+        ctypes.POINTER(ctypes.c_int),
+        ctypes.c_int,
+        ctypes.c_int,
+        ctypes.c_uint16,
+        ctypes.c_float,
+        ctypes.c_int,
+        ctypes.POINTER(ctypes.c_uint64),
+        ctypes.POINTER(ctypes.c_uint64),
+        ctypes.POINTER(ctypes.c_int),
+        ctypes.POINTER(ctypes.c_uint64),
+    ]
+    certify_exact.restype = ctypes.c_int
     recommend.argtypes = [
         ctypes.c_void_p,
         ctypes.c_int,
@@ -133,7 +157,15 @@ def _load_belief_pipeline_workspace_functions():
     destroy.restype = None
     return cache_function_group(
         key,
-        (create, query, certify, recommend, cancel, destroy),
+        (
+            create,
+            query,
+            certify,
+            certify_exact,
+            recommend,
+            cancel,
+            destroy,
+        ),
     )
 
 
@@ -146,12 +178,15 @@ class BeliefPipelineNativeWorkspace:
         create,
         query,
         certify,
+        certify_exact,
         recommend,
         cancel,
         destroy,
         x_axis: np.ndarray,
         y_axis: np.ndarray,
         clearance_volume: np.ndarray,
+        terminal_state_margins: np.ndarray | None,
+        terminal_action_margins: np.ndarray | None,
         velocity_x: np.ndarray,
         velocity_y: np.ndarray,
         base_action_mask: int,
@@ -169,6 +204,22 @@ class BeliefPipelineNativeWorkspace:
         self._clearance = as_contiguous_array(
             clearance_volume,
             dtype=np.float32,
+        )
+        self._terminal_state_margins = (
+            None
+            if terminal_state_margins is None
+            else as_contiguous_array(
+                terminal_state_margins,
+                dtype=np.float32,
+            )
+        )
+        self._terminal_action_margins = (
+            None
+            if terminal_action_margins is None
+            else as_contiguous_array(
+                terminal_action_margins,
+                dtype=np.float32,
+            )
         )
         self._velocity_x = as_contiguous_array(
             velocity_x,
@@ -188,6 +239,7 @@ class BeliefPipelineNativeWorkspace:
         )
         self._query = query
         self._certify = certify
+        self._certify_exact = certify_exact
         self._recommend = recommend
         self._cancel = cancel
         self._destroy = destroy
@@ -195,6 +247,20 @@ class BeliefPipelineNativeWorkspace:
         result = create(
             self._clearance.ctypes.data_as(
                 ctypes.POINTER(ctypes.c_float)
+            ),
+            (
+                self._terminal_state_margins.ctypes.data_as(
+                    ctypes.POINTER(ctypes.c_float)
+                )
+                if self._terminal_state_margins is not None
+                else None
+            ),
+            (
+                self._terminal_action_margins.ctypes.data_as(
+                    ctypes.POINTER(ctypes.c_float)
+                )
+                if self._terminal_action_margins is not None
+                else None
             ),
             self._clearance.shape[0],
             len(self._y_axis),
@@ -501,12 +567,85 @@ class BeliefPipelineNativeWorkspace:
             stats,
         )
 
+    def certify_exact(
+        self,
+        *,
+        start_frame: int,
+        start_row: int,
+        start_column: int,
+        observed_action_index: int,
+        target_frames: int,
+        target_margin: float,
+        pending_action_index: int = -1,
+        pending_remaining_frames: np.ndarray | None = None,
+        continuation_action_budget: int | None = None,
+        timeout_ms: int = 0,
+    ) -> tuple[int, int, bool, np.ndarray]:
+        """Return proved-winning, unresolved, and deadline state.
+
+        The native recurrence uses the physical information partition.  Only
+        actions in the winning mask completed an exact existential-controller
+        / universal-delay-and-cadence proof.  A deadline leaves unfinished
+        actions in the separate unresolved mask.
+        """
+
+        if self.closed:
+            raise RuntimeError("belief pipeline workspace is closed")
+        pending = as_contiguous_array(
+            (
+                np.empty(0, dtype=np.int32)
+                if pending_remaining_frames is None
+                else pending_remaining_frames
+            ),
+            dtype=np.int32,
+        )
+        winning_mask = ctypes.c_uint64()
+        unresolved_mask = ctypes.c_uint64()
+        deadline_expired = ctypes.c_int()
+        stats = np.empty(8, dtype=np.uint64)
+        result = self._certify_exact(
+            self._handle,
+            start_frame,
+            start_row,
+            start_column,
+            observed_action_index,
+            pending_action_index,
+            (
+                pending.ctypes.data_as(ctypes.POINTER(ctypes.c_int))
+                if len(pending)
+                else None
+            ),
+            len(pending),
+            (
+                -1
+                if continuation_action_budget is None
+                else continuation_action_budget
+            ),
+            target_frames,
+            target_margin,
+            timeout_ms,
+            ctypes.byref(winning_mask),
+            ctypes.byref(unresolved_mask),
+            ctypes.byref(deadline_expired),
+            stats.ctypes.data_as(ctypes.POINTER(ctypes.c_uint64)),
+        )
+        if result != 0:
+            _raise_pipeline_result("belief exact certification", result)
+        return (
+            int(winning_mask.value),
+            int(unresolved_mask.value),
+            bool(deadline_expired.value),
+            stats,
+        )
+
 
 def create_belief_pipeline_survival_workspace(
     *,
     x_axis: np.ndarray,
     y_axis: np.ndarray,
     clearance_volume: np.ndarray,
+    terminal_state_margins: np.ndarray | None = None,
+    terminal_action_margins: np.ndarray | None = None,
     velocity_x: np.ndarray,
     velocity_y: np.ndarray,
     base_action_mask: int,
@@ -524,17 +663,28 @@ def create_belief_pipeline_survival_workspace(
     functions = _load_belief_pipeline_workspace_functions()
     if functions is None:
         return None
-    create, query, certify, recommend, cancel, destroy = functions
+    (
+        create,
+        query,
+        certify,
+        certify_exact,
+        recommend,
+        cancel,
+        destroy,
+    ) = functions
     return BeliefPipelineNativeWorkspace(
         create=create,
         query=query,
         certify=certify,
+        certify_exact=certify_exact,
         recommend=recommend,
         cancel=cancel,
         destroy=destroy,
         x_axis=x_axis,
         y_axis=y_axis,
         clearance_volume=clearance_volume,
+        terminal_state_margins=terminal_state_margins,
+        terminal_action_margins=terminal_action_margins,
         velocity_x=velocity_x,
         velocity_y=velocity_y,
         base_action_mask=base_action_mask,

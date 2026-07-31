@@ -40,6 +40,7 @@ from touhou_control.corridor.runtime import (
 from touhou_control.corridor import (
     AabbTrajectoryHazard,
     AnnularSectorTrajectoryHazard,
+    CorridorConfig,
 )
 from touhou_control.query_survival import (
     PendingCommand,
@@ -147,16 +148,17 @@ def solve_corridor(
     background_low_priority: bool = False,
     native_viability_worker_limit: int | None = None,
     time_scale_schedule: Th08TimeScaleSchedule,
+    corridor_config: CorridorConfig = TH08_CORRIDOR_CONFIG,
 ) -> CorridorSolution:
     if (
         native_viability_worker_limit is not None
-        and not 1 <= native_viability_worker_limit <= 4
+        and not 1 <= native_viability_worker_limit <= 16
     ):
-        raise ValueError("native viability worker limit must be 1..4")
+        raise ValueError("native viability worker limit must be 1..16")
     scale_horizon = (
         max(0, snapshot_lag)
         + max(0, forecast_lead_frames)
-        + TH08_CORRIDOR_CONFIG.horizon_frames
+        + corridor_config.horizon_frames
         + 1
     )
     time_scale_schedule.require_complete_horizon(scale_horizon)
@@ -199,13 +201,13 @@ def solve_corridor(
         future_annular_sector_trajectories = (
             future_hazard_projection.trajectories_for_policy(
                 source_frame=source_frame,
-                horizon_frames=TH08_CORRIDOR_CONFIG.horizon_frames,
+                horizon_frames=corridor_config.horizon_frames,
             )
         )
         future_aabb_trajectories = (
             future_hazard_projection.aabb_trajectories_for_policy(
                 source_frame=source_frame,
-                horizon_frames=TH08_CORRIDOR_CONFIG.horizon_frames,
+                horizon_frames=corridor_config.horizon_frames,
             )
         )
     hazards = lower_th08_corridor_hazards(
@@ -214,7 +216,7 @@ def solve_corridor(
         enemy_bodies=enemy_bodies,
         snapshot_lag=snapshot_lag,
         forecast_frames=forecast_lead_frames,
-        horizon_frames=TH08_CORRIDOR_CONFIG.horizon_frames,
+        horizon_frames=corridor_config.horizon_frames,
         laser_time_scale_bits=laser_scale_bits,
         future_aabb_trajectories=future_aabb_trajectories,
         future_annular_sector_trajectories=(
@@ -223,6 +225,7 @@ def solve_corridor(
     )
     prepared_problem = prepare_lowered_th08_corridor(
         hazards=hazards,
+        config=corridor_config,
         control_delay_candidates=control_delay_candidates,
         nominal_control_delay=nominal_control_delay,
         active_action=active_action,
@@ -260,9 +263,9 @@ def solve_corridor(
         active_action=active_action,
         required_gate_lane=required_gate_lane,
         context_key=context_key,
-        grid_step=TH08_CORRIDOR_CONFIG.grid_step,
-        frames_per_layer=TH08_CORRIDOR_CONFIG.frames_per_layer,
-        horizon_frames=TH08_CORRIDOR_CONFIG.horizon_frames,
+        grid_step=corridor_config.grid_step,
+        frames_per_layer=corridor_config.frames_per_layer,
+        horizon_frames=corridor_config.horizon_frames,
         bullet_slots=tuple(bullet.slot for bullet in bullets),
         laser_slots=tuple(laser.slot for laser in lasers),
         enemy_pointers=tuple(

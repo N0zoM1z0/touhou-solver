@@ -25,7 +25,7 @@ int worker_count() {
 }
 
 int set_worker_limit(int worker_limit) {
-    if (worker_limit < 1 || worker_limit > 4) {
+    if (worker_limit < 1 || worker_limit > 16) {
         return -1;
     }
     viability_worker_limit = worker_limit;

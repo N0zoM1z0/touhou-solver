@@ -1,9 +1,11 @@
 from __future__ import annotations
 
 import unittest
+from types import SimpleNamespace
 
 from th08_live.controller import (
     _ordinary_nonspell_preexhaustion_filter,
+    _ordinary_target_query_frame,
 )
 from th08_time_scale import TH08_UNIT_TIME_SCALE_BITS
 from touhou_control.local_pipeline_oracle import LocalPipelineRoot
@@ -56,3 +58,25 @@ class OrdinaryNonspellPreexhaustionTests(unittest.TestCase):
 
         self.assertFalse(result.state_eligible)
         self.assertEqual(result.reason, "player_transition")
+
+    def test_active_policy_target_keeps_a_complete_pickup_lease(self) -> None:
+        policy = SimpleNamespace(
+            config=SimpleNamespace(frames_per_layer=8),
+            horizon_frames=80,
+        )
+
+        self.assertEqual(
+            _ordinary_target_query_frame(policy=policy, policy_age=0),
+            8,
+        )
+        self.assertEqual(
+            _ordinary_target_query_frame(policy=policy, policy_age=1),
+            8,
+        )
+        self.assertEqual(
+            _ordinary_target_query_frame(policy=policy, policy_age=2),
+            16,
+        )
+        self.assertIsNone(
+            _ordinary_target_query_frame(policy=policy, policy_age=73)
+        )

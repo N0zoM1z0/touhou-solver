@@ -625,6 +625,69 @@ class VariableCadenceOracleTests(unittest.TestCase):
                         places=5,
                     )
 
+    def test_terminal_action_margin_and_exact_threshold_share_contract(
+        self,
+    ) -> None:
+        actions = (
+            ControlAction("held", 0.0, 0.0),
+            ControlAction("new", 0.0, 0.0),
+        )
+        clearance = np.ones((2, 2, 3), dtype=np.float32)
+        terminal_state = np.ones((2, 2, 3), dtype=np.float32)
+        terminal_actions = np.ones((2, 2, 2, 3), dtype=np.float32)
+        terminal_actions[0, 1] = -1.0
+        problem = SurvivalQueryProblem(
+            x_axis=self.x_axis,
+            y_axis=self.y_axis,
+            clearance_volume=clearance,
+            actions=actions,
+            delay_frames=(2,),
+            nominal_delay=2,
+            config=ViabilityConfig(
+                frames_per_layer=1,
+                required_clearance=0.0,
+                clamp_to_bounds=True,
+            ),
+            terminal_state_margins=terminal_state,
+            terminal_action_margins=terminal_actions,
+        )
+        try:
+            workspace = problem.build_belief_pipeline_workspace(
+                policy_version="terminal-continuation",
+                decision_frame_support=(1,),
+            )
+        except RuntimeError as error:
+            self.skipTest(str(error))
+        with workspace:
+            labels = workspace.query_cell(
+                policy_version="terminal-continuation",
+                frame=0,
+                row=0,
+                column=1,
+                observed_action="held",
+            )
+            certificate = workspace.certify_exact_winning_actions(
+                policy_version="terminal-continuation",
+                frame=0,
+                row=0,
+                column=1,
+                observed_action="held",
+                target_frames=1,
+                target_margin=0.0,
+            )
+
+        self.assertEqual(
+            labels.action_label("held").guaranteed_frames,
+            1,
+        )
+        self.assertEqual(
+            labels.action_label("new").bottleneck_margin,
+            -1.0,
+        )
+        self.assertEqual(certificate.winning_actions, ("held",))
+        self.assertEqual(certificate.unresolved_actions, ())
+        self.assertTrue(certificate.complete)
+
 
 if __name__ == "__main__":
     unittest.main()

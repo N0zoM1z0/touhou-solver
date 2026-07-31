@@ -16,25 +16,25 @@ authority.
 - Last physical checkpoint:
   `lunatic_route2_stage4a_unattended_20260731_152921`, based on immutable
   live-code checkpoint `1c64751`.
-- Native H=32 wind-tunnel checkpoint: `3d15953`.
+- Native H=32 wind-tunnel checkpoint: `3d15953`; it is historical evidence,
+  not the live ordinary horizon.
 - Workspace-prune checkpoint: `be3e583` (`Prune TH08 active research
   workspace`). It removed dormant supplemental, candidate, prewarm, G5,
   priority-17, and old focused Final-B lanes while preserving the promoted
   baseline/pre-loss live path, native snapshot executor, exact pipeline
   workspace, and Final-B scale authority.
-- Current Linux discovery passed 1,226 tests in 10.000 seconds. Complete
-  Windows UNC discovery passed 1,226 tests with three platform skips in
-  19.910 seconds. Current Linux and Windows native builds pass the checked-in
-  42-symbol ABI gate.
-- **Implemented, deterministic gate closed:** default-off
-  `--ordinary-preexhaustion-authority` no longer uses scalar boundary
-  reserve. It now forms the exact observed active/held/pending root, checks
-  every pickup branch through a fresh signed-clearance prefix, and takes the
-  causal predecessor of a completed future signed safety-value policy at its
-  publication epoch. Full per-action values are retained; live-to-lattice
-  error is subtracted before certification. A pending held mask remains
-  no-write, and zero residual pickup is conservatively included in the future
-  policy delay support.
+- Current complete Linux discovery passes 1,234 tests in 9.652 seconds.
+  Complete Windows UNC discovery passes 1,234 tests with three platform
+  skips in 19.618 seconds. Linux and Windows native builds pass the
+  checked-in 44-symbol ABI gate.
+- **Implemented, factorized hard lower authority:** default-off
+  `--ordinary-preexhaustion-authority` no longer uses scalar reserve or the
+  coarse signed terminal tensor. Ordinary nonspells build a 4px Boolean
+  viability kernel with the 2.828px cell radius consumed as required
+  clearance. At every issue, the active/held/pending predecessor holds the
+  selected complete mask with no further writes across every pickup branch
+  into the next active-policy layer. A still-pending command must be a member
+  of that layer's exact action set.
 - **Implemented, deterministic hard gate passed:** collision-control
   projection v12 now captures the manager singleton and every active ordinary
   ECL/timeline source, auxiliary VM, installed callback gate, emission
@@ -57,18 +57,18 @@ authority.
   degenerates to all 17 actions under an uncontrollable prefix and at a
   clamped boundary. Scalar boundary reserve is not equivalent to global
   viability; do not rerun this design.
-- The retained f817/833/835/850/910 regression now joins observation-aligned
-  immutable native replay roots 816/831/834/848/908 to complete future-source
-  closure and newly computed signed per-action values. All five roots have
-  exact coverage/version authority and zero unavailable terminal branches.
-  At f817 the allowed set is
-  `stay/left/down/down_left/down_right/left_fast/down_fast/down_left_fast`;
-  active `up_fast` has margin `-16.137`, the physically issued
-  `up_left_fast` has `-18.845`, and best `stay` has `+21.280`. f833/f835
-  retain nonempty downward sets. The predecessor first becomes empty at f850
-  and the local prefix becomes empty at f910. The deterministic hard gate is
-  true; one fresh Stage-4A physical trial is now the next authorized
-  falsifier.
+- **Observed correction:** forcing the real 80-frame horizon makes the former
+  16px signed predecessor empty at all five retained roots. Its earlier
+  eight-action f817 result used H=32 and is not live authority.
+- **Observed deterministic replacement:** the same immutable
+  f817/833/835/850/910 chain has complete source/version coverage under the
+  4px cell-radius lower kernel. Native exact recurrence and the actual live
+  adapter independently agree that f817 permits only
+  `left_fast/down_left_fast`, excluding active `up_fast` and issued
+  `up_left_fast`. f833/f835/f850/f910 are already empty and remain fail
+  closed. Windows measured f817 kernel/certificate at 1420/21 ms; the five
+  roots have no unresolved action. This is finite-model evidence, not a
+  physical outcome.
 - `--kill-before-saturation` now uses observed ordinary bodies only. The
   falsified timeline spawn forecast is withheld from live input.
   Observed-body alignment/unfocus remains a proposed objective, but the
@@ -225,24 +225,26 @@ general hard-safety authority.
 
 The rejected scalar pre-exhaustion experiment is no longer connected to live
 input. The replacement remains default-off, but may now provide ordinary
-action authority only when the exact source projection, publication-prefix
-geometry, signed terminal values, interval, and version all match. Any
-unsupported source or empty predecessor still fails closed.
+action authority only when the exact source projection, fresh held-prefix
+geometry, 4px lower kernel, active policy layer, interval, and version all
+match. Any unsupported source, delivery gap, expired layer, or empty
+predecessor still fails closed.
 
 Removed lanes must not be re-enabled from archive without a new causal need
 and explicit `STRATEGY.md` decision.
 
 ## Next Useful Gate
 
-Do not rerun the rejected scalar-reserve design. The future-source and
-retained-chain deterministic gates now pass. Next:
+Do not rerun the rejected scalar-reserve or H=32 signed-terminal design. The
+future-source and factorized retained-chain semantic gates pass. Next:
 
 1. Run the already authorized single fresh Stage-4A physical trial from the
    committed checkpoint with ordinary prepublication authority and
    observed-body early kill enabled.
-2. Confirm that complete future-source projections publish, prefix geometry
-   is consumed, exact allowed sets affect issue, empty sets are never relaxed,
-   no Bomb is emitted, and the first-hit witness is retained.
+2. Confirm that complete future-source projections publish, the 4px active
+   kernel remains serviceable, held-prefix sets affect issue, empty/gap states
+   are never relaxed, no Bomb is emitted, and the first-hit witness is
+   retained.
 3. Rotate to Stage 5 only if Stage 4A materially improves as the user
    requested.
 4. Treat the physical first hit as the next counterexample. Hostile-birth

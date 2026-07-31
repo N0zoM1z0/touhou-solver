@@ -23,10 +23,18 @@ class OrdinaryFutureSourceRetainedGateTests(unittest.TestCase):
             for point in cls.report["chain"]
         }
 
-    def test_complete_future_geometry_hard_gate_passes(self) -> None:
+    def test_complete_future_geometry_exposes_coarse_kernel_blocker(
+        self,
+    ) -> None:
         gate = self.report["deterministic_gate"]
-        self.assertTrue(gate["hard_gate_passed"])
-        self.assertEqual(gate["blockers"], [])
+        self.assertFalse(gate["hard_gate_passed"])
+        self.assertEqual(
+            gate["blockers"],
+            [
+                "nontrivial_exact_allowed_set_before_exhaustion",
+                "positive_directional_recovery_retained",
+            ],
+        )
         self.assertTrue(
             gate["complete_future_birth_ecl_timeline_coverage"]
         )
@@ -36,31 +44,21 @@ class OrdinaryFutureSourceRetainedGateTests(unittest.TestCase):
         self.assertTrue(gate["signed_per_action_terminal_values"])
         self.assertTrue(gate["coverage_version_exact_authority_all_roots"])
 
-    def test_first_retained_root_has_directional_exact_authority(self) -> None:
+    def test_first_retained_root_is_erased_by_full_horizon_coarse_values(
+        self,
+    ) -> None:
         point = self.points[817]
         predecessor = point["causal_predecessor"]
         self.assertTrue(predecessor["authority_eligible"])
-        self.assertTrue(predecessor["applicable"])
-        self.assertEqual(
-            predecessor["allowed_actions"],
-            [
-                "stay",
-                "left",
-                "down",
-                "down_left",
-                "down_right",
-                "left_fast",
-                "down_fast",
-                "down_left_fast",
-            ],
-        )
+        self.assertFalse(predecessor["applicable"])
+        self.assertEqual(predecessor["allowed_actions"], [])
         self.assertFalse(
             point["directional_summary"]["active_action_allowed"]
         )
         self.assertFalse(
             point["directional_summary"]["issued_action_allowed"]
         )
-        self.assertGreater(
+        self.assertLess(
             point["directional_summary"]["best_margin"],
             0.0,
         )

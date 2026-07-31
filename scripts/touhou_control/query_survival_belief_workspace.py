@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import math
 from typing import TYPE_CHECKING, Hashable
 
 import numpy as np
@@ -12,6 +13,7 @@ from .query_survival_types import (
     ActionColumnRecommendation,
     BeliefPipelineQueryStats,
     BeliefUpperCertification,
+    ExactWinningActionCertification,
     PendingCommand,
     QueryLocalSurvivalResult,
 )
@@ -147,6 +149,8 @@ class BeliefPipelineSurvivalWorkspace:
                 x_axis=problem.x_axis,
                 y_axis=problem.y_axis,
                 clearance_volume=problem.clearance_volume,
+                terminal_state_margins=problem.terminal_state_margins,
+                terminal_action_margins=problem.terminal_action_margins,
                 velocity_x=np.asarray(
                     [action.velocity_x for action in problem.actions],
                     dtype=np.float64,
@@ -394,6 +398,103 @@ class BeliefPipelineSurvivalWorkspace:
             lower_bound=lower_bound,
             certified=not unresolved,
             unresolved_actions=unresolved,
+            deadline_expired=deadline_expired,
+            workspace_stats=stats,
+        )
+
+    def certify_exact_winning_actions(
+        self,
+        *,
+        policy_version: Hashable,
+        frame: int,
+        row: int,
+        column: int,
+        observed_action: str,
+        target_frames: int,
+        target_margin: float,
+        pending_command: PendingCommand | None = None,
+        continuation_action_budget: int | None = None,
+        timeout_ms: int = 0,
+    ) -> ExactWinningActionCertification:
+        """Prove root actions against the physical belief recurrence.
+
+        Unlike upper certification, this requires the unpartitioned hidden
+        delay information set. A deadline preserves completed winning/rejected
+        actions and reports every unfinished action as unresolved.
+        """
+
+        if policy_version != self.policy_version:
+            raise StalePipelineWorkspaceError(
+                "belief pipeline policy version does not match query"
+            )
+        if self.remaining_delay_bucket_size != 0:
+            raise ValueError(
+                "exact winning certification requires physical hidden-delay "
+                "observation merging"
+            )
+        if self.continuation_policy != "optimal":
+            raise ValueError(
+                "exact winning certification requires optimal continuation"
+            )
+        if observed_action not in self._action_indices:
+            raise ValueError("observed action is absent from the action set")
+        if (
+            pending_command is not None
+            and pending_command.action not in self._action_indices
+        ):
+            raise ValueError("pending action is absent from the action set")
+        if (
+            target_frames < 0
+            or frame < 0
+            or frame + target_frames > self.problem.horizon_frames
+        ):
+            raise ValueError("exact certification target is outside horizon")
+        if not math.isfinite(target_margin):
+            raise ValueError("exact certification margin must be finite")
+        (
+            winning_mask,
+            unresolved_mask,
+            deadline_expired,
+            raw_stats,
+        ) = self._native.certify_exact(
+            start_frame=frame,
+            start_row=row,
+            start_column=column,
+            observed_action_index=self._action_indices[observed_action],
+            pending_action_index=(
+                self._action_indices[pending_command.action]
+                if pending_command is not None
+                else -1
+            ),
+            pending_remaining_frames=(
+                np.asarray(
+                    pending_command.remaining_frames,
+                    dtype=np.int32,
+                )
+                if pending_command is not None
+                else None
+            ),
+            continuation_action_budget=continuation_action_budget,
+            target_frames=target_frames,
+            target_margin=target_margin,
+            timeout_ms=timeout_ms,
+        )
+        stats = BeliefPipelineQueryStats(
+            *[int(value) for value in raw_stats]
+        )
+        return ExactWinningActionCertification(
+            target_frames=target_frames,
+            target_margin=target_margin,
+            winning_actions=tuple(
+                action.name
+                for index, action in enumerate(self.problem.actions)
+                if winning_mask & (1 << index)
+            ),
+            unresolved_actions=tuple(
+                action.name
+                for index, action in enumerate(self.problem.actions)
+                if unresolved_mask & (1 << index)
+            ),
             deadline_expired=deadline_expired,
             workspace_stats=stats,
         )

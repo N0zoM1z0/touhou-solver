@@ -79,6 +79,22 @@ class BeliefUpperCertification:
 
 
 @dataclass(frozen=True)
+class ExactWinningActionCertification:
+    """Deadline-aware exact threshold result for one belief root."""
+
+    target_frames: int
+    target_margin: float
+    winning_actions: tuple[str, ...]
+    unresolved_actions: tuple[str, ...]
+    deadline_expired: bool
+    workspace_stats: BeliefPipelineQueryStats
+
+    @property
+    def complete(self) -> bool:
+        return not self.deadline_expired and not self.unresolved_actions
+
+
+@dataclass(frozen=True)
 class ActionColumnRecommendation:
     """Heuristic policy column found on an exact worst restricted path."""
 
@@ -133,6 +149,7 @@ __all__ = [
     "ActionColumnRecommendation",
     "BeliefPipelineQueryStats",
     "BeliefUpperCertification",
+    "ExactWinningActionCertification",
     "PendingCommand",
     "PipelineSurvivalQueryStats",
     "QueryLocalSurvivalResult",

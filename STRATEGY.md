@@ -64,22 +64,20 @@ uses player phase rather than the retained deathbomb-window value: phases 1/2
 fail closed, while native movement phases 0/3 remain eligible.
 
 For an ordinary nonspell at unit scale, it uses the exact observed
-active/held/pending pipeline root. Every command pickup branch is checked
-through a fresh signed-clearance hazard prefix and advanced to an already
-completed future policy epoch. The terminal set comes from full-horizon signed
-safety values with all per-action values retained. Exact off-grid projection
-error is subtracted. Holding the pending complete mask remains no-write; the
-future delay set includes zero residual pickup as a conservative superset.
+active/held/pending pipeline root. The published ordinary policy is a 4px
+Boolean lower kernel whose required clearance includes the 2.828px cell
+radius. Every selected complete mask is certified across every pickup branch
+under a held/no-further-write continuation into the next queryable active
+policy layer. A command still pending at that layer must itself belong to the
+layer's safe action set.
 
-Hard coverage must begin at the current observation and span the publication
-lead plus the complete future policy horizon under the exact hazard version.
-Missing prefix coverage, compact/missing terminal action values, interval or
-version mismatch, and unseen birth/event coverage all produce no action
-authority. Coverage is not metadata-only: the exact retained projection's
-annular-sector emissions and hostile-body AABBs are consumed in every
-root-to-publication prefix query and again by the future corridor policy.
-Directional terminal margins and recovery distances remain auditable even
-when the predecessor is empty.
+Hard coverage must begin at the current observation and span the held prefix
+plus the remaining active-policy horizon under one exact hazard version.
+Missing prefix geometry, a non-4px policy, an expired/unqueryable layer,
+interval or version mismatch, and unseen birth/event coverage all produce no
+action authority. Coverage is not metadata-only: the retained projection's
+annular-sector emissions and hostile-body AABBs are consumed in the fresh
+prefix and in the 80-frame future kernel.
 
 Observed-body early kill may rank only the resulting nonempty hard set plus
 the fresh issue-safe set. There is no objective fallback when the predecessor
@@ -99,7 +97,12 @@ worst reserve zero at frame 850; playfield clamping repeats the all-action tie
 at the saturated corner at frame 910. The scalar code remains only as a
 deterministic counterexample and has no promotion path.
 
-The set-valued replacement now passes its deterministic hard gate. Native
+Future-source closure passes, but the former signed predecessor does not. At
+the real live H=80, its 16px terminal set is empty at all five retained roots;
+the earlier eight-action f817 result came from H=32.
+
+The factorized lower replacement passes its deterministic semantic gate.
+Native
 collision-control projection v12 captures the ordinary manager singleton,
 active enemy main/auxiliary VMs, callback gates, emission descriptors, motion,
 phase, and timeline runtime. Reachable sources are executed fail-closed for
@@ -107,11 +110,11 @@ phase, and timeline runtime. Reachable sources are executed fail-closed for
 Unsupported source semantics remain `UNKNOWN`.
 
 Observation-aligned immutable replay roots 816/831/834/848/908 rebuild the
-retained f817/833/835/850/910 chain with signed action values. All five roots
-have exact interval/version authority and zero unavailable terminal branches.
-At f817 the nontrivial allowed set excludes active `up_fast` and issued
-`up_left_fast`; f833/f835 retain directional downward recovery; the exact
-predecessor first becomes empty at f850. This is deterministic native-replay
+retained f817/833/835/850/910 chain. Native exact recurrence and the live
+adapter agree that f817 permits only `left_fast/down_left_fast`, excluding
+active `up_fast` and issued `up_left_fast`. The later four roots are empty and
+fail closed. Windows measured f817 kernel/certificate delivery at 1420/21 ms;
+the five roots have no unresolved action. This is deterministic native-replay
 evidence, not a physical outcome. L3 remains default-off pending the already
 authorized Stage-4A physical falsifier.
 
@@ -246,9 +249,9 @@ predicate-only repair still permits the losing action and aliases every
 action under prefix/boundary saturation. Contact bullet slot 455 first entered
 the retained nearby set while an older hazard-snapshot policy certified
 `down_left`; the next snapshot reported an empty kernel. The compact trace
-cannot attribute the version flip to that slot alone. The set-valued
-pre-publication predecessor and bounded ordinary future-source coverage now
-pass the retained hard gate. The next question is physical
+cannot attribute the version flip to that slot alone. The factorized 4px
+lower predecessor and bounded ordinary future-source coverage now pass the
+retained semantic gate. The next question is physical
 delivery/effectiveness on Stage 4A, not another boundary score or local
 ranking change.
 

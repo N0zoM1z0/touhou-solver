@@ -1943,6 +1943,9 @@ Current checkpoint: the pinned atlas retains 2,885 occurrences; shipped
 native revalidation closes all mandatory-route static opcode semantics,
 including the 19 timeline-`0x06` message/cleanup/item-homing events. Shared
 unknown opcode `0x09` has no eligible occurrence in these four timelines.
+The pure scheduler may retain these symbolic events, but the integrated
+simulator fails closed until their complete ordered enemy/message/item
+mutation has an exact consumer.
 
 Remaining gate: join individual events by exact runtime image/program counter
 and prioritize observed physical reach without treating static candidates as

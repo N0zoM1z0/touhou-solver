@@ -2024,6 +2024,9 @@ first.
   timeline `0x06` has shipped-instruction/dataflow authority for ordered
   message start, eligible-enemy HP zero/end transition, conditional score-item
   allocation, and all-item homing, but no event-execution or timing authority.
+  CE-0227 requires the integrated simulator to fail closed on every unconsumed
+  timeline engine event; retaining a symbolic event alone is not an exact
+  successor.
   Runtime-observed generation/damage/end/item tracking and candidate-board
   joins, instruction execution, phase sequence, exposure causality,
   survival-feasible causal collection, targeting, and S18 live action

@@ -152,6 +152,22 @@ exact runtime-image/program-counter event join and event-level physical
 reach. That capture debt must not block unrelated high-ROI route, combat, or
 resource work.
 
+## Integrated Consumer Boundary
+
+CE-0227 found that the pure timeline scheduler correctly emitted opaque
+`TimelineEngineEvent` rows, while `_step_stage_timeline` in the integrated
+simulator retained and silently ignored them. After the native `0x06`
+revalidation, that successor is known to be wrong whenever an event occurs:
+enemy HP/end state, optional score-item allocation, and all active item motion
+can change before later manager phases.
+
+The pure scheduler continues to expose symbolic events for atlas and bounded
+differential work. The integrated simulator now fails closed on every
+nonempty engine-event batch, reporting exact timeline index, opcode, and
+instruction offset. It must not return a route/combat/resource successor
+until a future consumer implements the complete ordered mutation. This is an
+offline correctness boundary, not an implementation of message cleanup.
+
 ## Authority
 
 - **Observed:** exact input identities, decoded records, difficulty

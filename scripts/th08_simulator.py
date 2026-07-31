@@ -252,6 +252,18 @@ def _step_stage_timeline(
         active_difficulty_mask=state.active_timeline_difficulty_mask,
         external=control.timeline_external,
     )
+    if result.engine_events:
+        unsupported = ", ".join(
+            (
+                f"timeline {event.timeline_index} opcode "
+                f"{event.opcode:#04x} at {event.instruction_offset:#x}"
+            )
+            for event in result.engine_events
+        )
+        raise RuntimeError(
+            "integrated stage simulator has no exact engine-event consumer: "
+            f"{unsupported}"
+        )
     spawn_lifecycle = None
     enemy_lifetime_ledger = state.enemy_lifetime_ledger
     if enemy_lifetime_ledger is not None:

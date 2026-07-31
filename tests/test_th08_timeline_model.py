@@ -21,8 +21,6 @@ from th08_simulator import (
 )
 from th08_timeline_model import (
     IndexedEnemyView,
-    StageTimelineState,
-    TimelineClock,
     TimelineExternalState,
     initial_stage_timeline_state,
     step_stage_timelines,
@@ -153,6 +151,45 @@ class TimelineModelTests(unittest.TestCase):
         result = executor.step(state, Th08Route2FrameControl(0), frame_index=0)
         self.assertEqual(result.state.player.frame_index, 1)
         self.assertEqual(len(result.state.last_timeline_step.spawns), 1)
+
+    def test_integrated_executor_fails_closed_on_message_cleanup(self) -> None:
+        program = _ecl((_instruction(0x10, 0, 0x06, (2,)),))
+        timeline = step_stage_timelines(
+            program,
+            initial_stage_timeline_state(program, rng_seed=0),
+            active_difficulty_mask=1,
+        )
+        self.assertEqual(
+            [
+                (
+                    event.timeline_index,
+                    event.instruction_offset,
+                    event.opcode,
+                    event.value,
+                )
+                for event in timeline.engine_events
+            ],
+            [(0, 0x10, 0x06, 2)],
+        )
+
+        state = initial_route2_stage_simulation_state(
+            program,
+            rng_seed=0,
+            active_timeline_difficulty_mask=1,
+            short_spawn_mode=True,
+        )
+        with self.assertRaisesRegex(
+            RuntimeError,
+            (
+                "no exact engine-event consumer: "
+                "timeline 0 opcode 0x06 at 0x10"
+            ),
+        ):
+            route2_stage_executor().step(
+                state,
+                Th08Route2FrameControl(0),
+                frame_index=0,
+            )
 
     def test_integrated_timeline_spawn_updates_generation_ledger(self) -> None:
         program = _ecl(

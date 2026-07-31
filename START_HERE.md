@@ -45,8 +45,8 @@ historical handoff.
   mandatory-event atlas with native-revalidated timeline-`0x06`
   message/cleanup/item semantics are the current repository checkpoint; no
   new physical trial was run.
-- Complete Linux discovery passes 1,530 tests in 15.474 seconds.
-- Complete Windows UNC discovery passes 1,530 tests in 31.422 seconds with
+- Complete Linux discovery passes 1,531 tests in 14.323 seconds.
+- Complete Windows UNC discovery passes 1,531 tests in 31.006 seconds with
   the three existing skips.
 - No TH08, controller, supervisor, native-replay runner, or Windows test
   process is intentionally left running.
@@ -422,6 +422,10 @@ historical handoff.
 - Retained runs reach every workload but do not prove individual event
   execution. Exact runtime image/program-counter joins remain open and no
   event-timing, causal combat/resource, planner, or live authority follows.
+- CE-0227 rejects the prior integrated-simulator behavior that retained but
+  ignored `TimelineEngineEvent`. The pure scheduler still exposes symbolic
+  events; the integrated executor now fails closed before returning a
+  successor until complete ordered enemy/message/item mutation is implemented.
 - Retained atlas:
   `artifacts/runtime_reports/th08_mandatory_event_atlas_20260731.json`,
   SHA-256
@@ -1648,7 +1652,8 @@ Do not resume broad G5 work first.
    timeline `0x06`; its remaining gate is to join individual native events
    only by exact image/PC identity. Do not use `thtk` names as runtime
    side-effect authority, reinterpret static candidates as executed events,
-   or block on the failed external STD printer.
+   let an integrated simulator continue past an unconsumed engine event, or
+   block on the failed external STD printer.
 1. Do not repeat C5, the 22-hit Stage-6B run, or the unchanged 74-hit full
    route. C5 exact delivery is closed for its declared source-local contract;
    the two failed workloads already supply their reachability, resource, and

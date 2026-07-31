@@ -43,10 +43,11 @@ historical handoff.
   type/update/hit-callback content closure,
   `CONTENT-01` shipped content manifest, and `CONTENT-02` static
   mandatory-event atlas with native-revalidated timeline-`0x06`
-  message/cleanup/item semantics are the current repository checkpoint; no
-  new physical trial was run.
-- Complete Linux discovery passes 1,531 tests in 14.323 seconds.
-- Complete Windows UNC discovery passes 1,531 tests in 31.006 seconds with
+  message/cleanup/item semantics, plus the six-stage Route-2 cleanup-seam
+  atlas and exact post-allocation all-active-item homing recurrence, are the
+  current repository checkpoint; no new physical trial was run.
+- Complete Linux discovery passes 1,534 tests in 14.510 seconds.
+- Complete Windows UNC discovery passes 1,534 tests in 31.725 seconds with
   the three existing skips.
 - No TH08, controller, supervisor, native-replay runner, or Windows test
   process is intentionally left running.
@@ -426,6 +427,15 @@ historical handoff.
   ignored `TimelineEngineEvent`. The pure scheduler still exposes symbolic
   events; the integrated executor now fails closed before returning a
   successor until complete ordered enemy/message/item mutation is implemented.
+- The Route-2 cleanup-seam atlas extends the 19 mandatory `0x06` rows to all
+  23 natural-route rows by adding Stage 1/2. Its executable post-allocation
+  item recurrence forces every active item to `(state=1, vx=0, vy=-0.5)`
+  while preserving pool identity/order/cursor, other item fields, resources,
+  and RNG. It is not a pickup, Power benefit, or complete message event.
+- Retained route-wide cleanup atlas:
+  `artifacts/runtime_reports/th08_route2_message_cleanup_seam_atlas_20260731.json`,
+  SHA-256
+  `8ee48d5a3d25ad77d90a01e1a5373944553ac2fb9366fad854a7d6df0a016f8e`.
 - Retained atlas:
   `artifacts/runtime_reports/th08_mandatory_event_atlas_20260731.json`,
   SHA-256
@@ -1654,6 +1664,9 @@ Do not resume broad G5 work first.
    side-effect authority, reinterpret static candidates as executed events,
    let an integrated simulator continue past an unconsumed engine event, or
    block on the failed external STD printer.
+   The exact item-homing sub-transition may be reused only after a complete
+   same-update cleanup/allocation input; it does not authorize partial
+   continuation past the enclosing event.
 1. Do not repeat C5, the 22-hit Stage-6B run, or the unchanged 74-hit full
    route. C5 exact delivery is closed for its declared source-local contract;
    the two failed workloads already supply their reachability, resource, and

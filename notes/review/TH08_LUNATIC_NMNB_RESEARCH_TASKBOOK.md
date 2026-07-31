@@ -1906,6 +1906,11 @@ Output: an enemy/event-class kill-deadline model, not a blanket
 `if nonspell: attack` weight. Spell/boss damage remains survival-first unless
 its own phase-shortening experiment passes.
 
+Current checkpoint: the Route-2 cleanup-seam atlas identifies 23 static
+timeline-`0x06` candidates and keeps their forced HP-zero/end path distinct
+from player-shot kills. Event execution and prevented-birth causality remain
+open.
+
 #### POWER-ROUTE-01 — Survival-filtered Power-0 acquisition
 
 Hypothesis: collecting Power during easy early-route opportunities increases
@@ -1926,6 +1931,12 @@ capability does not improve, or the benefit depends on practice-mode max
 Power.  
 Boundary: no post-death recovery objective exists in the NMNB policy. Post-hit
 Power traces are diagnostic-only.
+
+Current checkpoint: all 23 Route-2 message-cleanup seams, including Stage 1/2,
+are hash-bound. The exact post-allocation item sub-transition forces every
+active item to homing without changing resources, cursor, order, timer, type,
+or RNG. Which items exist, execute, or are collected and whether later
+capability improves remain open.
 
 ### Priority 1 — Turn one root into a representative corpus
 

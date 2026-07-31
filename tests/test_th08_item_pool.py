@@ -25,6 +25,7 @@ from th08_item_pool import (
     ItemPoolState,
     ItemSlot,
     ItemSpawnRequest,
+    force_all_active_items_homing,
     step_item_pool,
 )
 from th08_rng import Th08Rng
@@ -63,6 +64,90 @@ def _random_spawn_ecl() -> EclFile:
 
 
 class ItemPoolTests(unittest.TestCase):
+    def test_message_start_forces_active_list_homing_without_other_mutation(
+        self,
+    ) -> None:
+        resources = ItemResources(
+            power=23,
+            bombs=3,
+            lives=2,
+            score_display=456,
+        )
+        state = ItemPoolState(
+            (
+                ItemSlot(
+                    1,
+                    ItemState(
+                        10,
+                        20,
+                        1.25,
+                        3.5,
+                        motion_state=FREE,
+                        timer_elapsed=17.25,
+                        item_type=ITEM_POWER_SMALL,
+                        full_value=True,
+                    ),
+                ),
+                ItemSlot(
+                    4,
+                    ItemState(
+                        30,
+                        40,
+                        -3,
+                        2,
+                        motion_state=SCATTER_DELAY,
+                        timer_elapsed=8.5,
+                        item_type=ITEM_BOMB,
+                        start_x=7,
+                        start_y=9,
+                        target_x=11,
+                        target_y=13,
+                    ),
+                ),
+            ),
+            resources,
+            next_allocation_index=29,
+            active_order=(4, 1),
+        )
+
+        transition = force_all_active_items_homing(state)
+
+        self.assertEqual(transition.affected_slots, (4, 1))
+        self.assertEqual(transition.state.resources, resources)
+        self.assertEqual(transition.state.next_allocation_index, 29)
+        self.assertEqual(transition.state.active_order, (4, 1))
+        self.assertEqual(
+            [
+                (
+                    slot.index,
+                    slot.item.velocity_x,
+                    slot.item.velocity_y,
+                    slot.item.motion_state,
+                )
+                for slot in transition.state.slots
+            ],
+            [
+                (1, 0.0, -0.5, HOMING),
+                (4, 0.0, -0.5, HOMING),
+            ],
+        )
+        for before, after in zip(
+            (slot.item for slot in state.slots),
+            (slot.item for slot in transition.state.slots),
+            strict=True,
+        ):
+            self.assertEqual(
+                replace(
+                    after,
+                    velocity_x=before.velocity_x,
+                    velocity_y=before.velocity_y,
+                    motion_state=before.motion_state,
+                ),
+                before,
+            )
+        self.assertEqual(state.slots[0].item.motion_state, FREE)
+        self.assertEqual(state.slots[1].item.motion_state, SCATTER_DELAY)
+
     def test_spawn_move_collect_bomb_and_release_slot(self) -> None:
         result = step_item_pool(
             ItemPoolState((), ItemResources(bombs=2)),

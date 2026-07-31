@@ -1996,6 +1996,7 @@ first.
   `notes/research/route_resources/ROUTE2_ITEM_DROP_OPPORTUNITY_ATLAS_CONTRACT_20260731.md`, and
   `notes/research/route_resources/ROUTE2_COMBAT_RESOURCE_CANDIDATE_BOARD_CONTRACT_20260731.md`, and
   `notes/research/route_resources/ROUTE2_ITEM_ALLOCATION_PICKUP_TRACE_CONTRACT_20260731.md`, and
+  `notes/research/route_resources/ROUTE2_MESSAGE_CLEANUP_ITEM_HOMING_CONTRACT_20260731.md`, and
   `notes/research/content/MANDATORY_STAGE_STATIC_EVENT_ATLAS_CONTRACT_20260731.md`.
   The raw first-64 inventory now has physical trace-only observation
   authority. The Power-0 audit has first-hit-bounded route observation
@@ -2026,7 +2027,9 @@ first.
   allocation, and all-item homing, but no event-execution or timing authority.
   CE-0227 requires the integrated simulator to fail closed on every unconsumed
   timeline engine event; retaining a symbolic event alone is not an exact
-  successor.
+  successor. The route-wide cleanup atlas adds the Stage-1/2 Power-0 history
+  and an exact post-allocation item-pool homing recurrence, while preserving
+  the same full-event fail-closed boundary.
   Runtime-observed generation/damage/end/item tracking and candidate-board
   joins, instruction execution, phase sequence, exposure causality,
   survival-feasible causal collection, targeting, and S18 live action

@@ -6,6 +6,7 @@ from __future__ import annotations
 from dataclasses import dataclass, replace
 
 from th08_item_model import (
+    HOMING,
     ITEM_POWER_LARGE,
     ITEM_POWER_OVERFLOW,
     ITEM_POWER_SMALL,
@@ -78,6 +79,12 @@ class ItemPoolStep:
     pool_exhausted: bool
 
 
+@dataclass(frozen=True)
+class ItemPoolForcedHoming:
+    state: ItemPoolState
+    affected_slots: tuple[int, ...]
+
+
 def initial_item_pool_state(resources: ItemResources) -> ItemPoolState:
     return ItemPoolState((), resources)
 
@@ -98,6 +105,37 @@ def _validate_state(state: ItemPoolState) -> tuple[int, ...]:
             "item active order must contain every occupied slot exactly once"
         )
     return active_order
+
+
+def force_all_active_items_homing(
+    state: ItemPoolState,
+) -> ItemPoolForcedHoming:
+    """Apply the post-allocation item mutation used by message start.
+
+    Native ``item_manager_force_all_homing`` (0x004413E0) walks the current
+    active list, sets motion state 1, and stores velocity ``(0, -0.5, 0)``.
+    The solver's item state is two-dimensional, so the observed zero z
+    component is structural rather than stored here. No timer, position,
+    type, resource, allocation-cursor, active-order, or RNG state changes in
+    this sub-transition.
+    """
+
+    active_order = _validate_state(state)
+    slots = {slot.index: slot.item for slot in state.slots}
+    for index in active_order:
+        slots[index] = replace(
+            slots[index],
+            velocity_x=0.0,
+            velocity_y=-0.5,
+            motion_state=HOMING,
+        )
+    successor = replace(
+        state,
+        slots=tuple(
+            ItemSlot(index, item) for index, item in sorted(slots.items())
+        ),
+    )
+    return ItemPoolForcedHoming(successor, active_order)
 
 
 def _next_free_slot(

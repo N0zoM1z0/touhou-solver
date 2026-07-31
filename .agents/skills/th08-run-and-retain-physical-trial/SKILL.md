@@ -11,9 +11,9 @@ separate.
 
 ## Establish The Contract
 
-1. Resolve the repository root and read `AGENTS.md`, `START_HERE.md`,
-   `STRATEGY.md`, the named experiment contract, and the latest relevant run
-   and counterexample notes.
+1. Resolve the repository root and read `AGENTS.md`, `GOAL.MD`,
+   `START_HERE.md`, `STRATEGY.md`, the named experiment contract, and the
+   latest relevant run and counterexample notes.
 2. Stop before launch if the user did not authorize a physical trial in the
    current request.
 3. Fix the code checkpoint, workload, route/team/difficulty/stage/phase,
@@ -24,9 +24,9 @@ separate.
 
 ## Preflight Without Side Effects
 
-1. Use the current canonical commands from `START_HERE.md` and
-   `notes/review/LAUNCH_AND_UNC_WORKFLOW_AUDIT_20260729.md`; do not copy a
-   stale command into this skill.
+1. Use the current canonical commands from `START_HERE.md` and the operating
+   contract in `notes/operations/UNATTENDED_PRACTICE_AUTOMATION.md`; do not
+   copy a volatile launch command into this skill.
 2. Validate Python imports, affected native libraries, BAT locations, output
    paths, executable identity, immutable ECL path/file/hash, and required
    patches before starting the game or controller.
@@ -61,5 +61,6 @@ separate.
 4. Classify conclusions as observed, inferred, or hypothesized. A completed
    run does not promote a model or strategy by itself.
 5. Route concrete failures through `notes/COUNTEREXAMPLES.md` and chronology
-   through `notes/RESEARCH_LOG.md`. Use
-   `$th08-retain-research-checkpoint` to align the full handoff and commit.
+   through `notes/RESEARCH_LOG.md`. Update `START_HERE.md`, `STRATEGY.md`,
+   compact evidence, and the focused counterexample only when the trial
+   changes them, then make one focused English research-checkpoint commit.

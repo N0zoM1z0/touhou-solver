@@ -2,8 +2,8 @@
 
 Last updated: 2026-07-31.
 
-This is the only volatile entrypoint. Read `AGENTS.md`, then this file,
-`STRATEGY.md`, and the focused task card in
+This is the only volatile entrypoint. Read `AGENTS.md`, `GOAL.MD`, then this
+file, `STRATEGY.md`, and the focused task card in
 `notes/review/TH08_LUNATIC_NMNB_RESEARCH_TASKBOOK.md`.
 
 Historical material removed from the active tree is recoverable through
@@ -16,10 +16,11 @@ authority.
 - Last physical checkpoint: `d2b810d` (`Retain Stage 3 4A and 5 physical
   ring`).
 - Native H=32 wind-tunnel checkpoint: `3d15953`.
-- This workspace-prune checkpoint removes dormant supplemental, candidate,
-  prewarm, G5, priority-17, and old focused Final-B lanes. It deliberately
-  preserves the promoted baseline/pre-loss live path, native snapshot
-  executor, exact pipeline workspace, and Final-B scale authority.
+- Workspace-prune checkpoint: `be3e583` (`Prune TH08 active research
+  workspace`). It removed dormant supplemental, candidate, prewarm, G5,
+  priority-17, and old focused Final-B lanes while preserving the promoted
+  baseline/pre-loss live path, native snapshot executor, exact pipeline
+  workspace, and Final-B scale authority.
 - Final cleanup gates: Linux discovery passed 1,136 tests in 9.611 seconds;
   the complete Windows UNC discovery over the same test set exited zero.
   Linux and Windows native builds pass the checked-in 41-symbol ABI gate.

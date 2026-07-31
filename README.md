@@ -13,12 +13,14 @@ short-prefix model provide faster controlled iteration.
 Read:
 
 1. [`AGENTS.md`](AGENTS.md) — repository and research contract;
-2. [`START_HERE.md`](START_HERE.md) — current checkpoint and next experiment;
-3. [`STRATEGY.md`](STRATEGY.md) — action-authority ledger;
-4. [`notes/review/TH08_LUNATIC_NMNB_RESEARCH_TASKBOOK.md`](notes/review/TH08_LUNATIC_NMNB_RESEARCH_TASKBOOK.md)
+2. [`GOAL.MD`](GOAL.MD) — primary physical completion target;
+3. [`START_HERE.md`](START_HERE.md) — current checkpoint and next experiment;
+4. [`STRATEGY.md`](STRATEGY.md) — action-authority ledger;
+5. [`notes/review/TH08_LUNATIC_NMNB_RESEARCH_TASKBOOK.md`](notes/review/TH08_LUNATIC_NMNB_RESEARCH_TASKBOOK.md)
    — closed research loop.
 
-Retired history is intentionally absent from the active tree. See
+The complete chronological research log remains active. Other retired history
+is intentionally absent from the active tree; see
 [`ARCHIVE_INDEX.md`](ARCHIVE_INDEX.md) and Git tag
 `pre-workspace-prune-20260731`.
 

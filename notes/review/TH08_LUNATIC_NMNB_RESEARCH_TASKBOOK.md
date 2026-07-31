@@ -434,17 +434,16 @@ it.
 
 ## 11. Immediate Backlog
 
-1. Finish this cleanup checkpoint and retain one final Linux/Windows gate.
-2. Select a generation-safe ordinary-enemy root from the retained Stage
+1. Select a generation-safe ordinary-enemy root from the retained Stage
    3/4A/5 evidence.
-3. Capture/reproduce the complete combat/resource native root.
-4. Run D1/D2 schedules inside the same survival-feasible set.
-5. Fix only the first model/native mismatch that blocks comparison.
-6. Repeat a winner on a second root.
-7. Integrate default-off shadow and verify deadline/fallback.
-8. Request one rotated focused physical trial.
-9. If materially better, run one fresh full Lunatic route.
-10. Use the new first hit to begin the next loop.
+2. Capture/reproduce the complete combat/resource native root.
+3. Run D1/D2 schedules inside the same survival-feasible set.
+4. Fix only the first model/native mismatch that blocks comparison.
+5. Repeat a winner on a second root.
+6. Integrate default-off shadow and verify deadline/fallback.
+7. Request one rotated focused physical trial.
+8. If materially better, run one fresh full Lunatic route.
+9. Use the new first hit to begin the next loop.
 
 Optional warm-service work and learned/MCTS candidate ordering stay behind
 this backlog unless branch latency becomes the measured bottleneck.
@@ -464,5 +463,6 @@ Stop or pivot when:
   solver experiment.
 
 Record durable failures in `notes/counterexamples/CE-0220-0269.md`. Preserve
+the complete chronology through `notes/RESEARCH_LOG.md` and other retired
 history through the archive tag; keep the active taskbook about what to do
 next.

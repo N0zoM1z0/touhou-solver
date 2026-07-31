@@ -6,11 +6,13 @@ These instructions apply to the entire repository.
 
 Read, in order:
 
-1. `START_HERE.md` — current checkpoint, evidence, commands, and next gate.
-2. `STRATEGY.md` — live/shadow/offline/proposed/rejected authority.
-3. `notes/review/TH08_LUNATIC_NMNB_RESEARCH_TASKBOOK.md` — research loop and
+1. `GOAL.MD` — primary physical completion target and what does not count as
+   completion.
+2. `START_HERE.md` — current checkpoint, evidence, commands, and next gate.
+3. `STRATEGY.md` — live/shadow/offline/proposed/rejected authority.
+4. `notes/review/TH08_LUNATIC_NMNB_RESEARCH_TASKBOOK.md` — research loop and
    prioritized backlog.
-4. Only the focused contract named by those files for the task at hand.
+5. Only the focused contract named by those files for the task at hand.
 
 `ARCHIVE_INDEX.md` explains how to recover retired history. Archived material
 has no current authority and must not be restored merely because an old note
@@ -18,8 +20,9 @@ mentions it.
 
 ## Mission And Priority
 
-The target is physically validated Sakuya/Remilia Lunatic and Extra NMNB.
-Optimize for real reduction of hits and eventual clean-route completion.
+The primary completion target is physically validated Sakuya/Remilia Lunatic
+Route-2 NMNB. Extra is follow-on scope after Lunatic closure. Optimize for
+real reduction of hits and eventual clean-route completion.
 
 Iteration is the default priority:
 

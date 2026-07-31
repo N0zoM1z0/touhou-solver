@@ -1,8 +1,9 @@
 # Active Notes
 
-This directory intentionally contains only current authority and a small
-physical evidence ring. Historical notes are recoverable from
-`pre-workspace-prune-20260731`; see `../ARCHIVE_INDEX.md`.
+This directory intentionally contains current authority, the complete
+chronological research log, and a small physical evidence ring. Other
+historical notes are recoverable from `pre-workspace-prune-20260731`; see
+`../ARCHIVE_INDEX.md`.
 
 ## Read By Question
 
@@ -15,7 +16,7 @@ physical evidence ring. Historical notes are recoverable from
   `architecture/TH08_PLAYER_LASER_GLOBAL_TIME_SCALE_SEMANTICS_20260729.md`
 - Physical operation: `operations/UNATTENDED_PRACTICE_AUTOMATION.md`
 - Current failures: `COUNTEREXAMPLES.md`
-- Current chronology: `RESEARCH_LOG.md`
+- Complete chronology: `RESEARCH_LOG.md`
 - Retained physical ring: `runs/`
 
 Documents are subordinate to shipped-game evidence and current code. Do not

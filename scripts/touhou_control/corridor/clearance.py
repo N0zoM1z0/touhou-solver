@@ -236,6 +236,16 @@ def _packed_annular_sector_clearance_field(
 ) -> np.ndarray:
     """Equivalent point clearance from one pre-indexed sector frame."""
 
+    native = native_backend.query_packed_annular_sector_clearance(
+        positions_x=grid_x.reshape(-1),
+        positions_y=grid_y.reshape(-1),
+        player_radius=player_radius,
+        packed_sectors=hazards,
+        frame=frame,
+    )
+    if native is not None:
+        return native.reshape(grid_x.shape)
+
     frame_slice = hazards.frame_slice(frame)
     if frame_slice.start == frame_slice.stop:
         return np.full(grid_x.shape, np.inf, dtype=np.float32)

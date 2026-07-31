@@ -199,6 +199,46 @@ TOUHOU_EXPORT int touhou_annular_sector_trajectory_clearance_v1(
     );
 }
 
+TOUHOU_EXPORT int touhou_annular_sector_frame_clearance_v1(
+    const float* positions_x,
+    const float* positions_y,
+    int position_count,
+    int frame,
+    float player_radius,
+    const double* origin_x,
+    const double* origin_y,
+    const double* minimum_angle,
+    const double* maximum_angle,
+    const double* minimum_radius,
+    const double* maximum_radius,
+    const double* half_extent_radius,
+    const double* origin_uncertainty,
+    const double* base_uncertainty,
+    const double* uncertainty_per_frame,
+    int sample_count,
+    float* output
+) {
+    return touhou_native_impl_annular_sector_frame_clearance_v1(
+        positions_x,
+        positions_y,
+        position_count,
+        frame,
+        player_radius,
+        origin_x,
+        origin_y,
+        minimum_angle,
+        maximum_angle,
+        minimum_radius,
+        maximum_radius,
+        half_extent_radius,
+        origin_uncertainty,
+        base_uncertainty,
+        uncertainty_per_frame,
+        sample_count,
+        output
+    );
+}
+
 TOUHOU_EXPORT int touhou_piecewise_aabb_clearance_v1(
     float x_start,
     float x_step,

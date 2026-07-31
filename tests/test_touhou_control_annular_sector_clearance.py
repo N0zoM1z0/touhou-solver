@@ -141,6 +141,50 @@ class AnnularSectorClearanceTests(unittest.TestCase):
             )
             np.testing.assert_allclose(actual, expected, rtol=0.0, atol=2e-5)
 
+    def test_native_packed_frame_field_matches_numpy_fallback(self) -> None:
+        if (
+            native_backend._load_annular_sector_frame_clearance_function()
+            is None
+        ):
+            self.skipTest("optional native sector-frame backend is unavailable")
+        hazards = tuple(
+            AnnularSectorTrajectoryHazard(
+                origin_x=4.0,
+                origin_y=-3.0,
+                minimum_angle=angle,
+                maximum_angle=angle + 0.35,
+                minimum_radii=(3.0, 5.0),
+                maximum_radii=(8.0, 11.0),
+                half_extent_radius=1.25,
+                origin_uncertainty=0.5,
+                uncertainty_per_frame=0.125,
+            )
+            for angle in (-0.4, -0.2, 0.7, 2.9, 3.1)
+        )
+        grid_x, grid_y = np.meshgrid(
+            np.arange(-12.0, 13.0, 2.0, dtype=np.float32),
+            np.arange(-12.0, 13.0, 2.0, dtype=np.float32),
+        )
+        expected = annular_sector_clearance_field(
+            grid_x,
+            grid_y,
+            hazards,
+            frame=1,
+            player_radius=2.0,
+        )
+        packed = PackedAnnularSectorFrames.from_trajectories(
+            hazards,
+            frame_count=2,
+        )
+        actual = packed_annular_sector_clearance_field(
+            grid_x,
+            grid_y,
+            packed,
+            frame=1,
+            player_radius=2.0,
+        )
+        np.testing.assert_allclose(actual, expected, rtol=0.0, atol=2e-5)
+
     def test_native_volume_matches_independent_python_field(self) -> None:
         hazards = (
             AnnularSectorTrajectoryHazard(

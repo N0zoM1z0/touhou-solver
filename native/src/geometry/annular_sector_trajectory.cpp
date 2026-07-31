@@ -492,3 +492,168 @@ int touhou_native_impl_annular_sector_trajectory_clearance_v1(
     }
     return 0;
 }
+
+int touhou_native_impl_annular_sector_frame_clearance_v1(
+    const float* positions_x,
+    const float* positions_y,
+    int position_count,
+    int frame,
+    float player_radius,
+    const double* origin_x,
+    const double* origin_y,
+    const double* minimum_angle,
+    const double* maximum_angle,
+    const double* minimum_radius,
+    const double* maximum_radius,
+    const double* half_extent_radius,
+    const double* origin_uncertainty,
+    const double* base_uncertainty,
+    const double* uncertainty_per_frame,
+    int sample_count,
+    float* output
+) {
+    if (
+        positions_x == nullptr || positions_y == nullptr || output == nullptr
+        || position_count < 1 || frame < 0 || player_radius < 0.0F
+        || sample_count < 0
+    ) {
+        return 1;
+    }
+    if (
+        sample_count > 0
+        && (
+            origin_x == nullptr || origin_y == nullptr
+            || minimum_angle == nullptr || maximum_angle == nullptr
+            || minimum_radius == nullptr || maximum_radius == nullptr
+            || half_extent_radius == nullptr
+            || origin_uncertainty == nullptr
+            || base_uncertainty == nullptr
+            || uncertainty_per_frame == nullptr
+        )
+    ) {
+        return 2;
+    }
+    for (int position = 0; position < position_count; ++position) {
+        if (
+            !std::isfinite(positions_x[position])
+            || !std::isfinite(positions_y[position])
+        ) {
+            return 3;
+        }
+        output[position] = std::numeric_limits<float>::infinity();
+    }
+    for (int index = 0; index < sample_count; ++index) {
+        if (
+            !std::isfinite(origin_x[index])
+            || !std::isfinite(origin_y[index])
+            || !std::isfinite(minimum_angle[index])
+            || !std::isfinite(maximum_angle[index])
+            || !std::isfinite(minimum_radius[index])
+            || !std::isfinite(maximum_radius[index])
+            || !std::isfinite(half_extent_radius[index])
+            || !std::isfinite(origin_uncertainty[index])
+            || !std::isfinite(base_uncertainty[index])
+            || !std::isfinite(uncertainty_per_frame[index])
+            || minimum_angle[index] > maximum_angle[index]
+            || minimum_radius[index] < 0.0
+            || minimum_radius[index] > maximum_radius[index]
+            || half_extent_radius[index] < 0.0
+            || origin_uncertainty[index] < 0.0
+            || base_uncertainty[index] < 0.0
+            || uncertainty_per_frame[index] < 0.0
+        ) {
+            return 4;
+        }
+        const double occupied_radius = (
+            static_cast<double>(player_radius)
+            + half_extent_radius[index]
+            + origin_uncertainty[index]
+            + base_uncertainty[index]
+            + static_cast<double>(frame) * uncertainty_per_frame[index]
+        );
+        if (!std::isfinite(occupied_radius) || occupied_radius < 0.0) {
+            return 5;
+        }
+    }
+
+    std::vector<int> order;
+    order.reserve(static_cast<std::size_t>(sample_count));
+    for (int index = 0; index < sample_count; ++index) {
+        order.push_back(index);
+    }
+    std::sort(order.begin(), order.end(), [&](int left, int right) {
+        const double* fields[] = {
+            origin_x,
+            origin_y,
+            minimum_radius,
+            maximum_radius,
+            half_extent_radius,
+            origin_uncertainty,
+            base_uncertainty,
+            uncertainty_per_frame,
+        };
+        for (const double* field : fields) {
+            if (field[left] != field[right]) {
+                return field[left] < field[right];
+            }
+        }
+        if (minimum_angle[left] != minimum_angle[right]) {
+            return minimum_angle[left] < minimum_angle[right];
+        }
+        return maximum_angle[left] < maximum_angle[right];
+    });
+
+    std::size_t group_begin = 0;
+    while (group_begin < order.size()) {
+        std::size_t group_end = group_begin + 1;
+        while (
+            group_end < order.size()
+            && same_geometry(
+                order[group_begin],
+                order[group_end],
+                origin_x,
+                origin_y,
+                minimum_radius,
+                maximum_radius,
+                half_extent_radius,
+                origin_uncertainty,
+                base_uncertainty,
+                uncertainty_per_frame
+            )
+        ) {
+            ++group_end;
+        }
+        const int index = order[group_begin];
+        const std::vector<AngularInterval> intervals = angular_union(
+            order,
+            group_begin,
+            group_end,
+            minimum_angle,
+            maximum_angle
+        );
+        const double occupied_radius = (
+            static_cast<double>(player_radius)
+            + half_extent_radius[index]
+            + origin_uncertainty[index]
+            + base_uncertainty[index]
+            + static_cast<double>(frame) * uncertainty_per_frame[index]
+        );
+        for (int position = 0; position < position_count; ++position) {
+            const double distance = annular_sector_union_distance(
+                positions_x[position],
+                positions_y[position],
+                origin_x[index],
+                origin_y[index],
+                minimum_radius[index],
+                maximum_radius[index],
+                intervals
+            );
+            const float clearance = static_cast<float>(
+                distance - occupied_radius - numeric_guard
+            );
+            output[position] = std::min(output[position], clearance);
+        }
+        group_begin = group_end;
+    }
+    return 0;
+}

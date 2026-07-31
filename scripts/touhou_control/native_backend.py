@@ -14,6 +14,7 @@ from .native.belief import (
 from .native.geometry import (
     _load_aabb_trajectory_clearance_function as _load_aabb_trajectory_clearance_function,
     _load_annular_sector_trajectory_clearance_function as _load_annular_sector_trajectory_clearance_function,
+    _load_annular_sector_frame_clearance_function as _load_annular_sector_frame_clearance_function,
     _load_clearance_function as _load_clearance_function,
     _load_piecewise_aabb_clearance_function as _load_piecewise_aabb_clearance_function,
     _load_trajectory_clearance_function as _load_trajectory_clearance_function,
@@ -23,6 +24,7 @@ from .native.geometry import (
     apply_piecewise_aabb_clearance as apply_piecewise_aabb_clearance,
     apply_segment_trajectory_clearance as apply_segment_trajectory_clearance,
     build_clearance_volume as build_clearance_volume,
+    query_packed_annular_sector_clearance as query_packed_annular_sector_clearance,
 )
 from .native.library import (
     PipelineNativeCancelledError as PipelineNativeCancelledError,

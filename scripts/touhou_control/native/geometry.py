@@ -179,6 +179,33 @@ def _load_annular_sector_trajectory_clearance_function():
     )
 
 
+def _load_annular_sector_frame_clearance_function():
+    cached = cached_function("touhou_annular_sector_frame_clearance_v1")
+    if cached is not None:
+        return cached
+    library = _load_library()
+    if library is None:
+        return None
+    try:
+        function = library.touhou_annular_sector_frame_clearance_v1
+    except AttributeError:
+        return None
+    float_pointer = ctypes.POINTER(ctypes.c_float)
+    double_pointer = ctypes.POINTER(ctypes.c_double)
+    function.argtypes = [
+        float_pointer,
+        float_pointer,
+        ctypes.c_int,
+        ctypes.c_int,
+        ctypes.c_float,
+        *([double_pointer] * 10),
+        ctypes.c_int,
+        float_pointer,
+    ]
+    function.restype = ctypes.c_int
+    return cache_function("touhou_annular_sector_frame_clearance_v1", function)
+
+
 def _load_piecewise_aabb_clearance_function():
     cached = cached_function("touhou_piecewise_aabb_clearance_v1")
     if cached is not None:
@@ -443,6 +470,65 @@ def apply_annular_sector_trajectory_clearance(
     if result != 0:
         raise RuntimeError(
             f"native annular-sector clearance kernel returned {result}"
+        )
+    return output
+
+
+def query_packed_annular_sector_clearance(
+    *,
+    positions_x: np.ndarray,
+    positions_y: np.ndarray,
+    player_radius: float,
+    packed_sectors: PackedAnnularSectorFrames,
+    frame: int,
+) -> np.ndarray | None:
+    """Query one packed sector frame at arbitrary branch positions."""
+
+    function = _load_annular_sector_frame_clearance_function()
+    if function is None:
+        return None
+    positions_x = as_contiguous_array(positions_x, dtype=np.float32)
+    positions_y = as_contiguous_array(positions_y, dtype=np.float32)
+    if (
+        positions_x.ndim != 1
+        or positions_y.shape != positions_x.shape
+        or not len(positions_x)
+    ):
+        raise ValueError("sector query positions must be nonempty 1D peers")
+    frame_slice = packed_sectors.frame_slice(frame)
+    if frame_slice.start == frame_slice.stop:
+        return np.full(positions_x.shape, np.inf, dtype=np.float32)
+    fields = tuple(
+        getattr(packed_sectors, name)[frame_slice]
+        for name in (
+            "origin_x",
+            "origin_y",
+            "minimum_angle",
+            "maximum_angle",
+            "minimum_radius",
+            "maximum_radius",
+            "half_extent_radius",
+            "origin_uncertainty",
+            "base_uncertainty",
+            "uncertainty_per_frame",
+        )
+    )
+    output = np.empty(len(positions_x), dtype=np.float32)
+    float_pointer = ctypes.POINTER(ctypes.c_float)
+    double_pointer = ctypes.POINTER(ctypes.c_double)
+    result = function(
+        positions_x.ctypes.data_as(float_pointer),
+        positions_y.ctypes.data_as(float_pointer),
+        len(positions_x),
+        frame,
+        player_radius,
+        *(values.ctypes.data_as(double_pointer) for values in fields),
+        frame_slice.stop - frame_slice.start,
+        output.ctypes.data_as(float_pointer),
+    )
+    if result != 0:
+        raise RuntimeError(
+            f"native annular-sector frame kernel returned {result}"
         )
     return output
 

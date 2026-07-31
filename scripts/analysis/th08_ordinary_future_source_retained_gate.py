@@ -160,6 +160,27 @@ def _native_payload(
     # These fixed v12 roots contain no auxiliary VM.  Their omitted +0x90
     # delay timer is therefore vacuous, so they are semantically identical to
     # v13 for the retained deterministic chain.
+    phase_groups = (
+        payload["enemy_manager_template_source"]["phase_transition_state"],
+        payload["enemy_phase_transition_state"],
+    )
+    for group in phase_groups:
+        for row in group["rows"]:
+            if (
+                any(int(value) >= 0 for value in row["health_thresholds"])
+                or int(row["timeout_frame"]) >= 0
+            ):
+                raise RuntimeError(
+                    "legacy v12 retained root cannot be uplifted with an "
+                    "armed phase transition"
+                )
+            # Successor and phase-timer bytes are irrelevant when every
+            # transition register is disabled.  Fill only that vacuous state;
+            # an armed legacy row remains rejected above.
+            row["health_successor_subroutines"] = [-1, -1, -1, -1]
+            row["phase_timer_previous"] = -1
+            row["phase_timer_fraction_bits"] = 0
+            row["phase_timer_elapsed"] = 0
     payload["schema"] = "th08-native-snapshot-collision-control-projection-v13"
     return path, trial, payload
 

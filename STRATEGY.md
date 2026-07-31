@@ -235,6 +235,21 @@ unchanged. Reached auxiliary loop-jump `0x05` and integer-LE jump `0x2E` are
 also lowered from exact captured integer state. Physical revalidation is
 required; unhandled source flow still fails closed.
 
+Stage-4A `20260801_024419` falsifies the QoS change as sufficient. The
+eight-worker/background-low-priority path was active and ordinary solve p95
+improved 230→218 ms, but one solve took 5,290 ms; the two directional exact
+sets in nonspell hit windows both arrived 20 frames after capture, leaving
+effective directional authority at zero. Aggregate 22 hits are observational.
+
+The run also isolates phase coverage: `0x05`/`0x2E` failures are gone, while
+ordinary slot-0 armed transition accounts for 1,243/1,714 incomplete source
+roots. IDA confirms timeout uses integer phase timer `>= deadline`, and health
+uses signed HP `< threshold`; both start the registered successor. Source v6
+captures the four health successors plus the phase timer and proves only a
+timeout with `elapsed + H < deadline` unreachable. Armed health and reachable
+timeouts continue to fail closed. Retained exact sets are unchanged; physical
+revalidation precedes Stage 5.
+
 ## Offline Native Authority
 
 ### O1 — Rolling native snapshot wind tunnel

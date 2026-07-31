@@ -41,9 +41,14 @@ from th08_runtime.native_snapshot_projection import (
     ECL_FILE_CONTEXT_ADDRESS,
     ENEMY_ANM_PREFIX_SIZE,
     ENEMY_HITPOINTS_OFFSET,
+    ENEMY_HEALTH_TRANSITION_SUCCESSORS_OFFSET,
+    ENEMY_HEALTH_TRANSITION_THRESHOLDS_OFFSET,
+    ENEMY_PHASE_TIMER_OFFSET,
     ENEMY_PERIODIC_EMISSION_DESCRIPTOR_OFFSET,
     ENEMY_PERIODIC_EMISSION_PERIOD_OFFSET,
     ENEMY_PERIODIC_EMISSION_TIMER_OFFSET,
+    ENEMY_TIMEOUT_TRANSITION_FRAME_OFFSET,
+    ENEMY_TIMEOUT_TRANSITION_SUBROUTINE_OFFSET,
     FRSCREEN_INNER_POINTER_OFFSET,
     FRSCREEN_NOTIFICATION_COUNTERS_OFFSET,
     FRSCREEN_STATE_ADDRESS,
@@ -62,6 +67,7 @@ from th08_runtime.native_snapshot_projection import (
     _enemy_main_ecl_callback_records,
     _enemy_main_ecl_inventory_record,
     _enemy_periodic_emission_records,
+    _enemy_phase_transition_state_records,
     _enemy_source_record,
     _timeline_runtime_inventory_record,
     normalized_causal_component_records,
@@ -76,6 +82,66 @@ def _component(name: str, data: bytes) -> object:
 
 
 class NativeSnapshotProjectionTests(unittest.TestCase):
+    def test_enemy_phase_transition_retains_timer_and_successor_registry(
+        self,
+    ) -> None:
+        enemy_blob = bytearray(ENEMY_STRIDE)
+        struct.pack_into(
+            "<4i",
+            enemy_blob,
+            ENEMY_HEALTH_TRANSITION_THRESHOLDS_OFFSET,
+            500,
+            -1,
+            -1,
+            -1,
+        )
+        struct.pack_into(
+            "<4i",
+            enemy_blob,
+            ENEMY_HEALTH_TRANSITION_SUCCESSORS_OFFSET,
+            28,
+            29,
+            30,
+            31,
+        )
+        struct.pack_into(
+            "<iIi",
+            enemy_blob,
+            ENEMY_PHASE_TIMER_OFFSET,
+            98,
+            0x3F000000,
+            99,
+        )
+        struct.pack_into(
+            "<ii",
+            enemy_blob,
+            ENEMY_TIMEOUT_TRANSITION_FRAME_OFFSET,
+            2400,
+            28,
+        )
+        inventory = SimpleNamespace(
+            observations=(
+                SimpleNamespace(slot=0, enemy_pointer=ENEMY_POOL_BASE),
+            )
+        )
+
+        result = _enemy_phase_transition_state_records(
+            bytes(enemy_blob),
+            inventory,
+        )
+
+        row = result["rows"][0]
+        self.assertEqual(row["health_thresholds"], [500, -1, -1, -1])
+        self.assertEqual(
+            row["health_successor_subroutines"],
+            [28, 29, 30, 31],
+        )
+        self.assertEqual(row["phase_timer_previous"], 98)
+        self.assertEqual(row["phase_timer_fraction_bits"], 0x3F000000)
+        self.assertEqual(row["phase_timer_elapsed"], 99)
+        self.assertEqual(row["timeout_frame"], 2400)
+        self.assertEqual(row["timeout_subroutine"], 28)
+
     def test_enemy_periodic_emission_retains_descriptor_and_timer(
         self,
     ) -> None:

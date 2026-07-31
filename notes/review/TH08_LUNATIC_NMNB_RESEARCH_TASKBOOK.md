@@ -345,6 +345,16 @@ initial publication lead is 80 frames and action sets are unchanged. Close
 reached auxiliary `0x05`/`0x2E` exactly, then rerun Stage 4A. Stage 5 still
 requires effective, not merely applicable, pressure-window authority.
 
+Stage-4A `20260801_024419` shows that resource isolation is useful but not
+sufficient: p95 solve latency improves slightly, one 5,290-ms tail remains,
+and both directional hit-window policies miss issue by 20 frames. The reached
+source blocker is now ordinary slot-0 phase arming (1,243/1,714 incomplete
+roots); `0x05`/`0x2E` are absent. Capture exact phase timer and successors and
+prove only far timeouts (`elapsed + H < timeout`) unreachable. Health-driven
+or horizon-reachable successor transitions remain fail closed. Re-run Stage
+4A and require effective directional pressure-window authority before Stage
+5.
+
 ### WS-D — Combat, Focus, and Power
 
 This is the highest-priority experiment after cleanup.

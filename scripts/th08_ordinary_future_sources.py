@@ -51,7 +51,7 @@ from touhou_control.corridor import AabbHazard, AabbTrajectoryHazard
 
 
 ORDINARY_FUTURE_SOURCE_SEMANTICS_VERSION = (
-    "th08-ordinary-future-sources-v5-stop-reaim-aux-flow-envelope"
+    "th08-ordinary-future-sources-v6-bounded-phase-timeout-envelope"
 )
 _PROJECTION_SCHEMA = "th08-native-snapshot-collision-control-projection-v13"
 _DIRECT_FIRE_OPCODES = frozenset(range(0x60, 0x69))
@@ -378,6 +378,7 @@ def _build_sources(
     payload: dict[str, object],
     *,
     ecl_base: int,
+    horizon_frames: int,
 ) -> tuple[list[_SourceState], int]:
     sources: list[_SourceState] = []
     auxiliary_count = 0
@@ -563,14 +564,33 @@ def _build_sources(
             thresholds = phase.get("health_thresholds")
             if not isinstance(thresholds, list) or len(thresholds) != 4:
                 _fail(f"{role}:{int(slot)} phase threshold layout drifted")
-            phase_transition_armed = (
-                any(int(value) >= 0 for value in thresholds)
-                or int(phase.get("timeout_frame", -2)) >= 0
+            successors = phase.get("health_successor_subroutines")
+            if not isinstance(successors, list) or len(successors) != 4:
+                _fail(f"{role}:{int(slot)} phase successor layout drifted")
+            active_thresholds = tuple(
+                int(value) for value in thresholds if int(value) >= 0
             )
-            if phase_transition_armed:
+            timeout_frame = int(phase.get("timeout_frame", -2))
+            phase_timer_elapsed = int(
+                phase.get("phase_timer_elapsed", -0x80000000)
+            )
+            phase_transition_armed = bool(
+                active_thresholds or timeout_frame >= 0
+            )
+            if active_thresholds:
                 _fail(
-                    f"{role}:{int(slot)} has an armed phase transition "
-                    "without integrated successor-source lowering"
+                    f"{role}:{int(slot)} has an armed health phase "
+                    "transition without integrated damage-conditioned "
+                    "successor-source lowering"
+                )
+            if (
+                timeout_frame >= 0
+                and phase_timer_elapsed + horizon_frames >= timeout_frame
+            ):
+                _fail(
+                    f"{role}:{int(slot)} timeout phase transition is "
+                    "reachable within the future-source horizon without "
+                    "integrated successor-source lowering"
                 )
             body = body_by_pointer[pointer]
             body_half_width = float(body["half_width"])
@@ -1978,7 +1998,11 @@ def _analyze(
         ecl,
         horizon_frames=horizon_frames,
     )
-    sources, auxiliary_count = _build_sources(payload, ecl_base=ecl_base)
+    sources, auxiliary_count = _build_sources(
+        payload,
+        ecl_base=ecl_base,
+        horizon_frames=horizon_frames,
+    )
     if not sources:
         _fail("manager template source is absent")
     template = sources[0]

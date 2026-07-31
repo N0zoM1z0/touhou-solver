@@ -14,8 +14,8 @@ authority.
 
 - Branch: `main`.
 - Last physical checkpoint:
-  `lunatic_route2_stage4a_unattended_20260801_022228`, based on immutable
-  live-code checkpoint `19066af`.
+  `lunatic_route2_stage4a_unattended_20260801_024419`, based on immutable
+  live-code checkpoint `223ba01`.
 - Native H=32 wind-tunnel checkpoint: `3d15953`; it is historical evidence,
   not the live ordinary horizon.
 - Workspace-prune checkpoint: `be3e583` (`Prune TH08 active research
@@ -195,6 +195,16 @@ authority.
   Reached auxiliary `0x05` loop-jump and `0x2E` integer-LE jump are also
   advanced exactly; other flow remains fail closed. Revalidate Stage 4A;
   Stage 5 remains withheld until effective pressure-window authority appears.
+- **Observed QoS falsifier and bounded phase correction:** Stage-4A
+  `20260801_024419` completed 22/1291/no-Bomb with accepted replay and cleanup.
+  Eight-worker/background-low-priority execution was active; solve p95 changed
+  230→218 ms, but a 5,290-ms tail remained and hit-window effective
+  directional authority stayed zero. `0x05`/`0x2E` failures disappeared;
+  ordinary slot-0 armed phase transition became 1,243/1,714 incomplete roots.
+  Source v6 captures health successors and the exact phase timer and ignores
+  only a timeout proved beyond `elapsed + horizon`; health or reachable
+  timeout transitions still fail closed. Linux/Windows tests and the retained
+  exact action sets pass. Revalidate Stage 4A before any Stage-5 run.
 - `--kill-before-saturation` now uses observed ordinary bodies only. The
   falsified timeline spawn forecast is withheld from live input.
   Observed-body alignment/unfocus remains a proposed objective, but the
@@ -228,6 +238,7 @@ Latest user-authorized Lunatic Route-2 practice ring:
 | Stage 4A sector/viability deadline falsifier | `20260801_011902` | 26 | 796 | 0 | accepted |
 | Stage 4A recurrence/coverage handoff | `20260801_015631` | 20 | 2009 | 0 | accepted |
 | Stage 4A transform/delivery falsifier | `20260801_022228` | 19 | 1833 | 0 | accepted |
+| Stage 4A delivery/phase falsifier | `20260801_024419` | 22 | 1291 | 0 | accepted |
 
 The automatic older-root comparisons were 15→5, 10→13, and 19→12. They are
 observational only: RNG roots differ and the proposed WS-H strategies were

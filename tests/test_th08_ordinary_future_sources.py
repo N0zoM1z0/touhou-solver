@@ -145,6 +145,10 @@ def _payload() -> dict[str, object]:
                 {
                     "enemy_pointer": SOURCE_POINTER,
                     "health_thresholds": [-1, -1, -1, -1],
+                    "health_successor_subroutines": [-1, -1, -1, -1],
+                    "phase_timer_previous": -1,
+                    "phase_timer_fraction_bits": 0,
+                    "phase_timer_elapsed": 0,
                     "timeout_frame": -1,
                     "timeout_subroutine": -1,
                 }
@@ -227,6 +231,64 @@ def _payload() -> dict[str, object]:
 
 
 class OrdinaryFutureSourceTests(unittest.TestCase):
+    def test_far_timeout_is_proven_outside_bounded_horizon(self) -> None:
+        payload = deepcopy(_payload())
+        phase = payload["enemy_manager_template_source"][
+            "phase_transition_state"
+        ]["rows"][0]
+        phase["phase_timer_elapsed"] = 100
+        phase["timeout_frame"] = 300
+        phase["timeout_subroutine"] = 7
+
+        closure = project_ordinary_future_sources(
+            payload,
+            ECL,
+            horizon_frames=100,
+        )
+
+        self.assertTrue(closure.projection.source_closure_complete)
+
+    def test_timeout_at_horizon_remains_fail_closed(self) -> None:
+        payload = deepcopy(_payload())
+        phase = payload["enemy_manager_template_source"][
+            "phase_transition_state"
+        ]["rows"][0]
+        phase["phase_timer_elapsed"] = 100
+        phase["timeout_frame"] = 200
+        phase["timeout_subroutine"] = 7
+
+        closure = project_ordinary_future_sources(
+            payload,
+            ECL,
+            horizon_frames=100,
+        )
+
+        self.assertFalse(closure.projection.source_closure_complete)
+        self.assertIn(
+            "timeout phase transition is reachable",
+            closure.projection.source_closure_reason,
+        )
+
+    def test_health_transition_remains_fail_closed(self) -> None:
+        payload = deepcopy(_payload())
+        phase = payload["enemy_manager_template_source"][
+            "phase_transition_state"
+        ]["rows"][0]
+        phase["health_thresholds"][0] = 50
+        phase["health_successor_subroutines"][0] = 7
+
+        closure = project_ordinary_future_sources(
+            payload,
+            ECL,
+            horizon_frames=1,
+        )
+
+        self.assertFalse(closure.projection.source_closure_complete)
+        self.assertIn(
+            "armed health phase transition",
+            closure.projection.source_closure_reason,
+        )
+
     def test_auxiliary_timer_reset_uses_captured_integer_local(self) -> None:
         instructions = {
             0: SubInstruction(

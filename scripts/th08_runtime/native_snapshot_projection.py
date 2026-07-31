@@ -115,8 +115,10 @@ ENEMY_EMISSION_DESCRIPTOR_SIZE = 0x214
 ENEMY_EMISSION_TRANSFORM_PROGRAM_OFFSET = 0x20
 ENEMY_EMISSION_TRANSFORM_PROGRAM_SIZE = 18 * 24
 ENEMY_MINIMUM_FIRE_DISTANCE_SQUARED_OFFSET = 0x3350
+ENEMY_PHASE_TIMER_OFFSET = 0x2E14
 ENEMY_HEALTH_TRANSITION_THRESHOLDS_OFFSET = 0x3358
 ENEMY_HEALTH_TRANSITION_COUNT = 4
+ENEMY_HEALTH_TRANSITION_SUCCESSORS_OFFSET = 0x3368
 ENEMY_TIMEOUT_TRANSITION_FRAME_OFFSET = 0x3378
 ENEMY_TIMEOUT_TRANSITION_SUBROUTINE_OFFSET = 0x337C
 
@@ -646,6 +648,32 @@ def _enemy_phase_transition_state_records(
                         base + ENEMY_HEALTH_TRANSITION_THRESHOLDS_OFFSET,
                     )
                 ),
+                "health_successor_subroutines": list(
+                    struct.unpack_from(
+                        f"<{ENEMY_HEALTH_TRANSITION_COUNT}i",
+                        enemy_blob,
+                        base + ENEMY_HEALTH_TRANSITION_SUCCESSORS_OFFSET,
+                    )
+                ),
+                "phase_timer_previous": struct.unpack_from(
+                    "<i",
+                    enemy_blob,
+                    base + ENEMY_PHASE_TIMER_OFFSET,
+                )[0],
+                "phase_timer_fraction_bits": struct.unpack_from(
+                    "<I",
+                    enemy_blob,
+                    base
+                    + ENEMY_PHASE_TIMER_OFFSET
+                    + TH08_TIMER_FRACTION_OFFSET,
+                )[0],
+                "phase_timer_elapsed": struct.unpack_from(
+                    "<i",
+                    enemy_blob,
+                    base
+                    + ENEMY_PHASE_TIMER_OFFSET
+                    + TH08_TIMER_ELAPSED_OFFSET,
+                )[0],
                 "timeout_frame": struct.unpack_from(
                     "<i",
                     enemy_blob,
@@ -661,8 +689,8 @@ def _enemy_phase_transition_state_records(
     return {
         "schema": "th08-active-enemy-phase-transition-state-v1",
         "scope": (
-            "exact_health_threshold_and_timeout_successor_arming_needed_"
-            "before_phase_timer_writes_can_be_ignored"
+            "exact_health_threshold_successor_and_integer_phase_timer_"
+            "timeout_registry_for_bounded_transition_reachability"
         ),
         "rows": rows,
     }

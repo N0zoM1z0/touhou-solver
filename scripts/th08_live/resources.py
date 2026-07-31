@@ -18,6 +18,7 @@ class LiveServiceResources:
         self.corridor_executor: Any | None = None
         self.audit_executor: Any | None = None
         self.enemy_executor: Any | None = None
+        self.future_source_executor: Any | None = None
         self._closed = False
         try:
             if not local_only:
@@ -34,6 +35,11 @@ class LiveServiceResources:
                 max_workers=1,
                 thread_name_prefix="th08-enemy-sensor",
             )
+            if not local_only:
+                self.future_source_executor = executor_factory(
+                    max_workers=1,
+                    thread_name_prefix="th08-future-source",
+                )
         except BaseException:
             self.close()
             raise
@@ -43,6 +49,7 @@ class LiveServiceResources:
         *,
         corridor_future: Future[Any] | None = None,
         enemy_future: Future[Any] | None = None,
+        future_source_future: Future[Any] | None = None,
     ) -> None:
         """Cancel pending work and idempotently close owners in live order."""
 
@@ -73,6 +80,15 @@ class LiveServiceResources:
         if self.enemy_executor is not None:
             attempt(
                 lambda: self.enemy_executor.shutdown(
+                    wait=True,
+                    cancel_futures=True,
+                )
+            )
+        if future_source_future is not None:
+            attempt(future_source_future.cancel)
+        if self.future_source_executor is not None:
+            attempt(
+                lambda: self.future_source_executor.shutdown(
                     wait=True,
                     cancel_futures=True,
                 )

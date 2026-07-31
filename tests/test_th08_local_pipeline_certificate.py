@@ -6,6 +6,8 @@ import unittest
 import numpy as np
 
 from th08_ecl_vm_state import float32_from_bits
+from th08_future_birth_envelope import FloatInterval, FutureDirectFire
+from th08_future_hazard_projection import complete_future_hazard_projection
 from th08_trace_replay import local_pipeline_root_from_trace
 from th08_live_dodge_agent import (
     Bullet,
@@ -34,6 +36,7 @@ from touhou_control.local_pipeline_oracle import (
     LocalPipelineRoot,
     scalar_local_pipeline_certificates,
 )
+from touhou_control.corridor import AabbHazard, AabbTrajectoryHazard
 from th08_time_scale import TH08_UNIT_TIME_SCALE_BITS
 
 
@@ -42,6 +45,67 @@ def _unit_scale_bits(horizon: int) -> tuple[int, ...]:
 
 
 class Th08LocalPipelineCertificateTests(unittest.TestCase):
+    def test_future_birth_geometry_is_consumed_during_publication_prefix(
+        self,
+    ) -> None:
+        body = AabbTrajectoryHazard(
+            samples=(
+                None,
+                AabbHazard(192.0, 400.0, 1.0, 1.0),
+                AabbHazard(192.0, 400.0, 1.0, 1.0),
+            )
+        )
+        fire = FutureDirectFire(
+            source="test:prefix",
+            activation_frames=(1,),
+            origin_x=FloatInterval.point(192.0),
+            origin_y=FloatInterval.point(400.0),
+            mode=1,
+            count1=1,
+            count2=1,
+            speed1=FloatInterval.point(0.0),
+            speed2=FloatInterval.point(0.0),
+            angle1=FloatInterval.point(0.0),
+            angle2=FloatInterval.point(0.0),
+            aim_angle=FloatInterval.point(0.0),
+            half_width=1.0,
+            half_height=1.0,
+            original_flags=0x203,
+            transform_program_zero=True,
+        )
+        projection = complete_future_hazard_projection(
+            root_frame=100,
+            horizon_frames=2,
+            events=(fire,),
+            aabb_trajectories=(body,),
+            source_semantics_version="test-prefix-v1",
+        )
+        common = dict(
+            player_x=192.0,
+            player_y=400.0,
+            previous_mask=FOCUS,
+            actions=_PLANNER_ACTIONS,
+            delay_frames=(0,),
+            action_hold_frames=2,
+            bullets=(),
+            lasers=(),
+            enemy_bodies=(),
+            snapshot_lag=0,
+            player_scale_bits=_unit_scale_bits(2),
+            laser_scale_bits=_unit_scale_bits(2),
+            pipeline_root=LocalPipelineRoot("stay", "stay"),
+        )
+
+        current_only = _robust_action_certificates(**common)
+        covered = _robust_action_certificates(
+            **common,
+            future_hazard_projection=projection,
+        )
+
+        self.assertEqual(current_only["stay"].worst_collisions, 0)
+        self.assertGreater(covered["stay"].worst_collisions, 0)
+        self.assertLessEqual(covered["stay"].min_clearance, 0.0)
+
     def test_explicit_root_certificate_reports_segmented_timing(self) -> None:
         root = LocalPipelineRoot(
             active_action="stay",

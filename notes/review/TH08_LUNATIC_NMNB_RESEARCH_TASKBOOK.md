@@ -248,8 +248,8 @@ Alternative methods:
 No heuristic may discard a safety branch or condition on hidden state without
 proof.
 
-Current first task: close future-hazard coverage for the new set-valued
-ordinary pre-publication predecessor. Stage-4A run
+The future-hazard hard gate for the new set-valued ordinary pre-publication
+predecessor is now closed deterministically. Stage-4A run
 `20260731_152921` enabled the experiment but all 7,202 nonspell decisions
 failed an invalid `player+0xE2A68 == 0` gate, producing zero action
 constraints and zero early-kill applications. Native code shows that field is
@@ -259,10 +259,19 @@ actions under an uncontrollable prefix and at the saturated corner. The
 replacement now uses phase-only transition semantics, fresh prefix
 certificates, exact active/held/pending pickup branches, full signed per-action
 terminal values, continuous-position error subtraction, and exact publication
-version binding. The retained source run lacks those signed values and every
-future slab is `model_unknown`, so its deterministic hard gate is false. Do
-not run physical or tune local scoring until bounded ordinary births/events
-produce a nontrivial exact set.
+version binding.
+
+Collision-control projection v12 and the fail-closed ordinary source executor
+now cover the manager singleton, ordinary main/auxiliary ECL, callback gates,
+emission descriptors, motion/phase state, and timeline births for the full
+268-frame source horizon. The exact annular-sector/AABB projection is consumed
+both before and after global publication. Observation-aligned native replay
+roots 816/831/834/848/908 rebuild f817/833/835/850/910 with signed values:
+f817 has a nontrivial eight-action set that excludes the retained losing
+active/issued actions, f833/f835 remain directional, and the exact predecessor
+first empties at f850. Complete Linux and Windows gates pass. The next task is
+the already authorized single Stage-4A physical falsifier; local scoring
+remains later.
 
 ### WS-D — Combat, Focus, and Power
 
@@ -492,18 +501,18 @@ it.
 
 1. Keep the corrected capture/issue player-phase predicate; never restore the
    retained deathbomb-window limit as an alive-state gate.
-2. Keep the signed continuous-position predecessor across exact
-   active/held/pending pickup order, fresh hazard prefix, and publication lead.
-3. Add bounded ordinary future-birth/event coverage or fail closed; do not
-   promote the existing shadow future slab.
-4. Recompute the retained frame-817/833/835/850/910 chain with signed
-   per-action values and require a nontrivial allowed set before exhaustion.
-5. Only after 3–4 and focused Windows gates pass, run the already authorized
-   single Stage-4A physical test with observed-body early kill inside the new
-   viable set.
-6. Rotate to Stage 3 or Stage 5 only if Stage 4A materially improves.
-7. Evaluate local micro ranking only after global action authority is
-   physically effective; repeat a winner before a full route.
+2. Keep the exact active/held/pending predecessor and require the same future
+   projection geometry across the publication prefix and corridor horizon.
+3. Preserve fail-closed source semantics; never convert an unsupported
+   ECL/timeline/callback/motion case into free space.
+4. Run the already authorized single Stage-4A physical test with
+   observed-body early kill only inside the new viable set.
+5. Verify effective exact constraints, prefix/source version matches,
+   deadline/fallback behavior, hard no-Bomb, and retain the first-hit witness.
+6. Rotate to Stage 5 only if Stage 4A materially improves.
+7. Evaluate hostile-birth uncertainty or local micro ranking only after
+   global action authority is physically effective; repeat a winner before a
+   full route.
 
 Optional warm-service work and learned/MCTS candidate ordering stay behind
 this backlog unless branch latency becomes the measured bottleneck.

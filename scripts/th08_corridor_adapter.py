@@ -29,6 +29,8 @@ from th08_laser_model import (
 from th08_movement_model import ROUTE2_MOVEMENT_PROFILE
 from th08_time_scale import TH08_UNIT_TIME_SCALE_BITS
 from touhou_control.corridor import (
+    AabbTrajectoryHazard,
+    AnnularSectorTrajectoryHazard,
     PreparedCorridorProblem,
     prepare_corridor_problem,
 )
@@ -152,6 +154,10 @@ class LoweredCorridorHazards:
     aabbs: tuple[MovingAabbHazard, ...]
     piecewise_aabbs: tuple[PiecewiseAabbHazard, ...]
     segment_trajectories: tuple[SegmentTrajectoryHazard, ...]
+    aabb_trajectories: tuple[AabbTrajectoryHazard, ...] = ()
+    annular_sector_trajectories: tuple[
+        AnnularSectorTrajectoryHazard, ...
+    ] = ()
     packed_segments: PackedSegmentFrames | None = None
 
 
@@ -446,6 +452,10 @@ def lower_th08_corridor_hazards(
     forecast_frames: int = 0,
     horizon_frames: int = TH08_CORRIDOR_CONFIG.horizon_frames,
     laser_time_scale_bits: tuple[int, ...] | None = None,
+    future_aabb_trajectories: tuple[AabbTrajectoryHazard, ...] = (),
+    future_annular_sector_trajectories: tuple[
+        AnnularSectorTrajectoryHazard, ...
+    ] = (),
 ) -> LoweredCorridorHazards:
     """Lower one TH08 sensor epoch without constructing a planner policy."""
 
@@ -469,6 +479,8 @@ def lower_th08_corridor_hazards(
             horizon_frames=horizon_frames,
         ),
         segment_trajectories=(),
+        aabb_trajectories=future_aabb_trajectories,
+        annular_sector_trajectories=future_annular_sector_trajectories,
         packed_segments=lower_lasers_packed(
             lasers,
             snapshot_lag=snapshot_lag,
@@ -521,6 +533,8 @@ def _prepare_lowered_th08_corridor_with_control(
         robust_control=robust_control,
         aabbs=hazards.aabbs,
         piecewise_aabbs=hazards.piecewise_aabbs,
+        aabb_trajectories=hazards.aabb_trajectories,
+        annular_sector_trajectories=hazards.annular_sector_trajectories,
         segment_trajectories=hazards.segment_trajectories,
         packed_segments=hazards.packed_segments,
     )

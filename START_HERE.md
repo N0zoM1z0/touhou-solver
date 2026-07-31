@@ -22,10 +22,10 @@ authority.
   priority-17, and old focused Final-B lanes while preserving the promoted
   baseline/pre-loss live path, native snapshot executor, exact pipeline
   workspace, and Final-B scale authority.
-- Current Linux discovery passed 1,196 tests in 9.377 seconds. The affected
-  Windows UNC delivery/parser/planner gate passed 188 tests; complete Windows
-  discovery remains the pre-physical-promotion gate. Linux and Windows native
-  builds at the preceding checkpoint pass the checked-in 41-symbol ABI gate.
+- Current Linux discovery passed 1,226 tests in 10.000 seconds. Complete
+  Windows UNC discovery passed 1,226 tests with three platform skips in
+  19.910 seconds. Current Linux and Windows native builds pass the checked-in
+  42-symbol ABI gate.
 - **Implemented, deterministic gate closed:** default-off
   `--ordinary-preexhaustion-authority` no longer uses scalar boundary
   reserve. It now forms the exact observed active/held/pending root, checks
@@ -35,12 +35,19 @@ authority.
   error is subtracted before certification. A pending held mask remains
   no-write, and zero residual pickup is conservatively included in the future
   policy delay support.
-- The hard result is versioned and fail closed. Coverage must span the current
-  observation, publication lead, and complete future policy horizon. The
-  existing unseen-birth/event slab remains `UNKNOWN`, so it produces
-  diagnostic candidate/recovery sets but no `allowed_actions`. Observed-body
-  early kill is applied only inside a nonempty hard set; an empty predecessor
-  is never relaxed for the objective.
+- **Implemented, deterministic hard gate passed:** collision-control
+  projection v12 now captures the manager singleton and every active ordinary
+  ECL/timeline source, auxiliary VM, installed callback gate, emission
+  descriptor, phase state, and motion state needed by the retained roots.
+  Reachable timeline spawns and ECL emissions are lowered fail-closed into
+  consumed annular-sector bullet and hostile-body AABB trajectories for 268
+  frames. Unsupported opcodes, callbacks, timeline gates, motion, content
+  identity, spell state, or nonunit scale remain `UNKNOWN`.
+- The exact future projection is retained with the asynchronously published
+  policy. Its geometry is now consumed twice under one version: every
+  physical frame in the active/held/pending root-to-publication certificate,
+  then every frame of the future corridor policy. Coverage metadata alone
+  cannot authorize an action.
 - In the physical gate, all 7,202 nonspell decisions were incorrectly
   rejected by the `player_transition_or_predeath` eligibility check, so the
   filter and early-kill preference each affected zero decisions. Native
@@ -50,14 +57,18 @@ authority.
   degenerates to all 17 actions under an uncontrollable prefix and at a
   clamped boundary. Scalar boundary reserve is not equivalent to global
   viability; do not rerun this design.
-- The retained f817/833/835/850/910 regression is now explicit. Native
-  transition eligibility uses player phase (1/2 are transition/death;
-  movement phases 0/3 remain eligible) and ignores the retained value 10.
-  Hazard-space recovery remains directional: `left_fast` is best at f835 and
-  f910 while scalar reserve ties all 17 actions at f850/f910. The source run
-  predates retained signed per-action values and every future slab is
-  `model_unknown`, so the required nontrivial exact allowed set is unresolved
-  and the authorized Stage-4A physical trial was not run.
+- The retained f817/833/835/850/910 regression now joins observation-aligned
+  immutable native replay roots 816/831/834/848/908 to complete future-source
+  closure and newly computed signed per-action values. All five roots have
+  exact coverage/version authority and zero unavailable terminal branches.
+  At f817 the allowed set is
+  `stay/left/down/down_left/down_right/left_fast/down_fast/down_left_fast`;
+  active `up_fast` has margin `-16.137`, the physically issued
+  `up_left_fast` has `-18.845`, and best `stay` has `+21.280`. f833/f835
+  retain nonempty downward sets. The predecessor first becomes empty at f850
+  and the local prefix becomes empty at f910. The deterministic hard gate is
+  true; one fresh Stage-4A physical trial is now the next authorized
+  falsifier.
 - `--kill-before-saturation` now uses observed ordinary bodies only. The
   falsified timeline spawn forecast is withheld from live input.
   Observed-body alignment/unfocus remains a proposed objective, but the
@@ -213,29 +224,30 @@ constant-scale continuation is diagnostic and unknown-direction, never a
 general hard-safety authority.
 
 The rejected scalar pre-exhaustion experiment is no longer connected to live
-input. The replacement remains default-off and has no action authority while
-ordinary birth/event coverage is unknown.
+input. The replacement remains default-off, but may now provide ordinary
+action authority only when the exact source projection, publication-prefix
+geometry, signed terminal values, interval, and version all match. Any
+unsupported source or empty predecessor still fails closed.
 
 Removed lanes must not be re-enabled from archive without a new causal need
 and explicit `STRATEGY.md` decision.
 
 ## Next Useful Gate
 
-Do not pay another physical run for the current scalar-reserve design, and do
-not run the conditional Stage-5 follow-up. Next:
+Do not rerun the rejected scalar-reserve design. The future-source and
+retained-chain deterministic gates now pass. Next:
 
-1. Keep the corrected phase-only capture/issue predicate and the
-   signed/off-grid active/held/pending prepublication predecessor.
-2. Establish bounded ordinary future-birth/event coverage over the combined
-   prefix plus future-policy interval. Do not promote the existing `UNKNOWN`
-   slab or substitute the falsified timeline observer.
-3. Recompute the retained chain with signed per-action values and require a
-   nontrivial exact set before f835. The current source trace cannot answer
-   that because those values were not retained.
-4. Only after steps 2–3 pass, run the already authorized single fresh
-   Stage-4A physical trial. The current hard gate says not to run.
-5. Preserve observed-body early kill only inside that exact set. Hostile-birth
-   modeling is the blocker; local ranking remains later.
+1. Run the already authorized single fresh Stage-4A physical trial from the
+   committed checkpoint with ordinary prepublication authority and
+   observed-body early kill enabled.
+2. Confirm that complete future-source projections publish, prefix geometry
+   is consumed, exact allowed sets affect issue, empty sets are never relaxed,
+   no Bomb is emitted, and the first-hit witness is retained.
+3. Rotate to Stage 5 only if Stage 4A materially improves as the user
+   requested.
+4. Treat the physical first hit as the next counterexample. Hostile-birth
+   uncertainty or local micro-ranking is later work only if the new hard
+   authority is physically effective.
 
 Do not compensate with a stage-specific waypoint.
 

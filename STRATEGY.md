@@ -75,8 +75,11 @@ Hard coverage must begin at the current observation and span the publication
 lead plus the complete future policy horizon under the exact hazard version.
 Missing prefix coverage, compact/missing terminal action values, interval or
 version mismatch, and unseen birth/event coverage all produce no action
-authority. The existing shadow slab remains `UNKNOWN`. Directional terminal
-margins and recovery distances may still be traced diagnostically.
+authority. Coverage is not metadata-only: the exact retained projection's
+annular-sector emissions and hostile-body AABBs are consumed in every
+root-to-publication prefix query and again by the future corridor policy.
+Directional terminal margins and recovery distances remain auditable even
+when the predecessor is empty.
 
 Observed-body early kill may rank only the resulting nonempty hard set plus
 the fresh issue-safe set. There is no objective fallback when the predecessor
@@ -96,10 +99,21 @@ worst reserve zero at frame 850; playfield clamping repeats the all-action tie
 at the saturated corner at frame 910. The scalar code remains only as a
 deterministic counterexample and has no promotion path.
 
-The set-valued replacement passes focused/Linux tests, but the retained
-source trace has no signed per-action policy values and all five
-future-hazard slabs are `model_unknown`. Its physical gate therefore remains
-closed until bounded ordinary birth/event coverage exists.
+The set-valued replacement now passes its deterministic hard gate. Native
+collision-control projection v12 captures the ordinary manager singleton,
+active enemy main/auxiliary VMs, callback gates, emission descriptors, motion,
+phase, and timeline runtime. Reachable sources are executed fail-closed for
+268 frames and lowered to bounded bullet sectors and hostile-body AABBs.
+Unsupported source semantics remain `UNKNOWN`.
+
+Observation-aligned immutable replay roots 816/831/834/848/908 rebuild the
+retained f817/833/835/850/910 chain with signed action values. All five roots
+have exact interval/version authority and zero unavailable terminal branches.
+At f817 the nontrivial allowed set excludes active `up_fast` and issued
+`up_left_fast`; f833/f835 retain directional downward recovery; the exact
+predecessor first becomes empty at f850. This is deterministic native-replay
+evidence, not a physical outcome. L3 remains default-off pending the already
+authorized Stage-4A physical falsifier.
 
 ## Offline Native Authority
 
@@ -233,8 +247,9 @@ action under prefix/boundary saturation. Contact bullet slot 455 first entered
 the retained nearby set while an older hazard-snapshot policy certified
 `down_left`; the next snapshot reported an empty kernel. The compact trace
 cannot attribute the version flip to that slot alone. The set-valued
-pre-publication predecessor is implemented; bounded ordinary future-hazard
-coverage is now its fail-closed blocker, not another boundary score or local
+pre-publication predecessor and bounded ordinary future-source coverage now
+pass the retained hard gate. The next question is physical
+delivery/effectiveness on Stage 4A, not another boundary score or local
 ranking change.
 
 ### P5 — Representative root corpus

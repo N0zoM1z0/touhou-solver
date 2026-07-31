@@ -41,9 +41,18 @@ class LiveServiceResourcesTests(unittest.TestCase):
         )
         corridor = _FakeFuture(events, "corridor")
         enemy = _FakeFuture(events, "enemy")
+        future_source = _FakeFuture(events, "future_source")
 
-        resources.close(corridor_future=corridor, enemy_future=enemy)
-        resources.close(corridor_future=corridor, enemy_future=enemy)
+        resources.close(
+            corridor_future=corridor,
+            enemy_future=enemy,
+            future_source_future=future_source,
+        )
+        resources.close(
+            corridor_future=corridor,
+            enemy_future=enemy,
+            future_source_future=future_source,
+        )
 
         self.assertEqual(
             events,
@@ -51,11 +60,14 @@ class LiveServiceResourcesTests(unittest.TestCase):
                 ("open", "th08-corridor", 1),
                 ("open", "th08-viability-audit", 1),
                 ("open", "th08-enemy-sensor", 1),
+                ("open", "th08-future-source", 1),
                 ("cancel", "corridor"),
                 ("shutdown", "th08-corridor", True, True),
                 ("shutdown", "th08-viability-audit", True, False),
                 ("cancel", "enemy"),
                 ("shutdown", "th08-enemy-sensor", True, True),
+                ("cancel", "future_source"),
+                ("shutdown", "th08-future-source", True, True),
             ],
         )
 
@@ -70,6 +82,7 @@ class LiveServiceResourcesTests(unittest.TestCase):
         self.assertIsNone(resources.corridor_executor)
         self.assertIsNotNone(resources.audit_executor)
         self.assertIsNotNone(resources.enemy_executor)
+        self.assertIsNone(resources.future_source_executor)
         resources.close()
 
     def test_audit_executor_is_optional(self) -> None:

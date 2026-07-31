@@ -36,6 +36,7 @@ from th08_live_dodge_agent import (
     ENEMY_DORMANT_MEMORY_FRAMES,
     ENEMY_FLAGS_OFFSET,
     ENEMY_LOCAL_PREFIX_SIZE,
+    ENEMY_MANAGER_TEMPLATE_BASE,
     ENEMY_POOL_BASE,
     ENEMY_POOL_SIZE,
     ENEMY_POSITION_OFFSET,
@@ -982,6 +983,57 @@ class LiveDodgeAgentTests(unittest.TestCase):
         self.assertEqual(
             reader.body_reads,
             [(active_pointer + ENEMY_BODY_READ_OFFSET, ENEMY_BODY_READ_SIZE)],
+        )
+
+    def test_sparse_enemy_reader_includes_active_manager_singleton(self) -> None:
+        body_blob = bytearray(ENEMY_BODY_READ_SIZE)
+        struct.pack_into(
+            "<ff",
+            body_blob,
+            ENEMY_CONTACT_SIZE_OFFSET - ENEMY_BODY_READ_OFFSET,
+            24.0,
+            24.0,
+        )
+        struct.pack_into(
+            "<ff",
+            body_blob,
+            ENEMY_POSITION_OFFSET - ENEMY_BODY_READ_OFFSET,
+            60.0,
+            32.0,
+        )
+        struct.pack_into(
+            "<I",
+            body_blob,
+            ENEMY_FLAGS_OFFSET - ENEMY_BODY_READ_OFFSET,
+            0x05,
+        )
+
+        class Reader:
+            def u32(self, address: int) -> int:
+                return (
+                    0x05
+                    if address
+                    == ENEMY_MANAGER_TEMPLATE_BASE + ENEMY_FLAGS_OFFSET
+                    else 0
+                )
+
+            def read(self, address: int, size: int) -> bytes:
+                self.assert_read = (address, size)
+                return bytes(body_blob)
+
+        reader = Reader()
+        bodies = read_enemy_bodies_sparse(reader)
+
+        self.assertEqual(
+            [body.pointer for body in bodies],
+            [ENEMY_MANAGER_TEMPLATE_BASE],
+        )
+        self.assertEqual(
+            reader.assert_read,
+            (
+                ENEMY_MANAGER_TEMPLATE_BASE + ENEMY_BODY_READ_OFFSET,
+                ENEMY_BODY_READ_SIZE,
+            ),
         )
 
     def test_local_enemy_prefix_is_one_contiguous_native_read(self) -> None:

@@ -37,6 +37,10 @@ ENEMY_FLAGS_OFFSET = 0x3324
 ENEMY_POOL_BASE = 0x005826C0
 ENEMY_POOL_SIZE = 480
 ENEMY_STRIDE = 0x53D0
+# The manager-owned record immediately before the ordinary pool is reused as
+# an active non-spell hostile source.  It is not merely inert template bytes:
+# retained native root 2129 observed a body and auxiliary ECL fire here.
+ENEMY_MANAGER_TEMPLATE_BASE = ENEMY_POOL_BASE - ENEMY_STRIDE
 ENEMY_LOCAL_PREFIX_SIZE = 64
 ENEMY_BODY_READ_OFFSET = ENEMY_VELOCITY_OFFSET
 ENEMY_BODY_READ_SIZE = ENEMY_FLAGS_OFFSET + 4 - ENEMY_BODY_READ_OFFSET
@@ -157,6 +161,7 @@ def decode_spell_enemy_body_guard(
 def decode_enemy_bodies(
     blob: bytes,
     *,
+    pool_base: int = ENEMY_POOL_BASE,
     pool_size: int = ENEMY_POOL_SIZE,
     include_contact_disabled: bool = False,
 ) -> tuple[EnemyBody, ...]:
@@ -218,7 +223,7 @@ def decode_enemy_bodies(
             continue
         bodies.append(
             EnemyBody(
-                pointer=ENEMY_POOL_BASE + base,
+                pointer=pool_base + base,
                 x=x,
                 y=y,
                 vx=0.0,
@@ -316,11 +321,17 @@ def capture_enemy_pool_prefix_contiguous(
 def read_enemy_bodies_sparse(
     reader: ProcessReader,
 ) -> tuple[EnemyBody, ...]:
-    """Read flags for every slot, then fetch only enabled body windows."""
+    """Read the manager singleton plus every ordinary pool body."""
 
     bodies = []
-    for slot in range(ENEMY_POOL_SIZE):
-        pointer = ENEMY_POOL_BASE + slot * ENEMY_STRIDE
+    pointers = (
+        ENEMY_MANAGER_TEMPLATE_BASE,
+        *(
+            ENEMY_POOL_BASE + slot * ENEMY_STRIDE
+            for slot in range(ENEMY_POOL_SIZE)
+        ),
+    )
+    for pointer in pointers:
         flags = reader.u32(pointer + ENEMY_FLAGS_OFFSET)
         if (
             not flags & ENEMY_ACTIVE_FLAG

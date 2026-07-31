@@ -48,6 +48,11 @@ from th08_ecl_runtime import (
     EclVmSnapshot,
     TaggedVelocityToggle,
 )
+from th08_ecl_tool.core import parse_ecl
+from th08_future_hazard_projection import (
+    OrdinaryFutureHazardProjection,
+    unknown_future_hazard_projection,
+)
 from th08_laser_runtime import (
     Laser,
     PackedLaserFrame as _PackedLaserFrame,
@@ -89,6 +94,13 @@ from th08_live import (
 from th08_live.runtime_ecl_identity import (
     RuntimeEclIdentityService,
     RuntimeEclPhysicalProvenance,
+)
+from th08_ordinary_future_sources import (
+    ORDINARY_FUTURE_SOURCE_SEMANTICS_VERSION,
+)
+from th08_runtime.ordinary_future_source_capture import (
+    OrdinaryFutureSourceCaptureResult,
+    capture_and_project_ordinary_future_sources,
 )
 from th08_live.scale_schedule_authority import (
     FinalBScaleScheduleAuthority,
@@ -224,7 +236,14 @@ from th08_live.local_objectives import (
     terminal_threat_degeneracy as _terminal_threat_degeneracy,
     terminal_threat_scores as _terminal_threat_scores_impl,
 )
-from touhou_control.hazard_coverage import HazardCoverageAssessment
+from touhou_control.hazard_coverage import (
+    HazardCoverageAssessment,
+    rebase_hazard_coverage,
+)
+from touhou_control.corridor import (
+    aabb_sample_clearance_field,
+    annular_sector_clearance_field,
+)
 from touhou_control.prepublication import (
     CausalPrepublicationFilter,
     build_causal_prepublication_filter,
@@ -280,6 +299,7 @@ from th08_live.enemy_sensor import (  # noqa: F401
     ENEMY_CONTACT_SIZE_OFFSET,
     ENEMY_FLAGS_OFFSET,
     ENEMY_LOCAL_PREFIX_SIZE,
+    ENEMY_MANAGER_TEMPLATE_BASE,
     ENEMY_POOL_BASE,
     ENEMY_POOL_SIZE,
     ENEMY_POSITION_OFFSET,
@@ -438,6 +458,12 @@ CORRIDOR_MAX_AGE_FRAMES = (
 CORRIDOR_POLICY_LEAD_INITIAL_FRAMES = 80
 CORRIDOR_POLICY_OVERLAP_FRAMES = 8
 CORRIDOR_POLICY_MAXIMUM_LEAD_FRAMES = 180
+ORDINARY_FUTURE_SOURCE_CAPTURE_INTERVAL_FRAMES = 8
+ORDINARY_FUTURE_SOURCE_HORIZON_FRAMES = (
+    CORRIDOR_POLICY_MAXIMUM_LEAD_FRAMES
+    + TH08_CORRIDOR_CONFIG.horizon_frames
+    + ORDINARY_FUTURE_SOURCE_CAPTURE_INTERVAL_FRAMES
+)
 CORRIDOR_POLICY_MINIMUM_LEAD_FRAMES = max(
     2 * TH08_CORRIDOR_CONFIG.frames_per_layer,
     LIVE_CONTROL_DELAY_MAX + LIVE_ACTION_HOLD_MAX,
@@ -929,6 +955,64 @@ def _hazards_for_positions(
     )
 
 
+def _hazards_for_positions_with_future_projection(
+    positions_x: np.ndarray,
+    positions_y: np.ndarray,
+    *,
+    step: int,
+    bullet_frame: tuple[np.ndarray, ...],
+    lasers: tuple[Laser, ...] | _PackedLaserFrame,
+    enemy_bodies: tuple[EnemyBody, ...],
+    future_hazard_projection: OrdinaryFutureHazardProjection,
+    future_projection_offset: int,
+) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """Consume future births during a root-to-publication certificate.
+
+    ``step`` is relative to the current observable root.  The retained
+    projection may have been captured earlier for the asynchronously solved
+    policy, so ``future_projection_offset`` aligns both physical clocks.
+    """
+
+    risk, collisions, minimum = _hazards_for_positions(
+        positions_x,
+        positions_y,
+        step=step,
+        bullet_frame=bullet_frame,
+        lasers=lasers,
+        enemy_bodies=enemy_bodies,
+    )
+    projection_frame = future_projection_offset + step
+    future_bodies = tuple(
+        sample
+        for trajectory in future_hazard_projection.aabb_trajectories
+        if (sample := trajectory.sample(projection_frame)) is not None
+    )
+    body_clearance = aabb_sample_clearance_field(
+        positions_x,
+        positions_y,
+        future_bodies,
+        frame=projection_frame,
+        player_radius=PLAYER_RADIUS,
+    )
+    emission_clearance = annular_sector_clearance_field(
+        positions_x,
+        positions_y,
+        future_hazard_projection.trajectories,
+        frame=projection_frame,
+        player_radius=PLAYER_RADIUS,
+    )
+    future_clearance = np.minimum(body_clearance, emission_clearance)
+    collisions = collisions + (future_clearance <= 0.0).astype(
+        np.int32,
+        copy=False,
+    )
+    minimum = np.minimum(minimum, future_clearance)
+    time_weight = 1.0 / (1.0 + 0.08 * (step - 1))
+    danger = np.maximum(64.0 - future_clearance, 0.0)
+    risk = risk + np.square(danger) * time_weight
+    return risk, collisions, minimum
+
+
 def _control_prefix_hazards(
     *,
     player_x: float,
@@ -1009,10 +1093,56 @@ def _robust_action_certificates(
     laser_scale_bits: tuple[int, ...],
     laser_frames: tuple[_PackedLaserFrame, ...] | None = None,
     pipeline_root: LocalPipelineRoot | None = None,
+    future_hazard_projection: OrdinaryFutureHazardProjection | None = None,
+    future_projection_offset: int = 0,
     timing_accumulator: _LocalCertificateTimingAccumulator | None = None,
 ) -> dict[str, RobustActionCertificate]:
+    hazards_for_positions = _hazards_for_positions
+    if future_hazard_projection is not None:
+        if (
+            not future_hazard_projection.source_closure_complete
+            or not future_hazard_projection.coverage.complete
+        ):
+            raise ValueError(
+                "future prefix certificate requires complete source coverage"
+            )
+        if future_projection_offset < 0:
+            raise ValueError(
+                "future prefix projection cannot start before its root"
+            )
+        required_horizon = (
+            action_hold_frames + max(delay_frames, default=0)
+        )
+        if (
+            future_projection_offset + required_horizon
+            > future_hazard_projection.horizon_frames
+        ):
+            raise ValueError(
+                "future prefix projection does not cover certificate horizon"
+            )
+
+        def hazards_for_positions(
+            positions_x: np.ndarray,
+            positions_y: np.ndarray,
+            *,
+            step: int,
+            bullet_frame: tuple[np.ndarray, ...],
+            lasers: tuple[Laser, ...] | _PackedLaserFrame,
+            enemy_bodies: tuple[EnemyBody, ...],
+        ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+            return _hazards_for_positions_with_future_projection(
+                positions_x,
+                positions_y,
+                step=step,
+                bullet_frame=bullet_frame,
+                lasers=lasers,
+                enemy_bodies=enemy_bodies,
+                future_hazard_projection=future_hazard_projection,
+                future_projection_offset=future_projection_offset,
+            )
+
     return _robust_action_certificates_impl(
-        hazards_for_positions=_hazards_for_positions,
+        hazards_for_positions=hazards_for_positions,
         player_x=player_x,
         player_y=player_y,
         previous_mask=previous_mask,
@@ -1647,6 +1777,13 @@ def _run_live_session(
     gameplay_armed = False
     termination_reason = "duration"
     corridor_future: Future[CorridorSolution] | None = None
+    ordinary_future_source_future: (
+        Future[OrdinaryFutureSourceCaptureResult] | None
+    ) = None
+    ordinary_future_source_result: (
+        OrdinaryFutureSourceCaptureResult | None
+    ) = None
+    ordinary_future_source_last_submit = CORRIDOR_INITIAL_SUBMIT_FRAME
     enemy_future: Future[EnemyPoolSnapshot] | None = None
     enemy_snapshot: EnemyPoolSnapshot | None = None
     enemy_last_submit = CORRIDOR_INITIAL_SUBMIT_FRAME
@@ -1757,6 +1894,7 @@ def _run_live_session(
         None,
     )
     runtime_ecl_static_path: Path | None = None
+    ordinary_future_ecl = None
     if runtime_ecl_static_image is not None:
         runtime_ecl_static_path = runtime_ecl_static_image
         if not runtime_ecl_static_path.is_absolute():
@@ -1772,6 +1910,8 @@ def _run_live_session(
             expected_difficulty_index=args.difficulty,
             expected_stage_route_index=args.expected_stage,
         )
+        if ordinary_preexhaustion_authority:
+            ordinary_future_ecl = parse_ecl(runtime_ecl_static_path)
         if getattr(args, "enable_finalb_scale_source_authority", False):
             finalb_scale_schedule_authority = (
                 FinalBScaleScheduleAuthority(
@@ -1797,6 +1937,7 @@ def _run_live_session(
     corridor_executor = service_resources.corridor_executor
     audit_executor = service_resources.audit_executor
     enemy_executor = service_resources.enemy_executor
+    future_source_executor = service_resources.future_source_executor
     issue_controller = IssueController(
         api=api,
         pid=pid,
@@ -2325,6 +2466,10 @@ def _run_live_session(
                         memory.clear()
                     if corridor_future is not None and corridor_future.cancel():
                         corridor_future = None
+                    ordinary_future_source_result = None
+                    if ordinary_future_source_future is not None:
+                        ordinary_future_source_future.cancel()
+                        ordinary_future_source_future = None
                     trace_sink.emit(
                         {
                                 "kind": "scene_inactive",
@@ -2418,6 +2563,10 @@ def _run_live_session(
                 ecl_instruction_cache.clear()
                 if corridor_future is not None and corridor_future.cancel():
                     corridor_future = None
+                ordinary_future_source_result = None
+                if ordinary_future_source_future is not None:
+                    ordinary_future_source_future.cancel()
+                    ordinary_future_source_future = None
                 auto_confirm.eligible_since = None
                 auto_confirm.released = False
                 last_frame_progress = now
@@ -2669,6 +2818,10 @@ def _run_live_session(
                     and corridor_future.cancel()
                 ):
                     corridor_future = None
+                ordinary_future_source_result = None
+                if ordinary_future_source_future is not None:
+                    ordinary_future_source_future.cancel()
+                    ordinary_future_source_future = None
             iterations += 1
             if iterations % 30 == 0:
                 _require_foreground(api, pid)
@@ -3022,6 +3175,10 @@ def _run_live_session(
                 ecl_instruction_cache.clear()
                 if corridor_future is not None:
                     corridor_future.cancel()
+                ordinary_future_source_result = None
+                if ordinary_future_source_future is not None:
+                    ordinary_future_source_future.cancel()
+                    ordinary_future_source_future = None
                 trace_sink.emit(
                     {
                             "kind": "sensor_epoch_discontinuity",
@@ -3394,6 +3551,100 @@ def _run_live_session(
                     )
                     termination_reason = "time_scale_authority_unknown"
                     break
+            if (
+                ordinary_future_source_future is not None
+                and ordinary_future_source_future.done()
+            ):
+                try:
+                    ordinary_future_source_result = (
+                        ordinary_future_source_future.result()
+                    )
+                    closure = ordinary_future_source_result.closure
+                    trace_sink.emit(
+                        {
+                            "kind": "ordinary_future_source_projection",
+                            "frame": counter_after_read,
+                            "root_frame": (
+                                closure.projection.root_frame
+                            ),
+                            "horizon_frame": (
+                                closure.projection.horizon_frame
+                            ),
+                            "stable_capture": (
+                                ordinary_future_source_result.snapshot.stable
+                            ),
+                            "capture_read_ms": (
+                                ordinary_future_source_result.snapshot.read_ms
+                            ),
+                            "capture_attempts": (
+                                ordinary_future_source_result.snapshot.attempts
+                            ),
+                            "source_closure_complete": (
+                                closure.projection.source_closure_complete
+                            ),
+                            "source_closure_reason": (
+                                closure.projection.source_closure_reason
+                            ),
+                            "source_count": closure.source_count,
+                            "auxiliary_count": closure.auxiliary_count,
+                            "timeline_spawn_count": (
+                                closure.timeline_spawn_count
+                            ),
+                            "direct_fire_event_count": len(
+                                closure.direct_fire_events
+                            ),
+                            "future_aabb_trajectory_count": len(
+                                closure.projection.aabb_trajectories
+                            ),
+                            "future_sector_trajectory_count": len(
+                                closure.projection.trajectories
+                            ),
+                            "digest": closure.projection.digest,
+                            "changes_input": False,
+                        }
+                    )
+                except (OSError, RuntimeError, TypeError, ValueError) as error:
+                    ordinary_future_source_result = None
+                    trace_sink.emit(
+                        {
+                            "kind": "ordinary_future_source_projection",
+                            "frame": counter_after_read,
+                            "source_closure_complete": False,
+                            "source_closure_reason": str(error),
+                            "changes_input": False,
+                        }
+                    )
+                ordinary_future_source_future = None
+            ordinary_future_source_due = (
+                ordinary_preexhaustion_authority
+                and not bool(spell_state["active"])
+                and int(player["phase"]) not in (1, 2)
+                and ordinary_future_ecl is not None
+                and future_source_executor is not None
+                and ordinary_future_source_future is None
+                and (
+                    runtime_ecl_identity_service is not None
+                    and runtime_ecl_identity_service.accepted_version
+                    is not None
+                )
+                and (
+                    counter_after_read
+                    - ordinary_future_source_last_submit
+                    >= ORDINARY_FUTURE_SOURCE_CAPTURE_INTERVAL_FRAMES
+                )
+            )
+            if ordinary_future_source_due:
+                ordinary_future_source_future = (
+                    future_source_executor.submit(
+                        capture_and_project_ordinary_future_sources,
+                        reader,
+                        ordinary_future_ecl,
+                        horizon_frames=(
+                            ORDINARY_FUTURE_SOURCE_HORIZON_FRAMES
+                        ),
+                    )
+                )
+                ordinary_future_source_last_submit = counter_after_read
             corridor_started = time.perf_counter()
             corridor_updated = False
             corridor_completed = False
@@ -3500,11 +3751,54 @@ def _run_live_session(
                         ),
                     )
                 )
+                policy_source_frame = (
+                    counter_after_read + forecast_lead_frames
+                )
+                policy_hazard_horizon_frame = (
+                    policy_source_frame
+                    + TH08_CORRIDOR_CONFIG.horizon_frames
+                )
+                ordinary_future_projection: (
+                    OrdinaryFutureHazardProjection | None
+                ) = None
+                if (
+                    ordinary_preexhaustion_authority
+                    and not bool(spell_state["active"])
+                ):
+                    candidate_projection = (
+                        ordinary_future_source_result.closure.projection
+                        if ordinary_future_source_result is not None
+                        else None
+                    )
+                    if (
+                        candidate_projection is not None
+                        and candidate_projection.root_frame
+                        <= policy_source_frame
+                        and candidate_projection.horizon_frame
+                        >= policy_hazard_horizon_frame
+                    ):
+                        ordinary_future_projection = candidate_projection
+                    else:
+                        ordinary_future_projection = (
+                            unknown_future_hazard_projection(
+                                root_frame=counter_after_read,
+                                horizon_frames=(
+                                    forecast_lead_frames
+                                    + TH08_CORRIDOR_CONFIG.horizon_frames
+                                ),
+                                reason=(
+                                    "no stable complete future-source "
+                                    "projection covers the publication "
+                                    "epoch and corridor horizon"
+                                ),
+                                source_semantics_version=(
+                                    ORDINARY_FUTURE_SOURCE_SEMANTICS_VERSION
+                                ),
+                            )
+                        )
                 corridor_future = corridor_executor.submit(
                     _solve_corridor,
-                    source_frame=(
-                        counter_after_read + forecast_lead_frames
-                    ),
+                    source_frame=policy_source_frame,
                     snapshot_frame=counter_after_read,
                     forecast_lead_frames=forecast_lead_frames,
                     player_x=forecast_player_x,
@@ -3512,6 +3806,9 @@ def _run_live_session(
                     bullets=bullets,
                     lasers=lasers,
                     enemy_bodies=enemy_bodies,
+                    future_hazard_projection=(
+                        ordinary_future_projection
+                    ),
                     snapshot_lag=hazard_snapshot_age,
                     control_delay_candidates=policy_delay_support,
                     observed_control_delay_candidates=(
@@ -3652,25 +3949,46 @@ def _run_live_session(
                 future_viability_policy = (
                     corridor_pending_solution.plan.viability_policy
                 )
-                ordinary_future_hazard_coverage = unknown_future_coverage(
-                    root_frame=captured_iteration.snapshot_frame,
-                    horizon_frames=(
-                        (
-                            corridor_pending_solution.source_frame
-                            - captured_iteration.snapshot_frame
-                        )
-                        + future_viability_policy.horizon_frames
+                ordinary_required_hazard_horizon = (
+                    corridor_pending_solution.source_frame
+                    + (
+                        future_viability_policy.horizon_frames
                         if future_viability_policy is not None
-                        else (
-                            corridor_pending_solution.source_frame
-                            - captured_iteration.snapshot_frame
-                            + PLANNER_THREAT_HORIZON
-                        )
-                    ),
-                    hazard_version=corridor_hazard_version(
-                        corridor_pending_solution
-                    ),
+                        else PLANNER_THREAT_HORIZON
+                    )
                 )
+                published_future_coverage = (
+                    corridor_pending_solution.future_hazard_coverage
+                )
+                if (
+                    published_future_coverage is not None
+                    and published_future_coverage.root_frame
+                    <= captured_iteration.snapshot_frame
+                    and published_future_coverage.horizon_frame
+                    >= ordinary_required_hazard_horizon
+                ):
+                    ordinary_future_hazard_coverage = (
+                        rebase_hazard_coverage(
+                            published_future_coverage,
+                            root_frame=(
+                                captured_iteration.snapshot_frame
+                            ),
+                            horizon_frame=(
+                                ordinary_required_hazard_horizon
+                            ),
+                        )
+                    )
+                else:
+                    ordinary_future_hazard_coverage = unknown_future_coverage(
+                        root_frame=captured_iteration.snapshot_frame,
+                        horizon_frames=(
+                            ordinary_required_hazard_horizon
+                            - captured_iteration.snapshot_frame
+                        ),
+                        hazard_version=corridor_hazard_version(
+                            corridor_pending_solution
+                        ),
+                    )
                 ordinary_publication_lead = (
                     corridor_pending_solution.source_frame
                     - captured_iteration.snapshot_frame
@@ -3694,12 +4012,44 @@ def _run_live_session(
                         ordinary_publication_lead
                         - max(ordinary_prefix_delay_frames),
                     )
-                    ordinary_prefix_certified_frames = (
+                    candidate_prefix_certified_frames = (
                         ordinary_prefix_hold_frames
                         + max(ordinary_prefix_delay_frames)
                     )
-                    ordinary_prefix_certificates = (
-                        _robust_action_certificates(
+                    published_future_projection = (
+                        corridor_pending_solution.future_hazard_projection
+                    )
+                    future_projection_offset = (
+                        captured_iteration.snapshot_frame
+                        - published_future_projection.root_frame
+                        if isinstance(
+                            published_future_projection,
+                            OrdinaryFutureHazardProjection,
+                        )
+                        else -1
+                    )
+                    prefix_projection_usable = bool(
+                        isinstance(
+                            published_future_projection,
+                            OrdinaryFutureHazardProjection,
+                        )
+                        and published_future_projection.version
+                        == corridor_hazard_version(
+                            corridor_pending_solution
+                        )
+                        and published_future_projection.coverage.complete
+                        and future_projection_offset >= 0
+                        and (
+                            future_projection_offset
+                            + candidate_prefix_certified_frames
+                            <= published_future_projection.horizon_frames
+                        )
+                    )
+                    if prefix_projection_usable:
+                        ordinary_prefix_certified_frames = (
+                            candidate_prefix_certified_frames
+                        )
+                        ordinary_prefix_certificates = _robust_action_certificates(
                             player_x=player_control_root.x,
                             player_y=player_control_root.y,
                             previous_mask=held_desired_mask,
@@ -3715,36 +4065,41 @@ def _run_live_session(
                             player_scale_bits=(
                                 captured_iteration.time_scale_schedule
                                 .require_player_horizon(
-                                    ordinary_prefix_certified_frames
+                                    candidate_prefix_certified_frames
                                 )
                             ),
                             laser_scale_bits=(
                                 captured_iteration.time_scale_schedule
                                 .require_laser_horizon(
-                                    ordinary_prefix_certified_frames
+                                    candidate_prefix_certified_frames
                                 )
                             ),
                             pipeline_root=(
                                 observed_local_pipeline_root
                             ),
+                            future_hazard_projection=(
+                                published_future_projection
+                            ),
+                            future_projection_offset=(
+                                future_projection_offset
+                            ),
                         )
-                    )
-                    ordinary_prefix_safe_actions = tuple(
-                        action.name
-                        for action in _PLANNER_ACTIONS
-                        if (
-                            (
-                                certificate := (
-                                    ordinary_prefix_certificates.get(
-                                        action.name
+                        ordinary_prefix_safe_actions = tuple(
+                            action.name
+                            for action in _PLANNER_ACTIONS
+                            if (
+                                (
+                                    certificate := (
+                                        ordinary_prefix_certificates.get(
+                                            action.name
+                                        )
                                     )
                                 )
+                                is not None
+                                and certificate.worst_collisions == 0
+                                and certificate.min_clearance > 0.0
                             )
-                            is not None
-                            and certificate.worst_collisions == 0
-                            and certificate.min_clearance > 0.0
                         )
-                    )
             ordinary_preexhaustion = (
                 _ordinary_nonspell_preexhaustion_filter(
                     enabled=ordinary_preexhaustion_authority,
@@ -4110,6 +4465,10 @@ def _run_live_session(
                 ecl_instruction_cache.clear()
                 if corridor_future is not None:
                     corridor_future.cancel()
+                ordinary_future_source_result = None
+                if ordinary_future_source_future is not None:
+                    ordinary_future_source_future.cancel()
+                    ordinary_future_source_future = None
                 trace_sink.emit(
                     {
                             "kind": "action_epoch_discontinuity",
@@ -4890,6 +5249,9 @@ def _run_live_session(
                 service_resources.close(
                     corridor_future=corridor_future,
                     enemy_future=enemy_future,
+                    future_source_future=(
+                        ordinary_future_source_future
+                    ),
                 )
             finally:
                 session.close()

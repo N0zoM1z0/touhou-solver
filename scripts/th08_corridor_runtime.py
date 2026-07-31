@@ -20,6 +20,7 @@ from th08_corridor_adapter import (
     plan_prepared_lowered_th08_corridor,
     prepare_lowered_th08_corridor,
 )
+from th08_future_hazard_projection import OrdinaryFutureHazardProjection
 from th08_corridor_audit import submit_corridor_audit
 from th08_time_scale import (
     TH08_UNIT_TIME_SCALE_BITS,
@@ -35,6 +36,10 @@ from touhou_control.corridor.runtime import (
     CorridorPublication,
     CorridorRuntimeHandles,
     CorridorSolution,
+)
+from touhou_control.corridor import (
+    AabbTrajectoryHazard,
+    AnnularSectorTrajectoryHazard,
 )
 from touhou_control.query_survival import (
     PendingCommand,
@@ -126,6 +131,8 @@ def solve_corridor(
     bullets: tuple[SlottedHazard, ...],
     lasers: tuple[SlottedHazard, ...],
     enemy_bodies: tuple[PointerHazard, ...],
+    future_aabb_trajectories: tuple[AabbTrajectoryHazard, ...] = (),
+    future_hazard_projection: OrdinaryFutureHazardProjection | None = None,
     snapshot_lag: int,
     control_delay_candidates: tuple[int, ...],
     nominal_control_delay: int,
@@ -181,6 +188,26 @@ def solve_corridor(
         else False
     )
     started = time.perf_counter()
+    future_annular_sector_trajectories: tuple[
+        AnnularSectorTrajectoryHazard, ...
+    ] = ()
+    if future_hazard_projection is not None:
+        if future_aabb_trajectories:
+            raise ValueError(
+                "future projection and raw future trajectories are exclusive"
+            )
+        future_annular_sector_trajectories = (
+            future_hazard_projection.trajectories_for_policy(
+                source_frame=source_frame,
+                horizon_frames=TH08_CORRIDOR_CONFIG.horizon_frames,
+            )
+        )
+        future_aabb_trajectories = (
+            future_hazard_projection.aabb_trajectories_for_policy(
+                source_frame=source_frame,
+                horizon_frames=TH08_CORRIDOR_CONFIG.horizon_frames,
+            )
+        )
     hazards = lower_th08_corridor_hazards(
         bullets=bullets,
         lasers=lasers,
@@ -189,6 +216,10 @@ def solve_corridor(
         forecast_frames=forecast_lead_frames,
         horizon_frames=TH08_CORRIDOR_CONFIG.horizon_frames,
         laser_time_scale_bits=laser_scale_bits,
+        future_aabb_trajectories=future_aabb_trajectories,
+        future_annular_sector_trajectories=(
+            future_annular_sector_trajectories
+        ),
     )
     prepared_problem = prepare_lowered_th08_corridor(
         hazards=hazards,
@@ -262,13 +293,26 @@ def solve_corridor(
                 native_worker_limit_applied
             ),
             time_scale_identity=time_scale_identity,
+            future_hazard_version=(
+                future_hazard_projection.version
+                if future_hazard_projection is not None
+                else None
+            ),
+            future_hazard_coverage=(
+                future_hazard_projection.coverage
+                if future_hazard_projection is not None
+                else None
+            ),
         ),
         publication=CorridorPublication(
             audit_capsule=audit.capsule,
             audit_write_ms=audit.write_ms,
             audit_error=audit.error,
         ),
-        handles=CorridorRuntimeHandles(audit_future=audit.future),
+        handles=CorridorRuntimeHandles(
+            audit_future=audit.future,
+            future_hazard_projection=future_hazard_projection,
+        ),
     )
 
 

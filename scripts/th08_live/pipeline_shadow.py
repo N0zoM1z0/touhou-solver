@@ -35,6 +35,7 @@ class CorridorVersionSource(Protocol):
     source_frame: int
     snapshot_frame: int | None
     context_key: tuple[int, int, int | None] | None
+    future_hazard_version: VersionIdentity | None
 
 
 @dataclass(frozen=True)
@@ -73,6 +74,13 @@ def corridor_hazard_version(
 ) -> VersionIdentity:
     """Return the exact hazard-snapshot identity for one corridor policy."""
 
+    future_version = (
+        getattr(solution, "future_hazard_version", None)
+        if solution is not None
+        else None
+    )
+    if future_version is not None:
+        return future_version
     return _corridor_version("th08-corridor-hazard-snapshot-v1", solution)
 
 

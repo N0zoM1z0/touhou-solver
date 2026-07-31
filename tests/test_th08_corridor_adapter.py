@@ -20,6 +20,7 @@ from th08_corridor_adapter import (
 )
 from th08_live_dodge_agent import Bullet, EnemyBody, Laser
 from th08_laser_model import LaserPhase, spawn_laser_state
+from touhou_control.corridor import AabbHazard, AabbTrajectoryHazard
 from touhou_control.trajectory import VelocityChange
 from touhou_control.packed_hazards import PackedSegmentFrames
 
@@ -29,6 +30,25 @@ class Th08CorridorAdapterTests(unittest.TestCase):
         self.assertEqual(TH08_CORRIDOR_CONFIG.grid_step, 16.0)
         self.assertEqual(TH08_CORRIDOR_CONFIG.frames_per_layer, 8)
         self.assertEqual(TH08_CORRIDOR_CONFIG.horizon_frames, 80)
+
+    def test_future_birth_trajectory_is_retained_for_clearance(self) -> None:
+        trajectory = AabbTrajectoryHazard(
+            (
+                None,
+                AabbHazard(
+                    x=192.0,
+                    y=368.0,
+                    half_width=2.0,
+                    half_height=2.0,
+                ),
+            )
+        )
+        hazards = lower_th08_corridor_hazards(
+            bullets=(),
+            lasers=(),
+            future_aabb_trajectories=(trajectory,),
+        )
+        self.assertEqual(hazards.aabb_trajectories, (trajectory,))
 
     def test_viability_actions_match_live_route2_action_names_and_speeds(
         self,

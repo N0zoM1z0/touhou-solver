@@ -1,0 +1,2013 @@
+"""Fail-closed ordinary-stage ECL/timeline future-source closure.
+
+The analyzer consumes one coherent native source projection and an immutable
+decoded ECL program.  It advances only native semantics that have an explicit
+lowering here.  Every reached unsupported callback, periodic emitter, main or
+auxiliary opcode, child topology, timeline event, or movement state makes the
+entire requested horizon UNKNOWN.
+
+The supported subset is intentionally sufficient for the retained H1
+ordinary root without using its native endpoint as model input:
+
+* every active manager-singleton and ordinary-pool main/auxiliary VM is joined;
+* sub30's interval arithmetic, player aim, and RNG variables are lowered;
+* direct-fire modes 0x60..0x68 become finite angle-sector AABB trajectories;
+* native movement state 0/1 and the reached 0x41/0x47 writes are advanced;
+* 0x5C children are accepted only when their complete reached subroutine is
+  proven emission-, laser-, callback-, topology-, and contact-silent;
+* the exact stage-timeline clocks are advanced and any reached event currently
+  fails closed instead of being omitted.
+
+Keeping an enemy alive after a possible player-shot kill is conservative.
+RNG variables are therefore set-valued rather than replayed from the captured
+global stream: a kill can remove RNG consumers in an action-diverged branch.
+"""
+
+from __future__ import annotations
+
+import math
+import struct
+from copy import deepcopy
+from dataclasses import dataclass, replace
+from itertools import product
+from typing import Any
+
+from th08_ecl_tool.core import EclFile, SubInstruction
+from th08_future_birth_envelope import FloatInterval, FutureDirectFire
+from th08_future_hazard_projection import (
+    OrdinaryFutureHazardProjection,
+    complete_future_hazard_projection,
+    unknown_future_hazard_projection,
+)
+from th08_timeline_model import (
+    IndexedEnemyView,
+    StageTimelineState,
+    TimelineClock,
+    TimelineExternalState,
+    TimelineSpawnRequest,
+    step_stage_timelines,
+)
+from touhou_control.corridor import AabbHazard, AabbTrajectoryHazard
+
+
+ORDINARY_FUTURE_SOURCE_SEMANTICS_VERSION = (
+    "th08-ordinary-future-sources-v2-set-valued-timeline-spawn"
+)
+_PROJECTION_SCHEMA = "th08-native-snapshot-collision-control-projection-v12"
+_DIRECT_FIRE_OPCODES = frozenset(range(0x60, 0x69))
+# Native table entry 51 is ANM/effect-only:
+#   table 0x004C6F94 -> init 0x00426280, update 0x004264F0.
+# Both callbacks only mutate the 0x360-byte effect record.  The initializer's
+# gameplay-RNG samples are already covered by the set-valued hostile geometry
+# below, so they cannot narrow a later hostile outcome.
+_HOSTILITY_NEUTRAL_EFFECT_TYPES = frozenset((51,))
+_FLOAT_LOCAL_FIRST = 10016
+_FLOAT_LOCAL_LAST = 10023
+_RNG_UNIT_VARIABLE = 10033
+_RNG_SIGNED_UNIT_VARIABLE = 10035
+_ANGLE_TO_PLAYER_VARIABLE = 10048
+_TWO_PI = 2.0 * math.pi
+_FLOAT32_ONE_BITS = 0x3F800000
+_PLAYER_MAX_AXIS_SPEED = 4.0
+_POSITION_TOLERANCE = 1.0e-3
+_MAX_INSTRUCTIONS_PER_UPDATE = 64
+_AUXILIARY_SLOT_COUNT = 4
+_MAX_TIMELINE_FRONTIER_STATES = 4096
+
+
+class FutureSourceClosureError(ValueError):
+    """One reached native source semantic has no hard lowering."""
+
+
+@dataclass
+class _MotionState:
+    base_x: float
+    base_y: float
+    relative_x: float
+    relative_y: float
+    movement_state: int
+    mirror_x: bool
+    angle: float
+    angular_velocity: float
+    speed: float
+    speed_acceleration: float
+    velocity_x: float
+    velocity_y: float
+    uncertainty_x: float
+    uncertainty_y: float
+    supported: bool
+    orbit_angle: float = 0.0
+    orbit_angular_velocity: float = 0.0
+    orbit_radius: float = 0.0
+    orbit_radius_acceleration: float = 0.0
+    orbit_center_x: float = 0.0
+    orbit_center_y: float = 0.0
+    motion_timer_elapsed: int = 0
+    motion_duration: int = 0
+    timed_duration: int = 0
+    timed_remaining: int = 0
+    timed_mode: int = 0
+    timed_start_x: float = 0.0
+    timed_start_y: float = 0.0
+    timed_displacement_x: float = 0.0
+    timed_displacement_y: float = 0.0
+
+    @property
+    def world_x(self) -> float:
+        return self.base_x + self.relative_x
+
+    @property
+    def world_y(self) -> float:
+        return self.base_y + self.relative_y
+
+    @property
+    def world_x_interval(self) -> FloatInterval:
+        return FloatInterval(
+            self.world_x - self.uncertainty_x,
+            self.world_x + self.uncertainty_x,
+        )
+
+    @property
+    def world_y_interval(self) -> FloatInterval:
+        return FloatInterval(
+            self.world_y - self.uncertainty_y,
+            self.world_y + self.uncertainty_y,
+        )
+
+
+@dataclass
+class _VmState:
+    instruction_offset: int
+    timer_elapsed: int
+    integer_locals: list[int]
+    float_locals: list[FloatInterval]
+    scratch_integers: list[int]
+    stopped: bool = False
+
+
+@dataclass
+class _SourceState:
+    identity: str
+    enemy_pointer: int
+    motion: _MotionState
+    main: _VmState
+    auxiliaries: list[_VmState | None]
+    emission: dict[str, object]
+    enemy_flags: int
+    body_half_width: float
+    body_half_height: float
+    phase_transition_armed: bool
+    timeline_spawned: bool = False
+    spawn_frame: int | None = None
+    precompose_origin_x: FloatInterval | None = None
+    precompose_origin_y: FloatInterval | None = None
+    precompose_world_x: FloatInterval | None = None
+    precompose_world_y: FloatInterval | None = None
+
+
+@dataclass(frozen=True)
+class OrdinaryFutureSourceClosure:
+    projection: OrdinaryFutureHazardProjection
+    direct_fire_events: tuple[FutureDirectFire, ...]
+    source_count: int
+    auxiliary_count: int
+    silent_child_count: int
+    timeline_steps: int
+    timeline_spawn_count: int
+
+
+def _fail(message: str) -> None:
+    raise FutureSourceClosureError(message)
+
+
+def _signed_u32(value: int) -> int:
+    return struct.unpack("<i", struct.pack("<I", value & 0xFFFFFFFF))[0]
+
+
+def _float32(value: int) -> float:
+    return struct.unpack("<f", struct.pack("<I", value & 0xFFFFFFFF))[0]
+
+
+def _finite(values: Any, *, label: str) -> None:
+    if not all(math.isfinite(float(value)) for value in values):
+        _fail(f"{label} contains a non-finite value")
+
+
+def _instruction_map(ecl: EclFile) -> dict[int, SubInstruction]:
+    return {
+        instruction.offset: instruction
+        for subroutine in ecl.subroutines
+        for instruction in subroutine.instructions
+    }
+
+
+def _eligible(instruction: SubInstruction, difficulty_mask: int) -> bool:
+    return (
+        (instruction.difficulty_mask & difficulty_mask)
+        == difficulty_mask
+    )
+
+
+def _runtime_program_identity(
+    payload: dict[str, object],
+    ecl: EclFile,
+) -> tuple[int, int]:
+    runtime = payload.get("stage_timeline_runtime")
+    if not isinstance(runtime, dict):
+        _fail("stage timeline runtime inventory is absent")
+    ecl_file = runtime.get("ecl_file")
+    if not isinstance(ecl_file, dict):
+        _fail("runtime ECL file identity is absent")
+    if int(ecl_file.get("magic", -1)) != 0x800:
+        _fail("runtime ECL magic is not TH08 ECL")
+    if int(ecl_file.get("subroutine_count", -1)) != len(ecl.subroutines):
+        _fail("runtime/decoded ECL subroutine counts disagree")
+    if int(ecl_file.get("timeline_count", -1)) != len(ecl.timelines):
+        _fail("runtime/decoded ECL timeline counts disagree")
+    if int(ecl_file.get("static_data_end_offset", -1)) != int(
+        ecl.header.data_end_offset
+    ):
+        _fail("runtime/decoded ECL data-end offsets disagree")
+    runtime_sha256 = ecl_file.get("canonical_sha256")
+    if runtime_sha256 is not None and str(runtime_sha256) != ecl.sha256:
+        _fail("runtime/decoded ECL canonical SHA-256 disagrees")
+    return int(ecl_file["file_base"]), int(runtime["difficulty_mask"])
+
+
+def _source_groups(
+    payload: dict[str, object],
+) -> tuple[tuple[str, dict[str, object]], ...]:
+    manager = payload.get("enemy_manager_template_source")
+    if not isinstance(manager, dict):
+        _fail("manager singleton hostile-source range is absent")
+    ordinary = {
+        "source_role": "ordinary_enemy_pool",
+        "enemy_bodies": payload.get("enemy_bodies"),
+        "main_ecl_vm_inventory": payload.get("enemy_main_ecl_vm_inventory"),
+        "main_ecl_installed_callbacks": payload.get(
+            "enemy_main_ecl_installed_callbacks"
+        ),
+        "periodic_emission_state": payload.get(
+            "enemy_periodic_emission_state"
+        ),
+        "emission_state": payload.get("enemy_emission_state"),
+        "motion_state": payload.get("enemy_motion_state"),
+        "phase_transition_state": payload.get(
+            "enemy_phase_transition_state"
+        ),
+        "auxiliary_ecl_contexts": payload.get(
+            "enemy_auxiliary_ecl_contexts"
+        ),
+    }
+    return (
+        (str(manager.get("source_role", "manager_singleton")), manager),
+        ("ordinary_enemy_pool", ordinary),
+    )
+
+
+def _rows(record: object, *, label: str) -> list[object]:
+    if not isinstance(record, dict) or not isinstance(record.get("rows"), list):
+        _fail(f"{label} rows are absent")
+    return list(record["rows"])
+
+
+def _point_float_locals(raw_bits: object, *, label: str) -> list[FloatInterval]:
+    if not isinstance(raw_bits, list) or len(raw_bits) != 8:
+        _fail(f"{label} does not contain eight float locals")
+    values = [_float32(int(bits)) for bits in raw_bits]
+    _finite(values, label=label)
+    return [FloatInterval.point(value) for value in values]
+
+
+def _point_integer_locals(raw_values: object, *, label: str) -> list[int]:
+    if not isinstance(raw_values, list) or len(raw_values) != 8:
+        _fail(f"{label} does not contain eight integer locals")
+    return [int(value) for value in raw_values]
+
+
+def _motion_state(row: dict[str, object]) -> _MotionState:
+    base = row.get("base_position")
+    relative = row.get("relative_position")
+    velocity = row.get("velocity")
+    world = row.get("world_position")
+    if not all(
+        isinstance(value, list) and len(value) == 3
+        for value in (base, relative, velocity, world)
+    ):
+        _fail("future source motion vector layout drifted")
+    assert isinstance(base, list)
+    assert isinstance(relative, list)
+    assert isinstance(velocity, list)
+    assert isinstance(world, list)
+    numeric = (
+        *base,
+        *relative,
+        *velocity,
+        *world,
+        row.get("angle"),
+        row.get("angular_velocity"),
+        row.get("speed"),
+        row.get("speed_acceleration"),
+        row.get("orbit_angle"),
+        row.get("orbit_angular_velocity"),
+        row.get("orbit_radius"),
+        row.get("orbit_radius_acceleration"),
+    )
+    orbit_center = row.get("orbit_center_position")
+    if not isinstance(orbit_center, list) or len(orbit_center) != 3:
+        _fail("future source orbit-center layout drifted")
+    numeric = (*numeric, *orbit_center)
+    _finite(numeric, label="future source motion state")
+    if (
+        abs(float(base[0]) + float(relative[0]) - float(world[0]))
+        > _POSITION_TOLERANCE
+        or abs(float(base[1]) + float(relative[1]) - float(world[1]))
+        > _POSITION_TOLERANCE
+    ):
+        _fail("composed source world position disagrees with base+relative")
+    movement_state = int(row.get("movement_state", -1))
+    state = _MotionState(
+        base_x=float(base[0]),
+        base_y=float(base[1]),
+        relative_x=float(relative[0]),
+        relative_y=float(relative[1]),
+        movement_state=movement_state,
+        mirror_x=bool(row.get("mirror_x")),
+        angle=float(row["angle"]),
+        angular_velocity=float(row["angular_velocity"]),
+        speed=float(row["speed"]),
+        speed_acceleration=float(row["speed_acceleration"]),
+        velocity_x=float(velocity[0]),
+        velocity_y=float(velocity[1]),
+        uncertainty_x=0.0,
+        uncertainty_y=0.0,
+        supported=movement_state in (0, 1, 3),
+        orbit_angle=float(row["orbit_angle"]),
+        orbit_angular_velocity=float(row["orbit_angular_velocity"]),
+        orbit_radius=float(row["orbit_radius"]),
+        orbit_radius_acceleration=float(
+            row["orbit_radius_acceleration"]
+        ),
+        orbit_center_x=float(orbit_center[0]),
+        orbit_center_y=float(orbit_center[1]),
+        motion_timer_elapsed=int(row["motion_timer_elapsed"]),
+        motion_duration=int(row["motion_duration"]),
+    )
+    if movement_state == 0 and (
+        abs(state.velocity_x) > _POSITION_TOLERANCE
+        or abs(state.velocity_y) > _POSITION_TOLERANCE
+    ):
+        _fail("movement state 0 carries nonzero unlowered velocity")
+    return state
+
+
+def _callback_is_clear(row: object, *, label: str) -> None:
+    if not isinstance(row, dict):
+        _fail(f"{label} callback row is malformed")
+    callback = row.get("installed_callback")
+    if (
+        not isinstance(callback, dict)
+        or int(callback.get("function_pointer", -1)) != 0
+    ):
+        _fail(f"{label} installed callback requires address-specific lowering")
+
+
+def _build_sources(
+    payload: dict[str, object],
+    *,
+    ecl_base: int,
+) -> tuple[list[_SourceState], int]:
+    sources: list[_SourceState] = []
+    auxiliary_count = 0
+    for role, group in _source_groups(payload):
+        inventory = group.get("main_ecl_vm_inventory")
+        if not isinstance(inventory, dict):
+            _fail(f"{role} main VM inventory is absent")
+        if (
+            int(inventory.get("invalid_active_vms", 0))
+            or int(inventory.get("invalid_auxiliary_contexts", 0))
+            or bool(inventory.get("invalid_auxiliary_context_rows", ()))
+        ):
+            _fail(f"{role} contains an invalid active ECL source")
+        main_rows = _rows(inventory, label=f"{role} main VM")
+        callback_rows = _rows(
+            group.get("main_ecl_installed_callbacks"),
+            label=f"{role} main callback",
+        )
+        periodic_rows = _rows(
+            group.get("periodic_emission_state"),
+            label=f"{role} periodic emitter",
+        )
+        emission_rows = _rows(
+            group.get("emission_state"),
+            label=f"{role} emission state",
+        )
+        motion_rows = _rows(
+            group.get("motion_state"),
+            label=f"{role} motion state",
+        )
+        phase_rows = _rows(
+            group.get("phase_transition_state"),
+            label=f"{role} phase transition state",
+        )
+        auxiliary_rows = _rows(
+            group.get("auxiliary_ecl_contexts"),
+            label=f"{role} auxiliary VM",
+        )
+        body_rows = group.get("enemy_bodies")
+        if not isinstance(body_rows, list):
+            _fail(f"{role} enemy body rows are absent")
+        callbacks_by_pointer = {
+            int(row["enemy_pointer"]): row
+            for row in callback_rows
+            if isinstance(row, dict)
+        }
+        periodic_by_pointer = {
+            int(row["enemy_pointer"]): row
+            for row in periodic_rows
+            if isinstance(row, dict)
+        }
+        emission_by_pointer = {
+            int(row["enemy_pointer"]): row
+            for row in emission_rows
+            if isinstance(row, dict)
+        }
+        motion_by_pointer = {
+            int(row["enemy_pointer"]): row
+            for row in motion_rows
+            if isinstance(row, dict)
+        }
+        phase_by_pointer = {
+            int(row["enemy_pointer"]): row
+            for row in phase_rows
+            if isinstance(row, dict)
+        }
+        body_by_pointer = {
+            int(row["pointer"]): row
+            for row in body_rows
+            if isinstance(row, dict)
+        }
+        auxiliaries_by_pointer: dict[int, list[dict[str, object]]] = {}
+        for raw_auxiliary in auxiliary_rows:
+            if not isinstance(raw_auxiliary, dict):
+                _fail(f"{role} auxiliary VM row is malformed")
+            _callback_is_clear(raw_auxiliary, label=f"{role} auxiliary")
+            auxiliaries_by_pointer.setdefault(
+                int(raw_auxiliary["enemy_pointer"]),
+                [],
+            ).append(raw_auxiliary)
+        if not (
+            len(main_rows)
+            == len(callbacks_by_pointer)
+            == len(periodic_by_pointer)
+            == len(emission_by_pointer)
+            == len(motion_by_pointer)
+            == len(phase_by_pointer)
+            == len(body_by_pointer)
+        ):
+            _fail(f"{role} active source join is incomplete")
+        for raw_main in main_rows:
+            if not isinstance(raw_main, list) or len(raw_main) != 9:
+                _fail(f"{role} main VM row layout drifted")
+            (
+                slot,
+                enemy_pointer,
+                _enemy_flags,
+                instruction_pointer,
+                timer_fraction_bits,
+                timer_elapsed,
+                integer_locals,
+                float_local_bits,
+                scratch_integers,
+            ) = raw_main
+            pointer = int(enemy_pointer)
+            _callback_is_clear(
+                callbacks_by_pointer[pointer],
+                label=f"{role} main",
+            )
+            periodic = periodic_by_pointer[pointer]
+            if bool(periodic.get("enabled")):
+                _fail(
+                    f"{role}:{int(slot)} active periodic emitter is unsupported"
+                )
+            if int(timer_fraction_bits) != 0:
+                _fail(f"{role}:{int(slot)} main VM has fractional time")
+            main = _VmState(
+                instruction_offset=int(instruction_pointer) - ecl_base,
+                timer_elapsed=int(timer_elapsed),
+                integer_locals=_point_integer_locals(
+                    integer_locals,
+                    label=f"{role}:{int(slot)} main integer locals",
+                ),
+                float_locals=_point_float_locals(
+                    float_local_bits,
+                    label=f"{role}:{int(slot)} main float locals",
+                ),
+                scratch_integers=[int(value) for value in scratch_integers],
+            )
+            auxiliaries: list[_VmState | None] = [None] * _AUXILIARY_SLOT_COUNT
+            for auxiliary in auxiliaries_by_pointer.get(pointer, []):
+                auxiliary_index = int(auxiliary["auxiliary_index"])
+                if not 0 <= auxiliary_index < _AUXILIARY_SLOT_COUNT:
+                    _fail(f"{role}:{int(slot)} auxiliary index is invalid")
+                if auxiliaries[auxiliary_index] is not None:
+                    _fail(f"{role}:{int(slot)} auxiliary slot is duplicated")
+                if int(auxiliary.get("call_depth", -1)) != 0:
+                    _fail(
+                        f"{role}:{int(slot)} auxiliary saved stack is unsupported"
+                    )
+                state = auxiliary.get("state")
+                if not isinstance(state, dict):
+                    _fail(f"{role}:{int(slot)} auxiliary state is absent")
+                if (
+                    int(state.get("timer_fraction_bits", -1)) != 0
+                    or int(state.get("timer_previous", -2)) != -1
+                ):
+                    _fail(
+                        f"{role}:{int(slot)} auxiliary timer state is unsupported"
+                    )
+                local = state.get("local_projection")
+                if not isinstance(local, dict):
+                    _fail(
+                        f"{role}:{int(slot)} auxiliary locals are absent"
+                    )
+                auxiliaries[auxiliary_index] = _VmState(
+                    instruction_offset=(
+                        int(state["instruction_pointer"]) - ecl_base
+                    ),
+                    timer_elapsed=int(state["timer_elapsed"]),
+                    integer_locals=_point_integer_locals(
+                        local.get("integer_locals"),
+                        label=(
+                            f"{role}:{int(slot)} auxiliary integer locals"
+                        ),
+                    ),
+                    float_locals=_point_float_locals(
+                        local.get("float_local_bits"),
+                        label=(
+                            f"{role}:{int(slot)} auxiliary float locals"
+                        ),
+                    ),
+                    scratch_integers=[
+                        int(value)
+                        for value in local.get("scratch_integers", [])
+                    ],
+                )
+            auxiliary_count += sum(
+                auxiliary is not None for auxiliary in auxiliaries
+            )
+            phase = phase_by_pointer[pointer]
+            thresholds = phase.get("health_thresholds")
+            if not isinstance(thresholds, list) or len(thresholds) != 4:
+                _fail(f"{role}:{int(slot)} phase threshold layout drifted")
+            phase_transition_armed = (
+                any(int(value) >= 0 for value in thresholds)
+                or int(phase.get("timeout_frame", -2)) >= 0
+            )
+            if phase_transition_armed:
+                _fail(
+                    f"{role}:{int(slot)} has an armed phase transition "
+                    "without integrated successor-source lowering"
+                )
+            body = body_by_pointer[pointer]
+            body_half_width = float(body["half_width"])
+            body_half_height = float(body["half_height"])
+            _finite(
+                (body_half_width, body_half_height),
+                label=f"{role}:{int(slot)} body geometry",
+            )
+            if body_half_width < 0.0 or body_half_height < 0.0:
+                _fail(f"{role}:{int(slot)} body geometry is negative")
+            sources.append(
+                _SourceState(
+                    identity=f"{role}:{int(slot)}:{pointer:#x}",
+                    enemy_pointer=pointer,
+                    motion=_motion_state(motion_by_pointer[pointer]),
+                    main=main,
+                    auxiliaries=auxiliaries,
+                    emission=emission_by_pointer[pointer],
+                    enemy_flags=int(body["flags"]),
+                    body_half_width=body_half_width,
+                    body_half_height=body_half_height,
+                    phase_transition_armed=False,
+                )
+            )
+    return sources, auxiliary_count
+
+
+def _variable_identifier(raw: int) -> int:
+    value = _float32(raw)
+    rounded = int(round(value))
+    if not math.isfinite(value) or abs(value - rounded) > 1.0e-4:
+        _fail(f"dynamic ECL float operand {value!r} is not a variable")
+    return rounded
+
+
+def _eval_float_operand(
+    raw: int,
+    *,
+    dynamic: bool,
+    vm: _VmState,
+    aim_angle: FloatInterval,
+) -> FloatInterval:
+    if not dynamic:
+        value = _float32(raw)
+        if not math.isfinite(value):
+            _fail("literal ECL float operand is non-finite")
+        return FloatInterval.point(value)
+    variable = _variable_identifier(raw)
+    if _FLOAT_LOCAL_FIRST <= variable <= _FLOAT_LOCAL_LAST:
+        return vm.float_locals[variable - _FLOAT_LOCAL_FIRST]
+    if variable == _RNG_UNIT_VARIABLE:
+        return FloatInterval(0.0, 1.0)
+    if variable == _RNG_SIGNED_UNIT_VARIABLE:
+        return FloatInterval(-1.0, 1.0)
+    if variable == _ANGLE_TO_PLAYER_VARIABLE:
+        return aim_angle
+    _fail(f"dynamic ECL float variable {variable} is unsupported")
+    raise AssertionError("unreachable")
+
+
+def _float_lvalue(raw: int) -> int:
+    variable = _variable_identifier(raw)
+    if not _FLOAT_LOCAL_FIRST <= variable <= _FLOAT_LOCAL_LAST:
+        _fail(f"ECL float lvalue {variable} is not a captured local")
+    return variable - _FLOAT_LOCAL_FIRST
+
+
+def _integer_lvalue(raw: int, vm: _VmState) -> tuple[list[int], int]:
+    variable = _signed_u32(raw)
+    if 10000 <= variable <= 10007:
+        return vm.integer_locals, variable - 10000
+    if 10036 <= variable <= 10039:
+        index = variable - 10036
+        if index >= len(vm.scratch_integers):
+            _fail("ECL scratch integer is absent")
+        return vm.scratch_integers, index
+    _fail(f"ECL integer lvalue {variable} is not a captured local")
+    raise AssertionError("unreachable")
+
+
+def _literal_integer(instruction: SubInstruction, index: int) -> int:
+    if instruction.parameter_mask & (1 << index):
+        _fail(
+            f"dynamic integer operand {index} at "
+            f"{instruction.offset:#x} is unsupported"
+        )
+    return _signed_u32(int(instruction.arguments[index]))
+
+
+def _literal_float(
+    instruction: SubInstruction,
+    index: int,
+) -> float:
+    if instruction.parameter_mask & (1 << index):
+        _fail(
+            f"dynamic movement operand {index} at "
+            f"{instruction.offset:#x} is unsupported"
+        )
+    value = _float32(int(instruction.arguments[index]))
+    if not math.isfinite(value):
+        _fail("movement operand is non-finite")
+    return value
+
+
+def _player_reachable_box(
+    *,
+    root_x: float,
+    root_y: float,
+    frame: int,
+) -> tuple[float, float, float, float]:
+    reach = _PLAYER_MAX_AXIS_SPEED * frame
+    return (
+        max(8.0, root_x - reach),
+        min(376.0, root_x + reach),
+        max(16.0, root_y - reach),
+        min(432.0, root_y + reach),
+    )
+
+
+def _minimal_angle_interval(angles: list[float]) -> FloatInterval:
+    normalized = sorted(angle % _TWO_PI for angle in angles)
+    if len(normalized) == 1:
+        return FloatInterval.point(normalized[0])
+    gaps = [
+        (
+            (normalized[(index + 1) % len(normalized)] - normalized[index])
+            % _TWO_PI,
+            index,
+        )
+        for index in range(len(normalized))
+    ]
+    _gap, index = max(gaps)
+    start = normalized[(index + 1) % len(normalized)]
+    end = normalized[index]
+    if end < start:
+        end += _TWO_PI
+    return FloatInterval(start, end)
+
+
+def _aim_interval(
+    *,
+    source_x: FloatInterval,
+    source_y: FloatInterval,
+    root_player_x: float,
+    root_player_y: float,
+    frame: int,
+) -> FloatInterval:
+    left, right, top, bottom = _player_reachable_box(
+        root_x=root_player_x,
+        root_y=root_player_y,
+        frame=frame,
+    )
+    if (
+        source_x.lower <= right
+        and source_x.upper >= left
+        and source_y.lower <= bottom
+        and source_y.upper >= top
+    ):
+        return FloatInterval(-math.pi, math.pi)
+    return _minimal_angle_interval(
+        [
+            math.atan2(player_y - enemy_y, player_x - enemy_x)
+            for enemy_x in (source_x.lower, source_x.upper)
+            for enemy_y in (source_y.lower, source_y.upper)
+            for player_x in (left, right)
+            for player_y in (top, bottom)
+        ]
+    )
+
+
+def _template_geometry(
+    payload: dict[str, object],
+    bullet_type: int,
+) -> tuple[float, float]:
+    geometry = payload.get("bullet_template_geometry")
+    rows = _rows(geometry, label="bullet template geometry")
+    matches = [
+        row
+        for row in rows
+        if isinstance(row, dict) and int(row.get("type", -1)) == bullet_type
+    ]
+    if len(matches) != 1:
+        _fail(f"bullet type {bullet_type} has no unique template geometry")
+    half_width = float(matches[0]["half_width"])
+    half_height = float(matches[0]["half_height"])
+    _finite((half_width, half_height), label="bullet template geometry")
+    if half_width < 0.0 or half_height < 0.0:
+        _fail("bullet template half-extent is negative")
+    return half_width, half_height
+
+
+def _direct_fire_events(
+    *,
+    source: _SourceState,
+    instruction: SubInstruction,
+    vm: _VmState,
+    frame: int,
+    aim_angle: FloatInterval,
+    payload: dict[str, object],
+) -> tuple[FutureDirectFire, ...]:
+    if not source.motion.supported:
+        _fail(
+            f"{source.identity} emits from unsupported movement state "
+            f"{source.motion.movement_state}"
+        )
+    if len(instruction.arguments) != 8:
+        _fail(f"direct fire at {instruction.offset:#x} argument layout drifted")
+    packed_type_color = int(instruction.arguments[0])
+    if instruction.parameter_mask & 0x03:
+        _fail("dynamic direct-fire type/color is unsupported")
+    bullet_type = struct.unpack("<h", struct.pack("<H", packed_type_color & 0xFFFF))[0]
+    count1 = struct.unpack(
+        "<h",
+        struct.pack("<H", int(instruction.arguments[1]) & 0xFFFF),
+    )[0]
+    count2 = struct.unpack(
+        "<h",
+        struct.pack("<H", int(instruction.arguments[2]) & 0xFFFF),
+    )[0]
+    if instruction.parameter_mask & 0x0C:
+        _fail("dynamic direct-fire count is unsupported")
+    if count1 <= 0 or count2 <= 0:
+        _fail("future direct-fire count is not positive")
+    speed1 = _eval_float_operand(
+        int(instruction.arguments[3]),
+        dynamic=bool(instruction.parameter_mask & 0x10),
+        vm=vm,
+        aim_angle=aim_angle,
+    )
+    speed2 = _eval_float_operand(
+        int(instruction.arguments[4]),
+        dynamic=bool(instruction.parameter_mask & 0x20),
+        vm=vm,
+        aim_angle=aim_angle,
+    )
+    angle1 = _eval_float_operand(
+        int(instruction.arguments[5]),
+        dynamic=bool(instruction.parameter_mask & 0x40),
+        vm=vm,
+        aim_angle=aim_angle,
+    )
+    angle2 = _eval_float_operand(
+        int(instruction.arguments[6]),
+        dynamic=bool(instruction.parameter_mask & 0x80),
+        vm=vm,
+        aim_angle=aim_angle,
+    )
+    original_flags = int(instruction.arguments[7])
+    rank_count = source.emission.get("rank_count_interval")
+    rank_speed = source.emission.get("rank_speed_interval")
+    if (
+        not isinstance(rank_count, list)
+        or len(rank_count) != 4
+        or any(int(value) != 0 for value in rank_count)
+    ):
+        _fail("nonzero rank count interpolation requires exact count lowering")
+    if not isinstance(rank_speed, list) or len(rank_speed) != 2:
+        _fail("rank speed interpolation layout drifted")
+    rank_adjustment = FloatInterval(
+        min(float(rank_speed[0]), float(rank_speed[1])),
+        max(float(rank_speed[0]), float(rank_speed[1])),
+    )
+    speed1 = speed1.add(rank_adjustment)
+    speed2 = speed2.add(rank_adjustment)
+    if speed1.lower < 0.0 or speed2.lower < 0.0:
+        _fail("future direct-fire speed interval crosses negative")
+    descriptor = source.emission.get("descriptor")
+    if not isinstance(descriptor, dict):
+        _fail("source emission descriptor is absent")
+    transform_hex = descriptor.get("transform_program_hex")
+    if not isinstance(transform_hex, str):
+        _fail("source transform program is absent")
+    try:
+        transform_zero = not any(bytes.fromhex(transform_hex))
+    except ValueError as error:
+        raise FutureSourceClosureError(
+            "source transform program is malformed"
+        ) from error
+    emission_offset = source.emission.get("emission_offset")
+    if not isinstance(emission_offset, list) or len(emission_offset) != 3:
+        _fail("source emission offset is absent")
+    _finite(emission_offset, label="source emission offset")
+    origin_x = source.motion.world_x_interval.add(
+        FloatInterval.point(float(emission_offset[0]))
+    )
+    origin_y = source.motion.world_y_interval.add(
+        FloatInterval.point(float(emission_offset[1]))
+    )
+    if source.precompose_origin_x is not None:
+        origin_x = FloatInterval(
+            min(origin_x.lower, source.precompose_origin_x.lower),
+            max(origin_x.upper, source.precompose_origin_x.upper),
+        )
+    if source.precompose_origin_y is not None:
+        origin_y = FloatInterval(
+            min(origin_y.lower, source.precompose_origin_y.lower),
+            max(origin_y.upper, source.precompose_origin_y.upper),
+        )
+    half_width, half_height = _template_geometry(payload, bullet_type)
+    return (
+        FutureDirectFire(
+            source=(
+                f"{source.identity}:pc={instruction.offset:#x}:"
+                f"frame={frame}"
+            ),
+            activation_frames=(frame,),
+            origin_x=origin_x,
+            origin_y=origin_y,
+            mode=int(instruction.opcode) - 0x60,
+            count1=count1,
+            count2=count2,
+            speed1=speed1,
+            speed2=speed2,
+            angle1=angle1,
+            angle2=angle2,
+            aim_angle=FloatInterval.point(0.0),
+            half_width=half_width,
+            half_height=half_height,
+            original_flags=original_flags,
+            transform_program_zero=transform_zero,
+        ),
+    )
+
+
+def _prove_child_silent(
+    ecl: EclFile,
+    *,
+    subroutine_index: int,
+    remaining_horizon: int,
+) -> None:
+    if not 0 <= subroutine_index < len(ecl.subroutines):
+        _fail(f"child subroutine {subroutine_index} is out of range")
+    allowed = frozenset((0x01, 0x36, 0x49, 0x4A, 0x4D, 0x50, 0x51, 0x53))
+    subroutine = ecl.subroutines[subroutine_index]
+    for instruction in subroutine.instructions:
+        if instruction.time > remaining_horizon:
+            continue
+        if int(instruction.opcode) not in allowed:
+            _fail(
+                f"child sub{subroutine_index} reaches unsupported opcode "
+                f"{instruction.opcode:#x} at {instruction.offset:#x}"
+            )
+        # 0x5C constructs the child synchronously, then clears contact bit
+        # 0x4.  A later flag mutation could re-enable contact and is rejected.
+        if instruction.time > 0 and int(instruction.opcode) in (0x4F, 0x50, 0x51):
+            _fail(
+                f"child sub{subroutine_index} mutates contact flags after spawn"
+            )
+
+
+def _execute_auxiliary(
+    *,
+    source: _SourceState,
+    vm: _VmState,
+    instructions: dict[int, SubInstruction],
+    difficulty_mask: int,
+    frame: int,
+    aim_angle: FloatInterval,
+    payload: dict[str, object],
+) -> tuple[FutureDirectFire, ...]:
+    events: list[FutureDirectFire] = []
+    visited: set[tuple[int, int]] = set()
+    for _ in range(_MAX_INSTRUCTIONS_PER_UPDATE):
+        key = (vm.instruction_offset, vm.timer_elapsed)
+        if key in visited:
+            _fail(f"{source.identity} auxiliary loops within one update")
+        visited.add(key)
+        instruction = instructions.get(vm.instruction_offset)
+        if instruction is None:
+            _fail(f"{source.identity} auxiliary PC is outside static ECL")
+        if instruction.time != vm.timer_elapsed:
+            _fail(
+                f"{source.identity} auxiliary timer/PC contract drifted"
+            )
+        opcode = int(instruction.opcode)
+        if not _eligible(instruction, difficulty_mask):
+            vm.instruction_offset += int(instruction.size)
+            continue
+        if opcode == 0x04:
+            if len(instruction.arguments) != 2:
+                _fail("auxiliary jump argument layout drifted")
+            vm.timer_elapsed = _signed_u32(int(instruction.arguments[0]))
+            vm.instruction_offset += _signed_u32(
+                int(instruction.arguments[1])
+            )
+            continue
+        if opcode == 0x02:
+            if len(instruction.arguments) != 1:
+                _fail("auxiliary timer reset argument layout drifted")
+            variable = int(instruction.arguments[0])
+            if not instruction.parameter_mask & 1:
+                _fail("auxiliary timer reset does not reference captured scratch")
+            if not 10036 <= variable <= 10039:
+                _fail("auxiliary timer reset variable is unsupported")
+            index = variable - 10036
+            if index >= len(vm.scratch_integers):
+                _fail("auxiliary scratch integer is absent")
+            reset_value = vm.scratch_integers[index]
+            if reset_value != 2:
+                _fail("auxiliary timer reset is not native two-tick wait")
+            vm.instruction_offset += int(instruction.size)
+            # Native opcode 0x02 sets two, the interpreter's paired timer
+            # decrements and final advance leave the next root at elapsed zero.
+            vm.timer_elapsed = 0
+            return tuple(events)
+        if opcode == 0x06:
+            if len(instruction.arguments) != 2:
+                _fail("auxiliary integer assignment argument layout drifted")
+            values, destination = _integer_lvalue(
+                int(instruction.arguments[0]),
+                vm,
+            )
+            values[destination] = _literal_integer(instruction, 1)
+        elif opcode == 0x07:
+            if len(instruction.arguments) != 2:
+                _fail("auxiliary float assignment argument layout drifted")
+            destination = _float_lvalue(int(instruction.arguments[0]))
+            vm.float_locals[destination] = _eval_float_operand(
+                int(instruction.arguments[1]),
+                dynamic=bool(instruction.parameter_mask & 0x02),
+                vm=vm,
+                aim_angle=aim_angle,
+            )
+        elif opcode == 0x1B:
+            if len(instruction.arguments) != 3:
+                _fail("auxiliary multiply argument layout drifted")
+            destination = _float_lvalue(int(instruction.arguments[0]))
+            left = _eval_float_operand(
+                int(instruction.arguments[1]),
+                dynamic=bool(instruction.parameter_mask & 0x02),
+                vm=vm,
+                aim_angle=aim_angle,
+            )
+            right = _eval_float_operand(
+                int(instruction.arguments[2]),
+                dynamic=bool(instruction.parameter_mask & 0x04),
+                vm=vm,
+                aim_angle=aim_angle,
+            )
+            vm.float_locals[destination] = left.multiply(right)
+        elif opcode == 0x0F:
+            if len(instruction.arguments) != 2:
+                _fail("auxiliary add argument layout drifted")
+            destination = _float_lvalue(int(instruction.arguments[0]))
+            value = _eval_float_operand(
+                int(instruction.arguments[1]),
+                dynamic=bool(instruction.parameter_mask & 0x02),
+                vm=vm,
+                aim_angle=aim_angle,
+            )
+            vm.float_locals[destination] = (
+                vm.float_locals[destination].add(value)
+            )
+        elif opcode in _DIRECT_FIRE_OPCODES:
+            events.extend(
+                _direct_fire_events(
+                    source=source,
+                    instruction=instruction,
+                    vm=vm,
+                    frame=frame,
+                    aim_angle=aim_angle,
+                    payload=payload,
+                )
+            )
+        else:
+            _fail(
+                f"{source.identity} auxiliary reaches unsupported opcode "
+                f"{opcode:#x} at {instruction.offset:#x}"
+            )
+        vm.instruction_offset += int(instruction.size)
+    _fail(f"{source.identity} auxiliary exceeded its instruction bound")
+    return ()
+
+
+def _subroutine_start(ecl: EclFile, subroutine_index: int) -> int:
+    if not 0 <= subroutine_index < len(ecl.subroutines):
+        _fail(f"ECL subroutine {subroutine_index} is out of range")
+    instructions = ecl.subroutines[subroutine_index].instructions
+    if not instructions:
+        _fail(f"ECL subroutine {subroutine_index} is empty")
+    return int(instructions[0].offset)
+
+
+def _clone_vm(vm: _VmState) -> _VmState:
+    return _VmState(
+        instruction_offset=vm.instruction_offset,
+        timer_elapsed=vm.timer_elapsed,
+        integer_locals=list(vm.integer_locals),
+        float_locals=list(vm.float_locals),
+        scratch_integers=list(vm.scratch_integers),
+        stopped=vm.stopped,
+    )
+
+
+def _start_auxiliary(
+    *,
+    source: _SourceState,
+    instruction: SubInstruction,
+    ecl: EclFile,
+) -> None:
+    if len(instruction.arguments) != 2:
+        _fail("start auxiliary argument layout drifted")
+    slot = _literal_integer(instruction, 0)
+    subroutine = _literal_integer(instruction, 1)
+    if not 0 <= slot < _AUXILIARY_SLOT_COUNT:
+        _fail(f"auxiliary slot {slot} is out of range")
+    if subroutine < 0:
+        source.auxiliaries[slot] = None
+        return
+    # Native 0x87 allocates a zeroed context, starts the selected subroutine,
+    # then copies the parent VM local block into the new active VM.
+    vm = _clone_vm(source.main)
+    vm.instruction_offset = _subroutine_start(ecl, subroutine)
+    vm.timer_elapsed = 0
+    vm.stopped = False
+    source.auxiliaries[slot] = vm
+
+
+def _apply_enemy_flag_opcode(
+    source: _SourceState,
+    instruction: SubInstruction,
+) -> None:
+    if len(instruction.arguments) != 1:
+        _fail("enemy flag opcode argument layout drifted")
+    value = _literal_integer(instruction, 0)
+    opcode = int(instruction.opcode)
+    if opcode == 0x4F:
+        mappings = (
+            (0x01, 0x40, False),
+            (0x02, 0x04, False),
+            (0x04, 0x08, False),
+            (0x08, 0x10, True),
+            (0x10, 0x10000000, True),
+        )
+        for input_bit, flag_bit, direct in mappings:
+            enabled = bool(value & input_bit)
+            if not direct:
+                enabled = not enabled
+            if enabled:
+                source.enemy_flags |= flag_bit
+            else:
+                source.enemy_flags &= ~flag_bit
+        return
+    mappings = (
+        (0x01, 0x40),
+        (0x02, 0x04),
+        (0x04, 0x08),
+        (0x08, 0x10),
+        (0x10, 0x10000000),
+    )
+    for input_bit, flag_bit in mappings:
+        if not value & input_bit:
+            continue
+        if opcode == 0x50:
+            # Native "clear flags" inverts the last two behavior flags.
+            if input_bit in (0x08, 0x10):
+                source.enemy_flags |= flag_bit
+            else:
+                source.enemy_flags &= ~flag_bit
+        elif opcode == 0x51:
+            if input_bit in (0x08, 0x10):
+                source.enemy_flags &= ~flag_bit
+            else:
+                source.enemy_flags |= flag_bit
+        else:
+            raise AssertionError("unexpected enemy flag opcode")
+
+
+def _install_timed_polar_motion(
+    *,
+    source: _SourceState,
+    instruction: SubInstruction,
+    aim_angle: FloatInterval,
+) -> None:
+    if len(instruction.arguments) != 4:
+        _fail("timed polar movement argument layout drifted")
+    duration = _literal_integer(instruction, 0)
+    mode = _literal_integer(instruction, 1)
+    if duration <= 0 or not 0 <= mode <= 6:
+        _fail("timed polar movement duration/mode is unsupported")
+    if (
+        abs(source.motion.relative_x) > 1e-6
+        or abs(source.motion.relative_y) > 1e-6
+    ):
+        _fail(
+            "timed polar movement with a pre-existing relative offset "
+            "is unsupported"
+        )
+    angle = _eval_float_operand(
+        int(instruction.arguments[2]),
+        dynamic=bool(instruction.parameter_mask & 0x04),
+        vm=source.main,
+        aim_angle=aim_angle,
+    )
+    speed = _eval_float_operand(
+        int(instruction.arguments[3]),
+        dynamic=bool(instruction.parameter_mask & 0x08),
+        vm=source.main,
+        aim_angle=aim_angle,
+    )
+    if angle.lower != angle.upper or speed.lower != speed.upper:
+        _fail("timed polar movement requires point angle and speed")
+    start_x = (
+        source.precompose_world_x
+        if source.precompose_world_x is not None
+        else source.motion.world_x_interval
+    )
+    start_y = (
+        source.precompose_world_y
+        if source.precompose_world_y is not None
+        else source.motion.world_y_interval
+    )
+    displacement_x = math.cos(angle.lower) * speed.lower * duration
+    if source.motion.mirror_x:
+        displacement_x = -displacement_x
+    displacement_y = math.sin(angle.lower) * speed.lower * duration
+    motion = source.motion
+    motion.movement_state = 2
+    motion.supported = True
+    motion.timed_duration = duration
+    motion.timed_remaining = duration
+    motion.timed_mode = mode
+    motion.timed_start_x = 0.5 * (start_x.lower + start_x.upper)
+    motion.timed_start_y = 0.5 * (start_y.lower + start_y.upper)
+    motion.timed_displacement_x = displacement_x
+    motion.timed_displacement_y = displacement_y
+    motion.uncertainty_x = 0.5 * (start_x.upper - start_x.lower)
+    motion.uncertainty_y = 0.5 * (start_y.upper - start_y.lower)
+
+
+def _execute_main(
+    *,
+    source: _SourceState,
+    instructions: dict[int, SubInstruction],
+    difficulty_mask: int,
+    frame: int,
+    aim_angle: FloatInterval,
+    payload: dict[str, object],
+    ecl: EclFile,
+    remaining_horizon: int,
+) -> tuple[tuple[FutureDirectFire, ...], int]:
+    vm = source.main
+    if vm.stopped:
+        return (), 0
+    events: list[FutureDirectFire] = []
+    silent_children = 0
+    visited: set[tuple[int, int]] = set()
+    for _ in range(_MAX_INSTRUCTIONS_PER_UPDATE):
+        key = (vm.instruction_offset, vm.timer_elapsed)
+        if key in visited:
+            _fail(f"{source.identity} main loops within one update")
+        visited.add(key)
+        instruction = instructions.get(vm.instruction_offset)
+        if instruction is None:
+            _fail(f"{source.identity} main PC is outside static ECL")
+        if instruction.time > vm.timer_elapsed:
+            break
+        if instruction.time < vm.timer_elapsed:
+            _fail(f"{source.identity} main PC is behind its timer")
+        opcode = int(instruction.opcode)
+        if not _eligible(instruction, difficulty_mask):
+            vm.instruction_offset += int(instruction.size)
+            continue
+        if opcode == 0x01:
+            vm.stopped = True
+            break
+        if opcode == 0x04:
+            if len(instruction.arguments) != 2:
+                _fail("main jump argument layout drifted")
+            if instruction.parameter_mask:
+                _fail("main jump has dynamic operands")
+            vm.timer_elapsed = _signed_u32(
+                int(instruction.arguments[0])
+            )
+            vm.instruction_offset += _signed_u32(
+                int(instruction.arguments[1])
+            )
+            continue
+        if opcode in (0x00, 0x03, 0x36, 0x39, 0x7C):
+            pass
+        elif opcode == 0x07:
+            if len(instruction.arguments) != 2:
+                _fail("main float assignment argument layout drifted")
+            destination = _float_lvalue(int(instruction.arguments[0]))
+            vm.float_locals[destination] = _eval_float_operand(
+                int(instruction.arguments[1]),
+                dynamic=bool(instruction.parameter_mask & 0x02),
+                vm=vm,
+                aim_angle=aim_angle,
+            )
+        elif opcode == 0x41:
+            if len(instruction.arguments) != 2:
+                _fail("set_velocity_polar argument layout drifted")
+            source.motion.angle = _literal_float(instruction, 0)
+            source.motion.speed = _literal_float(instruction, 1)
+            source.motion.movement_state = 1
+            source.motion.supported = True
+            source.motion.timed_duration = 0
+            source.motion.timed_remaining = 0
+        elif opcode == 0x42:
+            _install_timed_polar_motion(
+                source=source,
+                instruction=instruction,
+                aim_angle=aim_angle,
+            )
+        elif opcode == 0x47:
+            if len(instruction.arguments) != 1:
+                _fail("set_speed_acceleration argument layout drifted")
+            source.motion.speed_acceleration = _literal_float(instruction, 0)
+        elif opcode == 0x4A:
+            if len(instruction.arguments) != 3:
+                _fail("set orbit motion argument layout drifted")
+            duration = _literal_integer(instruction, 0)
+            if duration <= 0:
+                _fail("set orbit motion duration is nonpositive")
+            angular_velocity = _eval_float_operand(
+                int(instruction.arguments[1]),
+                dynamic=bool(instruction.parameter_mask & 0x02),
+                vm=vm,
+                aim_angle=aim_angle,
+            )
+            radius_acceleration = _eval_float_operand(
+                int(instruction.arguments[2]),
+                dynamic=bool(instruction.parameter_mask & 0x04),
+                vm=vm,
+                aim_angle=aim_angle,
+            )
+            if (
+                angular_velocity.lower != angular_velocity.upper
+                or radius_acceleration.lower != radius_acceleration.upper
+            ):
+                _fail("set orbit motion requires point-valued parameters")
+            source.motion.orbit_angular_velocity = (
+                angular_velocity.lower
+            )
+            source.motion.orbit_radius_acceleration = (
+                radius_acceleration.lower
+            )
+            source.motion.motion_duration = duration
+            source.motion.motion_timer_elapsed = duration
+            source.motion.movement_state = 3
+            source.motion.supported = True
+        elif opcode == 0x4D:
+            if len(instruction.arguments) != 2:
+                _fail("set hitbox argument layout drifted")
+            width = _eval_float_operand(
+                int(instruction.arguments[0]),
+                dynamic=bool(instruction.parameter_mask & 0x01),
+                vm=vm,
+                aim_angle=aim_angle,
+            )
+            height = _eval_float_operand(
+                int(instruction.arguments[1]),
+                dynamic=bool(instruction.parameter_mask & 0x02),
+                vm=vm,
+                aim_angle=aim_angle,
+            )
+            if width.lower < 0.0 or height.lower < 0.0:
+                _fail("enemy hitbox interval crosses negative")
+            source.body_half_width = 0.75 * width.upper
+            source.body_half_height = 0.75 * height.upper
+        elif opcode in (0x4F, 0x50, 0x51):
+            _apply_enemy_flag_opcode(source, instruction)
+        elif opcode == 0x5C:
+            if len(instruction.arguments) != 6:
+                _fail("0x5C child-spawn argument layout drifted")
+            child_subroutine = _signed_u32(int(instruction.arguments[0]))
+            _prove_child_silent(
+                ecl,
+                subroutine_index=child_subroutine,
+                remaining_horizon=remaining_horizon,
+            )
+            silent_children += 1
+        elif opcode in _DIRECT_FIRE_OPCODES:
+            events.extend(
+                _direct_fire_events(
+                    source=source,
+                    instruction=instruction,
+                    vm=vm,
+                    frame=frame,
+                    aim_angle=aim_angle,
+                    payload=payload,
+                )
+            )
+        elif opcode == 0x87:
+            _start_auxiliary(
+                source=source,
+                instruction=instruction,
+                ecl=ecl,
+            )
+        elif opcode == 0x8B:
+            if len(instruction.arguments) != 3:
+                _fail("spawn effect argument layout drifted")
+            effect_type = _literal_integer(instruction, 0)
+            effect_count = _literal_integer(instruction, 1)
+            _literal_integer(instruction, 2)
+            if effect_type not in _HOSTILITY_NEUTRAL_EFFECT_TYPES:
+                _fail(
+                    f"{source.identity} reaches unaudited effect type "
+                    f"{effect_type}"
+                )
+            if not 1 <= effect_count <= 512:
+                _fail(
+                    f"{source.identity} effect count is outside the "
+                    "audited pool bound"
+                )
+        elif opcode == 0xA0:
+            if len(instruction.arguments) != 1:
+                _fail("phase timer assignment argument layout drifted")
+            if source.phase_transition_armed:
+                _fail(
+                    f"{source.identity} phase timer write can reach an "
+                    "unlowered successor source"
+                )
+        else:
+            _fail(
+                f"{source.identity} main reaches unsupported opcode "
+                f"{opcode:#x} at {instruction.offset:#x}"
+            )
+        vm.instruction_offset += int(instruction.size)
+    else:
+        _fail(f"{source.identity} main exceeded its instruction bound")
+    if not vm.stopped:
+        vm.timer_elapsed += 1
+    return tuple(events), silent_children
+
+
+def _advance_motion(source: _SourceState) -> None:
+    motion = source.motion
+    if not motion.supported:
+        if any(auxiliary is not None for auxiliary in source.auxiliaries):
+            _fail(
+                f"{source.identity} active auxiliary uses unsupported "
+                f"movement state {motion.movement_state}"
+            )
+        source.precompose_origin_x = None
+        source.precompose_origin_y = None
+        source.precompose_world_x = None
+        source.precompose_world_y = None
+        return
+    if motion.movement_state == 0:
+        motion.velocity_x = 0.0
+        motion.velocity_y = 0.0
+        source.precompose_origin_x = None
+        source.precompose_origin_y = None
+        source.precompose_world_x = None
+        source.precompose_world_y = None
+        return
+    if motion.movement_state == 2:
+        if motion.timed_duration <= 0 or motion.timed_remaining <= 0:
+            _fail(f"{source.identity} timed movement state is malformed")
+        motion.timed_remaining -= 1
+        progress = 1.0 - (
+            float(motion.timed_remaining) / float(motion.timed_duration)
+        )
+        progress = max(0.0, progress)
+        if motion.timed_mode == 1:
+            eased = progress * progress
+        elif motion.timed_mode == 2:
+            eased = progress * progress * progress
+        elif motion.timed_mode == 3:
+            eased = progress * progress * progress * progress
+        elif motion.timed_mode == 4:
+            eased = 1.0 - (1.0 - progress) ** 2
+        elif motion.timed_mode == 5:
+            eased = 1.0 - (1.0 - progress) ** 3
+        elif motion.timed_mode == 6:
+            eased = 1.0 - (1.0 - progress) ** 4
+        else:
+            eased = progress
+        desired_x = (
+            motion.timed_start_x
+            + motion.timed_displacement_x * eased
+        )
+        desired_y = (
+            motion.timed_start_y
+            + motion.timed_displacement_y * eased
+        )
+        motion.velocity_x = desired_x - motion.base_x
+        motion.velocity_y = desired_y - motion.base_y
+        motion.base_x = desired_x
+        motion.base_y = desired_y
+        if motion.timed_remaining == 0:
+            motion.movement_state = 0
+            motion.velocity_x = 0.0
+            motion.velocity_y = 0.0
+        source.precompose_origin_x = None
+        source.precompose_origin_y = None
+        source.precompose_world_x = None
+        source.precompose_world_y = None
+        return
+    if motion.movement_state == 3:
+        motion.orbit_angle += motion.orbit_angular_velocity
+        motion.orbit_radius += motion.orbit_radius_acceleration
+        if not all(
+            math.isfinite(value)
+            for value in (motion.orbit_angle, motion.orbit_radius)
+        ):
+            _fail(f"{source.identity} orbit motion became non-finite")
+        motion.velocity_x = (
+            motion.orbit_center_x
+            + math.cos(motion.orbit_angle) * motion.orbit_radius
+            - motion.base_x
+        )
+        motion.velocity_y = (
+            motion.orbit_center_y
+            + math.sin(motion.orbit_angle) * motion.orbit_radius
+            - motion.base_y
+        )
+        motion.base_x += motion.velocity_x
+        motion.base_y += motion.velocity_y
+        if motion.motion_duration > 0:
+            motion.motion_timer_elapsed -= 1
+            if motion.motion_timer_elapsed <= 0:
+                motion.movement_state = 0
+                motion.velocity_x = 0.0
+                motion.velocity_y = 0.0
+        source.precompose_origin_x = None
+        source.precompose_origin_y = None
+        source.precompose_world_x = None
+        source.precompose_world_y = None
+        return
+    motion.angle += motion.angular_velocity
+    motion.speed += motion.speed_acceleration
+    if not all(math.isfinite(value) for value in (motion.angle, motion.speed)):
+        _fail(f"{source.identity} motion became non-finite")
+    velocity_x = math.cos(motion.angle) * motion.speed
+    if motion.mirror_x:
+        velocity_x = -velocity_x
+    motion.velocity_x = velocity_x
+    motion.velocity_y = math.sin(motion.angle) * motion.speed
+    motion.base_x += motion.velocity_x
+    motion.base_y += motion.velocity_y
+    source.precompose_origin_x = None
+    source.precompose_origin_y = None
+    source.precompose_world_x = None
+    source.precompose_world_y = None
+
+
+def _timeline_root(
+    payload: dict[str, object],
+    ecl: EclFile,
+) -> tuple[StageTimelineState, TimelineExternalState, int]:
+    runtime = payload["stage_timeline_runtime"]
+    assert isinstance(runtime, dict)
+    rows = _rows(runtime, label="stage timeline runtime")
+    if len(rows) != len(ecl.timelines):
+        _fail("timeline runtime/program count mismatch")
+    clocks: list[TimelineClock] = []
+    for timeline, raw_row in zip(ecl.timelines, rows, strict=True):
+        if not isinstance(raw_row, dict):
+            _fail("timeline runtime row is malformed")
+        current = raw_row.get("current_instruction")
+        if not isinstance(current, dict):
+            _fail("timeline current instruction is absent")
+        current_offset = int(current["static_offset"])
+        index = next(
+            (
+                candidate
+                for candidate, instruction in enumerate(timeline.instructions)
+                if instruction.offset == current_offset
+            ),
+            None,
+        )
+        if index is None:
+            _fail(f"timeline {timeline.index} PC is not static ECL")
+        if int(raw_row.get("fraction_bits", -1)) != 0:
+            _fail(f"timeline {timeline.index} has fractional time")
+        clocks.append(
+            TimelineClock(
+                instruction_index=index,
+                elapsed=int(raw_row["elapsed"]),
+                stopped=bool(current.get("terminal")),
+            )
+        )
+    external_record = runtime.get("external")
+    if not isinstance(external_record, dict):
+        _fail("timeline external state is absent")
+    indexed: list[IndexedEnemyView | None] = []
+    for row in external_record.get("indexed_enemies", []):
+        if row is None:
+            indexed.append(None)
+        elif isinstance(row, dict) and "field_2d30" in row:
+            indexed.append(
+                IndexedEnemyView(
+                    active=bool(row.get("active")),
+                    field_2d30=int(row["field_2d30"]),
+                )
+            )
+        else:
+            _fail("non-null indexed enemy lacks its timeline-visible state")
+    if len(indexed) != 8:
+        _fail("timeline indexed-enemy registry layout drifted")
+    compact = payload.get("compact_state")
+    if not isinstance(compact, dict):
+        _fail("compact RNG root is absent")
+    state = StageTimelineState(
+        clocks=tuple(clocks),
+        markers=tuple(
+            int(value) for value in external_record.get("markers", [])
+        ),
+        rng_state=int(compact["rng_state"]),
+        rng_calls=int(compact["rng_calls"]),
+        stage_flag_10=bool(runtime.get("stage_flag_10")),
+    )
+    external = TimelineExternalState(
+        stage_transition_busy=bool(
+            external_record.get("stage_transition_busy")
+        ),
+        spawn_suppressed=bool(external_record.get("spawn_suppressed")),
+        conditional_gate_blocked=bool(
+            external_record.get("conditional_gate_blocked")
+        ),
+        indexed_enemies=tuple(indexed),
+    )
+    return state, external, int(runtime["difficulty_mask"])
+
+
+def _timeline_external_variants(
+    root: TimelineExternalState,
+) -> tuple[TimelineExternalState, ...]:
+    active_indices = tuple(
+        index
+        for index, enemy in enumerate(root.indexed_enemies)
+        if enemy is not None and enemy.active
+    )
+    conditional_values = (
+        (False, True) if root.conditional_gate_blocked else (False,)
+    )
+    variants: list[TimelineExternalState] = []
+    for conditional, active_values in product(
+        conditional_values,
+        product((False, True), repeat=len(active_indices)),
+    ):
+        indexed = list(root.indexed_enemies)
+        for index, active in zip(
+            active_indices,
+            active_values,
+            strict=True,
+        ):
+            enemy = indexed[index]
+            assert enemy is not None
+            indexed[index] = replace(enemy, active=active)
+        variants.append(
+            TimelineExternalState(
+                # False is the hazard-maximal branch: both native gates
+                # consume the same timeline record, but only false can spawn.
+                stage_transition_busy=False,
+                spawn_suppressed=False,
+                conditional_gate_blocked=conditional,
+                indexed_enemies=tuple(indexed),
+            )
+        )
+    return tuple(variants)
+
+
+def _canonical_timeline_state(state: StageTimelineState) -> StageTimelineState:
+    # Gameplay RNG affects only randomized spawn X in the timeline scheduler.
+    # Spawn X is separately lifted to its whole static ECL interval, so carrying
+    # branch-specific RNG values would prevent a sound observation merge.
+    return replace(state, rng_state=0, rng_calls=0)
+
+
+def _normalized_spawn(spawn: TimelineSpawnRequest) -> TimelineSpawnRequest:
+    minimum_x = spawn.x if spawn.minimum_x is None else spawn.minimum_x
+    maximum_x = spawn.x if spawn.maximum_x is None else spawn.maximum_x
+    if not (
+        math.isfinite(minimum_x)
+        and math.isfinite(maximum_x)
+        and minimum_x <= maximum_x
+    ):
+        _fail("timeline spawn X interval is malformed")
+    return replace(
+        spawn,
+        x=0.5 * (minimum_x + maximum_x),
+        minimum_x=minimum_x,
+        maximum_x=maximum_x,
+    )
+
+
+def _lower_timeline_events(
+    payload: dict[str, object],
+    ecl: EclFile,
+    *,
+    horizon_frames: int,
+) -> tuple[dict[int, tuple[TimelineSpawnRequest, ...]], int]:
+    root_state, root_external, difficulty_mask = _timeline_root(payload, ecl)
+    if (
+        root_external.stage_transition_busy
+        or root_external.conditional_gate_blocked
+    ):
+        _fail(
+            "FRScreen transition/message clock blocking is active; physical "
+            "player-frame to enemy/timeline-frame lifting is not complete"
+        )
+    frontier = {_canonical_timeline_state(root_state)}
+    external_variants = _timeline_external_variants(root_external)
+    spawns_by_frame: dict[int, tuple[TimelineSpawnRequest, ...]] = {}
+    for frame in range(1, horizon_frames + 1):
+        next_frontier: set[StageTimelineState] = set()
+        frame_spawns: dict[TimelineSpawnRequest, None] = {}
+        for state in frontier:
+            for external in external_variants:
+                try:
+                    step = step_stage_timelines(
+                        ecl,
+                        state,
+                        active_difficulty_mask=difficulty_mask,
+                        external=external,
+                    )
+                except (IndexError, RuntimeError, ValueError) as error:
+                    raise FutureSourceClosureError(
+                        "timeline lowering failed at future frame "
+                        f"{frame}: {error}"
+                    ) from error
+                if step.engine_events:
+                    opcodes = sorted(
+                        {event.opcode for event in step.engine_events}
+                    )
+                    _fail(
+                        f"timeline reaches engine event(s) {opcodes} at "
+                        f"future frame {frame}; event effects are not lowered"
+                    )
+                if step.field_writes:
+                    _fail(
+                        "timeline reaches indexed enemy field write at "
+                        f"future frame {frame}; coupled enemy state is not "
+                        "lowered"
+                    )
+                for spawn in step.spawns:
+                    frame_spawns[_normalized_spawn(spawn)] = None
+                next_frontier.add(_canonical_timeline_state(step.state))
+        if len(next_frontier) > _MAX_TIMELINE_FRONTIER_STATES:
+            _fail(
+                "set-valued timeline frontier exceeds deterministic bound "
+                f"{_MAX_TIMELINE_FRONTIER_STATES}"
+            )
+        frontier = next_frontier
+        spawns_by_frame[frame] = tuple(frame_spawns)
+    return spawns_by_frame, horizon_frames
+
+
+def _timeline_source(
+    *,
+    template: _SourceState,
+    spawn: TimelineSpawnRequest,
+    frame: int,
+    serial: int,
+    ecl: EclFile,
+) -> _SourceState:
+    minimum_x = spawn.x if spawn.minimum_x is None else spawn.minimum_x
+    maximum_x = spawn.x if spawn.maximum_x is None else spawn.maximum_x
+    midpoint_x = 0.5 * (minimum_x + maximum_x)
+    uncertainty_x = 0.5 * (maximum_x - minimum_x)
+    motion = replace(
+        template.motion,
+        base_x=midpoint_x,
+        base_y=float(spawn.y),
+        uncertainty_x=uncertainty_x,
+        uncertainty_y=0.0,
+    )
+    main = _clone_vm(template.main)
+    main.instruction_offset = _subroutine_start(ecl, spawn.subroutine)
+    main.timer_elapsed = 0
+    main.stopped = False
+    emission = deepcopy(template.emission)
+    emission_offset = emission.get("emission_offset")
+    if not isinstance(emission_offset, list) or len(emission_offset) != 3:
+        _fail("timeline template emission offset is absent")
+    precompose_origin_x = template.motion.world_x_interval.add(
+        FloatInterval.point(float(emission_offset[0]))
+    )
+    precompose_origin_y = template.motion.world_y_interval.add(
+        FloatInterval.point(float(emission_offset[1]))
+    )
+    return _SourceState(
+        identity=(
+            f"timeline:{frame}:{serial}:timeline{spawn.timeline_index}:"
+            f"pc={spawn.instruction_offset:#x}:sub{spawn.subroutine}"
+        ),
+        enemy_pointer=-(serial + 1),
+        motion=motion,
+        main=main,
+        auxiliaries=[
+            _clone_vm(auxiliary) if auxiliary is not None else None
+            for auxiliary in template.auxiliaries
+        ],
+        emission=emission,
+        enemy_flags=template.enemy_flags,
+        body_half_width=template.body_half_width,
+        body_half_height=template.body_half_height,
+        phase_transition_armed=template.phase_transition_armed,
+        timeline_spawned=True,
+        spawn_frame=frame,
+        precompose_origin_x=precompose_origin_x,
+        precompose_origin_y=precompose_origin_y,
+        precompose_world_x=template.motion.world_x_interval,
+        precompose_world_y=template.motion.world_y_interval,
+    )
+
+
+def _execute_source_update(
+    *,
+    source: _SourceState,
+    frame: int,
+    root_player_x: float,
+    root_player_y: float,
+    instructions: dict[int, SubInstruction],
+    difficulty_mask: int,
+    payload: dict[str, object],
+    ecl: EclFile,
+    remaining_horizon: int,
+) -> tuple[tuple[FutureDirectFire, ...], int]:
+    if source.precompose_origin_x is not None:
+        aim_angle = FloatInterval(-math.pi, math.pi)
+    else:
+        aim_angle = _aim_interval(
+            source_x=source.motion.world_x_interval,
+            source_y=source.motion.world_y_interval,
+            root_player_x=root_player_x,
+            root_player_y=root_player_y,
+            frame=frame,
+        )
+    main_events, child_count = _execute_main(
+        source=source,
+        instructions=instructions,
+        difficulty_mask=difficulty_mask,
+        frame=frame,
+        aim_angle=aim_angle,
+        payload=payload,
+        ecl=ecl,
+        remaining_horizon=remaining_horizon,
+    )
+    events = list(main_events)
+    for auxiliary in source.auxiliaries:
+        if auxiliary is None:
+            continue
+        events.extend(
+            _execute_auxiliary(
+                source=source,
+                vm=auxiliary,
+                instructions=instructions,
+                difficulty_mask=difficulty_mask,
+                frame=frame,
+                aim_angle=aim_angle,
+                payload=payload,
+            )
+        )
+    return tuple(events), child_count
+
+
+def _analyze(
+    payload: dict[str, object],
+    ecl: EclFile,
+    *,
+    horizon_frames: int,
+) -> tuple[
+    tuple[FutureDirectFire, ...],
+    tuple[AabbTrajectoryHazard, ...],
+    int,
+    int,
+    int,
+    int,
+    int,
+]:
+    if str(payload.get("schema")) != _PROJECTION_SCHEMA:
+        _fail(
+            f"future source closure requires {_PROJECTION_SCHEMA}, got "
+            f"{payload.get('schema')!r}"
+        )
+    if horizon_frames < 0:
+        _fail("future source horizon is negative")
+    compact = payload.get("compact_state")
+    if not isinstance(compact, dict):
+        _fail("future source compact root is absent")
+    if compact.get("spell_id") is not None:
+        _fail("ordinary future source closure received an active spell")
+    if int(compact.get("time_scale_bits", -1)) != _FLOAT32_ONE_BITS:
+        _fail("future source closure currently requires exact unit time scale")
+    player_x = float(compact["player_x"])
+    player_y = float(compact["player_y"])
+    _finite((player_x, player_y), label="future source player root")
+    ecl_base, difficulty_mask = _runtime_program_identity(payload, ecl)
+    spawns_by_frame, timeline_steps = _lower_timeline_events(
+        payload,
+        ecl,
+        horizon_frames=horizon_frames,
+    )
+    sources, auxiliary_count = _build_sources(payload, ecl_base=ecl_base)
+    if not sources:
+        _fail("manager template source is absent")
+    template = sources[0]
+    instructions = _instruction_map(ecl)
+    events: list[FutureDirectFire] = []
+    future_body_samples: dict[str, list[AabbHazard | None]] = {}
+    silent_children = 0
+    timeline_spawn_count = 0
+    for frame in range(1, horizon_frames + 1):
+        for spawn in spawns_by_frame.get(frame, ()):
+            source = _timeline_source(
+                template=template,
+                spawn=spawn,
+                frame=frame,
+                serial=timeline_spawn_count,
+                ecl=ecl,
+            )
+            timeline_spawn_count += 1
+            future_body_samples[source.identity] = [None] * (
+                horizon_frames + 1
+            )
+            # enemy_spawn_from_timeline runs the new ECL VM once immediately.
+            # enemy_manager_update then reaches the allocated slot and performs
+            # the ordinary VM update a second time in this same physical frame.
+            bootstrap_events, child_count = _execute_source_update(
+                source=source,
+                frame=frame,
+                root_player_x=player_x,
+                root_player_y=player_y,
+                instructions=instructions,
+                difficulty_mask=difficulty_mask,
+                payload=payload,
+                ecl=ecl,
+                remaining_horizon=horizon_frames - frame,
+            )
+            events.extend(bootstrap_events)
+            silent_children += child_count
+            sources.append(source)
+        for source in sources:
+            source_events, child_count = _execute_source_update(
+                source=source,
+                frame=frame,
+                root_player_x=player_x,
+                root_player_y=player_y,
+                instructions=instructions,
+                difficulty_mask=difficulty_mask,
+                payload=payload,
+                ecl=ecl,
+                remaining_horizon=horizon_frames - frame,
+            )
+            events.extend(source_events)
+            silent_children += child_count
+            _advance_motion(source)
+            if source.timeline_spawned and source.enemy_flags & 0x04:
+                samples = future_body_samples[source.identity]
+                samples[frame] = AabbHazard(
+                    x=source.motion.world_x,
+                    y=source.motion.world_y,
+                    half_width=(
+                        source.body_half_width
+                        + source.motion.uncertainty_x
+                    ),
+                    half_height=(
+                        source.body_half_height
+                        + source.motion.uncertainty_y
+                    ),
+                )
+    body_trajectories = tuple(
+        AabbTrajectoryHazard(samples=tuple(samples))
+        for samples in future_body_samples.values()
+        if any(sample is not None for sample in samples)
+    )
+    auxiliary_count = sum(
+        auxiliary is not None
+        for source in sources
+        for auxiliary in source.auxiliaries
+    )
+    return (
+        tuple(events),
+        body_trajectories,
+        len(sources),
+        auxiliary_count,
+        silent_children,
+        timeline_steps,
+        timeline_spawn_count,
+    )
+
+
+def project_ordinary_future_sources(
+    payload: dict[str, object],
+    ecl: EclFile,
+    *,
+    horizon_frames: int,
+) -> OrdinaryFutureSourceClosure:
+    """Return complete consumed hazards or one fail-closed UNKNOWN slab."""
+
+    compact = payload.get("compact_state")
+    root_frame = (
+        int(compact.get("manager_frame", 0))
+        if isinstance(compact, dict)
+        else 0
+    )
+    try:
+        (
+            events,
+            aabb_trajectories,
+            source_count,
+            auxiliary_count,
+            silent_child_count,
+            timeline_steps,
+            timeline_spawn_count,
+        ) = _analyze(payload, ecl, horizon_frames=horizon_frames)
+    except (FutureSourceClosureError, KeyError, TypeError, ValueError) as error:
+        projection = unknown_future_hazard_projection(
+            root_frame=root_frame,
+            horizon_frames=horizon_frames,
+            reason=str(error),
+            source_semantics_version=(
+                ORDINARY_FUTURE_SOURCE_SEMANTICS_VERSION
+            ),
+        )
+        return OrdinaryFutureSourceClosure(
+            projection=projection,
+            direct_fire_events=(),
+            source_count=0,
+            auxiliary_count=0,
+            silent_child_count=0,
+            timeline_steps=0,
+            timeline_spawn_count=0,
+        )
+    projection = complete_future_hazard_projection(
+        root_frame=root_frame,
+        horizon_frames=horizon_frames,
+        events=events,
+        aabb_trajectories=aabb_trajectories,
+        source_semantics_version=ORDINARY_FUTURE_SOURCE_SEMANTICS_VERSION,
+    )
+    return OrdinaryFutureSourceClosure(
+        projection=projection,
+        direct_fire_events=events,
+        source_count=source_count,
+        auxiliary_count=auxiliary_count,
+        silent_child_count=silent_child_count,
+        timeline_steps=timeline_steps,
+        timeline_spawn_count=timeline_spawn_count,
+    )
+
+
+__all__ = [
+    "ORDINARY_FUTURE_SOURCE_SEMANTICS_VERSION",
+    "FutureSourceClosureError",
+    "OrdinaryFutureSourceClosure",
+    "project_ordinary_future_sources",
+]

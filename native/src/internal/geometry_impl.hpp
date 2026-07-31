@@ -75,6 +75,30 @@ int touhou_native_impl_aabb_trajectory_clearance_v1(
     float* inout
 );
 
+int touhou_native_impl_annular_sector_trajectory_clearance_v1(
+    float x_start,
+    float x_step,
+    int column_count,
+    float y_start,
+    float y_step,
+    int row_count,
+    int frame_count,
+    float player_radius,
+    const std::int32_t* frame_offsets,
+    const double* origin_x,
+    const double* origin_y,
+    const double* minimum_angle,
+    const double* maximum_angle,
+    const double* minimum_radius,
+    const double* maximum_radius,
+    const double* half_extent_radius,
+    const double* origin_uncertainty,
+    const double* base_uncertainty,
+    const double* uncertainty_per_frame,
+    int sample_count,
+    float* inout
+);
+
 int touhou_native_impl_piecewise_aabb_clearance_v1(
     float x_start,
     float x_step,

@@ -51,12 +51,15 @@ from th08_live.sensor import (
     LASER_STRIDE,
 )
 from th08_ecl_runtime import EclInstructionCache, ENEMY_MAIN_ECL_VM_OFFSET
-from th08_native_future_body_root import TH08_TIMELINE_RUNTIME_BASE
+from th08_native_future_body_root import (
+    TH08_ENEMY_MANAGER_TEMPLATE_BASE,
+    TH08_TIMELINE_RUNTIME_BASE,
+)
 from th08_runtime.game_state import ADDR_PLAYER
 
 
 COLLISION_CONTROL_PROJECTION_SCHEMA = (
-    "th08-native-snapshot-collision-control-projection-v7"
+    "th08-native-snapshot-collision-control-projection-v12"
 )
 
 # Revalidated in bullet_manager_update (0x00431240).  These two adjacent
@@ -99,6 +102,54 @@ ENEMY_PERIODIC_EMISSION_DESCRIPTOR_OFFSET = 0x3034
 ENEMY_PERIODIC_EMISSION_DESCRIPTOR_SIZE = 0x2C
 ENEMY_PERIODIC_EMISSION_PERIOD_OFFSET = 0x3060
 ENEMY_PERIODIC_EMISSION_TIMER_OFFSET = 0x3064
+
+# Revalidated in enemy_ecl_emit_bullets (0x00422720).  Direct fire adds this
+# source-local vector to enemy+0x2D88, applies the four rank fields below in
+# non-spell play, and copies the descriptor's 18x24-byte transform program to
+# every allocated bullet.
+ENEMY_EMISSION_OFFSET_OFFSET = 0x2DB8
+ENEMY_RANK_SPEED_INTERVAL_OFFSET = 0x2DEC
+ENEMY_RANK_COUNT_INTERVAL_OFFSET = 0x2DF4
+ENEMY_EMISSION_DESCRIPTOR_OFFSET = 0x2E24
+ENEMY_EMISSION_DESCRIPTOR_SIZE = 0x214
+ENEMY_EMISSION_TRANSFORM_PROGRAM_OFFSET = 0x20
+ENEMY_EMISSION_TRANSFORM_PROGRAM_SIZE = 18 * 24
+ENEMY_MINIMUM_FIRE_DISTANCE_SQUARED_OFFSET = 0x3350
+ENEMY_HEALTH_TRANSITION_THRESHOLDS_OFFSET = 0x3358
+ENEMY_HEALTH_TRANSITION_COUNT = 4
+ENEMY_TIMEOUT_TRANSITION_FRAME_OFFSET = 0x3378
+ENEMY_TIMEOUT_TRANSITION_SUBROUTINE_OFFSET = 0x337C
+
+# Revalidated in enemy_ecl_vm_step (0x004184B0), enemy_motion_update
+# (0x00422C40), and the internal-position integrator (0x0042DEB0).
+# Direct fire observes the composed world position at +0x2D88 before the
+# current update's motion integration.  The base position, relative offset,
+# polar state, and velocity are all required to advance a future source
+# without substituting the currently composed world derivative.
+ENEMY_MOTION_BASE_POSITION_OFFSET = 0x2D34
+ENEMY_MOTION_RELATIVE_POSITION_OFFSET = 0x2D40
+ENEMY_MOTION_VELOCITY_OFFSET = 0x2D4C
+ENEMY_MOTION_WORLD_POSITION_OFFSET = 0x2D88
+ENEMY_MOTION_ANGLE_OFFSET = 0x2D94
+ENEMY_MOTION_ANGULAR_VELOCITY_OFFSET = 0x2D98
+ENEMY_MOTION_SPEED_OFFSET = 0x2DA8
+ENEMY_MOTION_SPEED_ACCELERATION_OFFSET = 0x2DAC
+ENEMY_MOTION_ORBIT_ANGLE_OFFSET = 0x2D9C
+ENEMY_MOTION_ORBIT_ANGULAR_VELOCITY_OFFSET = 0x2DA0
+ENEMY_MOTION_ORBIT_RADIUS_OFFSET = 0x2DB0
+ENEMY_MOTION_ORBIT_RADIUS_ACCELERATION_OFFSET = 0x2DB4
+ENEMY_MOTION_ORBIT_CENTER_OFFSET = 0x2DD0
+ENEMY_MOTION_TIMER_OFFSET = 0x2DDC
+ENEMY_MOTION_DURATION_OFFSET = 0x2DE8
+
+# Revalidated in bullet_emitter_spawn_pattern (0x00430E10) and
+# bullet_spawn_from_emission_descriptor (0x0042F5F0).  The descriptor's type
+# selects one of the manager-owned templates; collision x/y are copied
+# without a clamp into live bullet +0xD34/+0xD38.
+BULLET_MANAGER_BASE = 0x00F54E90
+BULLET_TEMPLATE_COUNT = 16
+BULLET_TEMPLATE_STRIDE = 0x0D44
+BULLET_TEMPLATE_COLLISION_OFFSET = 0x0D34
 
 _ENEMY_COMPONENT_NAMES = frozenset(
     {
@@ -382,6 +433,9 @@ def _bullet_lifecycle_records(
 
 def _enemy_main_ecl_inventory_record(
     enemy_blob: bytes,
+    *,
+    pool_base: int = ENEMY_POOL_BASE,
+    pool_size: int = ENEMY_POOL_SIZE,
 ) -> tuple[EnemyMainEclVmInventory, dict[str, object]]:
     """Decode one deterministic active-enemy VM inventory.
 
@@ -391,8 +445,8 @@ def _enemy_main_ecl_inventory_record(
 
     inventory = decode_enemy_main_ecl_vm_inventory(
         enemy_blob,
-        pool_base=ENEMY_POOL_BASE,
-        pool_size=ENEMY_POOL_SIZE,
+        pool_base=pool_base,
+        pool_size=pool_size,
         enemy_stride=ENEMY_STRIDE,
         enemy_flags_offset=ENEMY_FLAGS_OFFSET,
         enemy_active_flag=ENEMY_ACTIVE_FLAG,
@@ -400,6 +454,339 @@ def _enemy_main_ecl_inventory_record(
     record = inventory.record()
     record.pop("decode_ms", None)
     return inventory, record
+
+
+def _enemy_source_record(
+    reader: Any,
+    *,
+    enemy_blob: bytes,
+    pool_base: int,
+    pool_size: int,
+    source_role: str,
+) -> dict[str, object]:
+    """Decode every emission root for one contiguous enemy source range."""
+
+    inventory, inventory_record = _enemy_main_ecl_inventory_record(
+        enemy_blob,
+        pool_base=pool_base,
+        pool_size=pool_size,
+    )
+    bodies = decode_enemy_bodies(
+        enemy_blob,
+        pool_base=pool_base,
+        pool_size=pool_size,
+        include_contact_disabled=True,
+    )
+    return {
+        "schema": "th08-enemy-hostile-source-range-v1",
+        "source_role": source_role,
+        "pool_base": pool_base,
+        "pool_size": pool_size,
+        "active": bool(inventory.observations),
+        "enemy_bodies": [asdict(body) for body in bodies],
+        "main_ecl_vm_inventory": inventory_record,
+        "periodic_emission_state": _enemy_periodic_emission_records(
+            enemy_blob,
+            inventory,
+        ),
+        "main_ecl_installed_callbacks": _enemy_main_ecl_callback_records(
+            reader,
+            enemy_blob,
+            inventory,
+        ),
+        "current_ecl_instructions": _enemy_current_instruction_records(
+            reader,
+            inventory,
+        ),
+        "emission_state": _enemy_emission_state_records(
+            enemy_blob,
+            inventory,
+        ),
+        "motion_state": _enemy_motion_state_records(
+            enemy_blob,
+            inventory,
+        ),
+        "phase_transition_state": _enemy_phase_transition_state_records(
+            enemy_blob,
+            inventory,
+        ),
+        "auxiliary_ecl_contexts": _enemy_auxiliary_ecl_context_records(
+            reader,
+            inventory,
+        ),
+    }
+
+
+def _enemy_motion_state_records(
+    enemy_blob: bytes,
+    inventory: EnemyMainEclVmInventory,
+) -> dict[str, object]:
+    rows: list[dict[str, object]] = []
+    for observation in inventory.observations:
+        base = observation.slot * ENEMY_STRIDE
+        rows.append(
+            {
+                "slot": observation.slot,
+                "enemy_pointer": observation.enemy_pointer,
+                "movement_state": (int(observation.enemy_flags) >> 12) & 3,
+                "mirror_x": bool(int(observation.enemy_flags) & 0x00040000),
+                "base_position": list(
+                    struct.unpack_from(
+                        "<fff",
+                        enemy_blob,
+                        base + ENEMY_MOTION_BASE_POSITION_OFFSET,
+                    )
+                ),
+                "relative_position": list(
+                    struct.unpack_from(
+                        "<fff",
+                        enemy_blob,
+                        base + ENEMY_MOTION_RELATIVE_POSITION_OFFSET,
+                    )
+                ),
+                "velocity": list(
+                    struct.unpack_from(
+                        "<fff",
+                        enemy_blob,
+                        base + ENEMY_MOTION_VELOCITY_OFFSET,
+                    )
+                ),
+                "world_position": list(
+                    struct.unpack_from(
+                        "<fff",
+                        enemy_blob,
+                        base + ENEMY_MOTION_WORLD_POSITION_OFFSET,
+                    )
+                ),
+                "angle": struct.unpack_from(
+                    "<f",
+                    enemy_blob,
+                    base + ENEMY_MOTION_ANGLE_OFFSET,
+                )[0],
+                "angular_velocity": struct.unpack_from(
+                    "<f",
+                    enemy_blob,
+                    base + ENEMY_MOTION_ANGULAR_VELOCITY_OFFSET,
+                )[0],
+                "speed": struct.unpack_from(
+                    "<f",
+                    enemy_blob,
+                    base + ENEMY_MOTION_SPEED_OFFSET,
+                )[0],
+                "speed_acceleration": struct.unpack_from(
+                    "<f",
+                    enemy_blob,
+                    base + ENEMY_MOTION_SPEED_ACCELERATION_OFFSET,
+                )[0],
+                "orbit_angle": struct.unpack_from(
+                    "<f",
+                    enemy_blob,
+                    base + ENEMY_MOTION_ORBIT_ANGLE_OFFSET,
+                )[0],
+                "orbit_angular_velocity": struct.unpack_from(
+                    "<f",
+                    enemy_blob,
+                    base + ENEMY_MOTION_ORBIT_ANGULAR_VELOCITY_OFFSET,
+                )[0],
+                "orbit_radius": struct.unpack_from(
+                    "<f",
+                    enemy_blob,
+                    base + ENEMY_MOTION_ORBIT_RADIUS_OFFSET,
+                )[0],
+                "orbit_radius_acceleration": struct.unpack_from(
+                    "<f",
+                    enemy_blob,
+                    base + ENEMY_MOTION_ORBIT_RADIUS_ACCELERATION_OFFSET,
+                )[0],
+                "orbit_center_position": list(
+                    struct.unpack_from(
+                        "<fff",
+                        enemy_blob,
+                        base + ENEMY_MOTION_ORBIT_CENTER_OFFSET,
+                    )
+                ),
+                "motion_timer_elapsed": struct.unpack_from(
+                    "<i",
+                    enemy_blob,
+                    base + ENEMY_MOTION_TIMER_OFFSET,
+                )[0],
+                "motion_duration": struct.unpack_from(
+                    "<i",
+                    enemy_blob,
+                    base + ENEMY_MOTION_DURATION_OFFSET,
+                )[0],
+            }
+        )
+    return {
+        "schema": "th08-active-enemy-motion-state-v1",
+        "scope": (
+            "exact_preupdate_composed_world_base_relative_velocity_and_"
+            "state1_polar_state3_orbit_timer_fields"
+        ),
+        "rows": rows,
+    }
+
+
+def _enemy_phase_transition_state_records(
+    enemy_blob: bytes,
+    inventory: EnemyMainEclVmInventory,
+) -> dict[str, object]:
+    rows: list[dict[str, object]] = []
+    for observation in inventory.observations:
+        base = observation.slot * ENEMY_STRIDE
+        rows.append(
+            {
+                "slot": observation.slot,
+                "enemy_pointer": observation.enemy_pointer,
+                "health_thresholds": list(
+                    struct.unpack_from(
+                        f"<{ENEMY_HEALTH_TRANSITION_COUNT}i",
+                        enemy_blob,
+                        base + ENEMY_HEALTH_TRANSITION_THRESHOLDS_OFFSET,
+                    )
+                ),
+                "timeout_frame": struct.unpack_from(
+                    "<i",
+                    enemy_blob,
+                    base + ENEMY_TIMEOUT_TRANSITION_FRAME_OFFSET,
+                )[0],
+                "timeout_subroutine": struct.unpack_from(
+                    "<i",
+                    enemy_blob,
+                    base + ENEMY_TIMEOUT_TRANSITION_SUBROUTINE_OFFSET,
+                )[0],
+            }
+        )
+    return {
+        "schema": "th08-active-enemy-phase-transition-state-v1",
+        "scope": (
+            "exact_health_threshold_and_timeout_successor_arming_needed_"
+            "before_phase_timer_writes_can_be_ignored"
+        ),
+        "rows": rows,
+    }
+
+
+def _enemy_emission_state_records(
+    enemy_blob: bytes,
+    inventory: EnemyMainEclVmInventory,
+) -> dict[str, object]:
+    rows: list[dict[str, object]] = []
+    for observation in inventory.observations:
+        base = observation.slot * ENEMY_STRIDE
+        descriptor_base = base + ENEMY_EMISSION_DESCRIPTOR_OFFSET
+        descriptor = enemy_blob[
+            descriptor_base :
+            descriptor_base + ENEMY_EMISSION_DESCRIPTOR_SIZE
+        ]
+        if len(descriptor) != ENEMY_EMISSION_DESCRIPTOR_SIZE:
+            raise ValueError("enemy emission descriptor is truncated")
+        rows.append(
+            {
+                "slot": observation.slot,
+                "enemy_pointer": observation.enemy_pointer,
+                "emission_offset": list(
+                    struct.unpack_from(
+                        "<fff",
+                        enemy_blob,
+                        base + ENEMY_EMISSION_OFFSET_OFFSET,
+                    )
+                ),
+                "rank_speed_interval": list(
+                    struct.unpack_from(
+                        "<ff",
+                        enemy_blob,
+                        base + ENEMY_RANK_SPEED_INTERVAL_OFFSET,
+                    )
+                ),
+                "rank_count_interval": list(
+                    struct.unpack_from(
+                        "<hhhh",
+                        enemy_blob,
+                        base + ENEMY_RANK_COUNT_INTERVAL_OFFSET,
+                    )
+                ),
+                "minimum_fire_distance_squared": struct.unpack_from(
+                    "<f",
+                    enemy_blob,
+                    base + ENEMY_MINIMUM_FIRE_DISTANCE_SQUARED_OFFSET,
+                )[0],
+                "descriptor": {
+                    "type": struct.unpack_from("<h", descriptor, 0x00)[0],
+                    "color": struct.unpack_from("<h", descriptor, 0x02)[0],
+                    "origin": list(struct.unpack_from("<fff", descriptor, 0x04)),
+                    "angle1": struct.unpack_from("<f", descriptor, 0x10)[0],
+                    "angle2": struct.unpack_from("<f", descriptor, 0x14)[0],
+                    "speed1": struct.unpack_from("<f", descriptor, 0x18)[0],
+                    "speed2": struct.unpack_from("<f", descriptor, 0x1C)[0],
+                    "transform_program_hex": descriptor[
+                        ENEMY_EMISSION_TRANSFORM_PROGRAM_OFFSET :
+                        (
+                            ENEMY_EMISSION_TRANSFORM_PROGRAM_OFFSET
+                            + ENEMY_EMISSION_TRANSFORM_PROGRAM_SIZE
+                        )
+                    ].hex(),
+                    "count1": struct.unpack_from("<h", descriptor, 0x1F4)[0],
+                    "count2": struct.unpack_from("<h", descriptor, 0x1F6)[0],
+                    "mode": struct.unpack_from("<h", descriptor, 0x1F8)[0],
+                    "flags": struct.unpack_from("<I", descriptor, 0x1FC)[0],
+                    "queue_cursor": struct.unpack_from(
+                        "<I",
+                        descriptor,
+                        0x208,
+                    )[0],
+                    "template_pointer": struct.unpack_from(
+                        "<I",
+                        descriptor,
+                        0x20C,
+                    )[0],
+                },
+            }
+        )
+    return {
+        "schema": "th08-active-enemy-emission-state-v1",
+        "scope": (
+            "exact_root_origin_rank_fields_current_descriptor_and_"
+            "complete_transform_program"
+        ),
+        "rows": rows,
+    }
+
+
+def _bullet_template_geometry_record(reader: Any) -> dict[str, object]:
+    blob = _read_exact(
+        reader,
+        BULLET_MANAGER_BASE,
+        BULLET_TEMPLATE_COUNT * BULLET_TEMPLATE_STRIDE,
+        field="bullet template table",
+    )
+    rows: list[dict[str, object]] = []
+    for template_type in range(BULLET_TEMPLATE_COUNT):
+        base = (
+            template_type * BULLET_TEMPLATE_STRIDE
+            + BULLET_TEMPLATE_COLLISION_OFFSET
+        )
+        width, height, collision_z = struct.unpack_from(
+            "<fff",
+            blob,
+            base,
+        )
+        rows.append(
+            {
+                "type": template_type,
+                "width": width,
+                "height": height,
+                "half_width": abs(width) * 0.5,
+                "half_height": abs(height) * 0.5,
+                "collision_z": collision_z,
+            }
+        )
+    return {
+        "schema": "th08-bullet-template-geometry-v1",
+        "manager_base": BULLET_MANAGER_BASE,
+        "template_stride": BULLET_TEMPLATE_STRIDE,
+        "rows": rows,
+    }
 
 
 def _runtime_instruction_record(
@@ -984,6 +1371,10 @@ def capture_collision_control_projection(
         ENEMY_POOL_BASE,
         ENEMY_POOL_SIZE * ENEMY_STRIDE,
     )
+    manager_template_blob = reader.read(
+        TH08_ENEMY_MANAGER_TEMPLATE_BASE,
+        ENEMY_STRIDE,
+    )
     bullets = decode_bullets(bullet_blob, retain_transform_runtime=True)
     lasers = decode_lasers(laser_blob)
     enemy_bodies = decode_enemy_bodies(
@@ -993,6 +1384,13 @@ def capture_collision_control_projection(
     )
     enemy_ecl_inventory, enemy_ecl_inventory_record = (
         _enemy_main_ecl_inventory_record(enemy_blob)
+    )
+    manager_template_source = _enemy_source_record(
+        reader,
+        enemy_blob=manager_template_blob,
+        pool_base=TH08_ENEMY_MANAGER_TEMPLATE_BASE,
+        pool_size=1,
+        source_role="enemy_manager_template_or_special_singleton",
     )
     player_x = float(compact_state["player_x"])
     player_y = float(compact_state["player_y"])
@@ -1035,12 +1433,28 @@ def capture_collision_control_projection(
         "enemy_current_ecl_instructions": (
             _enemy_current_instruction_records(reader, enemy_ecl_inventory)
         ),
+        "enemy_emission_state": _enemy_emission_state_records(
+            enemy_blob,
+            enemy_ecl_inventory,
+        ),
+        "enemy_motion_state": _enemy_motion_state_records(
+            enemy_blob,
+            enemy_ecl_inventory,
+        ),
+        "enemy_phase_transition_state": (
+            _enemy_phase_transition_state_records(
+                enemy_blob,
+                enemy_ecl_inventory,
+            )
+        ),
         "enemy_auxiliary_ecl_contexts": (
             _enemy_auxiliary_ecl_context_records(
                 reader,
                 enemy_ecl_inventory,
             )
         ),
+        "enemy_manager_template_source": manager_template_source,
+        "bullet_template_geometry": _bullet_template_geometry_record(reader),
         "stage_timeline_runtime": _timeline_runtime_inventory_record(reader),
         "normalized_native_components": list(normalized_components),
     }
@@ -1072,7 +1486,22 @@ def capture_collision_control_projection(
                     "enemy_auxiliary_ecl_contexts"
                 ]["rows"]
             )
+            + sum(
+                bool(row["installed_callback"]["function_pointer"])
+                for row in manager_template_source[
+                    "main_ecl_installed_callbacks"
+                ]["rows"]
+            )
+            + sum(
+                bool(row["installed_callback"]["function_pointer"])
+                for row in manager_template_source[
+                    "auxiliary_ecl_contexts"
+                ]["rows"]
+            )
         ),
+        "enemy_manager_template_source_active": manager_template_source[
+            "active"
+        ],
         "stage_timeline_count": len(
             payload["stage_timeline_runtime"]["rows"]
         ),

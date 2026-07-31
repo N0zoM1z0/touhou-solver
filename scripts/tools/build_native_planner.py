@@ -23,6 +23,7 @@ SOURCES = (
     NATIVE_ROOT / "src" / "geometry" / "clearance_volume.cpp",
     NATIVE_ROOT / "src" / "geometry" / "segment_trajectory.cpp",
     NATIVE_ROOT / "src" / "geometry" / "aabb_trajectory.cpp",
+    NATIVE_ROOT / "src" / "geometry" / "annular_sector_trajectory.cpp",
     NATIVE_ROOT / "src" / "geometry" / "piecewise_aabb.cpp",
     NATIVE_ROOT / "src" / "local" / "hazards.cpp",
     NATIVE_ROOT / "src" / "local" / "bullet_decode.cpp",

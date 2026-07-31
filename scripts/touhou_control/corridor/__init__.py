@@ -12,6 +12,7 @@ from .clearance import (
     aabb_clearance_field,
     aabb_clearance_volume,
     aabb_sample_clearance_field,
+    annular_sector_clearance_field,
     clearance_field,
     hazard_clearance_volume,
     packed_segment_clearance_field,
@@ -37,6 +38,7 @@ from .legacy_forward import plan_legacy_forward_corridor
 from .model import (
     AabbHazard,
     AabbTrajectoryHazard,
+    AnnularSectorTrajectoryHazard,
     CorridorBounds,
     CorridorConfig,
     CorridorPlan,
@@ -59,6 +61,7 @@ from .rollout import rollout_robust_corridor
 __all__ = [
     "AabbHazard",
     "AabbTrajectoryHazard",
+    "AnnularSectorTrajectoryHazard",
     "ActionMaskBounds",
     "CorridorBounds",
     "CorridorConfig",
@@ -82,6 +85,7 @@ __all__ = [
     "aabb_clearance_field",
     "aabb_clearance_volume",
     "aabb_sample_clearance_field",
+    "annular_sector_clearance_field",
     "aggregate_fine_action_mask_bounds",
     "axis",
     "build_prepared_transition_lattice",

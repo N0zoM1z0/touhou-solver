@@ -24,10 +24,17 @@ from th08_live.enemy_sensor import (
 )
 from th08_ecl_runtime import ENEMY_MAIN_ECL_VM_OFFSET
 from th08_live.sensor import BULLET_POOL_SIZE, BULLET_STRIDE
-from th08_native_future_body_root import TH08_TIMELINE_RUNTIME_BASE
+from th08_native_future_body_root import (
+    TH08_ENEMY_MANAGER_TEMPLATE_BASE,
+    TH08_TIMELINE_RUNTIME_BASE,
+)
 from th08_runtime.native_snapshot_projection import (
     BULLET_TIMER_D80_OFFSET,
     BULLET_TIMER_D8C_OFFSET,
+    BULLET_MANAGER_BASE,
+    BULLET_TEMPLATE_COLLISION_OFFSET,
+    BULLET_TEMPLATE_COUNT,
+    BULLET_TEMPLATE_STRIDE,
     COLLISION_CONTROL_PROJECTION_SCHEMA,
     CollisionControlProjection,
     ECL_DIFFICULTY_MASK_ADDRESS,
@@ -48,11 +55,13 @@ from th08_runtime.native_snapshot_projection import (
     TIMELINE_MARKERS_ADDRESS,
     TIMELINE_SPAWN_SUPPRESSED_ADDRESS,
     _bullet_lifecycle_records,
+    _bullet_template_geometry_record,
     _enemy_auxiliary_ecl_context_records,
     _enemy_current_instruction_records,
     _enemy_main_ecl_callback_records,
     _enemy_main_ecl_inventory_record,
     _enemy_periodic_emission_records,
+    _enemy_source_record,
     _timeline_runtime_inventory_record,
     normalized_causal_component_records,
 )
@@ -405,6 +414,99 @@ class NativeSnapshotProjectionTests(unittest.TestCase):
         self.assertEqual(
             callback["argument_record_instruction"]["opcode"],
             0x88,
+        )
+
+    def test_manager_template_singleton_is_a_complete_hostile_source(self) -> None:
+        enemy_blob = bytearray(ENEMY_STRIDE)
+        instruction_pointer = 0x00610000
+        struct.pack_into(
+            "<I",
+            enemy_blob,
+            ENEMY_FLAGS_OFFSET,
+            ENEMY_ACTIVE_FLAG,
+        )
+        struct.pack_into(
+            "<I",
+            enemy_blob,
+            ENEMY_MAIN_ECL_VM_OFFSET,
+            instruction_pointer,
+        )
+        instruction = struct.pack(
+            "<iHHBBH",
+            9,
+            0x61,
+            16,
+            0,
+            0x08,
+            0,
+        ) + b"\x10\x20\x30\x40"
+        reader = SimpleNamespace(
+            read=lambda address, size: instruction[
+                address - instruction_pointer :
+                address - instruction_pointer + size
+            ]
+        )
+
+        source = _enemy_source_record(
+            reader,
+            enemy_blob=bytes(enemy_blob),
+            pool_base=TH08_ENEMY_MANAGER_TEMPLATE_BASE,
+            pool_size=1,
+            source_role="enemy_manager_template_or_special_singleton",
+        )
+
+        self.assertTrue(source["active"])
+        self.assertEqual(
+            source["main_ecl_vm_inventory"]["rows"][0][1],
+            TH08_ENEMY_MANAGER_TEMPLATE_BASE,
+        )
+        self.assertEqual(
+            source["current_ecl_instructions"]["rows"][0]["opcode"],
+            0x61,
+        )
+        self.assertEqual(source["periodic_emission_state"]["rows"][0]["slot"], 0)
+        self.assertEqual(source["auxiliary_ecl_contexts"]["rows"], [])
+        self.assertEqual(
+            len(
+                source["emission_state"]["rows"][0]["descriptor"][
+                    "transform_program_hex"
+                ]
+            ),
+            18 * 24 * 2,
+        )
+
+    def test_bullet_template_geometry_is_retained_without_clamping(self) -> None:
+        blob = bytearray(BULLET_TEMPLATE_COUNT * BULLET_TEMPLATE_STRIDE)
+        type_two = 2 * BULLET_TEMPLATE_STRIDE
+        struct.pack_into(
+            "<fff",
+            blob,
+            type_two + BULLET_TEMPLATE_COLLISION_OFFSET,
+            2.0,
+            3.0,
+            4.0,
+        )
+        reader = SimpleNamespace(
+            read=lambda address, size: bytes(
+                blob[
+                    address - BULLET_MANAGER_BASE :
+                    address - BULLET_MANAGER_BASE + size
+                ]
+            )
+        )
+
+        record = _bullet_template_geometry_record(reader)
+
+        self.assertEqual(
+            record["rows"][2],
+            {
+                "type": 2,
+                "width": 2.0,
+                "height": 3.0,
+                "half_width": 1.0,
+                "half_height": 1.5,
+                "collision_z": 4.0,
+            },
         )
 
     def test_bullet_lifecycle_retains_state_and_both_native_timers(self) -> None:

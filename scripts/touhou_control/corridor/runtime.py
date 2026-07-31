@@ -6,6 +6,8 @@ from concurrent.futures import Future
 from dataclasses import dataclass, replace
 
 from ..query_survival import PipelineSurvivalWorkspace
+from ..hazard_coverage import HazardCoverageAssessment
+from ..pipeline_identity import VersionIdentity
 from .model import CorridorPlan
 
 
@@ -26,6 +28,8 @@ class CorridorPolicyArtifact:
     native_viability_worker_limit: int | None = None
     native_viability_worker_limit_applied: bool = False
     time_scale_identity: tuple[object, ...] | None = None
+    future_hazard_version: VersionIdentity | None = None
+    future_hazard_coverage: HazardCoverageAssessment | None = None
 
 
 @dataclass(frozen=True)
@@ -44,6 +48,7 @@ class CorridorRuntimeHandles:
 
     audit_future: Future[tuple[float, str | None]] | None = None
     pipeline_survival_workspace: PipelineSurvivalWorkspace | None = None
+    future_hazard_projection: object | None = None
 
 
 @dataclass(frozen=True, init=False)
@@ -72,11 +77,14 @@ class CorridorSolution:
         pipeline_survival_workspace: (
             PipelineSurvivalWorkspace | None
         ) = None,
+        future_hazard_projection: object | None = None,
         pipeline_survival_workspace_ms: float | None = None,
         background_priority_lowered: bool = False,
         native_viability_worker_limit: int | None = None,
         native_viability_worker_limit_applied: bool = False,
         time_scale_identity: tuple[object, ...] | None = None,
+        future_hazard_version: VersionIdentity | None = None,
+        future_hazard_coverage: HazardCoverageAssessment | None = None,
         *,
         artifact: CorridorPolicyArtifact | None = None,
         publication: CorridorPublication | None = None,
@@ -107,6 +115,8 @@ class CorridorSolution:
                     native_viability_worker_limit_applied
                 ),
                 time_scale_identity=time_scale_identity,
+                future_hazard_version=future_hazard_version,
+                future_hazard_coverage=future_hazard_coverage,
             )
             publication = CorridorPublication(
                 audit_capsule=audit_capsule,
@@ -121,6 +131,7 @@ class CorridorSolution:
                 pipeline_survival_workspace=(
                     pipeline_survival_workspace
                 ),
+                future_hazard_projection=future_hazard_projection,
             )
         else:
             if source_frame is not None or plan is not None or solve_ms is not None:
@@ -166,6 +177,18 @@ class CorridorSolution:
     @property
     def time_scale_identity(self) -> tuple[object, ...] | None:
         return self.artifact.time_scale_identity
+
+    @property
+    def future_hazard_version(self) -> VersionIdentity | None:
+        return self.artifact.future_hazard_version
+
+    @property
+    def future_hazard_coverage(self) -> HazardCoverageAssessment | None:
+        return self.artifact.future_hazard_coverage
+
+    @property
+    def future_hazard_projection(self) -> object | None:
+        return self.handles.future_hazard_projection
 
     @property
     def forecast_lead_frames(self) -> int:

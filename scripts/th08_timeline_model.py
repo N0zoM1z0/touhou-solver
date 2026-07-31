@@ -80,6 +80,8 @@ class TimelineSpawnRequest:
     variant: bool
     field_3308: int | None = None
     field_330c: int | None = None
+    minimum_x: float | None = None
+    maximum_x: float | None = None
 
 
 @dataclass(frozen=True)
@@ -156,6 +158,7 @@ def _spawn_request(
         words = _require_arguments(insn, 6)
         subroutine = _signed(words[0])
         x, y = _float(words[1]), _float(words[2])
+        minimum_x = maximum_x = x
         field_2dfc, byte_3304, field_2e08 = map(_signed, words[3:6])
     elif opcode in (0x02, 0x04):
         words = _require_arguments(insn, 7)
@@ -167,12 +170,14 @@ def _spawn_request(
     elif opcode in (0x03, 0x05):
         words = _require_arguments(insn, 5)
         subroutine = _signed(words[0])
-        x, y = rng.next_scaled(384.0), _float(words[1])
+        minimum_x, maximum_x = 0.0, 384.0
+        x, y = rng.next_scaled(maximum_x), _float(words[1])
         field_2dfc, byte_3304, field_2e08 = map(_signed, words[2:5])
     elif opcode in (0x0B, 0x0C):
         words = _require_arguments(insn, 7)
         subroutine = _signed(words[0])
         x, y = _float(words[1]), _float(words[2])
+        minimum_x = maximum_x = x
         field_2dfc = _signed(words[3])
         byte_3304 = -1
         extended_3308, extended_330c = map(_signed, words[4:6])
@@ -198,6 +203,8 @@ def _spawn_request(
         variant=variant,
         field_3308=extended_3308,
         field_330c=extended_330c,
+        minimum_x=minimum_x,
+        maximum_x=maximum_x,
     )
 
 

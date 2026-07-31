@@ -13,10 +13,12 @@ from .native.belief import (
 )
 from .native.geometry import (
     _load_aabb_trajectory_clearance_function as _load_aabb_trajectory_clearance_function,
+    _load_annular_sector_trajectory_clearance_function as _load_annular_sector_trajectory_clearance_function,
     _load_clearance_function as _load_clearance_function,
     _load_piecewise_aabb_clearance_function as _load_piecewise_aabb_clearance_function,
     _load_trajectory_clearance_function as _load_trajectory_clearance_function,
     apply_aabb_trajectory_clearance as apply_aabb_trajectory_clearance,
+    apply_annular_sector_trajectory_clearance as apply_annular_sector_trajectory_clearance,
     apply_packed_segment_clearance as apply_packed_segment_clearance,
     apply_piecewise_aabb_clearance as apply_piecewise_aabb_clearance,
     apply_segment_trajectory_clearance as apply_segment_trajectory_clearance,

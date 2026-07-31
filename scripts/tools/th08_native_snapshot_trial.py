@@ -86,7 +86,7 @@ from th08_runtime_agent import (  # noqa: E402
 from touhou_control.pipeline_identity import VersionIdentity  # noqa: E402
 
 
-SCHEMA = "th08-native-snapshot-rolling-trial-v11"
+SCHEMA = "th08-native-snapshot-rolling-trial-v12"
 DEFAULT_GAME_DIR = Path(
     "D:/Entertainment/Game/Touhou/[th08] 东方永夜抄 (日文版)__codex_wind_tunnel"
 )
@@ -1982,6 +1982,95 @@ def _run_transaction(
                 lifecycle_probe.close()
 
 
+def _capture_root_only(
+    api: object,
+    barrier: NativeCalculationBarrier,
+    *,
+    projection_reader: object,
+    target_manager_frame: int,
+    root_timeout_seconds: float,
+    retain_collision_control_payload: bool,
+) -> dict[str, object]:
+    """Capture one immutable replay root without executing a headless branch."""
+
+    root_header = barrier.wait_for_root(timeout_seconds=root_timeout_seconds)
+    if (
+        root_header.root_manager_frame != target_manager_frame
+        or root_header.target_manager_frame != target_manager_frame
+    ):
+        raise NativeSnapshotUnknownError(
+            "barrier stopped at an unexpected root-only manager frame"
+        )
+    release_injected_keys(api)
+    frozen = suspend_non_owner_threads(
+        api,
+        barrier.pid,
+        owner_thread_id=root_header.owner_thread_id,
+    )
+    try:
+        thread_ids = tuple(
+            sorted(
+                (
+                    root_header.owner_thread_id,
+                    *(thread.thread_id for thread in frozen),
+                )
+            )
+        )
+        _assert_thread_epoch(api, barrier.pid, thread_ids)
+        root_projection = _capture_native_projection(
+            projection_reader,
+            barrier,
+            target_manager_frame=target_manager_frame,
+        )
+        root_compact_state = _compact_state(projection_reader)
+        root_player_shot_emission_state = (
+            capture_player_shot_emission_state(projection_reader).record()
+        )
+        root_collision_control_projection = capture_collision_control_projection(
+            projection_reader,
+            native_root_projection=root_projection,
+            compact_state=root_compact_state,
+        )
+        root_native_combat_projection = capture_native_combat_projection(
+            projection_reader,
+            native_root_projection=root_projection,
+            compact_state=root_compact_state,
+        )
+        _assert_thread_epoch(api, barrier.pid, thread_ids)
+        if int(root_compact_state["manager_frame"]) != target_manager_frame:
+            raise NativeSnapshotUnknownError(
+                "root-only compact state is not aligned to the trapped callsite"
+            )
+        return {
+            "status": "native_collision_control_root_capture_passed",
+            "barrier_root": root_header.record(),
+            "thread_epoch": {
+                "thread_ids": list(thread_ids),
+                "owner_thread_id": root_header.owner_thread_id,
+                "frozen_thread_count": len(frozen),
+            },
+            "root_native_projection": root_projection.record(),
+            "root_collision_control_projection": (
+                root_collision_control_projection.record(
+                    include_model_payload=retain_collision_control_payload,
+                )
+            ),
+            "root_native_combat_projection": (
+                root_native_combat_projection.record()
+            ),
+            "root_compact_state": root_compact_state,
+            "root_player_shot_emission_state": (
+                root_player_shot_emission_state
+            ),
+            "recorded_future_world_reused": False,
+            "changes_gameplay_input": False,
+            "physical_predictive_authority": False,
+            "authority": "immutable_native_replay_root_observation_only",
+        }
+    finally:
+        release_frozen_threads(api, frozen)
+
+
 def _run_natural_reference(
     api: object,
     barrier: NativeCalculationBarrier,
@@ -2424,6 +2513,14 @@ def build_parser() -> argparse.ArgumentParser:
             "snapshot root and require exact generation-safe per-tick batches"
         ),
     )
+    parser.add_argument(
+        "--capture-root-only",
+        action="store_true",
+        help=(
+            "capture one immutable collision-control source root without "
+            "executing or restoring a headless action branch"
+        ),
+    )
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--launch-timeout", type=float, default=30.0)
     parser.add_argument("--focus-timeout", type=float, default=10.0)
@@ -2486,6 +2583,17 @@ def main(argv: list[str] | None = None) -> int:
         raise ValueError(
             "enemy lifecycle tracing currently requires --natural-reference none"
         )
+    if args.capture_root_only and (
+        args.portfolio_all36
+        or args.action_schedule is not None
+        or args.focus_schedule is not None
+        or args.trace_enemy_lifecycle
+        or args.natural_reference != "none"
+    ):
+        raise ValueError(
+            "root-only capture requires natural-reference none and accepts "
+            "no branch portfolio, schedule, or lifecycle probe"
+        )
 
     game_dir = args.game_dir.resolve()
     expected_exe = game_dir / TARGET_EXE
@@ -2521,8 +2629,13 @@ def main(argv: list[str] | None = None) -> int:
             args.retain_collision_control_payload
         ),
         "trace_enemy_lifecycle": args.trace_enemy_lifecycle,
-        "gameplay_input": "native_replay_with_explicit_root_action_word",
-        "changes_gameplay_input": True,
+        "gameplay_input": (
+            "native_replay_only"
+            if args.capture_root_only
+            else "native_replay_with_explicit_root_action_word"
+        ),
+        "changes_gameplay_input": not args.capture_root_only,
+        "capture_root_only": args.capture_root_only,
         "result": {"status": "not_started"},
     }
     launch_log = args.output.with_suffix(".launch.log")
@@ -2583,38 +2696,52 @@ def main(argv: list[str] | None = None) -> int:
         send_scan_key(api, scan_code=0x1D, pressed=True)
         reference_store: dict[str, object] = {}
         transaction = (
-            _run_all36_portfolio(
+            _capture_root_only(
                 api,
                 barrier,
                 projection_reader=reader,
                 target_manager_frame=args.target_manager_frame,
-                horizon=args.horizon,
-                hold_frames=args.hold_frames,
-                root_timeout_seconds=args.root_timeout,
-                corpus_path=args.portfolio_corpus.resolve(),
-            )
-            if args.portfolio_all36
-            else _run_transaction(
-                api,
-                barrier,
-                projection_reader=reader,
-                target_manager_frame=args.target_manager_frame,
-                action_b=args.action_b,
-                action_schedule=args.action_schedule,
-                focus_schedule=args.focus_schedule,
-                horizon=args.horizon,
-                hold_frames=args.hold_frames,
                 root_timeout_seconds=args.root_timeout,
                 retain_collision_control_payload=(
                     args.retain_collision_control_payload
                 ),
-                trace_enemy_lifecycle=args.trace_enemy_lifecycle,
-                reference_store=reference_store,
+            )
+            if args.capture_root_only
+            else (
+                _run_all36_portfolio(
+                    api,
+                    barrier,
+                    projection_reader=reader,
+                    target_manager_frame=args.target_manager_frame,
+                    horizon=args.horizon,
+                    hold_frames=args.hold_frames,
+                    root_timeout_seconds=args.root_timeout,
+                    corpus_path=args.portfolio_corpus.resolve(),
+                )
+                if args.portfolio_all36
+                else _run_transaction(
+                    api,
+                    barrier,
+                    projection_reader=reader,
+                    target_manager_frame=args.target_manager_frame,
+                    action_b=args.action_b,
+                    action_schedule=args.action_schedule,
+                    focus_schedule=args.focus_schedule,
+                    horizon=args.horizon,
+                    hold_frames=args.hold_frames,
+                    root_timeout_seconds=args.root_timeout,
+                    retain_collision_control_payload=(
+                        args.retain_collision_control_payload
+                    ),
+                    trace_enemy_lifecycle=args.trace_enemy_lifecycle,
+                    reference_store=reference_store,
+                )
             )
         )
         envelope["result"] = transaction
         if (
-            not args.portfolio_all36
+            not args.capture_root_only
+            and not args.portfolio_all36
             and not args.skip_compact_corpus
             and transaction["status"] == "rolling_native_projection_snapshot_passed"
         ):
@@ -2632,7 +2759,8 @@ def main(argv: list[str] | None = None) -> int:
             if not corpus_comparison["exact"]:
                 transaction["status"] = "recorded_action_compact_corpus_mismatch"
         if (
-            not args.portfolio_all36
+            not args.capture_root_only
+            and not args.portfolio_all36
             and args.natural_reference != "none"
             and transaction["status"] == "rolling_native_projection_snapshot_passed"
         ):
@@ -2774,6 +2902,7 @@ def main(argv: list[str] | None = None) -> int:
     result = envelope["result"]
     assert isinstance(result, dict)
     accepted_statuses = {
+        "native_collision_control_root_capture_passed",
         "rolling_native_projection_snapshot_passed",
         "rolling_native_all36_outcome_portfolio_passed",
     }

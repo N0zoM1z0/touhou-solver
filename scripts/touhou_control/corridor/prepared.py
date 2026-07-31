@@ -14,6 +14,7 @@ from .clearance import hazard_clearance_volume
 from .grid import axis
 from .model import (
     AabbTrajectoryHazard,
+    AnnularSectorTrajectoryHazard,
     CorridorBounds,
     CorridorConfig,
     MovingAabbHazard,
@@ -43,6 +44,7 @@ class PreparedCorridorProblem:
     survival_query_problem: SurvivalQueryProblem | None
     aabbs: tuple[MovingAabbHazard, ...]
     aabb_trajectories: tuple[AabbTrajectoryHazard, ...]
+    annular_sector_trajectories: tuple[AnnularSectorTrajectoryHazard, ...]
     piecewise_aabbs: tuple[PiecewiseAabbHazard, ...]
     segments: tuple[SegmentHazard, ...]
     segment_trajectories: tuple[SegmentTrajectoryHazard, ...]
@@ -72,6 +74,9 @@ def prepare_corridor_problem(
     robust_control: RobustControlSpec,
     aabbs: tuple[MovingAabbHazard, ...] = (),
     aabb_trajectories: tuple[AabbTrajectoryHazard, ...] = (),
+    annular_sector_trajectories: tuple[
+        AnnularSectorTrajectoryHazard, ...
+    ] = (),
     piecewise_aabbs: tuple[PiecewiseAabbHazard, ...] = (),
     segments: tuple[SegmentHazard, ...] = (),
     segment_trajectories: tuple[SegmentTrajectoryHazard, ...] = (),
@@ -88,6 +93,7 @@ def prepare_corridor_problem(
         grid_y,
         aabbs=aabbs,
         aabb_trajectories=aabb_trajectories,
+        annular_sector_trajectories=annular_sector_trajectories,
         piecewise_aabbs=piecewise_aabbs,
         segments=segments,
         segment_trajectories=segment_trajectories,
@@ -134,6 +140,7 @@ def prepare_corridor_problem(
         survival_query_problem=survival_query_problem,
         aabbs=aabbs,
         aabb_trajectories=aabb_trajectories,
+        annular_sector_trajectories=annular_sector_trajectories,
         piecewise_aabbs=piecewise_aabbs,
         segments=segments,
         segment_trajectories=segment_trajectories,

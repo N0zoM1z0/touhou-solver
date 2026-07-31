@@ -63,6 +63,23 @@ required hazard version exactly. Missing prefix certification, unavailable
 signed action values, interval/version mismatch, or unknown future
 birth/event geometry yields `allowed_actions = None`.
 
+For supported ordinary nonspells, native collision-control projection v12
+captures the manager singleton and ordinary enemy main/auxiliary ECL roots,
+installed callback gates, emission/template state, phase/motion state, and
+timeline runtime. A fail-closed source executor advances every reachable
+producer for 268 frames. Possible bullets become continuous annular-sector
+trajectories; possible contact bodies become time-indexed AABBs. Random,
+aimed, and player-dependent values remain bounded sets. Unsupported opcode,
+callback, timeline gate, motion, content identity, spell state, or nonunit
+scale makes the slab `UNKNOWN`.
+
+The exact projection object used by the asynchronous corridor solve is
+retained with that policy. At a later observation, its physical clock is
+rebased without extrapolation. The same versioned geometry is consumed during
+every active/held/pending root-to-publication prefix query and by the future
+corridor horizon. A complete coverage record without this geometric
+consumption cannot authorize input.
+
 Physical run `20260731_152921` found two independent invalidations. First,
 `player+0xE2A68` retains the deathbomb-window limit installed by
 `0x0044AB40`; it is not a zero-when-alive predeath predicate, so all 7,202
@@ -72,12 +89,15 @@ an uncontrollable prefix or playfield clamp dominates scalar minimum reserve.
 This finite boundary calculation may remain diagnostic, but its allowed set
 must not be treated as survival authority.
 
-The set-valued predecessor and phase/pipeline/publication mechanics now exist.
-The missing ordinary contract is bounded future hostile birth/event coverage.
-The retained f817/833/835/850/910 source run also predates signed per-action
-terminal values, so it cannot prove a nontrivial hard set. Until both are
-available, the replacement fails closed and no ordinary global action
-authority reaches input.
+The set-valued predecessor, phase/pipeline/publication mechanics, and bounded
+ordinary future-source coverage now pass the retained deterministic gate.
+Observation-aligned immutable replay roots 816/831/834/848/908 supply fresh
+signed per-action terminal values for f817/833/835/850/910. Every root has
+complete interval/version coverage and zero unavailable terminal branches.
+The f817 hard set has eight actions and excludes active `up_fast` and issued
+`up_left_fast`; f833/f835 remain nonempty; f850/f910 correctly retain empty
+predecessors. The feature remains default-off until the authorized Stage-4A
+physical trial establishes live delivery and effect.
 
 Removed supplemental, candidate-verifier, prewarm, G5, and priority-17 lanes
 have no active code or strategy authority.
@@ -218,8 +238,10 @@ configuration but never reached action authority. Native semantics invalidate
 its zero-`+0xE2A68` gate, and retained-root counterfactuals invalidate scalar
 boundary reserve as an equivalent global filter. No Stage-5 follow-up or
 local-ranking evaluation is authorized from this result. The replacement
-now supplies the set-valued pickup/publication predecessor; bounded
-future-birth/event coverage remains the unresolved promotion condition.
+now supplies the set-valued pickup/publication predecessor and bounded
+future-birth/event coverage. The unresolved promotion condition is physical
+Stage-4A delivery/effectiveness under deadline-safe hard no-Bomb, followed by
+a rotated workload if it materially improves.
 
 ## Falsification And Promotion
 

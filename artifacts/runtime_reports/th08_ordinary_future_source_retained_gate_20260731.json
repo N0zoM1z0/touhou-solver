@@ -1,0 +1,3213 @@
+{
+  "schema": "th08-ordinary-future-source-retained-gate-v2",
+  "scope": "ordinary_nonspell_only",
+  "authority": "deterministic_native_replay_regression_not_physical_outcome",
+  "source": {
+    "physical_run_id": "lunatic_route2_stage4a_unattended_20260731_152921",
+    "trace_path": "artifacts/runtime_reports/lunatic_route2_stage4a_unattended_20260731_152921.jsonl",
+    "trace_sha256": "7a74c3c691c58ac74b0b273623016d9956fc93c7466da17c46f2e10afa16d345",
+    "historical_gate_path": "artifacts/runtime_reports/th08_ordinary_prepublication_retained_gate_20260731.json",
+    "historical_gate_sha256": "405b2cc537cd7fc7389b0a1e896fdaee439753f88f954e23af005d96a9603b88",
+    "accepted_replay_sha256": "4588af47384d38ed0b50f51299b836c0a03972f11f93c0ec48a8845a45e1a990",
+    "ecl_path": "artifacts/decoded/ecldata4a.ecl",
+    "ecl_sha256": "797c83391c77d386abd264249224821be3d878fcf73b2bd71189dbfd3776f6cf",
+    "hard_no_bomb": true
+  },
+  "contract": {
+    "future_source_horizon_frames": 268,
+    "publication_lead_frames": 16,
+    "pickup_delay_frames": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ],
+    "prefix_hold_frames": 10,
+    "corridor_horizon_frames": 80,
+    "safety_value_horizon_frames": 32,
+    "future_geometry_before_publication": "consumed_by_exact_local_pipeline_prefix",
+    "future_geometry_after_publication": "consumed_by_corridor_hazard_space_policy",
+    "unsupported_source_semantics": "fail_closed"
+  },
+  "chain": [
+    {
+      "decision_frame": 817,
+      "observation_frame": 816,
+      "native_root": {
+        "path": "artifacts/native_snapshot_rolling/raw/th08_stage4a_obs816_source_v12_rootonly_20260731.json",
+        "sha256": "45888c1bec3db053f08a5c985be403e5ad105e6bfb7adb69bb5880a337b9186e",
+        "trial_schema": "th08-native-snapshot-rolling-trial-v12",
+        "projection_schema": "th08-native-snapshot-collision-control-projection-v12",
+        "projection_sha256": "c8e75ba32790b6997bd49810b5313b9b99a25cc136ac62218ec62a1694bfea0a",
+        "status": "native_collision_control_root_capture_passed",
+        "replay_sha256": "4588af47384d38ed0b50f51299b836c0a03972f11f93c0ec48a8845a45e1a990",
+        "thread_epoch_stable": true
+      },
+      "trace_alignment": {
+        "snapshot_frame": 816,
+        "player_root_exact": true,
+        "player_phase": 0,
+        "predeath_counter": 10,
+        "issued_action": "up_left_fast"
+      },
+      "pipeline_root": {
+        "active_action": "up_fast",
+        "held_desired_action": "up_fast",
+        "pending_action": null,
+        "remaining_delay_support": [],
+        "held_desired_mask": 17,
+        "issue_age": 0,
+        "overdue": false
+      },
+      "current_hazards": {
+        "bullets": 316,
+        "lasers": 0,
+        "observed_enemy_bodies": 10,
+        "contact_enabled_enemy_bodies": 0
+      },
+      "future_source_closure": {
+        "schema": "th08-ordinary-future-hazard-projection-v3-annular-sector-and-aabb",
+        "root_frame": 816,
+        "horizon_frames": 268,
+        "source_closure_complete": true,
+        "source_closure_reason": null,
+        "source_semantics_version": "th08-ordinary-future-sources-v2-set-valued-timeline-spawn",
+        "producer_count": 1,
+        "trajectory_count": 0,
+        "aabb_trajectory_count": 1,
+        "digest": "3187d583d79f5e0bb9491279a8accb44d5b21426adc629a773c8e2ca2d1c97f8",
+        "version": {
+          "namespace": "th08-ordinary-future-hazard-projection-v3",
+          "components": {
+            "digest": "3187d583d79f5e0bb9491279a8accb44d5b21426adc629a773c8e2ca2d1c97f8",
+            "horizon_frames": 268,
+            "root_frame": 816,
+            "source_semantics_version": "th08-ordinary-future-sources-v2-set-valued-timeline-spawn"
+          }
+        },
+        "coverage": {
+          "role": "shadow_no_action_authority",
+          "root_frame": 816,
+          "horizon_frame": 1084,
+          "covered_through_frame": 1084,
+          "unknown_from_frame": null,
+          "status": "complete",
+          "reason": null,
+          "slabs": [
+            {
+              "start_frame": 817,
+              "end_frame": 1084,
+              "coverage_class": "BOUNDED_ENVELOPE",
+              "authority_eligible": true,
+              "source": "th08_ordinary_future_sources",
+              "version": {
+                "namespace": "th08-ordinary-future-hazard-projection-v3",
+                "components": {
+                  "digest": "3187d583d79f5e0bb9491279a8accb44d5b21426adc629a773c8e2ca2d1c97f8",
+                  "horizon_frames": 268,
+                  "root_frame": 816,
+                  "source_semantics_version": "th08-ordinary-future-sources-v2-set-valued-timeline-spawn"
+                }
+              },
+              "rationale": "all reachable ordinary ECL/timeline producers were lowered into consumed continuous annular-sector and future hostile-body AABB envelopes"
+            }
+          ]
+        },
+        "closure_wall_ms": 19.94536600250285,
+        "source_count": 12,
+        "auxiliary_count": 0,
+        "silent_child_count": 0,
+        "timeline_steps": 268,
+        "timeline_spawn_count": 1,
+        "direct_fire_event_count": 0
+      },
+      "corridor": {
+        "source_frame": 832,
+        "publication_lead_frames": 16,
+        "forecast_player": [
+          288.15045166015625,
+          340.68780517578125
+        ],
+        "reachable": false,
+        "reason": "initial robust viability action set is empty",
+        "solve_ms": 607.3877899907529,
+        "solve_wall_ms": 608.3000319922576,
+        "viability_backend": "native",
+        "viable_state_count_layer0": 3820,
+        "initial_safe_action_count": 0,
+        "bottleneck_clearance": null,
+        "future_projection_retained_for_prefix": true
+      },
+      "publication_prefix": {
+        "frames": 16,
+        "pickup_delay_frames": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "selected_hold_frames": 10,
+        "future_projection_consumed": true,
+        "future_projection_version": {
+          "namespace": "th08-ordinary-future-hazard-projection-v3",
+          "components": {
+            "digest": "3187d583d79f5e0bb9491279a8accb44d5b21426adc629a773c8e2ca2d1c97f8",
+            "horizon_frames": 268,
+            "root_frame": 816,
+            "source_semantics_version": "th08-ordinary-future-sources-v2-set-valued-timeline-spawn"
+          }
+        },
+        "safe_actions": [
+          "stay",
+          "left",
+          "right",
+          "up",
+          "down",
+          "up_left",
+          "up_right",
+          "down_left",
+          "down_right",
+          "left_fast",
+          "right_fast",
+          "up_fast",
+          "down_fast",
+          "up_left_fast",
+          "up_right_fast",
+          "down_left_fast",
+          "down_right_fast"
+        ],
+        "certificates": [
+          {
+            "action": "stay",
+            "write_required": true,
+            "pipeline_branch_count": 7,
+            "worst_collisions": 0,
+            "min_clearance": 22.021129608154297,
+            "cvar_risk": 1129.8503076932393,
+            "worst_new_delay": 0,
+            "worst_pending_remaining": null
+          },
+          {
+            "action": "left",
+            "write_required": true,
+            "pipeline_branch_count": 7,
+            "worst_collisions": 0,
+            "min_clearance": 22.021129608154297,
+            "cvar_risk": 1044.9313327521086,
+            "worst_new_delay": 0,
+            "worst_pending_remaining": null
+          },
+          {
+            "action": "right",
+            "write_required": true,
+            "pipeline_branch_count": 7,
+            "worst_collisions": 0,
+            "min_clearance": 22.021129608154297,
+            "cvar_risk": 2088.7372620105743,
+            "worst_new_delay": 0,
+            "worst_pending_remaining": null
+          },
+          {
+            "action": "up",
+            "write_required": true,
+            "pipeline_branch_count": 7,
+            "worst_collisions": 0,
+            "min_clearance": 20.692712783813477,
+            "cvar_risk": 1764.2567208067048,
+            "worst_new_delay": 6,
+            "worst_pending_remaining": null
+          },
+          {
+            "action": "down",
+            "write_required": true,
+            "pipeline_branch_count": 7,
+            "worst_collisions": 0,
+            "min_clearance": 14.387527465820312,
+            "cvar_risk": 5280.127865922637,
+            "worst_new_delay": 0,
+            "worst_pending_remaining": null
+          },
+          {
+            "action": "up_left",
+            "write_required": true,
+            "pipeline_branch_count": 7,
+            "worst_collisions": 0,
+            "min_clearance": 17.042024612426758,
+            "cvar_risk": 1506.857173293829,
+            "worst_new_delay": 6,
+            "worst_pending_remaining": null
+          },
+          {
+            "action": "up_right",
+            "write_required": true,
+            "pipeline_branch_count": 7,
+            "worst_collisions": 0,
+            "min_clearance": 23.647472381591797,
+            "cvar_risk": 1349.7816909858957,
+            "worst_new_delay": 0,
+            "worst_pending_remaining": null
+          },
+          {
+            "action": "down_left",
+            "write_required": true,
+            "pipeline_branch_count": 7,
+            "worst_collisions": 0,
+            "min_clearance": 20.394786834716797,
+            "cvar_risk": 2319.9678200976923,
+            "worst_new_delay": 0,
+            "worst_pending_remaining": null
+          },
+          {
+            "action": "down_right",
+            "write_required": true,
+            "pipeline_branch_count": 7,
+            "worst_collisions": 0,
+            "min_clearance": 20.394786834716797,
+            "cvar_risk": 3324.6239773863927,
+            "worst_new_delay": 0,
+            "worst_pending_remaining": null
+          },
+          {
+            "action": "left_fast",
+            "write_required": true,
+            "pipeline_branch_count": 7,
+            "worst_collisions": 0,
+            "min_clearance": 22.051597595214844,
+            "cvar_risk": 1004.3462482085451,
+            "worst_new_delay": 0,
+            "worst_pending_remaining": null
+          },
+          {
+            "action": "right_fast",
+            "write_required": true,
+            "pipeline_branch_count": 7,
+            "worst_collisions": 0,
+            "min_clearance": 8.351823806762695,
+            "cvar_risk": 9725.329221725464,
+            "worst_new_delay": 0,
+            "worst_pending_remaining": null
+          },
+          {
+            "action": "up_fast",
+            "write_required": false,
+            "pipeline_branch_count": 1,
+            "worst_collisions": 0,
+            "min_clearance": 9.765212059020996,
+            "cvar_risk": 4262.43255409089,
+            "worst_new_delay": null,
+            "worst_pending_remaining": null
+          },
+          {
+            "action": "down_fast",
+            "write_required": true,
+            "pipeline_branch_count": 7,
+            "worst_collisions": 0,
+            "min_clearance": 5.2676544189453125,
+            "cvar_risk": 10207.429318312556,
+            "worst_new_delay": 0,
+            "worst_pending_remaining": null
+          },
+          {
+            "action": "up_left_fast",
+            "write_required": true,
+            "pipeline_branch_count": 7,
+            "worst_collisions": 0,
+            "min_clearance": 5.160713195800781,
+            "cvar_risk": 4003.698119015433,
+            "worst_new_delay": 6,
+            "worst_pending_remaining": null
+          },
+          {
+            "action": "up_right_fast",
+            "write_required": true,
+            "pipeline_branch_count": 7,
+            "worst_collisions": 0,
+            "min_clearance": 9.57554817199707,
+            "cvar_risk": 5818.4273891448975,
+            "worst_new_delay": 3,
+            "worst_pending_remaining": null
+          },
+          {
+            "action": "down_left_fast",
+            "write_required": true,
+            "pipeline_branch_count": 7,
+            "worst_collisions": 0,
+            "min_clearance": 18.23847198486328,
+            "cvar_risk": 5096.700677528977,
+            "worst_new_delay": 0,
+            "worst_pending_remaining": null
+          },
+          {
+            "action": "down_right_fast",
+            "write_required": true,
+            "pipeline_branch_count": 7,
+            "worst_collisions": 0,
+            "min_clearance": 9.763516426086426,
+            "cvar_risk": 8695.942937985063,
+            "worst_new_delay": 0,
+            "worst_pending_remaining": null
+          }
+        ]
+      },
+      "causal_predecessor": {
+        "schema": "causal-prepublication-viability-predecessor-v1",
+        "role": "hazard_space_prepublication_action_authority",
+        "enabled": true,
+        "state_eligible": true,
+        "coverage_complete": true,
+        "authority_eligible": true,
+        "applicable": true,
+        "reason": "prepublication_viable_actions_found",
+        "allowed_actions": [
+          "stay",
+          "left",
+          "down",
+          "down_left",
+          "down_right",
+          "left_fast",
+          "down_fast",
+          "down_left_fast"
+        ],
+        "candidate_viable_actions": [
+          "stay",
+          "left",
+          "down",
+          "down_left",
+          "down_right",
+          "left_fast",
+          "down_fast",
+          "down_left_fast"
+        ],
+        "recovery_actions": [
+          "stay"
+        ],
+        "current_frame": 816,
+        "publication_frame": 832,
+        "publication_lead_frames": 16,
+        "policy_query_frame": 0,
+        "pickup_delay_frames": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "prefix_certified_frames": 16,
+        "prefix_safe_actions": [
+          "stay",
+          "left",
+          "right",
+          "up",
+          "down",
+          "up_left",
+          "up_right",
+          "down_left",
+          "down_right",
+          "left_fast",
+          "right_fast",
+          "up_fast",
+          "down_fast",
+          "up_left_fast",
+          "up_right_fast",
+          "down_left_fast",
+          "down_right_fast"
+        ],
+        "pipeline_root": {
+          "active_action": "up_fast",
+          "held_desired_action": "up_fast",
+          "pending_action": null
+        },
+        "pickup_clock_authority": "every_physical_pickup_order_before_publication_complete_mask_hold_is_no_write",
+        "observation_merge": "all_hidden_pickup_branches_universal_before_future_choice",
+        "terminal_set": "action_conditioned_hazard_space_viability_not_scalar_reserve",
+        "coverage": {
+          "role": "shadow_no_action_authority",
+          "root_frame": 816,
+          "horizon_frame": 1084,
+          "covered_through_frame": 1084,
+          "unknown_from_frame": null,
+          "status": "complete",
+          "reason": null,
+          "slabs": [
+            {
+              "start_frame": 817,
+              "end_frame": 1084,
+              "coverage_class": "BOUNDED_ENVELOPE",
+              "authority_eligible": true,
+              "source": "th08_ordinary_future_sources",
+              "version": {
+                "namespace": "th08-ordinary-future-hazard-projection-v3",
+                "components": {
+                  "digest": "3187d583d79f5e0bb9491279a8accb44d5b21426adc629a773c8e2ca2d1c97f8",
+                  "horizon_frames": 268,
+                  "root_frame": 816,
+                  "source_semantics_version": "th08-ordinary-future-sources-v2-set-valued-timeline-spawn"
+                }
+              },
+              "rationale": "all reachable ordinary ECL/timeline producers were lowered into consumed continuous annular-sector and future hostile-body AABB envelopes"
+            }
+          ]
+        },
+        "required_hazard_version": {
+          "namespace": "th08-ordinary-future-hazard-projection-v3",
+          "components": {
+            "digest": "3187d583d79f5e0bb9491279a8accb44d5b21426adc629a773c8e2ca2d1c97f8",
+            "horizon_frames": 268,
+            "root_frame": 816,
+            "source_semantics_version": "th08-ordinary-future-sources-v2-set-valued-timeline-spawn"
+          }
+        },
+        "actions": [
+          {
+            "action": "stay",
+            "branch_count": 7,
+            "viable_branch_count": 7,
+            "unavailable_branch_count": 0,
+            "all_branches_viable": true,
+            "worst_certified_margin": 21.279503399823493,
+            "worst_recovery_distance": 0.0,
+            "terminal_active_actions": [
+              "stay"
+            ]
+          },
+          {
+            "action": "left",
+            "branch_count": 7,
+            "viable_branch_count": 7,
+            "unavailable_branch_count": 0,
+            "all_branches_viable": true,
+            "worst_certified_margin": 12.148993234352034,
+            "worst_recovery_distance": 0.0,
+            "terminal_active_actions": [
+              "left"
+            ]
+          },
+          {
+            "action": "right",
+            "branch_count": 7,
+            "viable_branch_count": 6,
+            "unavailable_branch_count": 0,
+            "all_branches_viable": false,
+            "worst_certified_margin": -0.9109841778677055,
+            "worst_recovery_distance": null,
+            "terminal_active_actions": [
+              "right"
+            ]
+          },
+          {
+            "action": "up",
+            "branch_count": 7,
+            "viable_branch_count": 0,
+            "unavailable_branch_count": 0,
+            "all_branches_viable": false,
+            "worst_certified_margin": -15.66034559931193,
+            "worst_recovery_distance": null,
+            "terminal_active_actions": [
+              "up"
+            ]
+          },
+          {
+            "action": "down",
+            "branch_count": 7,
+            "viable_branch_count": 7,
+            "unavailable_branch_count": 0,
+            "all_branches_viable": true,
+            "worst_certified_margin": 11.337592594053115,
+            "worst_recovery_distance": 0.0,
+            "terminal_active_actions": [
+              "down"
+            ]
+          },
+          {
+            "action": "up_left",
+            "branch_count": 7,
+            "viable_branch_count": 0,
+            "unavailable_branch_count": 0,
+            "all_branches_viable": false,
+            "worst_certified_margin": -13.094431584027241,
+            "worst_recovery_distance": null,
+            "terminal_active_actions": [
+              "up_left"
+            ]
+          },
+          {
+            "action": "up_right",
+            "branch_count": 7,
+            "viable_branch_count": 0,
+            "unavailable_branch_count": 0,
+            "all_branches_viable": false,
+            "worst_certified_margin": -10.01110531067324,
+            "worst_recovery_distance": null,
+            "terminal_active_actions": [
+              "up_right"
+            ]
+          },
+          {
+            "action": "down_left",
+            "branch_count": 7,
+            "viable_branch_count": 7,
+            "unavailable_branch_count": 0,
+            "all_branches_viable": true,
+            "worst_certified_margin": 20.508677170753955,
+            "worst_recovery_distance": 0.0,
+            "terminal_active_actions": [
+              "down_left"
+            ]
+          },
+          {
+            "action": "down_right",
+            "branch_count": 7,
+            "viable_branch_count": 7,
+            "unavailable_branch_count": 0,
+            "all_branches_viable": true,
+            "worst_certified_margin": 1.3572935202133465,
+            "worst_recovery_distance": 0.0,
+            "terminal_active_actions": [
+              "down_right"
+            ]
+          },
+          {
+            "action": "left_fast",
+            "branch_count": 7,
+            "viable_branch_count": 7,
+            "unavailable_branch_count": 0,
+            "all_branches_viable": true,
+            "worst_certified_margin": 1.5954405068294832,
+            "worst_recovery_distance": null,
+            "terminal_active_actions": [
+              "left_fast"
+            ]
+          },
+          {
+            "action": "right_fast",
+            "branch_count": 7,
+            "viable_branch_count": 0,
+            "unavailable_branch_count": 0,
+            "all_branches_viable": false,
+            "worst_certified_margin": -19.913961768255966,
+            "worst_recovery_distance": null,
+            "terminal_active_actions": [
+              "right_fast"
+            ]
+          },
+          {
+            "action": "up_fast",
+            "branch_count": 1,
+            "viable_branch_count": 0,
+            "unavailable_branch_count": 0,
+            "all_branches_viable": false,
+            "worst_certified_margin": -16.136740565405624,
+            "worst_recovery_distance": 35.77708763999664,
+            "terminal_active_actions": [
+              "up_fast"
+            ]
+          },
+          {
+            "action": "down_fast",
+            "branch_count": 7,
+            "viable_branch_count": 7,
+            "unavailable_branch_count": 0,
+            "all_branches_viable": true,
+            "worst_certified_margin": 7.713357567681534,
+            "worst_recovery_distance": 0.0,
+            "terminal_active_actions": [
+              "down_fast"
+            ]
+          },
+          {
+            "action": "up_left_fast",
+            "branch_count": 7,
+            "viable_branch_count": 0,
+            "unavailable_branch_count": 0,
+            "all_branches_viable": false,
+            "worst_certified_margin": -18.845321743481964,
+            "worst_recovery_distance": 48.0,
+            "terminal_active_actions": [
+              "up_left_fast"
+            ]
+          },
+          {
+            "action": "up_right_fast",
+            "branch_count": 7,
+            "viable_branch_count": 0,
+            "unavailable_branch_count": 0,
+            "all_branches_viable": false,
+            "worst_certified_margin": -21.85497121656848,
+            "worst_recovery_distance": null,
+            "terminal_active_actions": [
+              "up_right_fast"
+            ]
+          },
+          {
+            "action": "down_left_fast",
+            "branch_count": 7,
+            "viable_branch_count": 7,
+            "unavailable_branch_count": 0,
+            "all_branches_viable": true,
+            "worst_certified_margin": 18.299530082136645,
+            "worst_recovery_distance": 0.0,
+            "terminal_active_actions": [
+              "down_left_fast"
+            ]
+          },
+          {
+            "action": "down_right_fast",
+            "branch_count": 7,
+            "viable_branch_count": 2,
+            "unavailable_branch_count": 0,
+            "all_branches_viable": false,
+            "worst_certified_margin": -10.117021462116128,
+            "worst_recovery_distance": null,
+            "terminal_active_actions": [
+              "down_right_fast"
+            ]
+          }
+        ]
+      },
+      "directional_summary": {
+        "active_action": "up_fast",
+        "active_action_allowed": false,
+        "active_action_margin": -16.136740565405624,
+        "held_action": "up_fast",
+        "held_action_allowed": false,
+        "held_action_margin": -16.136740565405624,
+        "issued_action": "up_left_fast",
+        "issued_action_allowed": false,
+        "issued_action_margin": -18.845321743481964,
+        "best_action": "stay",
+        "best_margin": 21.279503399823493
+      }
+    },
+    {
+      "decision_frame": 833,
+      "observation_frame": 831,
+      "native_root": {
+        "path": "artifacts/native_snapshot_rolling/raw/th08_stage4a_obs831_source_v12_rootonly_20260731.json",
+        "sha256": "878cbad7ef81aabf90a629cae30f13a016d8e2a01c3433506a546eeeb1439659",
+        "trial_schema": "th08-native-snapshot-rolling-trial-v12",
+        "projection_schema": "th08-native-snapshot-collision-control-projection-v12",
+        "projection_sha256": "a23c13207e006912fbdcdad0d0017ac1649175beac5d59ba4958732a523950fd",
+        "status": "native_collision_control_root_capture_passed",
+        "replay_sha256": "4588af47384d38ed0b50f51299b836c0a03972f11f93c0ec48a8845a45e1a990",
+        "thread_epoch_stable": true
+      },
+      "trace_alignment": {
+        "snapshot_frame": 831,
+        "player_root_exact": true,
+        "player_phase": 0,
+        "predeath_counter": 10,
+        "issued_action": "down_left"
+      },
+      "pipeline_root": {
+        "active_action": "down_left",
+        "held_desired_action": "down_left",
+        "pending_action": null,
+        "remaining_delay_support": [],
+        "held_desired_mask": 101,
+        "issue_age": 0,
+        "overdue": false
+      },
+      "current_hazards": {
+        "bullets": 284,
+        "lasers": 0,
+        "observed_enemy_bodies": 10,
+        "contact_enabled_enemy_bodies": 0
+      },
+      "future_source_closure": {
+        "schema": "th08-ordinary-future-hazard-projection-v3-annular-sector-and-aabb",
+        "root_frame": 831,
+        "horizon_frames": 268,
+        "source_closure_complete": true,
+        "source_closure_reason": null,
+        "source_semantics_version": "th08-ordinary-future-sources-v2-set-valued-timeline-spawn",
+        "producer_count": 1,
+        "trajectory_count": 0,
+        "aabb_trajectory_count": 1,
+        "digest": "2559d8c34d5cd81c019c4e21acdb4b218a0773e13c453919f0e028ff6737c79e",
+        "version": {
+          "namespace": "th08-ordinary-future-hazard-projection-v3",
+          "components": {
+            "digest": "2559d8c34d5cd81c019c4e21acdb4b218a0773e13c453919f0e028ff6737c79e",
+            "horizon_frames": 268,
+            "root_frame": 831,
+            "source_semantics_version": "th08-ordinary-future-sources-v2-set-valued-timeline-spawn"
+          }
+        },
+        "coverage": {
+          "role": "shadow_no_action_authority",
+          "root_frame": 831,
+          "horizon_frame": 1099,
+          "covered_through_frame": 1099,
+          "unknown_from_frame": null,
+          "status": "complete",
+          "reason": null,
+          "slabs": [
+            {
+              "start_frame": 832,
+              "end_frame": 1099,
+              "coverage_class": "BOUNDED_ENVELOPE",
+              "authority_eligible": true,
+              "source": "th08_ordinary_future_sources",
+              "version": {
+                "namespace": "th08-ordinary-future-hazard-projection-v3",
+                "components": {
+                  "digest": "2559d8c34d5cd81c019c4e21acdb4b218a0773e13c453919f0e028ff6737c79e",
+                  "horizon_frames": 268,
+                  "root_frame": 831,
+                  "source_semantics_version": "th08-ordinary-future-sources-v2-set-valued-timeline-spawn"
+                }
+              },
+              "rationale": "all reachable ordinary ECL/timeline producers were lowered into consumed continuous annular-sector and future hostile-body AABB envelopes"
+            }
+          ]
+        },
+        "closure_wall_ms": 18.197897996287793,
+        "source_count": 12,
+        "auxiliary_count": 0,
+        "silent_child_count": 0,
+        "timeline_steps": 268,
+        "timeline_spawn_count": 1,
+        "direct_fire_event_count": 0
+      },
+      "corridor": {
+        "source_frame": 847,
+        "publication_lead_frames": 16,
+        "forecast_player": [
+          250.3909912109375,
+          417.4766845703125
+        ],
+        "reachable": false,
+        "reason": "initial robust viability action set is empty",
+        "solve_ms": 592.0349410007475,
+        "solve_wall_ms": 592.1603250026237,
+        "viability_backend": "native",
+        "viable_state_count_layer0": 3677,
+        "initial_safe_action_count": 0,
+        "bottleneck_clearance": null,
+        "future_projection_retained_for_prefix": true
+      },
+      "publication_prefix": {
+        "frames": 16,
+        "pickup_delay_frames": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "selected_hold_frames": 10,
+        "future_projection_consumed": true,
+        "future_projection_version": {
+          "namespace": "th08-ordinary-future-hazard-projection-v3",
+          "components": {
+            "digest": "2559d8c34d5cd81c019c4e21acdb4b218a0773e13c453919f0e028ff6737c79e",
+            "horizon_frames": 268,
+            "root_frame": 831,
+            "source_semantics_version": "th08-ordinary-future-sources-v2-set-valued-timeline-spawn"
+          }
+        },
+        "safe_actions": [
+          "stay",
+          "left",
+          "right",
+          "down",
+          "up_right",
+          "down_left",
+          "down_right",
+          "left_fast",
+          "right_fast",
+          "down_fast",
+          "up_right_fast",
+          "down_left_fast",
+          "down_right_fast"
+        ],
+        "certificates": [
+          {
+            "action": "stay",
+            "write_required": true,
+            "pipeline_branch_count": 7,
+            "worst_collisions": 0,
+            "min_clearance": 24.817983627319336,
+            "cvar_risk": 948.8346806624904,
+            "worst_new_delay": 0,
+            "worst_pending_remaining": null
+          },
+          {
+            "action": "left",
+            "write_required": true,
+            "pipeline_branch_count": 7,
+            "worst_collisions": 0,
+            "min_clearance": 17.40574836730957,
+            "cvar_risk": 2676.053052455187,
+            "worst_new_delay": 0,
+            "worst_pending_remaining": null
+          },
+          {
+            "action": "right",
+            "write_required": true,
+            "pipeline_branch_count": 7,
+            "worst_collisions": 0,
+            "min_clearance": 37.45367431640625,
+            "cvar_risk": 85.73283684719354,
+            "worst_new_delay": 0,
+            "worst_pending_remaining": null
+          },
+          {
+            "action": "up",
+            "write_required": true,
+            "pipeline_branch_count": 7,
+            "worst_collisions": 1,
+            "min_clearance": -2.445782423019409,
+            "cvar_risk": 10282.62484253943,
+            "worst_new_delay": 2,
+            "worst_pending_remaining": null
+          },
+          {
+            "action": "down",
+            "write_required": true,
+            "pipeline_branch_count": 7,
+            "worst_collisions": 0,
+            "min_clearance": 46.44229507446289,
+            "cvar_risk": 258.60739348456264,
+            "worst_new_delay": 1,
+            "worst_pending_remaining": null
+          },
+          {
+            "action": "up_left",
+            "write_required": true,
+            "pipeline_branch_count": 7,
+            "worst_collisions": 1,
+            "min_clearance": -2.2562224864959717,
+            "cvar_risk": 13042.637081515044,
+            "worst_new_delay": 0,
+            "worst_pending_remaining": null
+          },
+          {
+            "action": "up_right",
+            "write_required": true,
+            "pipeline_branch_count": 7,
+            "worst_collisions": 0,
+            "min_clearance": 11.716773986816406,
+            "cvar_risk": 3322.8636145619676,
+            "worst_new_delay": 0,
+            "worst_pending_remaining": null
+          },
+          {
+            "action": "down_left",
+            "write_required": false,
+            "pipeline_branch_count": 1,
+            "worst_collisions": 0,
+            "min_clearance": 44.72499465942383,
+            "cvar_risk": 0.0,
+            "worst_new_delay": null,
+            "worst_pending_remaining": null
+          },
+          {
+            "action": "down_right",
+            "write_required": true,
+            "pipeline_branch_count": 7,
+            "worst_collisions": 0,
+            "min_clearance": 46.44229507446289,
+            "cvar_risk": 0.0,
+            "worst_new_delay": 1,
+            "worst_pending_remaining": null
+          },
+          {
+            "action": "left_fast",
+            "write_required": true,
+            "pipeline_branch_count": 7,
+            "worst_collisions": 0,
+            "min_clearance": 20.84068489074707,
+            "cvar_risk": 2720.304565399885,
+            "worst_new_delay": 0,
+            "worst_pending_remaining": null
+          },
+          {
+            "action": "right_fast",
+            "write_required": true,
+            "pipeline_branch_count": 7,
+            "worst_collisions": 0,
+            "min_clearance": 14.406786918640137,
+            "cvar_risk": 1646.2438554167747,
+            "worst_new_delay": 0,
+            "worst_pending_remaining": null
+          },
+          {
+            "action": "up_fast",
+            "write_required": true,
+            "pipeline_branch_count": 7,
+            "worst_collisions": 2,
+            "min_clearance": -3.3767800331115723,
+            "cvar_risk": 16966.22849214077,
+            "worst_new_delay": 4,
+            "worst_pending_remaining": null
+          },
+          {
+            "action": "down_fast",
+            "write_required": true,
+            "pipeline_branch_count": 7,
+            "worst_collisions": 0,
+            "min_clearance": 46.44229507446289,
+            "cvar_risk": 2798.6625529155135,
+            "worst_new_delay": 1,
+            "worst_pending_remaining": null
+          },
+          {
+            "action": "up_left_fast",
+            "write_required": true,
+            "pipeline_branch_count": 7,
+            "worst_collisions": 4,
+            "min_clearance": -3.3718667030334473,
+            "cvar_risk": 26381.39311876893,
+            "worst_new_delay": 0,
+            "worst_pending_remaining": null
+          },
+          {
+            "action": "up_right_fast",
+            "write_required": true,
+            "pipeline_branch_count": 7,
+            "worst_collisions": 0,
+            "min_clearance": 1.2405827045440674,
+            "cvar_risk": 6654.16893824935,
+            "worst_new_delay": 2,
+            "worst_pending_remaining": null
+          },
+          {
+            "action": "down_left_fast",
+            "write_required": true,
+            "pipeline_branch_count": 7,
+            "worst_collisions": 0,
+            "min_clearance": 46.44229507446289,
+            "cvar_risk": 1267.7482095463201,
+            "worst_new_delay": 1,
+            "worst_pending_remaining": null
+          },
+          {
+            "action": "down_right_fast",
+            "write_required": true,
+            "pipeline_branch_count": 7,
+            "worst_collisions": 0,
+            "min_clearance": 42.364013671875,
+            "cvar_risk": 1268.1130926115438,
+            "worst_new_delay": 0,
+            "worst_pending_remaining": null
+          }
+        ]
+      },
+      "causal_predecessor": {
+        "schema": "causal-prepublication-viability-predecessor-v1",
+        "role": "hazard_space_prepublication_action_authority",
+        "enabled": true,
+        "state_eligible": true,
+        "coverage_complete": true,
+        "authority_eligible": true,
+        "applicable": true,
+        "reason": "prepublication_viable_actions_found",
+        "allowed_actions": [
+          "down",
+          "down_left",
+          "down_right",
+          "down_fast",
+          "down_left_fast"
+        ],
+        "candidate_viable_actions": [
+          "down",
+          "down_left",
+          "down_right",
+          "down_fast",
+          "down_left_fast"
+        ],
+        "recovery_actions": [
+          "down_left"
+        ],
+        "current_frame": 831,
+        "publication_frame": 847,
+        "publication_lead_frames": 16,
+        "policy_query_frame": 0,
+        "pickup_delay_frames": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "prefix_certified_frames": 16,
+        "prefix_safe_actions": [
+          "stay",
+          "left",
+          "right",
+          "down",
+          "up_right",
+          "down_left",
+          "down_right",
+          "left_fast",
+          "right_fast",
+          "down_fast",
+          "up_right_fast",
+          "down_left_fast",
+          "down_right_fast"
+        ],
+        "pipeline_root": {
+          "active_action": "down_left",
+          "held_desired_action": "down_left",
+          "pending_action": null
+        },
+        "pickup_clock_authority": "every_physical_pickup_order_before_publication_complete_mask_hold_is_no_write",
+        "observation_merge": "all_hidden_pickup_branches_universal_before_future_choice",
+        "terminal_set": "action_conditioned_hazard_space_viability_not_scalar_reserve",
+        "coverage": {
+          "role": "shadow_no_action_authority",
+          "root_frame": 831,
+          "horizon_frame": 1099,
+          "covered_through_frame": 1099,
+          "unknown_from_frame": null,
+          "status": "complete",
+          "reason": null,
+          "slabs": [
+            {
+              "start_frame": 832,
+              "end_frame": 1099,
+              "coverage_class": "BOUNDED_ENVELOPE",
+              "authority_eligible": true,
+              "source": "th08_ordinary_future_sources",
+              "version": {
+                "namespace": "th08-ordinary-future-hazard-projection-v3",
+                "components": {
+                  "digest": "2559d8c34d5cd81c019c4e21acdb4b218a0773e13c453919f0e028ff6737c79e",
+                  "horizon_frames": 268,
+                  "root_frame": 831,
+                  "source_semantics_version": "th08-ordinary-future-sources-v2-set-valued-timeline-spawn"
+                }
+              },
+              "rationale": "all reachable ordinary ECL/timeline producers were lowered into consumed continuous annular-sector and future hostile-body AABB envelopes"
+            }
+          ]
+        },
+        "required_hazard_version": {
+          "namespace": "th08-ordinary-future-hazard-projection-v3",
+          "components": {
+            "digest": "2559d8c34d5cd81c019c4e21acdb4b218a0773e13c453919f0e028ff6737c79e",
+            "horizon_frames": 268,
+            "root_frame": 831,
+            "source_semantics_version": "th08-ordinary-future-sources-v2-set-valued-timeline-spawn"
+          }
+        },
+        "actions": [
+          {
+            "action": "stay",
+            "branch_count": 7,
+            "viable_branch_count": 0,
+            "unavailable_branch_count": 0,
+            "all_branches_viable": false,
+            "worst_certified_margin": -9.89327974403097,
+            "worst_recovery_distance": 112.0,
+            "terminal_active_actions": [
+              "stay"
+            ]
+          },
+          {
+            "action": "left",
+            "branch_count": 7,
+            "viable_branch_count": 0,
+            "unavailable_branch_count": 0,
+            "all_branches_viable": false,
+            "worst_certified_margin": -14.536721911723609,
+            "worst_recovery_distance": 80.0,
+            "terminal_active_actions": [
+              "left"
+            ]
+          },
+          {
+            "action": "right",
+            "branch_count": 7,
+            "viable_branch_count": 4,
+            "unavailable_branch_count": 0,
+            "all_branches_viable": false,
+            "worst_certified_margin": -4.943963921058867,
+            "worst_recovery_distance": 150.94369811290565,
+            "terminal_active_actions": [
+              "right"
+            ]
+          },
+          {
+            "action": "up",
+            "branch_count": 7,
+            "viable_branch_count": 0,
+            "unavailable_branch_count": 0,
+            "all_branches_viable": false,
+            "worst_certified_margin": -17.17858935114142,
+            "worst_recovery_distance": 101.19288512538814,
+            "terminal_active_actions": [
+              "up"
+            ]
+          },
+          {
+            "action": "down",
+            "branch_count": 7,
+            "viable_branch_count": 7,
+            "unavailable_branch_count": 0,
+            "all_branches_viable": true,
+            "worst_certified_margin": 4.483365520245728,
+            "worst_recovery_distance": 112.0,
+            "terminal_active_actions": [
+              "down"
+            ]
+          },
+          {
+            "action": "up_left",
+            "branch_count": 7,
+            "viable_branch_count": 0,
+            "unavailable_branch_count": 0,
+            "all_branches_viable": false,
+            "worst_certified_margin": -22.468775217668686,
+            "worst_recovery_distance": 80.0,
+            "terminal_active_actions": [
+              "up_left"
+            ]
+          },
+          {
+            "action": "up_right",
+            "branch_count": 7,
+            "viable_branch_count": 0,
+            "unavailable_branch_count": 0,
+            "all_branches_viable": false,
+            "worst_certified_margin": -20.902422804272607,
+            "worst_recovery_distance": 121.85236969382254,
+            "terminal_active_actions": [
+              "up_right"
+            ]
+          },
+          {
+            "action": "down_left",
+            "branch_count": 1,
+            "viable_branch_count": 1,
+            "unavailable_branch_count": 0,
+            "all_branches_viable": true,
+            "worst_certified_margin": 11.159803144664961,
+            "worst_recovery_distance": 80.0,
+            "terminal_active_actions": [
+              "down_left"
+            ]
+          },
+          {
+            "action": "down_right",
+            "branch_count": 7,
+            "viable_branch_count": 7,
+            "unavailable_branch_count": 0,
+            "all_branches_viable": true,
+            "worst_certified_margin": 1.6777194636952615,
+            "worst_recovery_distance": 144.0,
+            "terminal_active_actions": [
+              "down_right"
+            ]
+          },
+          {
+            "action": "left_fast",
+            "branch_count": 7,
+            "viable_branch_count": 1,
+            "unavailable_branch_count": 0,
+            "all_branches_viable": false,
+            "worst_certified_margin": -13.531592684196854,
+            "worst_recovery_distance": 64.0,
+            "terminal_active_actions": [
+              "left_fast"
+            ]
+          },
+          {
+            "action": "right_fast",
+            "branch_count": 7,
+            "viable_branch_count": 1,
+            "unavailable_branch_count": 0,
+            "all_branches_viable": false,
+            "worst_certified_margin": -18.316862421440504,
+            "worst_recovery_distance": 170.0823330037544,
+            "terminal_active_actions": [
+              "right_fast"
+            ]
+          },
+          {
+            "action": "up_fast",
+            "branch_count": 7,
+            "viable_branch_count": 0,
+            "unavailable_branch_count": 0,
+            "all_branches_viable": false,
+            "worst_certified_margin": -19.727690058159254,
+            "worst_recovery_distance": 97.32420048477151,
+            "terminal_active_actions": [
+              "up_fast"
+            ]
+          },
+          {
+            "action": "down_fast",
+            "branch_count": 7,
+            "viable_branch_count": 7,
+            "unavailable_branch_count": 0,
+            "all_branches_viable": true,
+            "worst_certified_margin": 6.436587333679199,
+            "worst_recovery_distance": 112.0,
+            "terminal_active_actions": [
+              "down_fast"
+            ]
+          },
+          {
+            "action": "up_left_fast",
+            "branch_count": 7,
+            "viable_branch_count": 0,
+            "unavailable_branch_count": 0,
+            "all_branches_viable": false,
+            "worst_certified_margin": -19.76226492846572,
+            "worst_recovery_distance": 65.96969000988257,
+            "terminal_active_actions": [
+              "up_left_fast"
+            ]
+          },
+          {
+            "action": "up_right_fast",
+            "branch_count": 7,
+            "viable_branch_count": 0,
+            "unavailable_branch_count": 0,
+            "all_branches_viable": false,
+            "worst_certified_margin": -22.38695678417278,
+            "worst_recovery_distance": 115.37764081484765,
+            "terminal_active_actions": [
+              "up_right_fast"
+            ]
+          },
+          {
+            "action": "down_left_fast",
+            "branch_count": 7,
+            "viable_branch_count": 7,
+            "unavailable_branch_count": 0,
+            "all_branches_viable": true,
+            "worst_certified_margin": 5.629175545481627,
+            "worst_recovery_distance": 64.0,
+            "terminal_active_actions": [
+              "down_left_fast"
+            ]
+          },
+          {
+            "action": "down_right_fast",
+            "branch_count": 7,
+            "viable_branch_count": 4,
+            "unavailable_branch_count": 0,
+            "all_branches_viable": false,
+            "worst_certified_margin": -1.6671700477600098,
+            "worst_recovery_distance": 176.0,
+            "terminal_active_actions": [
+              "down_right_fast"
+            ]
+          }
+        ]
+      },
+      "directional_summary": {
+        "active_action": "down_left",
+        "active_action_allowed": true,
+        "active_action_margin": 11.159803144664961,
+        "held_action": "down_left",
+        "held_action_allowed": true,
+        "held_action_margin": 11.159803144664961,
+        "issued_action": "down_left",
+        "issued_action_allowed": true,
+        "issued_action_margin": 11.159803144664961,
+        "best_action": "down_left",
+        "best_margin": 11.159803144664961
+      }
+    },
+    {
+      "decision_frame": 835,
+      "observation_frame": 834,
+      "native_root": {
+        "path": "artifacts/native_snapshot_rolling/raw/th08_stage4a_obs834_source_v12_rootonly_20260731.json",
+        "sha256": "b1749461276176ac20836405a4c806109db9326284c08155784674aa8a8b8ee0",
+        "trial_schema": "th08-native-snapshot-rolling-trial-v12",
+        "projection_schema": "th08-native-snapshot-collision-control-projection-v12",
+        "projection_sha256": "823548bbda9b6db0d28d036480b465d181cbca2b0d741ec9c32a35dc846b7647",
+        "status": "native_collision_control_root_capture_passed",
+        "replay_sha256": "4588af47384d38ed0b50f51299b836c0a03972f11f93c0ec48a8845a45e1a990",
+        "thread_epoch_stable": true
+      },
+      "trace_alignment": {
+        "snapshot_frame": 834,
+        "player_root_exact": true,
+        "player_phase": 0,
+        "predeath_counter": 10,
+        "issued_action": "down_left"
+      },
+      "pipeline_root": {
+        "active_action": "down_left",
+        "held_desired_action": "down_left",
+        "pending_action": null,
+        "remaining_delay_support": [],
+        "held_desired_mask": 101,
+        "issue_age": 0,
+        "overdue": false
+      },
+      "current_hazards": {
+        "bullets": 276,
+        "lasers": 0,
+        "observed_enemy_bodies": 10,
+        "contact_enabled_enemy_bodies": 0
+      },
+      "future_source_closure": {
+        "schema": "th08-ordinary-future-hazard-projection-v3-annular-sector-and-aabb",
+        "root_frame": 834,
+        "horizon_frames": 268,
+        "source_closure_complete": true,
+        "source_closure_reason": null,
+        "source_semantics_version": "th08-ordinary-future-sources-v2-set-valued-timeline-spawn",
+        "producer_count": 1,
+        "trajectory_count": 0,
+        "aabb_trajectory_count": 1,
+        "digest": "026196de541930a1811fd9110f87ca2eb0a7c82fe916702682de64b5f837ebb3",
+        "version": {
+          "namespace": "th08-ordinary-future-hazard-projection-v3",
+          "components": {
+            "digest": "026196de541930a1811fd9110f87ca2eb0a7c82fe916702682de64b5f837ebb3",
+            "horizon_frames": 268,
+            "root_frame": 834,
+            "source_semantics_version": "th08-ordinary-future-sources-v2-set-valued-timeline-spawn"
+          }
+        },
+        "coverage": {
+          "role": "shadow_no_action_authority",
+          "root_frame": 834,
+          "horizon_frame": 1102,
+          "covered_through_frame": 1102,
+          "unknown_from_frame": null,
+          "status": "complete",
+          "reason": null,
+          "slabs": [
+            {
+              "start_frame": 835,
+              "end_frame": 1102,
+              "coverage_class": "BOUNDED_ENVELOPE",
+              "authority_eligible": true,
+              "source": "th08_ordinary_future_sources",
+              "version": {
+                "namespace": "th08-ordinary-future-hazard-projection-v3",
+                "components": {
+                  "digest": "026196de541930a1811fd9110f87ca2eb0a7c82fe916702682de64b5f837ebb3",
+                  "horizon_frames": 268,
+                  "root_frame": 834,
+                  "source_semantics_version": "th08-ordinary-future-sources-v2-set-valued-timeline-spawn"
+                }
+              },
+              "rationale": "all reachable ordinary ECL/timeline producers were lowered into consumed continuous annular-sector and future hostile-body AABB envelopes"
+            }
+          ]
+        },
+        "closure_wall_ms": 17.36963501025457,
+        "source_count": 12,
+        "auxiliary_count": 0,
+        "silent_child_count": 0,
+        "timeline_steps": 268,
+        "timeline_spawn_count": 1,
+        "direct_fire_event_count": 0
+      },
+      "corridor": {
+        "source_frame": 850,
+        "publication_lead_frames": 16,
+        "forecast_player": [
+          245.511962890625,
+          422.355712890625
+        ],
+        "reachable": false,
+        "reason": "initial robust viability action set is empty",
+        "solve_ms": 573.7789569975575,
+        "solve_wall_ms": 573.8811880000867,
+        "viability_backend": "native",
+        "viable_state_count_layer0": 3929,
+        "initial_safe_action_count": 0,
+        "bottleneck_clearance": null,
+        "future_projection_retained_for_prefix": true
+      },
+      "publication_prefix": {
+        "frames": 16,
+        "pickup_delay_frames": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "selected_hold_frames": 10,
+        "future_projection_consumed": true,
+        "future_projection_version": {
+          "namespace": "th08-ordinary-future-hazard-projection-v3",
+          "components": {
+            "digest": "026196de541930a1811fd9110f87ca2eb0a7c82fe916702682de64b5f837ebb3",
+            "horizon_frames": 268,
+            "root_frame": 834,
+            "source_semantics_version": "th08-ordinary-future-sources-v2-set-valued-timeline-spawn"
+          }
+        },
+        "safe_actions": [
+          "stay",
+          "left",
+          "right",
+          "down",
+          "up_right",
+          "down_left",
+          "down_right",
+          "left_fast",
+          "right_fast",
+          "down_fast",
+          "down_left_fast",
+          "down_right_fast"
+        ],
+        "certificates": [
+          {
+            "action": "stay",
+            "write_required": true,
+            "pipeline_branch_count": 7,
+            "worst_collisions": 0,
+            "min_clearance": 23.64913558959961,
+            "cvar_risk": 1347.6546049620956,
+            "worst_new_delay": 0,
+            "worst_pending_remaining": null
+          },
+          {
+            "action": "left",
+            "write_required": true,
+            "pipeline_branch_count": 7,
+            "worst_collisions": 0,
+            "min_clearance": 17.939960479736328,
+            "cvar_risk": 2802.2278376221657,
+            "worst_new_delay": 0,
+            "worst_pending_remaining": null
+          },
+          {
+            "action": "right",
+            "write_required": true,
+            "pipeline_branch_count": 7,
+            "worst_collisions": 0,
+            "min_clearance": 35.6873664855957,
+            "cvar_risk": 153.77646134793758,
+            "worst_new_delay": 0,
+            "worst_pending_remaining": null
+          },
+          {
+            "action": "up",
+            "write_required": true,
+            "pipeline_branch_count": 7,
+            "worst_collisions": 2,
+            "min_clearance": -3.7793679237365723,
+            "cvar_risk": 13808.739286618307,
+            "worst_new_delay": 0,
+            "worst_pending_remaining": null
+          },
+          {
+            "action": "down",
+            "write_required": true,
+            "pipeline_branch_count": 7,
+            "worst_collisions": 0,
+            "min_clearance": 47.20615768432617,
+            "cvar_risk": 989.2062989221886,
+            "worst_new_delay": 1,
+            "worst_pending_remaining": null
+          },
+          {
+            "action": "up_left",
+            "write_required": true,
+            "pipeline_branch_count": 7,
+            "worst_collisions": 2,
+            "min_clearance": -1.7477259635925293,
+            "cvar_risk": 15302.660163343302,
+            "worst_new_delay": 0,
+            "worst_pending_remaining": null
+          },
+          {
+            "action": "up_right",
+            "write_required": true,
+            "pipeline_branch_count": 7,
+            "worst_collisions": 0,
+            "min_clearance": 15.019062042236328,
+            "cvar_risk": 3913.346473097801,
+            "worst_new_delay": 3,
+            "worst_pending_remaining": null
+          },
+          {
+            "action": "down_left",
+            "write_required": false,
+            "pipeline_branch_count": 1,
+            "worst_collisions": 0,
+            "min_clearance": 43.562042236328125,
+            "cvar_risk": 18.332437010249123,
+            "worst_new_delay": null,
+            "worst_pending_remaining": null
+          },
+          {
+            "action": "down_right",
+            "write_required": true,
+            "pipeline_branch_count": 7,
+            "worst_collisions": 0,
+            "min_clearance": 47.20615768432617,
+            "cvar_risk": 18.244091972708702,
+            "worst_new_delay": 1,
+            "worst_pending_remaining": null
+          },
+          {
+            "action": "left_fast",
+            "write_required": true,
+            "pipeline_branch_count": 7,
+            "worst_collisions": 0,
+            "min_clearance": 18.967788696289062,
+            "cvar_risk": 2541.7554105967283,
+            "worst_new_delay": 0,
+            "worst_pending_remaining": null
+          },
+          {
+            "action": "right_fast",
+            "write_required": true,
+            "pipeline_branch_count": 7,
+            "worst_collisions": 0,
+            "min_clearance": 22.493967056274414,
+            "cvar_risk": 676.3859830943402,
+            "worst_new_delay": 0,
+            "worst_pending_remaining": null
+          },
+          {
+            "action": "up_fast",
+            "write_required": true,
+            "pipeline_branch_count": 7,
+            "worst_collisions": 3,
+            "min_clearance": -3.2917733192443848,
+            "cvar_risk": 22498.627647787333,
+            "worst_new_delay": 1,
+            "worst_pending_remaining": null
+          },
+          {
+            "action": "down_fast",
+            "write_required": true,
+            "pipeline_branch_count": 7,
+            "worst_collisions": 0,
+            "min_clearance": 47.20615768432617,
+            "cvar_risk": 3324.8698321804404,
+            "worst_new_delay": 1,
+            "worst_pending_remaining": null
+          },
+          {
+            "action": "up_left_fast",
+            "write_required": true,
+            "pipeline_branch_count": 7,
+            "worst_collisions": 2,
+            "min_clearance": -4.558941841125488,
+            "cvar_risk": 26984.032760091126,
+            "worst_new_delay": 5,
+            "worst_pending_remaining": null
+          },
+          {
+            "action": "up_right_fast",
+            "write_required": true,
+            "pipeline_branch_count": 7,
+            "worst_collisions": 1,
+            "min_clearance": -2.019146680831909,
+            "cvar_risk": 6586.459560804069,
+            "worst_new_delay": 1,
+            "worst_pending_remaining": null
+          },
+          {
+            "action": "down_left_fast",
+            "write_required": true,
+            "pipeline_branch_count": 7,
+            "worst_collisions": 0,
+            "min_clearance": 47.20615768432617,
+            "cvar_risk": 2017.3474387340248,
+            "worst_new_delay": 1,
+            "worst_pending_remaining": null
+          },
+          {
+            "action": "down_right_fast",
+            "write_required": true,
+            "pipeline_branch_count": 7,
+            "worst_collisions": 0,
+            "min_clearance": 46.32382583618164,
+            "cvar_risk": 2017.3474387340248,
+            "worst_new_delay": 0,
+            "worst_pending_remaining": null
+          }
+        ]
+      },
+      "causal_predecessor": {
+        "schema": "causal-prepublication-viability-predecessor-v1",
+        "role": "hazard_space_prepublication_action_authority",
+        "enabled": true,
+        "state_eligible": true,
+        "coverage_complete": true,
+        "authority_eligible": true,
+        "applicable": true,
+        "reason": "prepublication_viable_actions_found",
+        "allowed_actions": [
+          "down",
+          "down_left",
+          "down_fast",
+          "down_left_fast"
+        ],
+        "candidate_viable_actions": [
+          "down",
+          "down_left",
+          "down_fast",
+          "down_left_fast"
+        ],
+        "recovery_actions": [
+          "down_left_fast"
+        ],
+        "current_frame": 834,
+        "publication_frame": 850,
+        "publication_lead_frames": 16,
+        "policy_query_frame": 0,
+        "pickup_delay_frames": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "prefix_certified_frames": 16,
+        "prefix_safe_actions": [
+          "stay",
+          "left",
+          "right",
+          "down",
+          "up_right",
+          "down_left",
+          "down_right",
+          "left_fast",
+          "right_fast",
+          "down_fast",
+          "down_left_fast",
+          "down_right_fast"
+        ],
+        "pipeline_root": {
+          "active_action": "down_left",
+          "held_desired_action": "down_left",
+          "pending_action": null
+        },
+        "pickup_clock_authority": "every_physical_pickup_order_before_publication_complete_mask_hold_is_no_write",
+        "observation_merge": "all_hidden_pickup_branches_universal_before_future_choice",
+        "terminal_set": "action_conditioned_hazard_space_viability_not_scalar_reserve",
+        "coverage": {
+          "role": "shadow_no_action_authority",
+          "root_frame": 834,
+          "horizon_frame": 1102,
+          "covered_through_frame": 1102,
+          "unknown_from_frame": null,
+          "status": "complete",
+          "reason": null,
+          "slabs": [
+            {
+              "start_frame": 835,
+              "end_frame": 1102,
+              "coverage_class": "BOUNDED_ENVELOPE",
+              "authority_eligible": true,
+              "source": "th08_ordinary_future_sources",
+              "version": {
+                "namespace": "th08-ordinary-future-hazard-projection-v3",
+                "components": {
+                  "digest": "026196de541930a1811fd9110f87ca2eb0a7c82fe916702682de64b5f837ebb3",
+                  "horizon_frames": 268,
+                  "root_frame": 834,
+                  "source_semantics_version": "th08-ordinary-future-sources-v2-set-valued-timeline-spawn"
+                }
+              },
+              "rationale": "all reachable ordinary ECL/timeline producers were lowered into consumed continuous annular-sector and future hostile-body AABB envelopes"
+            }
+          ]
+        },
+        "required_hazard_version": {
+          "namespace": "th08-ordinary-future-hazard-projection-v3",
+          "components": {
+            "digest": "026196de541930a1811fd9110f87ca2eb0a7c82fe916702682de64b5f837ebb3",
+            "horizon_frames": 268,
+            "root_frame": 834,
+            "source_semantics_version": "th08-ordinary-future-sources-v2-set-valued-timeline-spawn"
+          }
+        },
+        "actions": [
+          {
+            "action": "stay",
+            "branch_count": 7,
+            "viable_branch_count": 0,
+            "unavailable_branch_count": 0,
+            "all_branches_viable": false,
+            "worst_certified_margin": -13.040343028605408,
+            "worst_recovery_distance": 96.0,
+            "terminal_active_actions": [
+              "stay"
+            ]
+          },
+          {
+            "action": "left",
+            "branch_count": 7,
+            "viable_branch_count": 2,
+            "unavailable_branch_count": 0,
+            "all_branches_viable": false,
+            "worst_certified_margin": -4.878509276033332,
+            "worst_recovery_distance": 64.0,
+            "terminal_active_actions": [
+              "left"
+            ]
+          },
+          {
+            "action": "right",
+            "branch_count": 7,
+            "viable_branch_count": 1,
+            "unavailable_branch_count": 0,
+            "all_branches_viable": false,
+            "worst_certified_margin": -6.098830519504146,
+            "worst_recovery_distance": 150.94369811290565,
+            "terminal_active_actions": [
+              "right"
+            ]
+          },
+          {
+            "action": "up",
+            "branch_count": 7,
+            "viable_branch_count": 0,
+            "unavailable_branch_count": 0,
+            "all_branches_viable": false,
+            "worst_certified_margin": -17.500739234455715,
+            "worst_recovery_distance": 97.32420048477151,
+            "terminal_active_actions": [
+              "up"
+            ]
+          },
+          {
+            "action": "down",
+            "branch_count": 7,
+            "viable_branch_count": 7,
+            "unavailable_branch_count": 0,
+            "all_branches_viable": true,
+            "worst_certified_margin": 2.5019168853759766,
+            "worst_recovery_distance": 96.0,
+            "terminal_active_actions": [
+              "down"
+            ]
+          },
+          {
+            "action": "up_left",
+            "branch_count": 7,
+            "viable_branch_count": 0,
+            "unavailable_branch_count": 0,
+            "all_branches_viable": false,
+            "worst_certified_margin": -18.797443291556633,
+            "worst_recovery_distance": 80.0,
+            "terminal_active_actions": [
+              "up_left"
+            ]
+          },
+          {
+            "action": "up_right",
+            "branch_count": 7,
+            "viable_branch_count": 0,
+            "unavailable_branch_count": 0,
+            "all_branches_viable": false,
+            "worst_certified_margin": -15.76427805780567,
+            "worst_recovery_distance": 121.85236969382254,
+            "terminal_active_actions": [
+              "up_right"
+            ]
+          },
+          {
+            "action": "down_left",
+            "branch_count": 1,
+            "viable_branch_count": 1,
+            "unavailable_branch_count": 0,
+            "all_branches_viable": true,
+            "worst_certified_margin": 3.2099539304084095,
+            "worst_recovery_distance": 80.0,
+            "terminal_active_actions": [
+              "down_left"
+            ]
+          },
+          {
+            "action": "down_right",
+            "branch_count": 7,
+            "viable_branch_count": 4,
+            "unavailable_branch_count": 0,
+            "all_branches_viable": false,
+            "worst_certified_margin": -1.4864581103690568,
+            "worst_recovery_distance": 144.0,
+            "terminal_active_actions": [
+              "down_right"
+            ]
+          },
+          {
+            "action": "left_fast",
+            "branch_count": 7,
+            "viable_branch_count": 0,
+            "unavailable_branch_count": 0,
+            "all_branches_viable": false,
+            "worst_certified_margin": -10.534425805251981,
+            "worst_recovery_distance": 48.0,
+            "terminal_active_actions": [
+              "left_fast"
+            ]
+          },
+          {
+            "action": "right_fast",
+            "branch_count": 7,
+            "viable_branch_count": 0,
+            "unavailable_branch_count": 0,
+            "all_branches_viable": false,
+            "worst_certified_margin": -19.705193263590758,
+            "worst_recovery_distance": 170.0823330037544,
+            "terminal_active_actions": [
+              "right_fast"
+            ]
+          },
+          {
+            "action": "up_fast",
+            "branch_count": 7,
+            "viable_branch_count": 0,
+            "unavailable_branch_count": 0,
+            "all_branches_viable": false,
+            "worst_certified_margin": -18.104746450134275,
+            "worst_recovery_distance": 97.32420048477151,
+            "terminal_active_actions": [
+              "up_fast"
+            ]
+          },
+          {
+            "action": "down_fast",
+            "branch_count": 7,
+            "viable_branch_count": 7,
+            "unavailable_branch_count": 0,
+            "all_branches_viable": true,
+            "worst_certified_margin": 2.5019168853759766,
+            "worst_recovery_distance": 96.0,
+            "terminal_active_actions": [
+              "down_fast"
+            ]
+          },
+          {
+            "action": "up_left_fast",
+            "branch_count": 7,
+            "viable_branch_count": 0,
+            "unavailable_branch_count": 0,
+            "all_branches_viable": false,
+            "worst_certified_margin": -20.262822908444996,
+            "worst_recovery_distance": 65.96969000988257,
+            "terminal_active_actions": [
+              "up_left_fast"
+            ]
+          },
+          {
+            "action": "up_right_fast",
+            "branch_count": 7,
+            "viable_branch_count": 0,
+            "unavailable_branch_count": 0,
+            "all_branches_viable": false,
+            "worst_certified_margin": -19.566378079740335,
+            "worst_recovery_distance": 121.85236969382254,
+            "terminal_active_actions": [
+              "up_right_fast"
+            ]
+          },
+          {
+            "action": "down_left_fast",
+            "branch_count": 7,
+            "viable_branch_count": 7,
+            "unavailable_branch_count": 0,
+            "all_branches_viable": true,
+            "worst_certified_margin": 4.241105079650879,
+            "worst_recovery_distance": 64.0,
+            "terminal_active_actions": [
+              "down_left_fast"
+            ]
+          },
+          {
+            "action": "down_right_fast",
+            "branch_count": 7,
+            "viable_branch_count": 4,
+            "unavailable_branch_count": 0,
+            "all_branches_viable": false,
+            "worst_certified_margin": -2.5901260375976562,
+            "worst_recovery_distance": 160.0,
+            "terminal_active_actions": [
+              "down_right_fast"
+            ]
+          }
+        ]
+      },
+      "directional_summary": {
+        "active_action": "down_left",
+        "active_action_allowed": true,
+        "active_action_margin": 3.2099539304084095,
+        "held_action": "down_left",
+        "held_action_allowed": true,
+        "held_action_margin": 3.2099539304084095,
+        "issued_action": "down_left",
+        "issued_action_allowed": true,
+        "issued_action_margin": 3.2099539304084095,
+        "best_action": "down_left_fast",
+        "best_margin": 4.241105079650879
+      }
+    },
+    {
+      "decision_frame": 850,
+      "observation_frame": 848,
+      "native_root": {
+        "path": "artifacts/native_snapshot_rolling/raw/th08_stage4a_obs848_source_v12_rootonly_20260731.json",
+        "sha256": "53c83aef0d92bfa6affdb48c59c0645647c6f02b26d11587ab4f49c5a942abde",
+        "trial_schema": "th08-native-snapshot-rolling-trial-v12",
+        "projection_schema": "th08-native-snapshot-collision-control-projection-v12",
+        "projection_sha256": "88858e60f522958c6f9760ee4da1551eff09668658d41e9876630b978a23184d",
+        "status": "native_collision_control_root_capture_passed",
+        "replay_sha256": "4588af47384d38ed0b50f51299b836c0a03972f11f93c0ec48a8845a45e1a990",
+        "thread_epoch_stable": true
+      },
+      "trace_alignment": {
+        "snapshot_frame": 848,
+        "player_root_exact": true,
+        "player_phase": 0,
+        "predeath_counter": 10,
+        "issued_action": "right_fast"
+      },
+      "pipeline_root": {
+        "active_action": "down_right_fast",
+        "held_desired_action": "right_fast",
+        "pending_action": "right_fast",
+        "remaining_delay_support": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "held_desired_mask": 129,
+        "issue_age": 1,
+        "overdue": false
+      },
+      "current_hazards": {
+        "bullets": 248,
+        "lasers": 0,
+        "observed_enemy_bodies": 10,
+        "contact_enabled_enemy_bodies": 0
+      },
+      "future_source_closure": {
+        "schema": "th08-ordinary-future-hazard-projection-v3-annular-sector-and-aabb",
+        "root_frame": 848,
+        "horizon_frames": 268,
+        "source_closure_complete": true,
+        "source_closure_reason": null,
+        "source_semantics_version": "th08-ordinary-future-sources-v2-set-valued-timeline-spawn",
+        "producer_count": 1,
+        "trajectory_count": 0,
+        "aabb_trajectory_count": 1,
+        "digest": "dd603ddd556f3ba29784da11a6a22666967811565b1000ce62e006d89584a341",
+        "version": {
+          "namespace": "th08-ordinary-future-hazard-projection-v3",
+          "components": {
+            "digest": "dd603ddd556f3ba29784da11a6a22666967811565b1000ce62e006d89584a341",
+            "horizon_frames": 268,
+            "root_frame": 848,
+            "source_semantics_version": "th08-ordinary-future-sources-v2-set-valued-timeline-spawn"
+          }
+        },
+        "coverage": {
+          "role": "shadow_no_action_authority",
+          "root_frame": 848,
+          "horizon_frame": 1116,
+          "covered_through_frame": 1116,
+          "unknown_from_frame": null,
+          "status": "complete",
+          "reason": null,
+          "slabs": [
+            {
+              "start_frame": 849,
+              "end_frame": 1116,
+              "coverage_class": "BOUNDED_ENVELOPE",
+              "authority_eligible": true,
+              "source": "th08_ordinary_future_sources",
+              "version": {
+                "namespace": "th08-ordinary-future-hazard-projection-v3",
+                "components": {
+                  "digest": "dd603ddd556f3ba29784da11a6a22666967811565b1000ce62e006d89584a341",
+                  "horizon_frames": 268,
+                  "root_frame": 848,
+                  "source_semantics_version": "th08-ordinary-future-sources-v2-set-valued-timeline-spawn"
+                }
+              },
+              "rationale": "all reachable ordinary ECL/timeline producers were lowered into consumed continuous annular-sector and future hostile-body AABB envelopes"
+            }
+          ]
+        },
+        "closure_wall_ms": 18.305602003238164,
+        "source_count": 12,
+        "auxiliary_count": 0,
+        "silent_child_count": 0,
+        "timeline_steps": 268,
+        "timeline_spawn_count": 1,
+        "direct_fire_event_count": 0
+      },
+      "corridor": {
+        "source_frame": 864,
+        "publication_lead_frames": 16,
+        "forecast_player": [
+          338.7861328125,
+          415.850341796875
+        ],
+        "reachable": false,
+        "reason": "initial robust viability action set is empty",
+        "solve_ms": 591.4281529985601,
+        "solve_wall_ms": 591.5450340107782,
+        "viability_backend": "native",
+        "viable_state_count_layer0": 4355,
+        "initial_safe_action_count": 0,
+        "bottleneck_clearance": null,
+        "future_projection_retained_for_prefix": true
+      },
+      "publication_prefix": {
+        "frames": 16,
+        "pickup_delay_frames": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "selected_hold_frames": 10,
+        "future_projection_consumed": true,
+        "future_projection_version": {
+          "namespace": "th08-ordinary-future-hazard-projection-v3",
+          "components": {
+            "digest": "dd603ddd556f3ba29784da11a6a22666967811565b1000ce62e006d89584a341",
+            "horizon_frames": 268,
+            "root_frame": 848,
+            "source_semantics_version": "th08-ordinary-future-sources-v2-set-valued-timeline-spawn"
+          }
+        },
+        "safe_actions": [
+          "stay",
+          "left",
+          "right",
+          "down",
+          "up_right",
+          "down_left",
+          "down_right",
+          "left_fast",
+          "right_fast",
+          "down_fast",
+          "down_left_fast",
+          "down_right_fast"
+        ],
+        "certificates": [
+          {
+            "action": "stay",
+            "write_required": true,
+            "pipeline_branch_count": 28,
+            "worst_collisions": 0,
+            "min_clearance": 9.189706802368164,
+            "cvar_risk": 3836.8845050893724,
+            "worst_new_delay": 0,
+            "worst_pending_remaining": 1
+          },
+          {
+            "action": "left",
+            "write_required": true,
+            "pipeline_branch_count": 28,
+            "worst_collisions": 0,
+            "min_clearance": 11.479357719421387,
+            "cvar_risk": 4732.861815076588,
+            "worst_new_delay": 5,
+            "worst_pending_remaining": 1
+          },
+          {
+            "action": "right",
+            "write_required": true,
+            "pipeline_branch_count": 28,
+            "worst_collisions": 0,
+            "min_clearance": 27.209064483642578,
+            "cvar_risk": 1116.0301252749216,
+            "worst_new_delay": 6,
+            "worst_pending_remaining": 1
+          },
+          {
+            "action": "up",
+            "write_required": true,
+            "pipeline_branch_count": 28,
+            "worst_collisions": 2,
+            "min_clearance": -3.815563917160034,
+            "cvar_risk": 21474.15950298828,
+            "worst_new_delay": 0,
+            "worst_pending_remaining": 1
+          },
+          {
+            "action": "down",
+            "write_required": true,
+            "pipeline_branch_count": 28,
+            "worst_collisions": 0,
+            "min_clearance": 25.004344940185547,
+            "cvar_risk": 5515.899740176143,
+            "worst_new_delay": 0,
+            "worst_pending_remaining": 1
+          },
+          {
+            "action": "up_left",
+            "write_required": true,
+            "pipeline_branch_count": 28,
+            "worst_collisions": 2,
+            "min_clearance": -3.564177989959717,
+            "cvar_risk": 22679.005519531667,
+            "worst_new_delay": 3,
+            "worst_pending_remaining": 1
+          },
+          {
+            "action": "up_right",
+            "write_required": true,
+            "pipeline_branch_count": 28,
+            "worst_collisions": 0,
+            "min_clearance": 18.50686264038086,
+            "cvar_risk": 5247.438523385142,
+            "worst_new_delay": 6,
+            "worst_pending_remaining": 1
+          },
+          {
+            "action": "down_left",
+            "write_required": true,
+            "pipeline_branch_count": 28,
+            "worst_collisions": 0,
+            "min_clearance": 24.800586700439453,
+            "cvar_risk": 5180.898941457005,
+            "worst_new_delay": 4,
+            "worst_pending_remaining": 4
+          },
+          {
+            "action": "down_right",
+            "write_required": true,
+            "pipeline_branch_count": 28,
+            "worst_collisions": 0,
+            "min_clearance": 32.82573318481445,
+            "cvar_risk": 4535.202833169805,
+            "worst_new_delay": 6,
+            "worst_pending_remaining": 1
+          },
+          {
+            "action": "left_fast",
+            "write_required": true,
+            "pipeline_branch_count": 28,
+            "worst_collisions": 0,
+            "min_clearance": 12.83851146697998,
+            "cvar_risk": 3762.222599774067,
+            "worst_new_delay": 6,
+            "worst_pending_remaining": 1
+          },
+          {
+            "action": "right_fast",
+            "write_required": false,
+            "pipeline_branch_count": 4,
+            "worst_collisions": 0,
+            "min_clearance": 11.343354225158691,
+            "cvar_risk": 3605.554290646687,
+            "worst_new_delay": null,
+            "worst_pending_remaining": 2
+          },
+          {
+            "action": "up_fast",
+            "write_required": true,
+            "pipeline_branch_count": 28,
+            "worst_collisions": 4,
+            "min_clearance": -4.420724391937256,
+            "cvar_risk": 31995.43689083095,
+            "worst_new_delay": 1,
+            "worst_pending_remaining": 1
+          },
+          {
+            "action": "down_fast",
+            "write_required": true,
+            "pipeline_branch_count": 28,
+            "worst_collisions": 0,
+            "min_clearance": 25.004344940185547,
+            "cvar_risk": 6173.476808267912,
+            "worst_new_delay": 0,
+            "worst_pending_remaining": 1
+          },
+          {
+            "action": "up_left_fast",
+            "write_required": true,
+            "pipeline_branch_count": 28,
+            "worst_collisions": 3,
+            "min_clearance": -4.252423286437988,
+            "cvar_risk": 35098.582483460326,
+            "worst_new_delay": 4,
+            "worst_pending_remaining": 2
+          },
+          {
+            "action": "up_right_fast",
+            "write_required": true,
+            "pipeline_branch_count": 28,
+            "worst_collisions": 1,
+            "min_clearance": -1.8588683605194092,
+            "cvar_risk": 7693.983954015055,
+            "worst_new_delay": 0,
+            "worst_pending_remaining": 1
+          },
+          {
+            "action": "down_left_fast",
+            "write_required": true,
+            "pipeline_branch_count": 28,
+            "worst_collisions": 0,
+            "min_clearance": 24.800586700439453,
+            "cvar_risk": 5678.949658295672,
+            "worst_new_delay": 6,
+            "worst_pending_remaining": 4
+          },
+          {
+            "action": "down_right_fast",
+            "write_required": true,
+            "pipeline_branch_count": 28,
+            "worst_collisions": 0,
+            "min_clearance": 20.804859161376953,
+            "cvar_risk": 5683.34026838094,
+            "worst_new_delay": 6,
+            "worst_pending_remaining": 1
+          }
+        ]
+      },
+      "causal_predecessor": {
+        "schema": "causal-prepublication-viability-predecessor-v1",
+        "role": "hazard_space_prepublication_action_authority",
+        "enabled": true,
+        "state_eligible": true,
+        "coverage_complete": true,
+        "authority_eligible": true,
+        "applicable": false,
+        "reason": "prepublication_viable_predecessor_empty",
+        "allowed_actions": [],
+        "candidate_viable_actions": [],
+        "recovery_actions": [
+          "right_fast"
+        ],
+        "current_frame": 848,
+        "publication_frame": 864,
+        "publication_lead_frames": 16,
+        "policy_query_frame": 0,
+        "pickup_delay_frames": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "prefix_certified_frames": 16,
+        "prefix_safe_actions": [
+          "stay",
+          "left",
+          "right",
+          "down",
+          "up_right",
+          "down_left",
+          "down_right",
+          "left_fast",
+          "right_fast",
+          "down_fast",
+          "down_left_fast",
+          "down_right_fast"
+        ],
+        "pipeline_root": {
+          "active_action": "down_right_fast",
+          "held_desired_action": "right_fast",
+          "pending_action": "right_fast"
+        },
+        "pickup_clock_authority": "every_physical_pickup_order_before_publication_complete_mask_hold_is_no_write",
+        "observation_merge": "all_hidden_pickup_branches_universal_before_future_choice",
+        "terminal_set": "action_conditioned_hazard_space_viability_not_scalar_reserve",
+        "coverage": {
+          "role": "shadow_no_action_authority",
+          "root_frame": 848,
+          "horizon_frame": 1116,
+          "covered_through_frame": 1116,
+          "unknown_from_frame": null,
+          "status": "complete",
+          "reason": null,
+          "slabs": [
+            {
+              "start_frame": 849,
+              "end_frame": 1116,
+              "coverage_class": "BOUNDED_ENVELOPE",
+              "authority_eligible": true,
+              "source": "th08_ordinary_future_sources",
+              "version": {
+                "namespace": "th08-ordinary-future-hazard-projection-v3",
+                "components": {
+                  "digest": "dd603ddd556f3ba29784da11a6a22666967811565b1000ce62e006d89584a341",
+                  "horizon_frames": 268,
+                  "root_frame": 848,
+                  "source_semantics_version": "th08-ordinary-future-sources-v2-set-valued-timeline-spawn"
+                }
+              },
+              "rationale": "all reachable ordinary ECL/timeline producers were lowered into consumed continuous annular-sector and future hostile-body AABB envelopes"
+            }
+          ]
+        },
+        "required_hazard_version": {
+          "namespace": "th08-ordinary-future-hazard-projection-v3",
+          "components": {
+            "digest": "dd603ddd556f3ba29784da11a6a22666967811565b1000ce62e006d89584a341",
+            "horizon_frames": 268,
+            "root_frame": 848,
+            "source_semantics_version": "th08-ordinary-future-sources-v2-set-valued-timeline-spawn"
+          }
+        },
+        "actions": [
+          {
+            "action": "stay",
+            "branch_count": 28,
+            "viable_branch_count": 1,
+            "unavailable_branch_count": 0,
+            "all_branches_viable": false,
+            "worst_certified_margin": -13.35630624328612,
+            "worst_recovery_distance": 57.688820407423826,
+            "terminal_active_actions": [
+              "stay"
+            ]
+          },
+          {
+            "action": "left",
+            "branch_count": 28,
+            "viable_branch_count": 0,
+            "unavailable_branch_count": 0,
+            "all_branches_viable": false,
+            "worst_certified_margin": -14.978278495338639,
+            "worst_recovery_distance": 101.19288512538814,
+            "terminal_active_actions": [
+              "left"
+            ]
+          },
+          {
+            "action": "right",
+            "branch_count": 28,
+            "viable_branch_count": 0,
+            "unavailable_branch_count": 0,
+            "all_branches_viable": false,
+            "worst_certified_margin": -13.57515693376839,
+            "worst_recovery_distance": 35.77708763999664,
+            "terminal_active_actions": [
+              "right"
+            ]
+          },
+          {
+            "action": "up",
+            "branch_count": 28,
+            "viable_branch_count": 0,
+            "unavailable_branch_count": 0,
+            "all_branches_viable": false,
+            "worst_certified_margin": -18.500547519355177,
+            "worst_recovery_distance": 50.59644256269407,
+            "terminal_active_actions": [
+              "up"
+            ]
+          },
+          {
+            "action": "down",
+            "branch_count": 28,
+            "viable_branch_count": 2,
+            "unavailable_branch_count": 0,
+            "all_branches_viable": false,
+            "worst_certified_margin": -10.062866449356079,
+            "worst_recovery_distance": 57.688820407423826,
+            "terminal_active_actions": [
+              "down"
+            ]
+          },
+          {
+            "action": "up_left",
+            "branch_count": 28,
+            "viable_branch_count": 0,
+            "unavailable_branch_count": 0,
+            "all_branches_viable": false,
+            "worst_certified_margin": -25.381385548342628,
+            "worst_recovery_distance": 81.58431221748455,
+            "terminal_active_actions": [
+              "up_left"
+            ]
+          },
+          {
+            "action": "up_right",
+            "branch_count": 28,
+            "viable_branch_count": 0,
+            "unavailable_branch_count": 0,
+            "all_branches_viable": false,
+            "worst_certified_margin": -18.376420923915717,
+            "worst_recovery_distance": null,
+            "terminal_active_actions": [
+              "up_right"
+            ]
+          },
+          {
+            "action": "down_left",
+            "branch_count": 28,
+            "viable_branch_count": 0,
+            "unavailable_branch_count": 0,
+            "all_branches_viable": false,
+            "worst_certified_margin": -10.581413269042969,
+            "worst_recovery_distance": 101.19288512538814,
+            "terminal_active_actions": [
+              "down_left"
+            ]
+          },
+          {
+            "action": "down_right",
+            "branch_count": 28,
+            "viable_branch_count": 0,
+            "unavailable_branch_count": 0,
+            "all_branches_viable": false,
+            "worst_certified_margin": -11.288561582565308,
+            "worst_recovery_distance": 45.254833995939045,
+            "terminal_active_actions": [
+              "down_right"
+            ]
+          },
+          {
+            "action": "left_fast",
+            "branch_count": 28,
+            "viable_branch_count": 0,
+            "unavailable_branch_count": 0,
+            "all_branches_viable": false,
+            "worst_certified_margin": -14.594065356597888,
+            "worst_recovery_distance": 101.19288512538814,
+            "terminal_active_actions": [
+              "left_fast"
+            ]
+          },
+          {
+            "action": "right_fast",
+            "branch_count": 4,
+            "viable_branch_count": 2,
+            "unavailable_branch_count": 0,
+            "all_branches_viable": false,
+            "worst_certified_margin": -5.962125945434558,
+            "worst_recovery_distance": 45.254833995939045,
+            "terminal_active_actions": [
+              "right_fast"
+            ]
+          },
+          {
+            "action": "up_fast",
+            "branch_count": 28,
+            "viable_branch_count": 0,
+            "unavailable_branch_count": 0,
+            "all_branches_viable": false,
+            "worst_certified_margin": -18.374613452301013,
+            "worst_recovery_distance": 80.0,
+            "terminal_active_actions": [
+              "up_fast"
+            ]
+          },
+          {
+            "action": "down_fast",
+            "branch_count": 28,
+            "viable_branch_count": 2,
+            "unavailable_branch_count": 0,
+            "all_branches_viable": false,
+            "worst_certified_margin": -10.062866449356079,
+            "worst_recovery_distance": 57.688820407423826,
+            "terminal_active_actions": [
+              "down_fast"
+            ]
+          },
+          {
+            "action": "up_left_fast",
+            "branch_count": 28,
+            "viable_branch_count": 0,
+            "unavailable_branch_count": 0,
+            "all_branches_viable": false,
+            "worst_certified_margin": -23.159653450057533,
+            "worst_recovery_distance": 81.58431221748455,
+            "terminal_active_actions": [
+              "up_left_fast"
+            ]
+          },
+          {
+            "action": "up_right_fast",
+            "branch_count": 28,
+            "viable_branch_count": 0,
+            "unavailable_branch_count": 0,
+            "all_branches_viable": false,
+            "worst_certified_margin": -16.31163912969587,
+            "worst_recovery_distance": null,
+            "terminal_active_actions": [
+              "up_right_fast"
+            ]
+          },
+          {
+            "action": "down_left_fast",
+            "branch_count": 28,
+            "viable_branch_count": 1,
+            "unavailable_branch_count": 0,
+            "all_branches_viable": false,
+            "worst_certified_margin": -6.967718839645386,
+            "worst_recovery_distance": 101.19288512538814,
+            "terminal_active_actions": [
+              "down_left_fast"
+            ]
+          },
+          {
+            "action": "down_right_fast",
+            "branch_count": 28,
+            "viable_branch_count": 0,
+            "unavailable_branch_count": 0,
+            "all_branches_viable": false,
+            "worst_certified_margin": -6.871025085449219,
+            "worst_recovery_distance": 35.77708763999664,
+            "terminal_active_actions": [
+              "down_right_fast"
+            ]
+          }
+        ]
+      },
+      "directional_summary": {
+        "active_action": "down_right_fast",
+        "active_action_allowed": false,
+        "active_action_margin": -6.871025085449219,
+        "held_action": "right_fast",
+        "held_action_allowed": false,
+        "held_action_margin": -5.962125945434558,
+        "issued_action": "right_fast",
+        "issued_action_allowed": false,
+        "issued_action_margin": -5.962125945434558,
+        "best_action": "right_fast",
+        "best_margin": -5.962125945434558
+      }
+    },
+    {
+      "decision_frame": 910,
+      "observation_frame": 908,
+      "native_root": {
+        "path": "artifacts/native_snapshot_rolling/raw/th08_stage4a_obs908_source_v12_rootonly_20260731.json",
+        "sha256": "20f56c25711a9a5dbcb3907d8a6bf2f12fd57ce7c0f908d3dc5a95a11e3993ea",
+        "trial_schema": "th08-native-snapshot-rolling-trial-v12",
+        "projection_schema": "th08-native-snapshot-collision-control-projection-v12",
+        "projection_sha256": "75d32f3bbcf06251375cfe363ac4b57406a702125620197aad0dd7044a631482",
+        "status": "native_collision_control_root_capture_passed",
+        "replay_sha256": "4588af47384d38ed0b50f51299b836c0a03972f11f93c0ec48a8845a45e1a990",
+        "thread_epoch_stable": true
+      },
+      "trace_alignment": {
+        "snapshot_frame": 908,
+        "player_root_exact": true,
+        "player_phase": 0,
+        "predeath_counter": 10,
+        "issued_action": "up_right_fast"
+      },
+      "pipeline_root": {
+        "active_action": "stay",
+        "held_desired_action": "stay",
+        "pending_action": null,
+        "remaining_delay_support": [],
+        "held_desired_mask": 5,
+        "issue_age": 0,
+        "overdue": false
+      },
+      "current_hazards": {
+        "bullets": 141,
+        "lasers": 0,
+        "observed_enemy_bodies": 10,
+        "contact_enabled_enemy_bodies": 0
+      },
+      "future_source_closure": {
+        "schema": "th08-ordinary-future-hazard-projection-v3-annular-sector-and-aabb",
+        "root_frame": 908,
+        "horizon_frames": 268,
+        "source_closure_complete": true,
+        "source_closure_reason": null,
+        "source_semantics_version": "th08-ordinary-future-sources-v2-set-valued-timeline-spawn",
+        "producer_count": 1,
+        "trajectory_count": 0,
+        "aabb_trajectory_count": 1,
+        "digest": "fdcc4285070b4d336a45c9cffef0b25ae04a9bb6762bc7bc57059c83b0dcccb5",
+        "version": {
+          "namespace": "th08-ordinary-future-hazard-projection-v3",
+          "components": {
+            "digest": "fdcc4285070b4d336a45c9cffef0b25ae04a9bb6762bc7bc57059c83b0dcccb5",
+            "horizon_frames": 268,
+            "root_frame": 908,
+            "source_semantics_version": "th08-ordinary-future-sources-v2-set-valued-timeline-spawn"
+          }
+        },
+        "coverage": {
+          "role": "shadow_no_action_authority",
+          "root_frame": 908,
+          "horizon_frame": 1176,
+          "covered_through_frame": 1176,
+          "unknown_from_frame": null,
+          "status": "complete",
+          "reason": null,
+          "slabs": [
+            {
+              "start_frame": 909,
+              "end_frame": 1176,
+              "coverage_class": "BOUNDED_ENVELOPE",
+              "authority_eligible": true,
+              "source": "th08_ordinary_future_sources",
+              "version": {
+                "namespace": "th08-ordinary-future-hazard-projection-v3",
+                "components": {
+                  "digest": "fdcc4285070b4d336a45c9cffef0b25ae04a9bb6762bc7bc57059c83b0dcccb5",
+                  "horizon_frames": 268,
+                  "root_frame": 908,
+                  "source_semantics_version": "th08-ordinary-future-sources-v2-set-valued-timeline-spawn"
+                }
+              },
+              "rationale": "all reachable ordinary ECL/timeline producers were lowered into consumed continuous annular-sector and future hostile-body AABB envelopes"
+            }
+          ]
+        },
+        "closure_wall_ms": 15.820915999938734,
+        "source_count": 12,
+        "auxiliary_count": 0,
+        "silent_child_count": 0,
+        "timeline_steps": 268,
+        "timeline_spawn_count": 1,
+        "direct_fire_event_count": 0
+      },
+      "corridor": {
+        "source_frame": 924,
+        "publication_lead_frames": 16,
+        "forecast_player": [
+          376.0,
+          432.0
+        ],
+        "reachable": false,
+        "reason": "initial robust viability action set is empty",
+        "solve_ms": 593.8464040082181,
+        "solve_wall_ms": 593.9376569876913,
+        "viability_backend": "native",
+        "viable_state_count_layer0": 7811,
+        "initial_safe_action_count": 0,
+        "bottleneck_clearance": null,
+        "future_projection_retained_for_prefix": true
+      },
+      "publication_prefix": {
+        "frames": 16,
+        "pickup_delay_frames": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "selected_hold_frames": 10,
+        "future_projection_consumed": true,
+        "future_projection_version": {
+          "namespace": "th08-ordinary-future-hazard-projection-v3",
+          "components": {
+            "digest": "fdcc4285070b4d336a45c9cffef0b25ae04a9bb6762bc7bc57059c83b0dcccb5",
+            "horizon_frames": 268,
+            "root_frame": 908,
+            "source_semantics_version": "th08-ordinary-future-sources-v2-set-valued-timeline-spawn"
+          }
+        },
+        "safe_actions": [],
+        "certificates": [
+          {
+            "action": "stay",
+            "write_required": false,
+            "pipeline_branch_count": 1,
+            "worst_collisions": 9,
+            "min_clearance": -4.297830104827881,
+            "cvar_risk": 125246.7451171875,
+            "worst_new_delay": null,
+            "worst_pending_remaining": null
+          },
+          {
+            "action": "left",
+            "write_required": true,
+            "pipeline_branch_count": 7,
+            "worst_collisions": 6,
+            "min_clearance": -3.8448894023895264,
+            "cvar_risk": 105628.68398439139,
+            "worst_new_delay": 6,
+            "worst_pending_remaining": null
+          },
+          {
+            "action": "right",
+            "write_required": true,
+            "pipeline_branch_count": 7,
+            "worst_collisions": 9,
+            "min_clearance": -4.297830104827881,
+            "cvar_risk": 125246.7451171875,
+            "worst_new_delay": 0,
+            "worst_pending_remaining": null
+          },
+          {
+            "action": "up",
+            "write_required": true,
+            "pipeline_branch_count": 7,
+            "worst_collisions": 9,
+            "min_clearance": -3.8543500900268555,
+            "cvar_risk": 137883.6555542238,
+            "worst_new_delay": 5,
+            "worst_pending_remaining": null
+          },
+          {
+            "action": "down",
+            "write_required": true,
+            "pipeline_branch_count": 7,
+            "worst_collisions": 9,
+            "min_clearance": -4.297830104827881,
+            "cvar_risk": 125246.7451171875,
+            "worst_new_delay": 0,
+            "worst_pending_remaining": null
+          },
+          {
+            "action": "up_left",
+            "write_required": true,
+            "pipeline_branch_count": 7,
+            "worst_collisions": 5,
+            "min_clearance": -3.555431604385376,
+            "cvar_risk": 128280.69170412421,
+            "worst_new_delay": 6,
+            "worst_pending_remaining": null
+          },
+          {
+            "action": "up_right",
+            "write_required": true,
+            "pipeline_branch_count": 7,
+            "worst_collisions": 11,
+            "min_clearance": -4.3644819259643555,
+            "cvar_risk": 139684.61220747232,
+            "worst_new_delay": 6,
+            "worst_pending_remaining": null
+          },
+          {
+            "action": "down_left",
+            "write_required": true,
+            "pipeline_branch_count": 7,
+            "worst_collisions": 7,
+            "min_clearance": -4.122216701507568,
+            "cvar_risk": 112697.19825875759,
+            "worst_new_delay": 2,
+            "worst_pending_remaining": null
+          },
+          {
+            "action": "down_right",
+            "write_required": true,
+            "pipeline_branch_count": 7,
+            "worst_collisions": 9,
+            "min_clearance": -4.297830104827881,
+            "cvar_risk": 125246.7451171875,
+            "worst_new_delay": 0,
+            "worst_pending_remaining": null
+          },
+          {
+            "action": "left_fast",
+            "write_required": true,
+            "pipeline_branch_count": 7,
+            "worst_collisions": 3,
+            "min_clearance": -3.153362512588501,
+            "cvar_risk": 90926.6167602539,
+            "worst_new_delay": 6,
+            "worst_pending_remaining": null
+          },
+          {
+            "action": "right_fast",
+            "write_required": true,
+            "pipeline_branch_count": 7,
+            "worst_collisions": 9,
+            "min_clearance": -4.297830104827881,
+            "cvar_risk": 125246.7451171875,
+            "worst_new_delay": 0,
+            "worst_pending_remaining": null
+          },
+          {
+            "action": "up_fast",
+            "write_required": true,
+            "pipeline_branch_count": 7,
+            "worst_collisions": 6,
+            "min_clearance": -3.881753444671631,
+            "cvar_risk": 122713.69165039062,
+            "worst_new_delay": 5,
+            "worst_pending_remaining": null
+          },
+          {
+            "action": "down_fast",
+            "write_required": true,
+            "pipeline_branch_count": 7,
+            "worst_collisions": 9,
+            "min_clearance": -4.297830104827881,
+            "cvar_risk": 125246.7451171875,
+            "worst_new_delay": 0,
+            "worst_pending_remaining": null
+          },
+          {
+            "action": "up_left_fast",
+            "write_required": true,
+            "pipeline_branch_count": 7,
+            "worst_collisions": 5,
+            "min_clearance": -2.9670403003692627,
+            "cvar_risk": 117602.1437991336,
+            "worst_new_delay": 6,
+            "worst_pending_remaining": null
+          },
+          {
+            "action": "up_right_fast",
+            "write_required": true,
+            "pipeline_branch_count": 7,
+            "worst_collisions": 7,
+            "min_clearance": -3.5094096660614014,
+            "cvar_risk": 133672.33047179133,
+            "worst_new_delay": 6,
+            "worst_pending_remaining": null
+          },
+          {
+            "action": "down_left_fast",
+            "write_required": true,
+            "pipeline_branch_count": 7,
+            "worst_collisions": 5,
+            "min_clearance": -3.7991130352020264,
+            "cvar_risk": 100040.81042276323,
+            "worst_new_delay": 6,
+            "worst_pending_remaining": null
+          },
+          {
+            "action": "down_right_fast",
+            "write_required": true,
+            "pipeline_branch_count": 7,
+            "worst_collisions": 9,
+            "min_clearance": -4.297830104827881,
+            "cvar_risk": 125246.7451171875,
+            "worst_new_delay": 0,
+            "worst_pending_remaining": null
+          }
+        ]
+      },
+      "causal_predecessor": {
+        "schema": "causal-prepublication-viability-predecessor-v1",
+        "role": "hazard_space_prepublication_action_authority",
+        "enabled": true,
+        "state_eligible": true,
+        "coverage_complete": true,
+        "authority_eligible": true,
+        "applicable": false,
+        "reason": "prepublication_viable_predecessor_empty",
+        "allowed_actions": [],
+        "candidate_viable_actions": [],
+        "recovery_actions": [
+          "stay",
+          "right",
+          "down",
+          "down_right",
+          "right_fast",
+          "down_fast",
+          "down_right_fast"
+        ],
+        "current_frame": 908,
+        "publication_frame": 924,
+        "publication_lead_frames": 16,
+        "policy_query_frame": 0,
+        "pickup_delay_frames": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "prefix_certified_frames": 16,
+        "prefix_safe_actions": [],
+        "pipeline_root": {
+          "active_action": "stay",
+          "held_desired_action": "stay",
+          "pending_action": null
+        },
+        "pickup_clock_authority": "every_physical_pickup_order_before_publication_complete_mask_hold_is_no_write",
+        "observation_merge": "all_hidden_pickup_branches_universal_before_future_choice",
+        "terminal_set": "action_conditioned_hazard_space_viability_not_scalar_reserve",
+        "coverage": {
+          "role": "shadow_no_action_authority",
+          "root_frame": 908,
+          "horizon_frame": 1176,
+          "covered_through_frame": 1176,
+          "unknown_from_frame": null,
+          "status": "complete",
+          "reason": null,
+          "slabs": [
+            {
+              "start_frame": 909,
+              "end_frame": 1176,
+              "coverage_class": "BOUNDED_ENVELOPE",
+              "authority_eligible": true,
+              "source": "th08_ordinary_future_sources",
+              "version": {
+                "namespace": "th08-ordinary-future-hazard-projection-v3",
+                "components": {
+                  "digest": "fdcc4285070b4d336a45c9cffef0b25ae04a9bb6762bc7bc57059c83b0dcccb5",
+                  "horizon_frames": 268,
+                  "root_frame": 908,
+                  "source_semantics_version": "th08-ordinary-future-sources-v2-set-valued-timeline-spawn"
+                }
+              },
+              "rationale": "all reachable ordinary ECL/timeline producers were lowered into consumed continuous annular-sector and future hostile-body AABB envelopes"
+            }
+          ]
+        },
+        "required_hazard_version": {
+          "namespace": "th08-ordinary-future-hazard-projection-v3",
+          "components": {
+            "digest": "fdcc4285070b4d336a45c9cffef0b25ae04a9bb6762bc7bc57059c83b0dcccb5",
+            "horizon_frames": 268,
+            "root_frame": 908,
+            "source_semantics_version": "th08-ordinary-future-sources-v2-set-valued-timeline-spawn"
+          }
+        },
+        "actions": [
+          {
+            "action": "stay",
+            "branch_count": 1,
+            "viable_branch_count": 0,
+            "unavailable_branch_count": 0,
+            "all_branches_viable": false,
+            "worst_certified_margin": -4.589929103851318,
+            "worst_recovery_distance": null,
+            "terminal_active_actions": [
+              "stay"
+            ]
+          },
+          {
+            "action": "left",
+            "branch_count": 7,
+            "viable_branch_count": 0,
+            "unavailable_branch_count": 0,
+            "all_branches_viable": false,
+            "worst_certified_margin": -9.470717906951904,
+            "worst_recovery_distance": null,
+            "terminal_active_actions": [
+              "left"
+            ]
+          },
+          {
+            "action": "right",
+            "branch_count": 7,
+            "viable_branch_count": 0,
+            "unavailable_branch_count": 0,
+            "all_branches_viable": false,
+            "worst_certified_margin": -4.589929103851318,
+            "worst_recovery_distance": 32.0,
+            "terminal_active_actions": [
+              "right"
+            ]
+          },
+          {
+            "action": "up",
+            "branch_count": 7,
+            "viable_branch_count": 0,
+            "unavailable_branch_count": 0,
+            "all_branches_viable": false,
+            "worst_certified_margin": -13.998747825622559,
+            "worst_recovery_distance": null,
+            "terminal_active_actions": [
+              "up"
+            ]
+          },
+          {
+            "action": "down",
+            "branch_count": 7,
+            "viable_branch_count": 0,
+            "unavailable_branch_count": 0,
+            "all_branches_viable": false,
+            "worst_certified_margin": -4.589929103851318,
+            "worst_recovery_distance": null,
+            "terminal_active_actions": [
+              "down"
+            ]
+          },
+          {
+            "action": "up_left",
+            "branch_count": 7,
+            "viable_branch_count": 0,
+            "unavailable_branch_count": 0,
+            "all_branches_viable": false,
+            "worst_certified_margin": -20.526396725503652,
+            "worst_recovery_distance": null,
+            "terminal_active_actions": [
+              "up_left"
+            ]
+          },
+          {
+            "action": "up_right",
+            "branch_count": 7,
+            "viable_branch_count": 0,
+            "unavailable_branch_count": 0,
+            "all_branches_viable": false,
+            "worst_certified_margin": -13.270962238311768,
+            "worst_recovery_distance": null,
+            "terminal_active_actions": [
+              "up_right"
+            ]
+          },
+          {
+            "action": "down_left",
+            "branch_count": 7,
+            "viable_branch_count": 0,
+            "unavailable_branch_count": 0,
+            "all_branches_viable": false,
+            "worst_certified_margin": -8.24671220779419,
+            "worst_recovery_distance": null,
+            "terminal_active_actions": [
+              "down_left"
+            ]
+          },
+          {
+            "action": "down_right",
+            "branch_count": 7,
+            "viable_branch_count": 0,
+            "unavailable_branch_count": 0,
+            "all_branches_viable": false,
+            "worst_certified_margin": -4.589929103851318,
+            "worst_recovery_distance": 32.0,
+            "terminal_active_actions": [
+              "down_right"
+            ]
+          },
+          {
+            "action": "left_fast",
+            "branch_count": 7,
+            "viable_branch_count": 0,
+            "unavailable_branch_count": 0,
+            "all_branches_viable": false,
+            "worst_certified_margin": -12.82777738571167,
+            "worst_recovery_distance": null,
+            "terminal_active_actions": [
+              "left_fast"
+            ]
+          },
+          {
+            "action": "right_fast",
+            "branch_count": 7,
+            "viable_branch_count": 0,
+            "unavailable_branch_count": 0,
+            "all_branches_viable": false,
+            "worst_certified_margin": -4.589929103851318,
+            "worst_recovery_distance": 32.0,
+            "terminal_active_actions": [
+              "right_fast"
+            ]
+          },
+          {
+            "action": "up_fast",
+            "branch_count": 7,
+            "viable_branch_count": 0,
+            "unavailable_branch_count": 0,
+            "all_branches_viable": false,
+            "worst_certified_margin": -15.514166355133057,
+            "worst_recovery_distance": null,
+            "terminal_active_actions": [
+              "up_fast"
+            ]
+          },
+          {
+            "action": "down_fast",
+            "branch_count": 7,
+            "viable_branch_count": 0,
+            "unavailable_branch_count": 0,
+            "all_branches_viable": false,
+            "worst_certified_margin": -4.589929103851318,
+            "worst_recovery_distance": null,
+            "terminal_active_actions": [
+              "down_fast"
+            ]
+          },
+          {
+            "action": "up_left_fast",
+            "branch_count": 7,
+            "viable_branch_count": 0,
+            "unavailable_branch_count": 0,
+            "all_branches_viable": false,
+            "worst_certified_margin": -17.95137851993546,
+            "worst_recovery_distance": null,
+            "terminal_active_actions": [
+              "up_left_fast"
+            ]
+          },
+          {
+            "action": "up_right_fast",
+            "branch_count": 7,
+            "viable_branch_count": 0,
+            "unavailable_branch_count": 0,
+            "all_branches_viable": false,
+            "worst_certified_margin": -13.76036024093628,
+            "worst_recovery_distance": null,
+            "terminal_active_actions": [
+              "up_right_fast"
+            ]
+          },
+          {
+            "action": "down_left_fast",
+            "branch_count": 7,
+            "viable_branch_count": 0,
+            "unavailable_branch_count": 0,
+            "all_branches_viable": false,
+            "worst_certified_margin": -10.401371240615845,
+            "worst_recovery_distance": null,
+            "terminal_active_actions": [
+              "down_left_fast"
+            ]
+          },
+          {
+            "action": "down_right_fast",
+            "branch_count": 7,
+            "viable_branch_count": 0,
+            "unavailable_branch_count": 0,
+            "all_branches_viable": false,
+            "worst_certified_margin": -4.589929103851318,
+            "worst_recovery_distance": 32.0,
+            "terminal_active_actions": [
+              "down_right_fast"
+            ]
+          }
+        ]
+      },
+      "directional_summary": {
+        "active_action": "stay",
+        "active_action_allowed": false,
+        "active_action_margin": -4.589929103851318,
+        "held_action": "stay",
+        "held_action_allowed": false,
+        "held_action_margin": -4.589929103851318,
+        "issued_action": "up_right_fast",
+        "issued_action_allowed": false,
+        "issued_action_margin": -13.76036024093628,
+        "best_action": "stay",
+        "best_margin": -4.589929103851318
+      }
+    }
+  ],
+  "deterministic_gate": {
+    "observation_aligned_native_roots": true,
+    "complete_future_birth_ecl_timeline_coverage": true,
+    "future_geometry_consumed_across_publication_lead": true,
+    "signed_per_action_terminal_values": true,
+    "coverage_version_exact_authority_all_roots": true,
+    "nontrivial_exact_allowed_set_before_exhaustion": true,
+    "retained_losing_active_action_excluded": true,
+    "positive_directional_recovery_retained": true,
+    "pending_command_pickup_branches_exact": true,
+    "hard_gate_passed": true,
+    "blockers": [],
+    "physical_disposition": "stage4a_physical_gate_authorized"
+  }
+}

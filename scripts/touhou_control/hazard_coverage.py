@@ -173,9 +173,49 @@ def assess_hazard_coverage(
     )
 
 
+def rebase_hazard_coverage(
+    coverage: HazardCoverageAssessment,
+    *,
+    root_frame: int,
+    horizon_frame: int,
+) -> HazardCoverageAssessment:
+    """Restrict an older exhaustive envelope to a later observable root.
+
+    This never extrapolates.  It only intersects already-covered physical
+    slabs with ``root+1..horizon`` and then re-runs the ordinary fail-closed
+    coverage assessment.
+    """
+
+    if root_frame < coverage.root_frame:
+        raise ValueError("rebased hazard root predates captured coverage")
+    if horizon_frame < root_frame:
+        raise ValueError("rebased hazard horizon is invalid")
+    if horizon_frame > coverage.horizon_frame:
+        raise ValueError("rebased hazard horizon exceeds captured coverage")
+    start = root_frame + 1
+    slabs = tuple(
+        HazardCoverageSlab(
+            start_frame=max(start, slab.start_frame),
+            end_frame=min(horizon_frame, slab.end_frame),
+            coverage_class=slab.coverage_class,
+            source=slab.source,
+            version=slab.version,
+            rationale=slab.rationale,
+        )
+        for slab in coverage.slabs
+        if slab.end_frame >= start and slab.start_frame <= horizon_frame
+    )
+    return assess_hazard_coverage(
+        root_frame=root_frame,
+        horizon_frame=horizon_frame,
+        slabs=slabs,
+    )
+
+
 __all__ = [
     "HazardCoverageAssessment",
     "HazardCoverageClass",
     "HazardCoverageSlab",
     "assess_hazard_coverage",
+    "rebase_hazard_coverage",
 ]

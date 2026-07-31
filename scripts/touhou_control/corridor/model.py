@@ -90,6 +90,128 @@ class AabbTrajectoryHazard:
             return None
         return self.samples[frame]
 
+    def rebase(
+        self,
+        *,
+        offset: int,
+        horizon_frames: int,
+    ) -> AabbTrajectoryHazard:
+        if offset < 0 or horizon_frames < 0:
+            raise ValueError("AABB trajectory rebase range is invalid")
+        end = offset + horizon_frames + 1
+        if end > len(self.samples):
+            raise ValueError("AABB trajectory does not cover rebase horizon")
+        return AabbTrajectoryHazard(samples=self.samples[offset:end])
+
+
+@dataclass(frozen=True)
+class AnnularSectorTrajectoryHazard:
+    """A compact set-valued trajectory of possible disc centers.
+
+    At each frame the possible center lies in the annular sector defined by
+    ``minimum_radii``/``maximum_radii`` and the closed continuous angle
+    interval.  ``origin_uncertainty`` and ``half_extent_radius`` are radial
+    Minkowski inflations; adapters may use them to conservatively contain an
+    uncertain origin and a non-circular native collision shape.
+    """
+
+    origin_x: float
+    origin_y: float
+    minimum_angle: float
+    maximum_angle: float
+    minimum_radii: tuple[float | None, ...]
+    maximum_radii: tuple[float | None, ...]
+    half_extent_radius: float
+    origin_uncertainty: float = 0.0
+    base_uncertainty: float = 0.0
+    uncertainty_per_frame: float = 0.0
+
+    def __post_init__(self) -> None:
+        scalar_values = (
+            self.origin_x,
+            self.origin_y,
+            self.minimum_angle,
+            self.maximum_angle,
+            self.half_extent_radius,
+            self.origin_uncertainty,
+            self.base_uncertainty,
+            self.uncertainty_per_frame,
+        )
+        if not all(math.isfinite(value) for value in scalar_values):
+            raise ValueError("annular-sector trajectory values must be finite")
+        if self.minimum_angle > self.maximum_angle:
+            raise ValueError("annular-sector angle interval must be ordered")
+        if min(
+            self.half_extent_radius,
+            self.origin_uncertainty,
+            self.base_uncertainty,
+            self.uncertainty_per_frame,
+        ) < 0.0:
+            raise ValueError("annular-sector inflation cannot be negative")
+        if (
+            not self.minimum_radii
+            or len(self.minimum_radii) != len(self.maximum_radii)
+        ):
+            raise ValueError(
+                "annular-sector radius samples must be nonempty and paired"
+            )
+        for minimum, maximum in zip(
+            self.minimum_radii,
+            self.maximum_radii,
+            strict=True,
+        ):
+            if (minimum is None) != (maximum is None):
+                raise ValueError(
+                    "annular-sector radius absence must be paired"
+                )
+            if minimum is None:
+                continue
+            assert maximum is not None
+            if (
+                not math.isfinite(minimum)
+                or not math.isfinite(maximum)
+                or minimum < 0.0
+                or minimum > maximum
+            ):
+                raise ValueError(
+                    "annular-sector radii must be finite, nonnegative, "
+                    "and ordered"
+                )
+
+    def radial_sample(self, frame: int) -> tuple[float, float] | None:
+        if frame < 0 or frame >= len(self.minimum_radii):
+            return None
+        minimum = self.minimum_radii[frame]
+        maximum = self.maximum_radii[frame]
+        if minimum is None:
+            return None
+        assert maximum is not None
+        return minimum, maximum
+
+    def rebase(
+        self,
+        *,
+        offset: int,
+        horizon_frames: int,
+    ) -> AnnularSectorTrajectoryHazard:
+        if offset < 0 or horizon_frames < 0:
+            raise ValueError("annular-sector rebase range is invalid")
+        end = offset + horizon_frames + 1
+        if end > len(self.minimum_radii):
+            raise ValueError("annular-sector rebase exceeds trajectory")
+        return AnnularSectorTrajectoryHazard(
+            origin_x=self.origin_x,
+            origin_y=self.origin_y,
+            minimum_angle=self.minimum_angle,
+            maximum_angle=self.maximum_angle,
+            minimum_radii=self.minimum_radii[offset:end],
+            maximum_radii=self.maximum_radii[offset:end],
+            half_extent_radius=self.half_extent_radius,
+            origin_uncertainty=self.origin_uncertainty,
+            base_uncertainty=self.base_uncertainty,
+            uncertainty_per_frame=self.uncertainty_per_frame,
+        )
+
 
 @dataclass(frozen=True)
 class PiecewiseAabbHazard:
@@ -303,6 +425,7 @@ class RobustControlSpec:
 __all__ = [
     "AabbHazard",
     "AabbTrajectoryHazard",
+    "AnnularSectorTrajectoryHazard",
     "CorridorBounds",
     "CorridorConfig",
     "CorridorPlan",

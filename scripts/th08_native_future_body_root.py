@@ -18,6 +18,7 @@ from th08_future_body_identity import Route2SlotLifetimeLedger
 from th08_live.enemy_sensor import (
     ENEMY_ACTIVE_FLAG,
     ENEMY_FLAGS_OFFSET,
+    ENEMY_MANAGER_TEMPLATE_BASE,
     ENEMY_POOL_BASE,
     ENEMY_POOL_SIZE,
     ENEMY_STRIDE,
@@ -32,7 +33,7 @@ ROOT_COMPONENT_CAPTURE_SCHEMA = (
     "th08-native-future-body-root-component-capture-v2"
 )
 ROOT_SLICE_AUTHORITY = "native_root_bytes_only_no_predictive_authority"
-TH08_ENEMY_MANAGER_TEMPLATE_BASE = 0x0057D2F0
+TH08_ENEMY_MANAGER_TEMPLATE_BASE = ENEMY_MANAGER_TEMPLATE_BASE
 TH08_TIMELINE_RUNTIME_BASE = 0x00F5A0C0
 
 MINIMUM_ROOT_REQUIREMENTS = (

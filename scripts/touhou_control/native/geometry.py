@@ -6,7 +6,10 @@ import ctypes
 
 import numpy as np
 
-from ..packed_hazards import PackedSegmentFrames
+from ..packed_hazards import (
+    PackedAnnularSectorFrames,
+    PackedSegmentFrames,
+)
 from .arrays import (
     as_contiguous_array,
     attribute_array as _attribute_array,
@@ -136,6 +139,42 @@ def _load_aabb_trajectory_clearance_function():
     function.restype = ctypes.c_int
     return cache_function(
         "touhou_aabb_trajectory_clearance_v1",
+        function,
+    )
+
+
+def _load_annular_sector_trajectory_clearance_function():
+    cached = cached_function(
+        "touhou_annular_sector_trajectory_clearance_v1"
+    )
+    if cached is not None:
+        return cached
+    library = _load_library()
+    if library is None:
+        return None
+    try:
+        function = library.touhou_annular_sector_trajectory_clearance_v1
+    except AttributeError:
+        return None
+    float_pointer = ctypes.POINTER(ctypes.c_float)
+    double_pointer = ctypes.POINTER(ctypes.c_double)
+    function.argtypes = [
+        ctypes.c_float,
+        ctypes.c_float,
+        ctypes.c_int,
+        ctypes.c_float,
+        ctypes.c_float,
+        ctypes.c_int,
+        ctypes.c_int,
+        ctypes.c_float,
+        ctypes.POINTER(ctypes.c_int32),
+        *([double_pointer] * 10),
+        ctypes.c_int,
+        float_pointer,
+    ]
+    function.restype = ctypes.c_int
+    return cache_function(
+        "touhou_annular_sector_trajectory_clearance_v1",
         function,
     )
 
@@ -339,6 +378,71 @@ def apply_packed_segment_clearance(
     if result != 0:
         raise RuntimeError(
             f"native segment trajectory clearance kernel returned {result}"
+        )
+    return output
+
+
+def apply_annular_sector_trajectory_clearance(
+    *,
+    x_axis: np.ndarray,
+    y_axis: np.ndarray,
+    player_radius: float,
+    annular_sector_trajectories: tuple[object, ...],
+    clearance_volume: np.ndarray,
+) -> np.ndarray | None:
+    """Apply continuous set-valued future centers with the native kernel."""
+
+    function = _load_annular_sector_trajectory_clearance_function()
+    if function is None:
+        return None
+    x_axis = as_contiguous_array(x_axis, dtype=np.float32)
+    y_axis = as_contiguous_array(y_axis, dtype=np.float32)
+    output = as_contiguous_array(clearance_volume, dtype=np.float32)
+    if output.shape[1:] != (len(y_axis), len(x_axis)):
+        raise ValueError("clearance volume does not match the supplied axes")
+    packed = PackedAnnularSectorFrames.from_trajectories(
+        annular_sector_trajectories,
+        frame_count=output.shape[0],
+    )
+    fields = tuple(
+        getattr(packed, name)
+        for name in (
+            "origin_x",
+            "origin_y",
+            "minimum_angle",
+            "maximum_angle",
+            "minimum_radius",
+            "maximum_radius",
+            "half_extent_radius",
+            "origin_uncertainty",
+            "base_uncertainty",
+            "uncertainty_per_frame",
+        )
+    )
+    double_pointer = ctypes.POINTER(ctypes.c_double)
+    float_pointer = ctypes.POINTER(ctypes.c_float)
+    result = function(
+        float(x_axis[0]),
+        float(x_axis[1] - x_axis[0]),
+        len(x_axis),
+        float(y_axis[0]),
+        float(y_axis[1] - y_axis[0]),
+        len(y_axis),
+        output.shape[0],
+        player_radius,
+        packed.frame_offsets.ctypes.data_as(
+            ctypes.POINTER(ctypes.c_int32)
+        ),
+        *(
+            values.ctypes.data_as(double_pointer)
+            for values in fields
+        ),
+        packed.sample_count,
+        output.ctypes.data_as(float_pointer),
+    )
+    if result != 0:
+        raise RuntimeError(
+            f"native annular-sector clearance kernel returned {result}"
         )
     return output
 

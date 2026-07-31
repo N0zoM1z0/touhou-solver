@@ -119,8 +119,16 @@ empty. Directional terminal recoverability is therefore preserved at zero
 reserve without imposing its scan cost on a nonempty exact set. On Windows,
 the no-hazard bootstrap viability pass is 282 ms cold and about 9 ms warm
 instead of the physical 2,996 ms; the retained dense-root maximum remains
-2,104 ms and expires fail closed. The feature remains default-off pending a
-fresh physical coverage/delivery gate.
+2,104 ms and expires fail closed.
+
+Correctly configured Stage-4A run `20260731_231944` then completed only
+1/1,859 source projections; 1,836 crossed manager frames and all 4,499
+state-eligible nonspell records remained `future_policy_unavailable`.
+`20260731_230657` is explicitly configuration-invalid because it omitted the
+runtime ECL image/hash. The source worker now retains a destination allocated
+before the bracket and uses zero-copy manager/pool views; this removes about
+10.6 ms of observer copies without changing exact clock/coverage authority.
+The feature remains default-off pending a fresh physical activation gate.
 
 Removed supplemental, candidate-verifier, prewarm, G5, and priority-17 lanes
 have no active code or strategy authority.

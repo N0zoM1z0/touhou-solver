@@ -14,8 +14,8 @@ authority.
 
 - Branch: `main`.
 - Last physical checkpoint:
-  `lunatic_route2_stage4a_unattended_20260731_220830`, based on immutable
-  live-code checkpoint `81ed96a`.
+  `lunatic_route2_stage4a_unattended_20260731_231944`, based on immutable
+  live-code checkpoint `1c23fc3`.
 - Native H=32 wind-tunnel checkpoint: `3d15953`; it is historical evidence,
   not the live ordinary horizon.
 - Workspace-prune checkpoint: `be3e583` (`Prune TH08 active research
@@ -91,6 +91,17 @@ authority.
   viability fell from the physical 2,996 ms bootstrap solve to 282 ms cold
   and about 9 ms warm. The retained dense-root worst case is still 2,104 ms
   and remains fail-closed on expiry.
+- **Observed contiguous-capture falsifier:** correctly configured Stage-4A
+  run `20260731_231944` completed with 35 hits, first hit 498, and zero Bombs,
+  but only 1/1,859 source projections completed; 1,836 crossed the manager
+  frame and zero decisions received hard authority. The earlier
+  `20260731_230657` replay omitted the runtime ECL identity flags and is an
+  invalid authority experiment, not an 18-hit improvement.
+- **Implemented after that run:** the dedicated source worker now allocates
+  its 10.32 MiB destination before the frame bracket, reads directly into it,
+  and exposes manager/pool memoryviews. This removes about 10.6 ms of Windows
+  allocation/`.raw`/slice copies without relaxing exact frame equality or
+  future-source coverage.
 - `--kill-before-saturation` now uses observed ordinary bodies only. The
   falsified timeline spawn forecast is withheld from live input.
   Observed-body alignment/unfocus remains a proposed objective, but the
@@ -116,6 +127,8 @@ Latest user-authorized Lunatic Route-2 practice ring:
 | Stage 4A forecast/global investigation | `20260731_142342` | 18 | 1915 | 0 | accepted |
 | Stage 4A reserve-authority falsifier | `20260731_152921` | 17 | 914 | 0 | accepted |
 | Stage 4A live-source/delivery falsifier | `20260731_220830` | 23 | 939 | 0 | accepted |
+| Stage 4A ECL-config-invalid replay | `20260731_230657` | 18 | 499 | 0 | invalid gate |
+| Stage 4A contiguous-capture falsifier | `20260731_231944` | 35 | 498 | 0 | accepted |
 
 The automatic older-root comparisons were 15→5, 10→13, and 19→12. They are
 observational only: RNG roots differ and the proposed WS-H strategies were
@@ -148,6 +161,13 @@ FRScreen message-clock boundary, and three reached the now-lowered auxiliary
 `0x1A`. The worker also produced 3,610 expired-policy and 3,792 no-query
 decisions. These are capture/publication counterexamples, not evidence that
 `left_fast/down_left_fast` at retained f817 was wrong.
+
+Stage-4A run `20260731_231944` supplied the correctly configured follow-up.
+Only 1/1,859 projections completed and 1,836 crossed manager frames; all
+4,499 state-eligible nonspell decisions remained `future_policy_unavailable`,
+including all 332 before first hit 498. Its 35 hits are fallback-path evidence.
+The preceding `20260731_230657` run had no runtime ECL image, emitted zero
+source projections, and is retained only as a configuration counterexample.
 
 The physical forecast gate also falsified the current timeline observer as a
 general later-wave source. All 376 observations recycled the same timeline-0
@@ -273,9 +293,9 @@ and explicit `STRATEGY.md` decision.
 Do not rerun the rejected scalar-reserve or H=32 signed-terminal design. The
 future-source and factorized retained-chain semantic gates pass. Next:
 
-1. Run the already authorized single fresh Stage-4A physical trial from the
-   committed checkpoint with ordinary prepublication authority and
-   observed-body early kill enabled.
+1. Run the continuously authorized fresh Stage-4A physical trial from the
+   persistent zero-copy capture checkpoint with ordinary prepublication
+   authority and observed-body early kill enabled.
 2. Confirm that complete future-source projections publish, the 4px active
    kernel remains serviceable, held-prefix sets affect issue, empty/gap states
    are never relaxed, no Bomb is emitted, and the first-hit witness is

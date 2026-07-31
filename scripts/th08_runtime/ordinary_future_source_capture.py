@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import struct
+import threading
 import time
 from dataclasses import dataclass
 from typing import Any
@@ -55,20 +56,60 @@ class OrdinaryFutureSourceCaptureResult:
     closure: OrdinaryFutureSourceClosure
 
 
+_CAPTURE_BUFFERS = threading.local()
+
+
+def _persistent_enemy_slab_buffer(reader: Any) -> Any | None:
+    """Return one worker-local RPM destination when the reader supports it.
+
+    ``ProcessReader.read`` allocates and zeroes a ctypes destination, copies
+    the remote slab into it, then copies it again through ``buffer.raw``.
+    Future-source capture runs on one dedicated worker, so retaining the
+    destination there removes both observer-only operations from the native
+    manager-frame bracket without sharing mutable storage across workers.
+    """
+
+    allocate_buffer = getattr(reader, "allocate_buffer", None)
+    read_into = getattr(reader, "read_into", None)
+    if not callable(allocate_buffer) or not callable(read_into):
+        return None
+    expected_size = (ENEMY_POOL_SIZE + 1) * ENEMY_STRIDE
+    buffer = getattr(_CAPTURE_BUFFERS, "enemy_slab", None)
+    if buffer is None or len(buffer) != expected_size:
+        buffer = allocate_buffer(expected_size)
+        _CAPTURE_BUFFERS.enemy_slab = buffer
+    return buffer
+
+
+def _unsigned_byte_view(data: Any) -> memoryview:
+    view = memoryview(data)
+    if view.ndim == 1 and view.format == "B":
+        return view
+    return view.cast("B")
+
+
 def _read_active_enemy_records(
     reader: Any,
-) -> tuple[bytes, bytes, int]:
+    *,
+    slab_buffer: Any | None = None,
+) -> tuple[memoryview, memoryview, int]:
     # The manager singleton is immediately before the ordinary pool.  Capture
     # both in one ReadProcessMemory transaction: the former sparse scan made
     # at least 481 cross-process calls, and retained physical traces showed
     # that 1,726/1,754 roots crossed enemy_manager_frame before closure could
     # even be attempted.  One contiguous image is larger (~9.8 MiB) but is a
     # single versioned native observation and retains every slot coordinate.
-    slab = reader.read(
-        ENEMY_MANAGER_TEMPLATE_BASE,
-        (ENEMY_POOL_SIZE + 1) * ENEMY_STRIDE,
-    )
     expected_size = (ENEMY_POOL_SIZE + 1) * ENEMY_STRIDE
+    if slab_buffer is None:
+        slab = _unsigned_byte_view(
+            reader.read(
+                ENEMY_MANAGER_TEMPLATE_BASE,
+                expected_size,
+            )
+        )
+    else:
+        reader.read_into(ENEMY_MANAGER_TEMPLATE_BASE, slab_buffer)
+        slab = _unsigned_byte_view(slab_buffer)
     if len(slab) != expected_size:
         raise ValueError("ordinary future-source enemy slab is truncated")
     manager_blob = slab[:ENEMY_STRIDE]
@@ -149,8 +190,8 @@ def _compact_state(state: dict[str, object]) -> dict[str, object]:
 def _payload(
     reader: Any,
     *,
-    manager_blob: bytes,
-    ordinary_blob: bytes,
+    manager_blob: bytes | memoryview,
+    ordinary_blob: bytes | memoryview,
     state: dict[str, object],
 ) -> dict[str, object]:
     manager = _enemy_source_record(
@@ -211,11 +252,18 @@ def capture_ordinary_future_source_snapshot(
     if maximum_attempts <= 0:
         raise ValueError("future-source capture attempts must be positive")
     started = time.perf_counter()
+    # Allocate the reusable 9.8 MiB destination before the native clock
+    # bracket. Allocation/zeroing is observer work and is not part of the
+    # source observation.
+    enemy_slab_buffer = _persistent_enemy_slab_buffer(reader)
     snapshot: OrdinaryFutureSourceSnapshot | None = None
     for attempt in range(1, maximum_attempts + 1):
         frame_before = reader.u32(ADDR_ENEMY_MANAGER_FRAME)
         manager_blob, ordinary_blob, _active_count = (
-            _read_active_enemy_records(reader)
+            _read_active_enemy_records(
+                reader,
+                slab_buffer=enemy_slab_buffer,
+            )
         )
         state = observe_state(reader)
         payload = _payload(

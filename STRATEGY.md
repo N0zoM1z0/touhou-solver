@@ -134,8 +134,16 @@ safe. Boolean hard membership omits soft scans; directional recovery is still
 computed when the predecessor is empty. Windows no-hazard viability is about
 282 ms cold and 9 ms warm instead of the physical 2,996 ms bootstrap solve;
 the retained dense-root worst case is still about 2,104 ms and remains
-fail-closed on deadline expiry. L3 stays default-off until a fresh physical
-run shows nonzero complete source projections and effective exact authority.
+fail-closed on deadline expiry.
+
+The correctly configured physical follow-up `20260731_231944` still produced
+only 1/1,859 complete source roots: 1,836 captures crossed manager frames and
+zero decisions received hard authority. `20260731_230657` omitted the runtime
+ECL flags and is configuration-invalid for this question. The next checkpoint
+retains one worker-local 10.32 MiB RPM destination and zero-copy pool views,
+removing about 10.6 ms of observer allocation/copy work from the bracket while
+preserving fail-closed semantics. L3 stays default-off until a fresh physical
+run shows nonzero effective exact authority.
 
 ## Offline Native Authority
 

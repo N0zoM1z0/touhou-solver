@@ -68,7 +68,15 @@ def _corridor_version(
     )
 
 
-def _unknown_future_coverage(
+def corridor_hazard_version(
+    solution: CorridorVersionSource | None,
+) -> VersionIdentity:
+    """Return the exact hazard-snapshot identity for one corridor policy."""
+
+    return _corridor_version("th08-corridor-hazard-snapshot-v1", solution)
+
+
+def unknown_future_coverage(
     *,
     root_frame: int,
     horizon_frames: int,
@@ -151,11 +159,8 @@ def build_pipeline_shadow_snapshot(
         else None
     )
 
-    hazard_version = _corridor_version(
-        "th08-corridor-hazard-snapshot-v1",
-        corridor_solution,
-    )
-    hazard_coverage = _unknown_future_coverage(
+    hazard_version = corridor_hazard_version(corridor_solution)
+    hazard_coverage = unknown_future_coverage(
         root_frame=query_frame,
         horizon_frames=hazard_horizon_frames,
         hazard_version=hazard_version,
@@ -260,4 +265,6 @@ __all__ = [
     "PIPELINE_SHADOW_ROLE",
     "PipelineShadowSnapshot",
     "build_pipeline_shadow_snapshot",
+    "corridor_hazard_version",
+    "unknown_future_coverage",
 ]

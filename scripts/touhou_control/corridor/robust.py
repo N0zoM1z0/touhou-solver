@@ -138,7 +138,7 @@ def build_robust_corridor_induction(
                 required_clearance=config.required_clearance,
                 clamp_to_bounds=True,
             ),
-            compact=True,
+            compact=not control.retain_safety_action_values,
         )
         safety_value_finished = time.perf_counter()
 

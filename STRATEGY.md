@@ -56,30 +56,31 @@ unknown-direction. It may publish a queryable shadow global policy, but its
 target and action labels are stripped before planning/issue; it is not general
 live safety authority.
 
-### L3 — Default-off ordinary pre-exhaustion experiment
+### L3 — Default-off ordinary prepublication predecessor
 
-`--ordinary-preexhaustion-authority` remains default-off and is physically
-falsified. Its implementation attempts to affect input only during an
-ordinary nonspell, normal player phase, zero `player+0xE2A68`, unit observed
-root time-scale, hard no-Bomb run. It does not enable the existing
-shadow-global flag or inherit the shadow future-hazard slab.
+`--ordinary-preexhaustion-authority` remains default-off. Its former scalar
+boundary-reserve implementation is rejected and disconnected. The replacement
+uses player phase rather than the retained deathbomb-window value: phases 1/2
+fail closed, while native movement phases 0/3 remain eligible.
 
-Its hard claim is narrower than global hazard viability: from observed native
-active input and held complete input, it forms the one-pending causal root and
-enumerates every pickup order over a six-physical-update lease, including
-next-step pickup and no pickup within the lease. Movement scale is universally
-bounded in `[0,1]`. Near boundary exhaustion it admits only actions whose
-minimum reserve over every pipeline branch does not fall below the root
-reserve; if already-pending motion makes that impossible, it retains only the
-maximum worst-lease actions.
+For an ordinary nonspell at unit scale, it uses the exact observed
+active/held/pending pipeline root. Every command pickup branch is checked
+through a fresh signed-clearance hazard prefix and advanced to an already
+completed future policy epoch. The terminal set comes from full-horizon signed
+safety values with all per-action values retained. Exact off-grid projection
+error is subtracted. Holding the pending complete mask remains no-write; the
+future delay set includes zero residual pickup as a conservative superset.
 
-One additional six-update lease moves activation earlier for an unseen
-hostile-birth reaction window. This is a controllability reserve, not hostile
-spawn/bullet geometry authority. The local planner may not discard the
-constraint through coarse-grid degeneracy. Fresh issue collision
-certification is the final gate; an empty intersection is explicitly relaxed
-only to preserve immediate collision survival. The held complete mask remains
-no-write and preserves a pending command.
+Hard coverage must begin at the current observation and span the publication
+lead plus the complete future policy horizon under the exact hazard version.
+Missing prefix coverage, compact/missing terminal action values, interval or
+version mismatch, and unseen birth/event coverage all produce no action
+authority. The existing shadow slab remains `UNKNOWN`. Directional terminal
+margins and recovery distances may still be traced diagnostically.
+
+Observed-body early kill may rank only the resulting nonempty hard set plus
+the fresh issue-safe set. There is no objective fallback when the predecessor
+is empty.
 
 **Observed physical falsifier:** run `20260731_152921` enabled the flag on
 12,029 decisions but produced zero eligible/applicable/effective decisions.
@@ -92,10 +93,13 @@ That wiring bug is not the only failure. Re-evaluating the physical roots with
 only the bad gate removed still permits `down_left` at global exhaustion
 frame 835. An uncontrollable no-pickup prefix makes all 17 actions share
 worst reserve zero at frame 850; playfield clamping repeats the all-action tie
-at the saturated corner at frame 910. The code remains as a default-off
-counterexample, but this scalar boundary-reserve design has no promotion path.
-The next design must preserve a hazard-space viable set across pickup and
-publication delay and must cover bounded future births.
+at the saturated corner at frame 910. The scalar code remains only as a
+deterministic counterexample and has no promotion path.
+
+The set-valued replacement passes focused/Linux tests, but the retained
+source trace has no signed per-action policy values and all five
+future-hazard slabs are `model_unknown`. Its physical gate therefore remains
+closed until bounded ordinary birth/event coverage exists.
 
 ## Offline Native Authority
 
@@ -228,10 +232,10 @@ predicate-only repair still permits the losing action and aliases every
 action under prefix/boundary saturation. Contact bullet slot 455 first entered
 the retained nearby set while an older hazard-snapshot policy certified
 `down_left`; the next snapshot reported an empty kernel. The compact trace
-cannot attribute the version flip to that slot alone. The next global
-candidate is therefore a set-valued pre-publication predecessor with bounded
-ordinary future-hazard coverage, not another boundary score or local ranking
-change.
+cannot attribute the version flip to that slot alone. The set-valued
+pre-publication predecessor is implemented; bounded ordinary future-hazard
+coverage is now its fail-closed blocker, not another boundary score or local
+ranking change.
 
 ### P5 — Representative root corpus
 

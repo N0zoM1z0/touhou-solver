@@ -249,6 +249,7 @@ class RobustControlSpec:
     nominal_delay: int
     active_action: str
     safety_value_horizon_frames: int = 0
+    retain_safety_action_values: bool = False
     terminal_viable: np.ndarray | None = None
     survival_labels: bool = False
     retain_query_survival_problem: bool = False

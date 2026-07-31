@@ -652,8 +652,9 @@ def build_parser() -> argparse.ArgumentParser:
         action=argparse.BooleanOptionalAction,
         default=False,
         help=(
-            "enable the default-off ordinary-nonspell causal control-reserve "
-            "action filter; this does not promote shadow future hazards"
+            "enable the default-off signed ordinary prepublication "
+            "predecessor; incomplete future birth/event coverage remains "
+            "fail-closed"
         ),
     )
     parser.add_argument(

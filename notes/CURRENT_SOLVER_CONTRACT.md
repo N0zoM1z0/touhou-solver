@@ -38,30 +38,30 @@ its pinned Route-2 content identity. Unknown or mismatched schedule state
 fails closed unless a diagnostic explicitly authorizes the root-only
 unknown-direction continuation.
 
-The ordinary-stage root-only continuation may compute and query a rolling
-global policy for diagnostic evidence, but that publication has no action
-authority: its target, repair labels, and survival labels are removed before
-baseline local planning. `--ordinary-preexhaustion-authority` does not change
-that rule or promote the shadow future-hazard slab. Its scalar
-player-control-reserve experiment is now physically rejected and is not
-ordinary global action authority.
+The ordinary-stage root-only continuation remains diagnostic by default.
+`--ordinary-preexhaustion-authority` does not promote it or the shadow
+future-hazard slab. The rejected scalar reserve implementation is disconnected
+from live input.
 
-The rejected pre-exhaustion implementation observes native active input, held
-complete desired input, player position/phase, player `+0xE2A68`, root time
-scale, and the current action lease. If active and held differ, held is the
-one pending complete action.
-Within a six-physical-update lease, nature may choose every pending/new pickup
-order, including next-step pickup and no pickup within the lease; this does
-not use `enemy_manager_frame` as a pickup clock. Selecting held remains
-no-write and samples no new delay. Future player movement scale is universally
-bounded in `[0,1]`.
+The default-off replacement observes player phase at capture and issue,
+native active input, held desired input, the one-pending estimate, position,
+unit time scale, a completed future policy/version, and fresh hazards. Phases
+1/2 fail closed; movement phases 0/3 do not depend on the retained
+`player+0xE2A68` deathbomb-window limit.
 
-It attempts to activate when signed playfield-boundary reserve is within the
-player radius plus maximum axis travel over the current lease and one
-additional hostile-birth reaction lease. It retains actions whose minimum
-reserve across every pipeline branch and every lease step does not decrease.
-If an already-pending motion forces loss for every action, only actions with
-maximum worst-lease reserve remain.
+For every complete selected action, nature chooses every old/new pickup
+branch. The fresh signed-clearance prefix must cover the publication lead.
+Each terminal root queries full-horizon signed safety values, retains every
+future action value, and subtracts live-to-lattice position error. A terminal
+pending held command must itself have positive certified action value.
+Selecting held remains no-write; zero residual pickup is included
+conservatively in the future delay set.
+
+Coverage must span every physical frame from the current observation through
+the publication lead and the future policy horizon. Its slabs must match the
+required hazard version exactly. Missing prefix certification, unavailable
+signed action values, interval/version mismatch, or unknown future
+birth/event geometry yields `allowed_actions = None`.
 
 Physical run `20260731_152921` found two independent invalidations. First,
 `player+0xE2A68` retains the deathbomb-window limit installed by
@@ -72,12 +72,12 @@ an uncontrollable prefix or playfield clamp dominates scalar minimum reserve.
 This finite boundary calculation may remain diagnostic, but its allowed set
 must not be treated as survival authority.
 
-The missing ordinary contract is a set-valued, hazard-space causal
-predecessor that spans active/held/pending pickup order and policy publication
-lead, preserves directional recovery, and includes bounded future hostile
-birth/event coverage. Until that exists, fresh issue-time collision
-certificates remain local-prefix authority only; they do not repair the
-missing global viable set.
+The set-valued predecessor and phase/pipeline/publication mechanics now exist.
+The missing ordinary contract is bounded future hostile birth/event coverage.
+The retained f817/833/835/850/910 source run also predates signed per-action
+terminal values, so it cannot prove a nontrivial hard set. Until both are
+available, the replacement fails closed and no ordinary global action
+authority reaches input.
 
 Removed supplemental, candidate-verifier, prewarm, G5, and priority-17 lanes
 have no active code or strategy authority.
@@ -218,8 +218,8 @@ configuration but never reached action authority. Native semantics invalidate
 its zero-`+0xE2A68` gate, and retained-root counterfactuals invalidate scalar
 boundary reserve as an equivalent global filter. No Stage-5 follow-up or
 local-ranking evaluation is authorized from this result. The replacement
-must be a set-valued hazard-space predecessor with pickup, publication, and
-future-birth coverage.
+now supplies the set-valued pickup/publication predecessor; bounded
+future-birth/event coverage remains the unresolved promotion condition.
 
 ## Falsification And Promotion
 

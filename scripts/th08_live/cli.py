@@ -103,8 +103,9 @@ def build_live_parser(
         type=int,
         default=0,
         help=(
-            "optional compact max-min fallback horizon in game frames; "
-            "zero disables the research policy"
+            "optional max-min signed-clearance horizon in game frames; "
+            "ordinary prepublication authority forces the full horizon and "
+            "retains per-action values for continuous-position certificates"
         ),
     )
     parser.add_argument(
@@ -123,10 +124,9 @@ def build_live_parser(
         action=argparse.BooleanOptionalAction,
         default=False,
         help=(
-            "enable the default-off ordinary-nonspell causal player-control "
-            "reserve filter; it models active/held/pending input and hostile-"
-            "birth reaction time without promoting the root-only shadow "
-            "future"
+            "enable the default-off signed ordinary-nonspell "
+            "prepublication predecessor; incomplete future birth/event "
+            "coverage remains fail-closed"
         ),
     )
     parser.add_argument(

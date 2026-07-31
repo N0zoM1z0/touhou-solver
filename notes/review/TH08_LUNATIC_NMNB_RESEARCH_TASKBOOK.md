@@ -248,17 +248,21 @@ Alternative methods:
 No heuristic may discard a safety branch or condition on hidden state without
 proof.
 
-Current first task: replace the physically falsified scalar-reserve filter
-with a set-valued ordinary pre-publication predecessor. Stage-4A run
+Current first task: close future-hazard coverage for the new set-valued
+ordinary pre-publication predecessor. Stage-4A run
 `20260731_152921` enabled the experiment but all 7,202 nonspell decisions
 failed an invalid `player+0xE2A68 == 0` gate, producing zero action
 constraints and zero early-kill applications. Native code shows that field is
 a retained deathbomb-window limit. Counterfactual roots with only the gate
 removed still permit `down_left` at global exhaustion and alias all 17
-actions under an uncontrollable prefix and at the saturated corner. The next
-candidate must preserve hazard-space viability across pickup order and the
-rolling publication lead, with bounded future hostile births. Do not rerun
-the old filter or tune local scoring.
+actions under an uncontrollable prefix and at the saturated corner. The
+replacement now uses phase-only transition semantics, fresh prefix
+certificates, exact active/held/pending pickup branches, full signed per-action
+terminal values, continuous-position error subtraction, and exact publication
+version binding. The retained source run lacks those signed values and every
+future slab is `model_unknown`, so its deterministic hard gate is false. Do
+not run physical or tune local scoring until bounded ordinary births/events
+produce a nontrivial exact set.
 
 ### WS-D — Combat, Focus, and Power
 
@@ -486,17 +490,17 @@ it.
 
 ## 11. Immediate Backlog
 
-1. Correct the ordinary native state predicate and its capture/issue epoch,
-   but do not rerun that gate alone.
-2. Build a set-valued hazard-space predecessor across active/held/pending
-   pickup order and the rolling worker publication lead. Preserve
-   directional reachability when the current scalar reserve is zero.
+1. Keep the corrected capture/issue player-phase predicate; never restore the
+   retained deathbomb-window limit as an alive-state gate.
+2. Keep the signed continuous-position predecessor across exact
+   active/held/pending pickup order, fresh hazard prefix, and publication lead.
 3. Add bounded ordinary future-birth/event coverage or fail closed; do not
    promote the existing shadow future slab.
-4. Regress the retained frame-817/833/835/850/910 chain and require a
-   nontrivial allowed set before global exhaustion.
-5. After focused Linux/Windows gates, request one new Stage-4A physical test
-   with observed-body early kill inside the new viable set.
+4. Recompute the retained frame-817/833/835/850/910 chain with signed
+   per-action values and require a nontrivial allowed set before exhaustion.
+5. Only after 3–4 and focused Windows gates pass, run the already authorized
+   single Stage-4A physical test with observed-body early kill inside the new
+   viable set.
 6. Rotate to Stage 3 or Stage 5 only if Stage 4A materially improves.
 7. Evaluate local micro ranking only after global action authority is
    physically effective; repeat a winner before a full route.

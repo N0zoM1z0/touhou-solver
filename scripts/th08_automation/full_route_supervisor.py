@@ -510,8 +510,8 @@ def build_parser() -> argparse.ArgumentParser:
         action=argparse.BooleanOptionalAction,
         default=False,
         help=(
-            "enable causal control-reserve action filtering during ordinary "
-            "nonspells only; shadow future hazards remain non-authoritative"
+            "enable the signed ordinary prepublication predecessor; "
+            "incomplete future birth/event coverage remains fail-closed"
         ),
     )
     parser.add_argument(

@@ -224,10 +224,11 @@ from th08_live.local_objectives import (
     terminal_threat_degeneracy as _terminal_threat_degeneracy,
     terminal_threat_scores as _terminal_threat_scores_impl,
 )
-from touhou_control.preexhaustion import (
-    CausalPreexhaustionFilter,
-    build_causal_preexhaustion_filter,
-    unavailable_causal_preexhaustion_filter,
+from touhou_control.hazard_coverage import HazardCoverageAssessment
+from touhou_control.prepublication import (
+    CausalPrepublicationFilter,
+    build_causal_prepublication_filter,
+    unavailable_causal_prepublication_filter,
 )
 from th08_live.movement import (
     BOMB,
@@ -315,7 +316,11 @@ from th08_live.planner_pass import (
     PlannerPassDependencies,
     _run_local_planner_pass as _run_local_planner_pass_impl,
 )
-from th08_live.pipeline_shadow import build_pipeline_shadow_snapshot
+from th08_live.pipeline_shadow import (
+    build_pipeline_shadow_snapshot,
+    corridor_hazard_version,
+    unknown_future_coverage,
+)
 from th08_local_planner import (  # noqa: F401
     ActuatorPipeline,
     BaselineBeamContext,
@@ -464,7 +469,7 @@ ROUTE2_STAGE_SUCCESSORS = {
     5: 7,
 }
 ORDINARY_PREEXHAUSTION_AUTHORITY = (
-    "causal_ordinary_nonspell_control_reserve_v1"
+    "causal_ordinary_nonspell_prepublication_viability_v1"
 )
 CORRIDOR_ALLOWED_ACTION_AUTHORITY = "exact_corridor_viability_v1"
 _ORDINARY_PREEXHAUSTION_ACTIONS = tuple(
@@ -520,73 +525,72 @@ def _ordinary_nonspell_preexhaustion_filter(
     enabled: bool,
     spell_active: bool,
     player_phase: int,
-    predeath_counter: int,
     root_scale_bits: int,
     root: LocalPipelineRoot | None,
     action_hold_frames: int,
     player_x: float,
     player_y: float,
-) -> CausalPreexhaustionFilter:
-    """Build fail-closed causal action authority for an ordinary phase."""
+    current_frame: int,
+    future_solution: CorridorSolution | None,
+    future_hazard_coverage: HazardCoverageAssessment | None,
+    prefix_certified_frames: int = 0,
+    prefix_safe_actions: tuple[str, ...] | None = None,
+) -> CausalPrepublicationFilter:
+    """Build fail-closed authority into the next published ordinary kernel."""
 
-    uncertainty_frames = action_hold_frames
     pickup_delay_frames = tuple(range(action_hold_frames + 1))
     if not enabled:
-        return unavailable_causal_preexhaustion_filter(
+        return unavailable_causal_prepublication_filter(
             enabled=False,
             reason="disabled",
-            hostile_birth_uncertainty_frames=uncertainty_frames,
             pickup_delay_frames=pickup_delay_frames,
+            coverage=future_hazard_coverage,
         )
     if spell_active:
-        return unavailable_causal_preexhaustion_filter(
+        return unavailable_causal_prepublication_filter(
             enabled=True,
             reason="spell_active",
-            hostile_birth_uncertainty_frames=uncertainty_frames,
             pickup_delay_frames=pickup_delay_frames,
+            coverage=future_hazard_coverage,
         )
-    if player_phase != 0 or predeath_counter != 0:
-        return unavailable_causal_preexhaustion_filter(
+    if player_phase in (1, 2):
+        return unavailable_causal_prepublication_filter(
             enabled=True,
-            reason="player_transition_or_predeath",
-            hostile_birth_uncertainty_frames=uncertainty_frames,
+            reason="player_transition",
             pickup_delay_frames=pickup_delay_frames,
+            coverage=future_hazard_coverage,
         )
     if root_scale_bits != TH08_UNIT_TIME_SCALE_BITS:
-        return unavailable_causal_preexhaustion_filter(
+        return unavailable_causal_prepublication_filter(
             enabled=True,
             reason="nonunit_root_time_scale",
-            hostile_birth_uncertainty_frames=uncertainty_frames,
             pickup_delay_frames=pickup_delay_frames,
+            coverage=future_hazard_coverage,
         )
-    if root is not None and root.pending_action is not None:
-        root = LocalPipelineRoot(
-            active_action=root.active_action,
-            held_desired_action=root.held_desired_action,
-            pending_action=root.pending_action,
-            remaining_delay_support=tuple(
-                range(action_hold_frames + 1)
-            ),
+    if future_solution is None:
+        return unavailable_causal_prepublication_filter(
+            enabled=True,
+            reason="future_policy_unavailable",
+            state_eligible=True,
+            pickup_delay_frames=pickup_delay_frames,
+            coverage=future_hazard_coverage,
         )
-    return build_causal_preexhaustion_filter(
+    return build_causal_prepublication_filter(
         enabled=True,
         root=root,
         selected_actions=_ORDINARY_PREEXHAUSTION_ACTIONS,
         action_velocities=_ORDINARY_PREEXHAUSTION_VELOCITIES,
         delay_frames=pickup_delay_frames,
-        action_hold_frames=action_hold_frames,
+        current_frame=current_frame,
+        publication_frame=future_solution.source_frame,
+        prefix_certified_frames=prefix_certified_frames,
+        prefix_safe_actions=prefix_safe_actions,
         start_x=player_x,
         start_y=player_y,
-        bounds=(
-            PLAYFIELD_LEFT,
-            PLAYFIELD_RIGHT,
-            PLAYFIELD_TOP,
-            PLAYFIELD_BOTTOM,
-        ),
-        player_radius=PLAYER_RADIUS,
-        hostile_birth_uncertainty_frames=uncertainty_frames,
-        movement_scale_bounds=(0.0, 1.0),
-        physical_lease_frames=action_hold_frames,
+        future_safety_policy=future_solution.plan.safety_value_policy,
+        future_recovery_policy=future_solution.plan.viability_policy,
+        hazard_coverage=future_hazard_coverage,
+        required_hazard_version=corridor_hazard_version(future_solution),
     )
 
 
@@ -1718,6 +1722,14 @@ def _run_live_session(
     ordinary_preexhaustion_authority = bool(
         getattr(args, "ordinary_preexhaustion_authority", False)
     )
+    ordinary_safety_value_horizon = max(
+        args.safety_value_horizon,
+        (
+            TH08_CORRIDOR_CONFIG.horizon_frames
+            if ordinary_preexhaustion_authority
+            else 0
+        ),
+    )
 
     enemy_lifecycle_probe: EnemyLifecycleProbe | None = None
     enemy_lifecycle_probe_last_serial: int | None = None
@@ -1926,13 +1938,21 @@ def _run_live_session(
                         "authority": ORDINARY_PREEXHAUSTION_AUTHORITY,
                         "hard_inputs": (
                             "observed_active_held_pending_pipeline_root_"
-                            "pickup_delay_support_playfield_bounds"
+                            "pickup_delay_support_completed_future_policy_"
+                            "exact_hazard_version"
                         ),
                         "hostile_birth_uncertainty": (
-                            "one_additional_observation_lease_reaction_"
-                            "reserve_no_spawn_geometry_claim"
+                            "future_hazard_coverage_required_or_no_"
+                            "action_authority"
                         ),
-                        "future_time_scale_support": [0.0, 1.0],
+                        "future_time_scale_support": "exact_unit_only",
+                        "predecessor": (
+                            "set_valued_hazard_space_all_pickup_branches_"
+                            "to_next_publication_epoch"
+                        ),
+                        "recovery_role": (
+                            "directional_set_distance_diagnostic_only"
+                        ),
                         "fresh_collision_certificate_is_final_gate": True,
                         "shadow_future_promoted": False,
                     },
@@ -2127,12 +2147,20 @@ def _run_live_session(
                         args.corridor_every
                     ),
                     "safety_value_horizon_frames": (
-                        args.safety_value_horizon
+                        ordinary_safety_value_horizon
                     ),
                     "safety_value_role": (
-                        "empty_kernel_soft_preference"
-                        if args.safety_value_horizon
+                        (
+                            "continuous_position_prepublication_"
+                            "action_certificate"
+                        )
+                        if ordinary_preexhaustion_authority
+                        else "empty_kernel_soft_preference"
+                        if ordinary_safety_value_horizon
                         else "disabled"
+                    ),
+                    "safety_value_action_values_retained": (
+                        ordinary_preexhaustion_authority
                     ),
                     "native_planner_backend": native_backend.available(),
                     "viability_quantifiers": (
@@ -3449,6 +3477,15 @@ def _run_live_session(
                     maximum=LIVE_CONTROL_DELAY_MAX,
                     padding=ASYNC_POLICY_DELAY_PADDING,
                 )
+                if (
+                    ordinary_preexhaustion_authority
+                    and 0 not in policy_delay_support
+                ):
+                    # A command already pending at the future publication
+                    # epoch can have zero residual pickup delay.  Treating
+                    # the held mask as a fresh write over (0..max) is a
+                    # conservative superset of that exact no-write branch.
+                    policy_delay_support = (0, *policy_delay_support)
                 forecast_player_x, forecast_player_y = (
                     _project_player_for_read_lag(
                         captured_iteration.projected_player_x,
@@ -3483,7 +3520,10 @@ def _run_live_session(
                     nominal_control_delay=control_delay_frames,
                     active_action=_action_name_from_mask(previous_mask),
                     safety_value_horizon_frames=(
-                        args.safety_value_horizon
+                        ordinary_safety_value_horizon
+                    ),
+                    retain_safety_action_values=(
+                        ordinary_preexhaustion_authority
                     ),
                     required_gate_lane=(
                         corridor_commitment.active_lane(counter_after_read)
@@ -3605,45 +3645,127 @@ def _run_live_session(
             action_hold_frames = _estimate_live_action_hold(
                 tuple(decision_frame_deltas)
             )
-            preexhaustion_active_action = (
-                _local_pipeline_action_from_mask(
-                    captured_iteration.native_active_mask
+            ordinary_future_hazard_coverage = None
+            ordinary_prefix_certified_frames = 0
+            ordinary_prefix_safe_actions: tuple[str, ...] | None = None
+            if corridor_pending_solution is not None:
+                future_viability_policy = (
+                    corridor_pending_solution.plan.viability_policy
                 )
-            )
-            preexhaustion_held_action = (
-                _local_pipeline_action_from_mask(
-                    captured_iteration.held_desired_mask
+                ordinary_future_hazard_coverage = unknown_future_coverage(
+                    root_frame=captured_iteration.snapshot_frame,
+                    horizon_frames=(
+                        (
+                            corridor_pending_solution.source_frame
+                            - captured_iteration.snapshot_frame
+                        )
+                        + future_viability_policy.horizon_frames
+                        if future_viability_policy is not None
+                        else (
+                            corridor_pending_solution.source_frame
+                            - captured_iteration.snapshot_frame
+                            + PLANNER_THREAT_HORIZON
+                        )
+                    ),
+                    hazard_version=corridor_hazard_version(
+                        corridor_pending_solution
+                    ),
                 )
-            )
-            preexhaustion_pipeline_root = (
-                LocalPipelineRoot(
-                    active_action=preexhaustion_active_action,
-                    held_desired_action=preexhaustion_held_action,
+                ordinary_publication_lead = (
+                    corridor_pending_solution.source_frame
+                    - captured_iteration.snapshot_frame
                 )
                 if (
-                    preexhaustion_active_action
-                    == preexhaustion_held_action
-                )
-                else LocalPipelineRoot(
-                    active_action=preexhaustion_active_action,
-                    held_desired_action=preexhaustion_held_action,
-                    pending_action=preexhaustion_held_action,
-                    # The helper replaces this placeholder with every
-                    # possible pickup inside its physical lease.
-                    remaining_delay_support=(0,),
-                )
-            )
+                    ordinary_preexhaustion_authority
+                    and not spell_state["active"]
+                    and int(player["phase"]) not in (1, 2)
+                    and (
+                        player_control_root.scale_bits
+                        == TH08_UNIT_TIME_SCALE_BITS
+                    )
+                    and observed_local_pipeline_root is not None
+                    and ordinary_publication_lead > 0
+                ):
+                    ordinary_prefix_delay_frames = tuple(
+                        range(LIVE_ACTION_HOLD_MAX + 1)
+                    )
+                    ordinary_prefix_hold_frames = max(
+                        1,
+                        ordinary_publication_lead
+                        - max(ordinary_prefix_delay_frames),
+                    )
+                    ordinary_prefix_certified_frames = (
+                        ordinary_prefix_hold_frames
+                        + max(ordinary_prefix_delay_frames)
+                    )
+                    ordinary_prefix_certificates = (
+                        _robust_action_certificates(
+                            player_x=player_control_root.x,
+                            player_y=player_control_root.y,
+                            previous_mask=held_desired_mask,
+                            actions=_PLANNER_ACTIONS,
+                            delay_frames=ordinary_prefix_delay_frames,
+                            action_hold_frames=(
+                                ordinary_prefix_hold_frames
+                            ),
+                            bullets=bullets,
+                            lasers=lasers,
+                            enemy_bodies=enemy_bodies,
+                            snapshot_lag=player_to_hazard_lag,
+                            player_scale_bits=(
+                                captured_iteration.time_scale_schedule
+                                .require_player_horizon(
+                                    ordinary_prefix_certified_frames
+                                )
+                            ),
+                            laser_scale_bits=(
+                                captured_iteration.time_scale_schedule
+                                .require_laser_horizon(
+                                    ordinary_prefix_certified_frames
+                                )
+                            ),
+                            pipeline_root=(
+                                observed_local_pipeline_root
+                            ),
+                        )
+                    )
+                    ordinary_prefix_safe_actions = tuple(
+                        action.name
+                        for action in _PLANNER_ACTIONS
+                        if (
+                            (
+                                certificate := (
+                                    ordinary_prefix_certificates.get(
+                                        action.name
+                                    )
+                                )
+                            )
+                            is not None
+                            and certificate.worst_collisions == 0
+                            and certificate.min_clearance > 0.0
+                        )
+                    )
             ordinary_preexhaustion = (
                 _ordinary_nonspell_preexhaustion_filter(
                     enabled=ordinary_preexhaustion_authority,
                     spell_active=bool(spell_state["active"]),
                     player_phase=int(player["phase"]),
-                    predeath_counter=int(player["predeath_counter"]),
                     root_scale_bits=player_control_root.scale_bits,
-                    root=preexhaustion_pipeline_root,
+                    root=observed_local_pipeline_root,
                     action_hold_frames=LIVE_ACTION_HOLD_MAX,
                     player_x=player_control_root.x,
                     player_y=player_control_root.y,
+                    current_frame=captured_iteration.snapshot_frame,
+                    future_solution=corridor_pending_solution,
+                    future_hazard_coverage=(
+                        ordinary_future_hazard_coverage
+                    ),
+                    prefix_certified_frames=(
+                        ordinary_prefix_certified_frames
+                    ),
+                    prefix_safe_actions=(
+                        ordinary_prefix_safe_actions
+                    ),
                 )
             )
             allowed_action_authority = (
@@ -3681,14 +3803,6 @@ def _run_live_session(
             early_kill_allowed_actions = (
                 actionable_policy_guidance.allowed_first_actions
             )
-            if (
-                early_kill_allowed_actions is None
-                and ordinary_preexhaustion.authority_eligible
-                and not ordinary_preexhaustion.applicable
-            ):
-                early_kill_allowed_actions = (
-                    _ORDINARY_PREEXHAUSTION_ACTIONS
-                )
             damage_target_x: float | None = None
             damage_target_half_width = 0.0
             damageable = False
@@ -3964,6 +4078,7 @@ def _run_live_session(
             )
             phase_now = action_issue_observation.player_phase
             predeath_now = action_issue_observation.predeath_counter
+            ordinary_issue_phase_eligible = phase_now not in (1, 2)
             counter_at_action = action_issue_observation.issue_frame
             action_alignment = action_issue_observation.alignment
             if action_alignment.crosses_contiguous_epoch(
@@ -4373,8 +4488,12 @@ def _run_live_session(
                             allowed_action_authority
                             == ORDINARY_PREEXHAUSTION_AUTHORITY
                             and not action_deadline_missed
+                            and ordinary_issue_phase_eligible
                         ),
                         "deadline_missed": action_deadline_missed,
+                        "issue_phase_eligible": (
+                            ordinary_issue_phase_eligible
+                        ),
                     }
                 )
                 record["ordinary_preexhaustion"] = (

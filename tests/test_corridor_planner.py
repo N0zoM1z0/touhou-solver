@@ -1216,6 +1216,42 @@ class CorridorPlannerTests(unittest.TestCase):
             dict(plan.solver_timing_ms),
         )
 
+    def test_robust_mode_can_retain_certifiable_safety_action_values(
+        self,
+    ) -> None:
+        actions = (
+            ControlAction("stay", 0.0, 0.0),
+            ControlAction("left", -4.0, 0.0),
+            ControlAction("right", 4.0, 0.0),
+        )
+        plan = plan_corridor(
+            start_x=48.0,
+            start_y=88.0,
+            bounds=BOUNDS,
+            config=CONFIG,
+            robust_control=RobustControlSpec(
+                actions=actions,
+                delay_frames=(0, 1, 2),
+                nominal_delay=1,
+                active_action="stay",
+                safety_value_horizon_frames=16,
+                retain_safety_action_values=True,
+            ),
+        )
+
+        self.assertIsNotNone(plan.safety_value_policy)
+        assert plan.safety_value_policy is not None
+        query = plan.safety_value_policy.query(
+            frame=0,
+            x=48.25,
+            y=88.0,
+            active_action="stay",
+        )
+        self.assertTrue(query.available)
+        self.assertEqual(len(query.action_values), len(actions))
+        self.assertLess(query.position_error, 1.0)
+        self.assertIsInstance(query.certified_actions(), tuple)
+
     def test_robust_mode_proves_initial_action_set_empty(self) -> None:
         wall = (
             MovingAabbHazard(

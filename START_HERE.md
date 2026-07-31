@@ -14,8 +14,8 @@ authority.
 
 - Branch: `main`.
 - Last physical checkpoint:
-  `lunatic_route2_stage4a_unattended_20260801_002006`, based on immutable
-  live-code checkpoint `7558f47`.
+  `lunatic_route2_stage4a_unattended_20260801_004533`, based on immutable
+  live-code checkpoint `c67009f`.
 - Native H=32 wind-tunnel checkpoint: `3d15953`; it is historical evidence,
   not the live ordinary horizon.
 - Workspace-prune checkpoint: `be3e583` (`Prune TH08 active research
@@ -125,6 +125,24 @@ authority.
   coverage and exposes a completed exact pending policy to the causal
   pre-publication predecessor before its epoch. The next gate tests this
   delivery fix; phase/transform/opcode/callback/movement closure remains open.
+- **Observed pending-delivery activation and next correction:** Stage-4A
+  `20260801_004533` completed 22/1837/no-Bomb. Exact ordinary authority was
+  effective on 287/7,275 nonspell decisions; 110 effective roots used a
+  completed pending policy and 43 did so before the first hit. This validates
+  the CE-0244 delivery correction. Authority was nevertheless effective on
+  0/287 decisions in the 80-frame windows before 11 nonspell hits. Complete
+  sources carried up to 750 future sectors, and representative 6.9/19.8/23.5
+  second solves spent 6.1/19.5/23.2 seconds building clearance but only
+  0.81/0.24/0.23 seconds in viability.
+- **Implemented exact sector-volume acceleration:** native geometry now
+  groups identical origin/radial/inflation samples, evaluates their exact
+  circular angular union once per lattice point, and parallelizes disjoint
+  frame slabs over at most 16 workers. A synthetic 750-trajectory, 81-frame,
+  4px regression completed in about 198 ms and matched the independent Python
+  signed-clearance oracle exactly at sampled frames; 80 randomized angular
+  unions also had zero observed error. Linux/Windows focused native parity and
+  the retained f817/833/835/850/910 semantic chain pass. A fresh Stage-4A
+  physical gate is next; Stage 5 remains withheld.
 - `--kill-before-saturation` now uses observed ordinary bodies only. The
   falsified timeline spawn forecast is withheld from live input.
   Observed-body alignment/unfocus remains a proposed objective, but the
@@ -154,6 +172,7 @@ Latest user-authorized Lunatic Route-2 practice ring:
 | Stage 4A contiguous-capture falsifier | `20260731_231944` | 35 | 498 | 0 | accepted |
 | Stage 4A exact-authority activation | `20260731_233856` | 24 | 845 | 0 | accepted |
 | Stage 4A source-v4/delivery falsifier | `20260801_002006` | 24 | 1205 | 0 | accepted |
+| Stage 4A pending-delivery/clearance falsifier | `20260801_004533` | 22 | 1837 | 0 | accepted |
 
 The automatic older-root comparisons were 15→5, 10→13, and 19→12. They are
 observational only: RNG roots differ and the proposed WS-H strategies were
@@ -210,6 +229,14 @@ complete roots 1137..1200 existed while an UNKNOWN-source future publication
 blocked the serial worker. This is now corrected by gating solve submission on
 complete source coverage and treating a completed exact pending policy as the
 pre-publication terminal kernel. Stage 5 was correctly skipped.
+
+Stage-4A `20260801_004533` physically validates that correction: 110 effective
+ordinary decisions used the exact pending terminal. It also isolates the next
+deadline blocker. Dense complete future sources reached 750 sector
+trajectories and spent up to 23.2 seconds in clearance-volume construction,
+leaving zero effective authority in all nonspell hit windows. Native grouped
+angular-union/frame-parallel clearance is now deterministic-parity validated;
+its physical effect has not yet been measured.
 
 The physical forecast gate also falsified the current timeline observer as a
 general later-wave source. All 376 observations recycled the same timeline-0

@@ -138,6 +138,55 @@ class AnnularSectorClearanceTests(unittest.TestCase):
             self.skipTest("optional native geometry backend is unavailable")
         np.testing.assert_allclose(actual, expected, rtol=0.0, atol=2.0e-5)
 
+    def test_native_grouped_angular_union_matches_independent_field(
+        self,
+    ) -> None:
+        intervals = (
+            (-0.4, 0.2),
+            (0.1, 0.8),
+            (1.4, 1.6),
+            (2.9, 3.8),
+            (2.0 * math.pi - 0.2, 2.0 * math.pi + 0.3),
+        )
+        hazards = tuple(
+            AnnularSectorTrajectoryHazard(
+                origin_x=1.25,
+                origin_y=-2.5,
+                minimum_angle=minimum_angle,
+                maximum_angle=maximum_angle,
+                minimum_radii=(None, 3.0, 5.0),
+                maximum_radii=(None, 7.0, 10.0),
+                half_extent_radius=1.5,
+                origin_uncertainty=0.25,
+            )
+            for minimum_angle, maximum_angle in intervals
+        )
+        x_axis = np.arange(-20.0, 21.0, 2.0, dtype=np.float32)
+        y_axis = np.arange(-20.0, 21.0, 2.0, dtype=np.float32)
+        grid_x, grid_y = np.meshgrid(x_axis, y_axis)
+        expected = np.full((3, len(y_axis), len(x_axis)), 48.0, np.float32)
+        for frame in range(3):
+            expected[frame] = np.minimum(
+                expected[frame],
+                annular_sector_clearance_field(
+                    grid_x,
+                    grid_y,
+                    hazards,
+                    frame=frame,
+                    player_radius=2.0,
+                ),
+            )
+        actual = native_backend.apply_annular_sector_trajectory_clearance(
+            x_axis=x_axis,
+            y_axis=y_axis,
+            player_radius=2.0,
+            annular_sector_trajectories=hazards,
+            clearance_volume=np.full_like(expected, 48.0),
+        )
+        if actual is None:
+            self.skipTest("optional native geometry backend is unavailable")
+        np.testing.assert_allclose(actual, expected, rtol=0.0, atol=2.0e-5)
+
 
 if __name__ == "__main__":
     unittest.main()

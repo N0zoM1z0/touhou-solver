@@ -301,6 +301,17 @@ remaining transform/opcode/callback/movement gaps without relaxing
 fail-closed coverage. Total hits remain secondary different-RNG evidence;
 local scoring and hostile-birth ranking remain later.
 
+Stage-4A `20260801_004533` validates the pending-terminal correction: 110
+effective nonspell decisions used a completed pending policy. It also
+separates solver costs. Complete roots with up to 750 future sectors spent
+6.1..23.2 seconds constructing exact signed-clearance volumes versus
+0.23..0.81 seconds in the Boolean recurrence, and no authority reached a
+nonspell hit window. The native sector kernel now uses exact grouped angular
+unions plus disjoint frame parallelism; deterministic Python/native parity and
+the f817/833/835/850/910 chain pass. Re-run Stage 4A before working on the
+remaining phase/transform/opcode/callback/movement coverage. Run Stage 5 only
+if Stage 4A shows the expected pressure-window authority improvement.
+
 ### WS-D — Combat, Focus, and Power
 
 This is the highest-priority experiment after cleanup.

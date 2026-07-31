@@ -165,6 +165,22 @@ This preserves fail-closed coverage while removing work and publication that
 could never carry hard authority. Physical revalidation is pending; phase,
 transform, opcode, callback, and movement closure is still incomplete.
 
+Stage-4A `20260801_004533` validates that delivery correction but not L3
+promotion. Completed pending policies supplied 110 effective nonspell
+decisions, including 43 before first hit 1837. Yet exact authority remained
+absent from every 80-frame nonspell hit window. Complete sources carried up
+to 750 future sectors; representative long solves spent 6.1..23.2 seconds in
+clearance construction and only 0.23..0.81 seconds in Boolean recurrence.
+
+The native annular-sector kernel now groups only exactly equal
+origin/radial/inflation samples, forms their exact circular angular union, and
+evaluates one distance per group/lattice point. Disjoint frame slabs run over
+at most 16 workers. This changes neither the set-valued hazard union nor the
+signed-clearance threshold. Synthetic 750-trajectory pressure and randomized
+wrap/overlap/disjoint cases match the independent Python oracle; Linux,
+Windows, and the retained five-root semantic chain pass. Physical
+revalidation is pending, and incomplete source coverage still fails closed.
+
 ## Offline Native Authority
 
 ### O1 — Rolling native snapshot wind tunnel

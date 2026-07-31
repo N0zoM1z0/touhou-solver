@@ -248,17 +248,17 @@ Alternative methods:
 No heuristic may discard a safety branch or condition on hidden state without
 proof.
 
-Current first task: physically falsify the newly implemented ordinary-stage
-causal pre-exhaustion filter. In physical Stage-4A run
-`20260731_142342`, frame 1707 still had queried safe actions
-`stay/up/up_fast`, but the authority-free live transaction selected
-`down_left`. Global loss followed 205 frames before the hit; local loss
-appeared only three frames before it. The default-off filter now enumerates
-active/held/pending pickup order over a six-physical-update lease, rejects
-reserve-degrading actions near exhaustion, activates one lease early for
-unknown hostile births, and still requires fresh issue safety. It does not
-promote shadow future hazards. Do not tune local scoring until a physical
-Stage-4A gate shows whether this closes the authority seam.
+Current first task: replace the physically falsified scalar-reserve filter
+with a set-valued ordinary pre-publication predecessor. Stage-4A run
+`20260731_152921` enabled the experiment but all 7,202 nonspell decisions
+failed an invalid `player+0xE2A68 == 0` gate, producing zero action
+constraints and zero early-kill applications. Native code shows that field is
+a retained deathbomb-window limit. Counterfactual roots with only the gate
+removed still permit `down_left` at global exhaustion and alias all 17
+actions under an uncontrollable prefix and at the saturated corner. The next
+candidate must preserve hazard-space viability across pickup order and the
+rolling publication lead, with bounded future hostile births. Do not rerun
+the old filter or tune local scoring.
 
 ### WS-D — Combat, Focus, and Power
 
@@ -308,11 +308,16 @@ Current checkpoint:
 - the authorized physical gate retained full-health body sensing but
   falsified the timeline forecast: all 376 observations recycled the same
   time-1 startup birth and only three affected input;
-- preserve observed-body early kill inside the new causal reserve and fresh
-  issue sets; repair exact timeline lifecycle only before any future forecast
-  experiment. First physically test ordinary-stage pre-exhaustion authority,
+- preserve observed-body early kill inside the future exact ordinary viable
+  set and fresh issue set; repair exact timeline lifecycle only before any
+  future forecast experiment. First establish ordinary-stage pre-exhaustion
+  authority,
   then repeat the native kill/prevented-birth result on a second root before
   promotion. This checkpoint supports D1 but does not promote it.
+- the attempted scalar-reserve gate `20260731_152921` applied zero early-kill
+  preferences because its eligibility source never activated. The result
+  does not falsify observed-body early kill; it removes the scalar reserve as
+  the proposed survival-feasible set.
 
 #### D2: Focus as control
 
@@ -481,17 +486,20 @@ it.
 
 ## 11. Immediate Backlog
 
-1. Request one fresh Stage-4A physical gate with
-   `--ordinary-preexhaustion-authority --kill-before-saturation`.
-2. Verify allowed-set membership, explicit empty-intersection/deadline
-   fallbacks, exact-root certificate calls, first reserve activation, global
-   exhaustion, fresh-set exhaustion, first hit, hits, and Bombs.
-3. If the filter helps, rotate to Stage 3 or Stage 5; if it fails, keep the
-   first causal authority/birth/cadence mismatch.
-4. Only after global constraint evidence, evaluate local micro ranking.
-5. Repeat a winner on a second root.
-6. If materially better, run one fresh full Lunatic route.
-7. Use the new first hit to begin the next loop.
+1. Correct the ordinary native state predicate and its capture/issue epoch,
+   but do not rerun that gate alone.
+2. Build a set-valued hazard-space predecessor across active/held/pending
+   pickup order and the rolling worker publication lead. Preserve
+   directional reachability when the current scalar reserve is zero.
+3. Add bounded ordinary future-birth/event coverage or fail closed; do not
+   promote the existing shadow future slab.
+4. Regress the retained frame-817/833/835/850/910 chain and require a
+   nontrivial allowed set before global exhaustion.
+5. After focused Linux/Windows gates, request one new Stage-4A physical test
+   with observed-body early kill inside the new viable set.
+6. Rotate to Stage 3 or Stage 5 only if Stage 4A materially improves.
+7. Evaluate local micro ranking only after global action authority is
+   physically effective; repeat a winner before a full route.
 
 Optional warm-service work and learned/MCTS candidate ordering stay behind
 this backlog unless branch latency becomes the measured bottleneck.

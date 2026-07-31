@@ -14,8 +14,8 @@ authority.
 
 - Branch: `main`.
 - Last physical checkpoint:
-  `lunatic_route2_stage4a_unattended_20260731_142342`, based on immutable
-  live-code checkpoint `a980600`.
+  `lunatic_route2_stage4a_unattended_20260731_152921`, based on immutable
+  live-code checkpoint `1c64751`.
 - Native H=32 wind-tunnel checkpoint: `3d15953`.
 - Workspace-prune checkpoint: `be3e583` (`Prune TH08 active research
   workspace`). It removed dormant supplemental, candidate, prewarm, G5,
@@ -26,8 +26,8 @@ authority.
   Windows UNC delivery/parser/planner gate passed 188 tests; complete Windows
   discovery remains the pre-physical-promotion gate. Linux and Windows native
   builds at the preceding checkpoint pass the checked-in 41-symbol ABI gate.
-- **Implemented, not physically validated:** default-off
-  `--ordinary-preexhaustion-authority` supplies an ordinary-nonspell causal
+- **Implemented, physically falsified:** default-off
+  `--ordinary-preexhaustion-authority` implements an ordinary-nonspell
   control-reserve filter without promoting the shadow future-hazard slab.
   It uses observed active/held complete masks, enumerates every physical
   pickup order (including no pickup) over a six-update lease, bounds future
@@ -37,11 +37,21 @@ authority.
   future birth-geometry claim. Fresh issue collision certification remains
   the final gate, with explicit immediate-survival relaxation only when the
   intersection is empty.
+- In the physical gate, all 7,202 nonspell decisions were incorrectly
+  rejected by the `player_transition_or_predeath` eligibility check, so the
+  filter and early-kill preference each affected zero decisions. Native
+  evidence shows player `+0xE2A68` retains a deathbomb-window limit and is not
+  zero while alive. More importantly, an offline counterfactual with only
+  that check removed still permits the canonical `down_left` action and
+  degenerates to all 17 actions under an uncontrollable prefix and at a
+  clamped boundary. Scalar boundary reserve is not equivalent to global
+  viability; do not rerun this design.
 - `--kill-before-saturation` now uses observed ordinary bodies only. The
-  falsified timeline spawn forecast is withheld from live input. With the
-  pre-exhaustion flag enabled, observed-body alignment/unfocus is an objective
-  inside the causal reserve set and fresh issue-safe set; it has no independent
-  safety authority.
+  falsified timeline spawn forecast is withheld from live input.
+  Observed-body alignment/unfocus remains a proposed objective, but the
+  rejected reserve set is no longer an eligibility source; exact ordinary
+  viable membership and fresh issue safety are required before another live
+  gate.
 - `audits/` and `archive/` are untracked/local. Never stage them.
 
 ## Current Outcome
@@ -59,6 +69,7 @@ Latest user-authorized Lunatic Route-2 practice ring:
 | Stage 4A global/early-kill gate | `20260731_130103` | 16 | 1827 | 0 | accepted |
 | Stage 4A pre-exhaustion early-kill gate | `20260731_133852` | 11 | 4148 | 0 | accepted |
 | Stage 4A forecast/global investigation | `20260731_142342` | 18 | 1915 | 0 | accepted |
+| Stage 4A reserve-authority falsifier | `20260731_152921` | 17 | 914 | 0 | accepted |
 
 The automatic older-root comparisons were 15→5, 10→13, and 19→12. They are
 observational only: RNG roots differ and the proposed WS-H strategies were
@@ -67,15 +78,18 @@ different-RNG: it physically applied 27 certified unfocus preferences,
 delayed first hit by 4857 frames relative to the listed Stage-5 baseline, but
 worsened total hits by one.
 
-The newest Stage-4A run is different-RNG and its 18/1915 aggregate is
-observational. Its canonical nonspell first hit is decisive: at frame 1707
-the queried global set still allowed only `stay/up/up_fast`, but the live
-fresh-local transaction selected `down_left` because ordinary-stage global
-action authority is explicitly disabled. The global set became empty at
-1710; the fresh local set remained non-empty until frame 1909 and became empty
-only at 1912, three frames before impact. Across the run, 11,947 global
-queries constrained zero decisions; 4,119 distant recoveries were exposed and
-none selected.
+The newest Stage-4A run is different-RNG and its 17/914 aggregate is
+observational. Its experiment activation is decisive: the flag was present
+on all 12,029 decisions but yielded zero eligible, applicable, or effective
+constraints and zero early-kill applications. All 7,202 nonspell decisions
+failed on a stale native-field interpretation. The canonical hit also
+falsifies a gate-only repair. Contact bullet slot 455 first entered the
+retained nearby set at decision 817; the snapshot-801 global policy still
+certified `down_left` through frame 833, while the snapshot-818 policy
+delivered an empty set at 835. The compact trace cannot attribute that version
+flip to slot 455 alone. Counterfactual reserve evaluation still allowed
+`down_left` there and allowed all 17 actions at frames 850 and 910. Robust
+local prefixes exhausted only at 910, four frames before the hit.
 
 The physical forecast gate also falsified the current timeline observer as a
 general later-wave source. All 376 observations recycled the same timeline-0
@@ -93,7 +107,7 @@ Latest full game-start Lunatic Route-2 run:
 - result-state replay save was unavailable after Final-B unload; do not rerun
   solely for that replay.
 
-The five retained dossiers are under `notes/runs/`. Compact reports and valid
+Retained dossiers are under `notes/runs/`. Compact reports and valid
 practice replays remain under `artifacts/`.
 
 ### Native wind tunnel
@@ -186,38 +200,36 @@ Final-B uses the exact pinned global-time-scale schedule. The root-only
 constant-scale continuation is diagnostic and unknown-direction, never a
 general hard-safety authority.
 
-The default-off ordinary pre-exhaustion experiment adds a causal
-player-controllability constraint before step 5. It is exact only for its
-declared six-physical-update lease, active/held/pending action partition,
-pickup-order set, `[0,1]` movement-scale bound, and playfield geometry. It
-makes no hard claim about unseen hostile geometry.
+The default-off scalar pre-exhaustion experiment is not part of current live
+authority. Its finite player-motion calculation is exact only for its
+declared lease and playfield geometry, but its state gate is invalid and its
+scalar allowed set is not global viability. It must remain off.
 
 Removed lanes must not be re-enabled from archive without a new causal need
 and explicit `STRATEGY.md` decision.
 
 ## Next Useful Gate
 
-The ordinary pre-exhaustion implementation and focused Linux/Windows gates
-are complete. No physical claim has been made.
-Next:
+Do not pay another physical run for the current scalar-reserve design, and do
+not run the conditional Stage-5 follow-up. Next:
 
-1. With explicit gameplay authorization, run one fresh Stage-4A practice
-   using both `--ordinary-preexhaustion-authority` and
-   `--kill-before-saturation`; do not enable lifecycle tracing or spawn
-   forecasting.
-2. At the canonical first failure, verify that every near-exhaustion issued
-   action is in `ordinary_preexhaustion.allowed_actions`, or carries an
-   explicit empty-fresh-intersection/deadline fallback. The frame-1707-shaped
-   regression must reject `down_left`.
-3. Falsify physical usefulness, not merely code parity: compare last
-   nonempty global query, first causal-reserve activation, first fresh-set
-   exhaustion, first hit, total hits, Bombs, and exact-root certificate calls.
-4. Rotate the next gate to Stage 3 or Stage 5 if Stage 4A improves, then run a
-   fresh full Lunatic Route-2 diagnostic only after a material integrated
-   gain.
-5. If the causal filter preserves control reserve but a new hostile birth
-   still invalidates fresh-local safety, keep that as the next model gap;
-   do not promote the shadow future or tune local micro ranking.
+1. Correct the native state contract: phase is the live transition predicate;
+   player `+0xE2A68` is a retained deathbomb-window limit. Revalidate both
+   capture- and issue-time phase gates.
+2. Replace scalar minimum boundary distance with a set-valued causal
+   predecessor over the action-conditioned hazard-space viable set. It must
+   span active/held/pending pickup order and the rolling worker publication
+   lead, preserving directional recovery instead of aliasing every action at
+   a clamped edge.
+3. Establish bounded ordinary future-birth/event coverage for that
+   predecessor, or fail closed. Do not directly promote the existing shadow
+   future slab.
+4. Prove on the retained frame-817/833/835/850/910 chain that the candidate
+   acts before exhaustion, then run focused tests. Only after that deterministic
+   gate should one fresh Stage-4A physical trial be requested.
+5. Preserve observed-body early kill as an objective inside the eventual
+   viable set. Hostile birth uncertainty comes next; local ranking remains
+   behind global authority.
 
 Do not compensate with a stage-specific waypoint.
 

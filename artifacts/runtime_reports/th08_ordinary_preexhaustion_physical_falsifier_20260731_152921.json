@@ -1,0 +1,223 @@
+{
+  "schema": "th08-ordinary-preexhaustion-physical-falsifier-v1",
+  "run_id": "lunatic_route2_stage4a_unattended_20260731_152921",
+  "live_code_checkpoint": "1c6475108551eb72433ce2d327b86b713e327583",
+  "scope": {
+    "workload": "Lunatic Route-2 Stage 4A practice",
+    "frames": [
+      1,
+      45169
+    ],
+    "decisions": 12029,
+    "hits": 17,
+    "first_hit": 914,
+    "bomb_inputs": 0,
+    "route_complete": true,
+    "stage5_followup": "skipped_because_stage4a_did_not_improve"
+  },
+  "trial_integrity": {
+    "accepted": true,
+    "hard_no_bomb_verified": true,
+    "replay_sha256": "4588af47384d38ed0b50f51299b836c0a03972f11f93c0ec48a8845a45e1a990",
+    "replay_route_id": 2,
+    "replay_difficulty_index": 3,
+    "replay_stage_index": 3,
+    "replay_bomb_press_frames": [],
+    "game_terminated_after_trial": true,
+    "controller_supervisor_replay_processes_absent_after_cleanup": true
+  },
+  "live_activation": {
+    "enabled_decisions": 12029,
+    "authority_eligible_decisions": 0,
+    "applicable_decisions": 0,
+    "selected_as_allowed_action_authority_decisions": 0,
+    "effective_at_issue_decisions": 0,
+    "deadline_missed_decisions": 1,
+    "reason_counts": {
+      "player_transition_or_predeath": 7202,
+      "spell_active": 4827
+    },
+    "nonspell_decisions": 7202,
+    "spell_decisions": 4827,
+    "viability_constrained_decisions": 0,
+    "kill_before_saturation_preferences_applied": 0
+  },
+  "native_gate_semantics": {
+    "ida_observations": [
+      {
+        "address": "0x0044AB40",
+        "fact": "player_dead_handler sets phase byte 2 and writes the computed deathbomb-window limit at player+0xE2A68 only after a hit"
+      },
+      {
+        "address": "0x0044C390",
+        "fact": "player_update runs input and movement whenever the phase byte is neither 1 nor 2"
+      },
+      {
+        "address": "0x0044C650",
+        "fact": "the deathbomb transition tests the retained player+0xE2A68 value while phase/state controls whether the death path is active"
+      }
+    ],
+    "physical_normal_sample_counts": {
+      "phase0_issue_phase0_retained_value10": 5862,
+      "phase3_issue_phase3_retained_value10": 1124
+    },
+    "interpretation": "player+0xE2A68 is a retained deathbomb-window limit, not a zero-when-alive active-predeath predicate. Requiring it to equal zero rejects ordinary live play."
+  },
+  "canonical_first_hit_chain": {
+    "contact_bullet_observation": {
+      "slot": 455,
+      "first_retained_nearby_decision_frame": 817,
+      "first_observed_position": [
+        260.5947570800781,
+        247.6588592529297
+      ],
+      "velocity": [
+        1.1347037553787231,
+        1.8077622652053833
+      ],
+      "hit_observation_frame": 914,
+      "hit_observation_position": [
+        370.6611022949219,
+        423.01251220703125
+      ]
+    },
+    "last_old_snapshot_winning_decision": {
+      "frame": 833,
+      "player": [
+        276.4124755859375,
+        391.4552001953125
+      ],
+      "policy_source_frame": 817,
+      "hazard_snapshot_frame": 801,
+      "active_action": "down_left",
+      "issued_action": "down_left",
+      "safe_action_count": 10,
+      "safe_actions": [
+        "stay",
+        "left",
+        "right",
+        "down",
+        "down_left",
+        "down_right",
+        "right_fast",
+        "down_fast",
+        "down_left_fast",
+        "down_right_fast"
+      ]
+    },
+    "first_new_snapshot_empty_decision": {
+      "frame": 835,
+      "player": [
+        271.533447265625,
+        396.334228515625
+      ],
+      "policy_source_frame": 834,
+      "hazard_snapshot_frame": 818,
+      "active_action": "down_left",
+      "issued_action": "down_left",
+      "safe_action_count": 0,
+      "minimum_distant_recovery_distance": 65.96969000988257,
+      "minimum_distant_recovery_action": "left_fast",
+      "global_action_authority": false
+    },
+    "robust_prefix_exhaustion": {
+      "frame": 910,
+      "player": [
+        376.0,
+        432.0
+      ],
+      "active_action": "stay",
+      "issued_action": "up_right_fast",
+      "predicted_collision_branches": 2,
+      "minimum_clearance": -1.4596617221832275
+    },
+    "last_alive": {
+      "frame": 912,
+      "player": [
+        376.0,
+        432.0
+      ],
+      "active_action": "up_right_fast",
+      "issued_action": "up_left_fast",
+      "pipeline_clearance": -0.14221704006195068,
+      "predicted_collision_branches": 5,
+      "minimum_clearance": -3.6778922080993652
+    },
+    "hit": {
+      "frame": 914,
+      "player": [
+        376.0,
+        426.3431396484375
+      ],
+      "active_action": "up_left_fast",
+      "issued_after_detection": "left_fast",
+      "pipeline_clearance": -2.824237108230591,
+      "primary_cause": "modeled_committed_prefix_collision",
+      "contributors": [
+        "playfield_boundary",
+        "fast_mode"
+      ]
+    }
+  },
+  "counterfactual_after_removing_only_the_bad_live_gate": [
+    {
+      "frame": 817,
+      "current_boundary_reserve": 27.31219482421875,
+      "reason": "nondegrading_control_reserve_found",
+      "allowed_action_count": 11,
+      "issued_action": "up_left_fast",
+      "issued_action_allowed": true
+    },
+    {
+      "frame": 835,
+      "current_boundary_reserve": 35.665771484375,
+      "reason": "pending_motion_forces_reserve_loss_choose_maximum",
+      "allowed_action_count": 13,
+      "issued_action": "down_left",
+      "issued_action_allowed": true,
+      "worst_lease_reserve_for_issued_action": 25.907697677611964
+    },
+    {
+      "frame": 850,
+      "current_boundary_reserve": 16.149658203125,
+      "reason": "pending_motion_forces_reserve_loss_choose_maximum",
+      "allowed_action_count": 17,
+      "all_action_worst_lease_reserve": 0.0,
+      "cause": "the no-pickup branch lets the already-active outward prefix dominate every proposed action"
+    },
+    {
+      "frame": 910,
+      "current_boundary_reserve": 0.0,
+      "reason": "nondegrading_control_reserve_found",
+      "allowed_action_count": 17,
+      "all_action_worst_lease_reserve": 0.0,
+      "cause": "playfield clamping and scalar minimum reserve alias inward, outward, and stationary actions at a saturated corner"
+    }
+  ],
+  "conclusions": [
+    {
+      "label": "observed",
+      "text": "The enabled experiment supplied no live action authority in any decision, so this run did not physically exercise either the reserve filter or early-kill preference."
+    },
+    {
+      "label": "observed",
+      "text": "The eligibility gate mistakes a retained deathbomb-window limit for an active-predeath counter and rejects every ordinary nonspell decision."
+    },
+    {
+      "label": "observed",
+      "text": "Counterfactual execution with only that gate removed still permits the canonical down-left action and later degenerates to all 17 actions."
+    },
+    {
+      "label": "inferred",
+      "text": "Scalar playfield-boundary reserve is not equivalent to hazard-space global viability; an uncontrollable prefix or boundary clamp erases terminal recovery direction and distant-safe-region topology."
+    },
+    {
+      "label": "inferred",
+      "text": "The contact bullet first entered the retained nearby set while an older hazard-version policy continued to certify down-left; the next hazard-version policy declared the kernel empty. The compact trace does not prove whether slot 455 was already present outside the retained nearby set in snapshot 801, so attribution to this specific birth remains unresolved. Ordinary exact action authority still needs complete versioned future-hazard coverage or a hard set-valued pre-publication predecessor, not another scalar boundary threshold."
+    },
+    {
+      "label": "decision",
+      "text": "Do not rerun after merely deleting the bad predeath check, do not run the conditional Stage-5 follow-up, and do not tune local ranking. Redesign the ordinary global/pre-exhaustion authority first."
+    }
+  ]
+}

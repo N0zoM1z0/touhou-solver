@@ -42,33 +42,42 @@ The ordinary-stage root-only continuation may compute and query a rolling
 global policy for diagnostic evidence, but that publication has no action
 authority: its target, repair labels, and survival labels are removed before
 baseline local planning. `--ordinary-preexhaustion-authority` does not change
-that rule or promote the shadow future-hazard slab. Instead it supplies a
-separate causal player-control reserve constraint for ordinary nonspells.
+that rule or promote the shadow future-hazard slab. Its scalar
+player-control-reserve experiment is now physically rejected and is not
+ordinary global action authority.
 
-The pre-exhaustion observation is native active input, held complete desired
-input, player position/phase/predeath, root time scale, and the current action
-lease. If active and held differ, held is the one pending complete action.
+The rejected pre-exhaustion implementation observes native active input, held
+complete desired input, player position/phase, player `+0xE2A68`, root time
+scale, and the current action lease. If active and held differ, held is the
+one pending complete action.
 Within a six-physical-update lease, nature may choose every pending/new pickup
 order, including next-step pickup and no pickup within the lease; this does
 not use `enemy_manager_frame` as a pickup clock. Selecting held remains
 no-write and samples no new delay. Future player movement scale is universally
 bounded in `[0,1]`.
 
-The filter activates when signed playfield-boundary reserve is within the
+It attempts to activate when signed playfield-boundary reserve is within the
 player radius plus maximum axis travel over the current lease and one
 additional hostile-birth reaction lease. It retains actions whose minimum
 reserve across every pipeline branch and every lease step does not decrease.
 If an already-pending motion forces loss for every action, only actions with
-maximum worst-lease reserve remain. This is exact finite-lease
-player-controllability authority, not future hostile-birth geometry or global
-collision authority.
+maximum worst-lease reserve remain.
 
-The local planner receives this allowed set without coarse-grid viability
-relaxation. Fresh issue-time collision certificates remain authoritative. If
-the causal/fresh intersection is empty, the transaction explicitly relaxes
-the reserve constraint in favor of immediate collision survival; timeout or
-deadline fallback holds the prior complete mask and records loss of current
-publication authority.
+Physical run `20260731_152921` found two independent invalidations. First,
+`player+0xE2A68` retains the deathbomb-window limit installed by
+`0x0044AB40`; it is not a zero-when-alive predeath predicate, so all 7,202
+nonspell decisions were rejected. Second, counterfactual roots with only that
+gate removed still permit the losing `down_left`, then alias all actions when
+an uncontrollable prefix or playfield clamp dominates scalar minimum reserve.
+This finite boundary calculation may remain diagnostic, but its allowed set
+must not be treated as survival authority.
+
+The missing ordinary contract is a set-valued, hazard-space causal
+predecessor that spans active/held/pending pickup order and policy publication
+lead, preserves directional recovery, and includes bounded future hostile
+birth/event coverage. Until that exists, fresh issue-time collision
+certificates remain local-prefix authority only; they do not repair the
+missing global viable set.
 
 Removed supplemental, candidate-verifier, prewarm, G5, and priority-17 lanes
 have no active code or strategy authority.
@@ -148,12 +157,10 @@ The only current physical combat experiment is default-off
 may use the coherent first-64 enemy prefix to select any living ordinary
 non-boss enemy above the player and within bounded horizontal separation.
 Full-health enemies are eligible; small enemies retain deterministic
-selection priority. When the causal pre-exhaustion flag is enabled, the
-objective may select a complete action that improves horizontal alignment
-while preserving the planner's vertical tendency inside its allowed set. In
-an interior state whose reserve exceeds the activation threshold, every
-complete action is eligible for objective ranking but still requires fresh
-issue safety. Same-direction unfocus remains a fallback for an observed body.
+selection priority. Horizontal alignment and same-direction unfocus remain
+objective proposals only. They have no live eligibility source until exact
+ordinary survival membership exists; the rejected scalar-reserve set and an
+unconstrained interior state do not supply that membership.
 
 Physical Stage-4A run `20260731_142342` falsified the current forecast
 implementation as a later-wave observer. Its 376 observations all named the
@@ -164,10 +171,11 @@ the live path does not call it; full-health currently observed bodies remain
 eligible under the other gates.
 
 These are objective proposals, not hard safety authority. A missing or losing
-causal reserve root, no improving action, deadline expiry, or fresh issue
-rejection preserves the baseline action. The chosen complete action still
-passes the issue-time fresh certificate and hard no-Bomb transaction.
-Selecting the held complete mask retains the ordinary no-write semantics.
+ordinary viable root, no improving action, deadline expiry, or fresh issue
+rejection must preserve the baseline action. Any future chosen complete
+action must still pass the issue-time fresh certificate and hard no-Bomb
+transaction. Selecting the held complete mask retains the ordinary no-write
+semantics.
 
 This rule is experimental, not promoted route-wide authority. Its first
 physical Stage-5 gate applied 27 preferences with zero Bomb/deadline
@@ -189,6 +197,11 @@ and fresh issue certification. The last winning query was frame 3679. A
 selected it only at frame 3900 at 15 HP. The new full-health and byte-verified
 spawn observations directly addressed this delay.
 
+The later scalar-reserve physical gate did not re-evaluate early killing:
+zero reserve decisions became eligible and zero early-kill preferences were
+applied. Its 17-hit/first-914 outcome is therefore evidence against the
+eligibility/authority design, not against observed-body early kill.
+
 The authorized follow-up physically rejected the forecast implementation and
 exposed the larger authority failure. It completed with 18 hits and zero
 Bombs. Of 11,947 available global queries, 5,341 were winning and 4,119 losing
@@ -200,15 +213,13 @@ global set became empty at 1710, while the fresh issue set became empty only
 at 1912. Ordinary-stage global action authority, or a causally equivalent
 pre-exhaustion filter, was therefore the next hard contract gap.
 
-**Implemented, not observed physically:** the default-off filter now reaches
-local planning and fresh issue with an explicit authority label. The exact
-active/held/pending root also reaches both certificate calls when available.
-The frame-1707-shaped regression rejects `down_left`; zero-remaining pending
-pickup and hostile-birth early activation have deterministic coverage. The
-next physical gate must determine whether this moves global/fresh exhaustion
-and the first hit, and whether the six-update publication lease is respected.
-Until then the change is not promoted route-wide and local micro-ranking is
-unchanged.
+**Physically rejected:** run `20260731_152921` proved that the filter reached
+configuration but never reached action authority. Native semantics invalidate
+its zero-`+0xE2A68` gate, and retained-root counterfactuals invalidate scalar
+boundary reserve as an equivalent global filter. No Stage-5 follow-up or
+local-ranking evaluation is authorized from this result. The replacement
+must be a set-valued hazard-space predecessor with pickup, publication, and
+future-birth coverage.
 
 ## Falsification And Promotion
 

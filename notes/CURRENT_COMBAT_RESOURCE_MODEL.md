@@ -181,14 +181,18 @@ fixed births at `3560/64`, `3660/320`, `3810/64`, and `3860/320`, two to four
 frames before the observed runtime bodies. **Inferred:** current HP was an
 unnecessarily late observation boundary for this workload.
 
-The default-off implementation now accepts full-health ordinary non-boss
-targets and can expose an upcoming fixed birth from the stable native
-timeline clock plus exact live/static ECL byte equality. Current body
-evidence has priority. The forecast crosses no timeline barrier, rejects
-dynamic positions and transition/suppression gates, and has no independent
-action authority. Retained-trace replay found 18 pre-exhaustion forecast
-proposals, 15 also in the old fresh-safe set; this is offline eligibility
-only, not physical validation.
+The default-off implementation accepts full-health ordinary non-boss targets.
+The attempted fixed-birth forecast is physically rejected and withheld from
+live input: all 376 observations in run `20260731_142342` recycled the same
+timeline-0 time-1 x=30 startup instruction, and only three affected input.
+Retained current-body evidence remains the only early-kill observation source.
+
+The later scalar-reserve gate `20260731_152921` did not exercise that source.
+All 7,202 nonspell decisions failed an invalid retained-deathbomb-limit
+predicate, so early kill applied zero preferences. Counterfactual roots show
+that deleting only the gate still permits the losing action and all-action
+ties. Its 17 hits and first hit 914 falsify the eligibility/authority design,
+not observed-body early killing.
 
 The latest full-route game-start baseline is 68 hits, zero Bombs, with
 per-stage counts 2/3/5/20/15/23.
@@ -197,15 +201,15 @@ per-stage counts 2/3/5/20/15/23.
 
 Do not add more atlas/schema work unless it blocks this experiment:
 
-1. Physically falsify full-health observation and byte-verified upcoming-spawn
-   alignment on a fresh Stage-4A root.
-2. Require the last winning query to move beyond the old frame-3679 boundary,
-   or retain the first earlier failure explaining why it did not.
-3. Establish exact ordinary-stage hard action authority; the current queried
-   global set remains diagnostic shadow and only gates this optional
-   objective.
-4. Repeat the native kill/prevented-birth result on a second ordinary enemy
-   and root.
+1. Establish exact ordinary-stage hard action authority as a set-valued
+   hazard-space predecessor across command pickup and policy publication.
+2. Add bounded ordinary future-birth/event coverage or fail closed; the
+   current queried global set and rejected scalar reserve remain diagnostic.
+3. Regress the retained Stage-4A frame-817/833/835/850/910 chain before any
+   new physical trial.
+4. Then place full-health observed-body early kill inside the exact viable
+   set and repeat the native kill/prevented-birth result on a second ordinary
+   enemy and root.
 5. Keep the rule default-off and return `UNKNOWN` at the first unsupported
    event. Do not infer causal A/B from different-RNG totals.
 
@@ -228,3 +232,6 @@ model post-death recovery for an NMNB policy.
 - CE-0232: local-safe early kill is not global survival filtering.
 - CE-0233: the old HP gate exposed a middle-wave ordinary enemy only after
   global-kernel exhaustion.
+- CE-0235: the live timeline forecast recycled one startup instruction.
+- CE-0237: the scalar reserve never activated and is not equivalent to the
+  missing ordinary viable set.

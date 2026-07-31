@@ -58,10 +58,11 @@ live safety authority.
 
 ### L3 — Default-off ordinary pre-exhaustion experiment
 
-`--ordinary-preexhaustion-authority` may affect input only during an ordinary
-nonspell, normal player phase, zero predeath counter, unit observed root
-time-scale, hard no-Bomb run. It does not enable the existing shadow-global
-flag or inherit the shadow future-hazard slab.
+`--ordinary-preexhaustion-authority` remains default-off and is physically
+falsified. Its implementation attempts to affect input only during an
+ordinary nonspell, normal player phase, zero `player+0xE2A68`, unit observed
+root time-scale, hard no-Bomb run. It does not enable the existing
+shadow-global flag or inherit the shadow future-hazard slab.
 
 Its hard claim is narrower than global hazard viability: from observed native
 active input and held complete input, it forms the one-pending causal root and
@@ -80,12 +81,21 @@ certification is the final gate; an empty intersection is explicitly relaxed
 only to preserve immediate collision survival. The held complete mask remains
 no-write and preserves a pending command.
 
-**Implemented/unvalidated:** the frame-1707-shaped deterministic regression
-excludes `down_left`/`down_left_fast`, and focused Windows delivery tests pass.
-No physical hit reduction or promotion is claimed yet. The falsifier is an
-issued near-exhaustion action outside the allowed set without a recorded
-fresh-intersection/deadline relaxation, or physical reserve exhaustion before
-the declared lease expires.
+**Observed physical falsifier:** run `20260731_152921` enabled the flag on
+12,029 decisions but produced zero eligible/applicable/effective decisions.
+All 7,202 nonspell decisions failed the state gate. Native
+`0x0044AB40/0x0044C390/0x0044C650` shows `player+0xE2A68` is the retained
+deathbomb-window limit installed on a hit, not a zero-when-alive active
+counter.
+
+That wiring bug is not the only failure. Re-evaluating the physical roots with
+only the bad gate removed still permits `down_left` at global exhaustion
+frame 835. An uncontrollable no-pickup prefix makes all 17 actions share
+worst reserve zero at frame 850; playfield clamping repeats the all-action tie
+at the saturated corner at frame 910. The code remains as a default-off
+counterexample, but this scalar boundary-reserve design has no promotion path.
+The next design must preserve a hazard-space viable set across pickup and
+publication delay and must cover bounded future births.
 
 ## Offline Native Authority
 
@@ -126,8 +136,9 @@ The current WS-H model can select generation-safe roots and compare completed
 native transactions for normal shots, enemy HP/defeat, phase transitions,
 items, Power, and resources. The general model remains offline. One narrow,
 default-off live experiment may align with an observed ordinary non-boss
-enemy inside the causal pre-exhaustion set (or unconstrained interior reserve)
-and a fresh issue-safe set under hard no-Bomb. This is objective ranking, not
+enemy only after an exact ordinary viable action set and a fresh issue-safe
+set exist under hard no-Bomb. The rejected scalar reserve and unconstrained
+interior are not eligibility sources. This is objective ranking, not
 independent safety authority.
 See `notes/CURRENT_COMBAT_RESOURCE_MODEL.md`.
 
@@ -210,15 +221,17 @@ bounds. MCTS, learned value functions, Monte Carlo, beam widening, and
 imitation may rank or propose candidates offline, but cannot prune hard-safety
 branches or gain live authority without an independent exact verifier.
 
-The causal pre-exhaustion portion is now implemented default-off for
-nonspells, but remains physically unvalidated. Physical
-Stage-4A run `20260731_142342` produced 11,947 available ordinary/spell global
-queries but zero viability-constrained decisions and zero selected
-recoveries. At the canonical nonspell hit, frame 1707 still had the exact
-queried set `stay/up/up_fast`, while live selected `down_left`; global loss
-followed at 1710 and local loss only at 1912. The next gate must test whether
-the new filter prevents that control-reserve expenditure before tuning local
-scores.
+The first scalar pre-exhaustion implementation is physically rejected.
+Stage-4A run `20260731_152921` produced zero live constraints because of an
+incorrect native eligibility predicate, and its retained roots show that a
+predicate-only repair still permits the losing action and aliases every
+action under prefix/boundary saturation. Contact bullet slot 455 first entered
+the retained nearby set while an older hazard-snapshot policy certified
+`down_left`; the next snapshot reported an empty kernel. The compact trace
+cannot attribute the version flip to that slot alone. The next global
+candidate is therefore a set-valued pre-publication predecessor with bounded
+ordinary future-hazard coverage, not another boundary score or local ranking
+change.
 
 ### P5 — Representative root corpus
 
@@ -238,6 +251,10 @@ than extending one root indefinitely.
 - **Priority-17 publication and stationary-witness delivery lanes:** retired.
 - **Old focused Final-B trial/report tools:** retired. The exact scale schedule
   remains in the main full-route path.
+- **Scalar minimum boundary reserve as ordinary global authority:** rejected
+  by physical run `20260731_152921`. It never activated because of a stale
+  native-field predicate and, after counterfactual gate repair, still
+  degenerates to all-action ties before the canonical hit.
 - **Replay-prefix exhaustive branching as inner loop:** rejected for speed;
   native replay remains a sparse independent oracle.
 - **Action-incompatible replay future reuse:** rejected as noncausal.

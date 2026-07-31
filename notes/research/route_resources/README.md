@@ -12,6 +12,7 @@ Read:
 4. [Route-2 combat/resource candidate board contract](ROUTE2_COMBAT_RESOURCE_CANDIDATE_BOARD_CONTRACT_20260731.md)
 5. [Route-2 item allocation and pickup trace contract](ROUTE2_ITEM_ALLOCATION_PICKUP_TRACE_CONTRACT_20260731.md)
 6. [Route-2 message-cleanup item-homing contract](ROUTE2_MESSAGE_CLEANUP_ITEM_HOMING_CONTRACT_20260731.md)
+7. [Item pre-update allocation contract](ITEM_PREUPDATE_ALLOCATION_CONTRACT_20260731.md)
 
 The retained audit has first-hit-bounded observation authority only. It grants
 no item-objective, collection-policy, later-combat, or live action authority.
@@ -26,3 +27,6 @@ option-edge, planner, and live action authority remain open.
 The route-wide cleanup atlas additionally includes Stage 1/2 Power-0 history
 and an exact post-allocation all-item homing sub-transition. The enclosing
 enemy/message event remains fail closed and grants no pickup or Power benefit.
+The pre-update allocation recurrence preserves ordered source calls, cursor,
+active-list, and RNG state, including effective type 7's native single-probe
+failure. It still grants no occurrence, pickup, or route-benefit authority.

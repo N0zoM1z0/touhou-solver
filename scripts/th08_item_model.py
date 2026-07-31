@@ -35,6 +35,7 @@ ITEM_LIFE_OR_BOMB = 5
 ITEM_SCORE_SCALED = 6
 ITEM_TIME = 7
 ITEM_POWER_OVERFLOW = 8
+ITEM_TIME_PSEUDO = 10
 
 POWER_LEVEL_THRESHOLDS = (8, 24, 48, 80, 128)
 STANDARD_POINT_EXTENDS = (100, 250, 500, 800, 1100, 9999)
@@ -160,7 +161,7 @@ def spawn_item_state(
         item_type = ITEM_POWER_OVERFLOW
     if item_type == ITEM_TIME:
         motion_state = SCATTER_DELAY
-    elif item_type == 10:
+    elif item_type == ITEM_TIME_PSEUDO:
         item_type = ITEM_TIME
         motion_state = SCATTER_TO_HOME
 

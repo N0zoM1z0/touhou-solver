@@ -44,10 +44,11 @@ historical handoff.
   `CONTENT-01` shipped content manifest, and `CONTENT-02` static
   mandatory-event atlas with native-revalidated timeline-`0x06`
   message/cleanup/item semantics, plus the six-stage Route-2 cleanup-seam
-  atlas and exact post-allocation all-active-item homing recurrence, are the
-  current repository checkpoint; no new physical trial was run.
-- Complete Linux discovery passes 1,534 tests in 14.510 seconds.
-- Complete Windows UNC discovery passes 1,534 tests in 31.725 seconds with
+  atlas, exact pre-update item allocation, and post-allocation all-active-item
+  homing recurrences, are the current repository checkpoint; no new physical
+  trial was run.
+- Complete Linux discovery passes 1,537 tests in 14.064 seconds.
+- Complete Windows UNC discovery passes 1,537 tests in 30.711 seconds with
   the three existing skips.
 - No TH08, controller, supervisor, native-replay runner, or Windows test
   process is intentionally left running.
@@ -279,6 +280,13 @@ historical handoff.
   update follows active linked-list allocation order rather than numeric slot
   order. Full-Power conversion also conditionally rewrites converted item
   velocity before later list entries update.
+- CE-0228 corrects another allocator branch: effective type 7, including
+  pseudo-type 10 after remapping, probes only the current cursor slot and
+  fails immediately when it is occupied. Other types scan the full cyclic
+  pool. The exact pre-update allocation recurrence now exposes successful
+  slots and per-request failures before any movement, pickup, or resource
+  mutation; same-update cleanup type-6 allocations can therefore precede
+  all-item homing without being delayed into the item-manager pass.
 - The complete static Power ledger enumerates all 387 combinations of Power
   0..128 and requested small, large, or Full Power pickup. It joins the capped
   resource result to both Focus-conditioned SHT capability bands. This is
@@ -1665,8 +1673,9 @@ Do not resume broad G5 work first.
    let an integrated simulator continue past an unconsumed engine event, or
    block on the failed external STD printer.
    The exact item-homing sub-transition may be reused only after a complete
-   same-update cleanup/allocation input; it does not authorize partial
-   continuation past the enclosing event.
+   same-update cleanup request batch has passed through the exact pre-update
+   allocator; neither sub-transition authorizes partial continuation past the
+   enclosing event.
 1. Do not repeat C5, the 22-hit Stage-6B run, or the unchanged 74-hit full
    route. C5 exact delivery is closed for its declared source-local contract;
    the two failed workloads already supply their reachability, resource, and

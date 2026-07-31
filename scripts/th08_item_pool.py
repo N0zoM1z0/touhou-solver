@@ -10,6 +10,8 @@ from th08_item_model import (
     ITEM_POWER_LARGE,
     ITEM_POWER_OVERFLOW,
     ITEM_POWER_SMALL,
+    ITEM_TIME,
+    ITEM_TIME_PSEUDO,
     ItemCollection,
     ItemResources,
     ItemState,
@@ -71,11 +73,26 @@ class CollectedItem:
 
 
 @dataclass(frozen=True)
+class ItemAllocationFailure:
+    request_index: int
+    reason: str
+
+
+@dataclass(frozen=True)
 class ItemPoolStep:
     state: ItemPoolState
     collected: tuple[CollectedItem, ...]
     spawned_slots: tuple[int, ...]
     culled_slots: tuple[int, ...]
+    allocation_failures: tuple[ItemAllocationFailure, ...]
+    pool_exhausted: bool
+
+
+@dataclass(frozen=True)
+class ItemPoolAllocationStep:
+    state: ItemPoolState
+    spawned_slots: tuple[int, ...]
+    failures: tuple[ItemAllocationFailure, ...]
     pool_exhausted: bool
 
 
@@ -141,15 +158,105 @@ def force_all_active_items_homing(
 def _next_free_slot(
     occupied: set[int],
     cursor: int,
+    *,
+    probe_limit: int = ITEM_POOL_SIZE,
 ) -> tuple[int | None, int]:
     """Match the native rotating allocation cursor and cyclic scan."""
 
-    for _ in range(ITEM_POOL_SIZE):
+    if not 1 <= probe_limit <= ITEM_POOL_SIZE:
+        raise ValueError("item allocation probe limit is outside the pool")
+    for _ in range(probe_limit):
         index = cursor
         cursor = (cursor + 1) % ITEM_POOL_SIZE
         if index not in occupied:
             return index, cursor
     return None, cursor
+
+
+def allocate_items_before_update(
+    state: ItemPoolState,
+    *,
+    requests: tuple[ItemSpawnRequest, ...],
+    player_state: int,
+    rng: Th08Rng,
+) -> ItemPoolAllocationStep:
+    """Apply only native item allocation, without the later manager update.
+
+    Effective type 7 is a native special case: after one occupied cursor
+    probe, ``item_pool_spawn`` returns failure instead of scanning later
+    slots. Input pseudo-type 10 is remapped to effective type 7 before that
+    branch. Every other type scans the complete cyclic pool.
+    """
+
+    active_order = list(_validate_state(state))
+    slots = {slot.index: slot.item for slot in state.slots}
+    occupied = set(slots)
+    allocation_cursor = state.next_allocation_index
+    spawned: list[int] = []
+    failures: list[ItemAllocationFailure] = []
+    pool_exhausted = False
+
+    for request_index, request in enumerate(requests):
+        if request.x < -64.0 or request.x > 448.0:
+            failures.append(
+                ItemAllocationFailure(request_index, "x_out_of_range")
+            )
+            continue
+        effective_type_7 = request.item_type in (
+            ITEM_TIME,
+            ITEM_TIME_PSEUDO,
+        )
+        index, allocation_cursor = _next_free_slot(
+            occupied,
+            allocation_cursor,
+            probe_limit=1 if effective_type_7 else ITEM_POOL_SIZE,
+        )
+        if index is None:
+            exhausted = len(occupied) == ITEM_POOL_SIZE
+            pool_exhausted = pool_exhausted or exhausted
+            failures.append(
+                ItemAllocationFailure(
+                    request_index,
+                    (
+                        "pool_exhausted"
+                        if exhausted
+                        else "effective_type_7_cursor_slot_occupied"
+                    ),
+                )
+            )
+            continue
+        item = spawn_item_state(
+            x=request.x,
+            y=request.y,
+            item_type=request.item_type,
+            motion_state=request.motion_state,
+            power=state.resources.power,
+            player_state=player_state,
+            rng=rng,
+        )
+        if item is None:
+            raise RuntimeError(
+                "validated item allocation unexpectedly rejected its spawn"
+            )
+        slots[index] = item
+        occupied.add(index)
+        active_order.append(index)
+        spawned.append(index)
+
+    return ItemPoolAllocationStep(
+        replace(
+            state,
+            slots=tuple(
+                ItemSlot(index, item)
+                for index, item in sorted(slots.items())
+            ),
+            next_allocation_index=allocation_cursor,
+            active_order=tuple(active_order),
+        ),
+        tuple(spawned),
+        tuple(failures),
+        pool_exhausted,
+    )
 
 
 def _convert_active_power_items(slots: dict[int, ItemState]) -> None:
@@ -186,41 +293,16 @@ def step_item_pool(
     the later hostile-projectile pass must be supplied on the next frame.
     """
 
-    active_order = list(_validate_state(state))
-    slots = {slot.index: slot.item for slot in state.slots}
-    occupied = set(slots)
-    allocation_cursor = state.next_allocation_index
-    spawned: list[int] = []
-    pool_exhausted = False
-    resources = state.resources
-
-    for request in spawns_before_update:
-        # Native rejects an out-of-range spawn before it scans or advances the
-        # allocation cursor and before callback RNG is consumed.
-        if request.x < -64.0 or request.x > 448.0:
-            continue
-        index, allocation_cursor = _next_free_slot(
-            occupied,
-            allocation_cursor,
-        )
-        if index is None:
-            pool_exhausted = True
-            break
-        item = spawn_item_state(
-            x=request.x,
-            y=request.y,
-            item_type=request.item_type,
-            motion_state=request.motion_state,
-            power=resources.power,
-            player_state=player_state,
-            rng=rng,
-        )
-        if item is None:
-            continue
-        slots[index] = item
-        occupied.add(index)
-        active_order.append(index)
-        spawned.append(index)
+    allocation = allocate_items_before_update(
+        state,
+        requests=spawns_before_update,
+        player_state=player_state,
+        rng=rng,
+    )
+    active_order = list(_validate_state(allocation.state))
+    slots = {slot.index: slot.item for slot in allocation.state.slots}
+    allocation_cursor = allocation.state.next_allocation_index
+    resources = allocation.state.resources
 
     collected: list[CollectedItem] = []
     culled: list[int] = []
@@ -296,7 +378,8 @@ def step_item_pool(
             tuple(active_order),
         ),
         tuple(collected),
-        tuple(spawned),
+        allocation.spawned_slots,
         tuple(culled),
-        pool_exhausted,
+        allocation.failures,
+        allocation.pool_exhausted,
     )

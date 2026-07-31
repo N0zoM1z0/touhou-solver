@@ -16,15 +16,21 @@ from th08_item_model import (
     ITEM_POWER_LARGE,
     ITEM_POWER_OVERFLOW,
     ITEM_POWER_SMALL,
+    ITEM_SCORE_SCALED,
+    ITEM_TIME,
+    ITEM_TIME_PSEUDO,
     ItemResources,
     ItemState,
     SCATTER_DELAY,
 )
 from th08_item_pool import (
+    ITEM_POOL_SIZE,
+    ItemAllocationFailure,
     ItemPoolConfig,
     ItemPoolState,
     ItemSlot,
     ItemSpawnRequest,
+    allocate_items_before_update,
     force_all_active_items_homing,
     step_item_pool,
 )
@@ -64,6 +70,168 @@ def _random_spawn_ecl() -> EclFile:
 
 
 class ItemPoolTests(unittest.TestCase):
+    def test_cleanup_score_allocation_precedes_all_item_homing(self) -> None:
+        resources = ItemResources(power=31, bombs=3, lives=2)
+        state = ItemPoolState(
+            (
+                ItemSlot(
+                    4,
+                    ItemState(
+                        80,
+                        120,
+                        1.5,
+                        2.5,
+                        motion_state=FREE,
+                        item_type=ITEM_POWER_SMALL,
+                    ),
+                ),
+            ),
+            resources,
+            next_allocation_index=4,
+            active_order=(4,),
+        )
+        rng = Th08Rng(0xCAFE)
+
+        allocated = allocate_items_before_update(
+            state,
+            requests=(
+                ItemSpawnRequest(
+                    160,
+                    200,
+                    ITEM_SCORE_SCALED,
+                    HOMING,
+                ),
+            ),
+            player_state=0,
+            rng=rng,
+        )
+        homed = force_all_active_items_homing(allocated.state)
+
+        self.assertEqual(allocated.spawned_slots, (5,))
+        self.assertEqual(allocated.failures, ())
+        self.assertFalse(allocated.pool_exhausted)
+        self.assertEqual(allocated.state.next_allocation_index, 6)
+        self.assertEqual(allocated.state.active_order, (4, 5))
+        self.assertEqual(homed.affected_slots, (4, 5))
+        self.assertEqual(homed.state.resources, resources)
+        self.assertEqual(rng.calls, 0)
+        self.assertEqual(
+            [
+                (
+                    slot.index,
+                    slot.item.item_type,
+                    slot.item.motion_state,
+                    slot.item.velocity_x,
+                    slot.item.velocity_y,
+                )
+                for slot in homed.state.slots
+            ],
+            [
+                (4, ITEM_POWER_SMALL, HOMING, 0.0, -0.5),
+                (5, ITEM_SCORE_SCALED, HOMING, 0.0, -0.5),
+            ],
+        )
+
+    def test_effective_time_type_uses_one_cursor_probe(self) -> None:
+        for item_type in (ITEM_TIME, ITEM_TIME_PSEUDO):
+            with self.subTest(item_type=item_type):
+                state = ItemPoolState(
+                    (
+                        ItemSlot(
+                            9,
+                            ItemState(
+                                80,
+                                120,
+                                0,
+                                0,
+                                item_type=ITEM_POWER_SMALL,
+                            ),
+                        ),
+                    ),
+                    ItemResources(power=7),
+                    next_allocation_index=9,
+                    active_order=(9,),
+                )
+                rng = Th08Rng(0x1234)
+
+                allocated = allocate_items_before_update(
+                    state,
+                    requests=(
+                        ItemSpawnRequest(100, 100, item_type, FREE),
+                        ItemSpawnRequest(
+                            120,
+                            140,
+                            ITEM_POWER_SMALL,
+                            FREE,
+                        ),
+                    ),
+                    player_state=0,
+                    rng=rng,
+                )
+
+                self.assertEqual(allocated.spawned_slots, (10,))
+                self.assertEqual(
+                    allocated.failures,
+                    (
+                        ItemAllocationFailure(
+                            0,
+                            "effective_type_7_cursor_slot_occupied",
+                        ),
+                    ),
+                )
+                self.assertFalse(allocated.pool_exhausted)
+                self.assertEqual(allocated.state.next_allocation_index, 11)
+                self.assertEqual(allocated.state.active_order, (9, 10))
+                self.assertEqual(
+                    allocated.state.slots[1].item.item_type,
+                    ITEM_POWER_SMALL,
+                )
+                self.assertEqual(rng.calls, 0)
+
+    def test_full_pool_processes_later_single_probe_cursor_effect(self) -> None:
+        state = ItemPoolState(
+            tuple(
+                ItemSlot(
+                    index,
+                    ItemState(
+                        0,
+                        0,
+                        0,
+                        0,
+                        item_type=ITEM_POWER_SMALL,
+                    ),
+                )
+                for index in range(ITEM_POOL_SIZE)
+            ),
+            ItemResources(),
+            next_allocation_index=ITEM_POOL_SIZE - 1,
+            active_order=tuple(range(ITEM_POOL_SIZE)),
+        )
+        rng = Th08Rng(0x1234)
+
+        allocated = allocate_items_before_update(
+            state,
+            requests=(
+                ItemSpawnRequest(100, 100, ITEM_POWER_SMALL, FREE),
+                ItemSpawnRequest(100, 100, ITEM_TIME, FREE),
+            ),
+            player_state=0,
+            rng=rng,
+        )
+
+        self.assertEqual(allocated.spawned_slots, ())
+        self.assertEqual(
+            allocated.failures,
+            (
+                ItemAllocationFailure(0, "pool_exhausted"),
+                ItemAllocationFailure(1, "pool_exhausted"),
+            ),
+        )
+        self.assertTrue(allocated.pool_exhausted)
+        self.assertEqual(allocated.state.next_allocation_index, 0)
+        self.assertEqual(allocated.state, replace(state, next_allocation_index=0))
+        self.assertEqual(rng.calls, 0)
+
     def test_message_start_forces_active_list_homing_without_other_mutation(
         self,
     ) -> None:
@@ -269,6 +437,10 @@ class ItemPoolTests(unittest.TestCase):
             rng=rng,
         )
         self.assertEqual(result.spawned_slots, ())
+        self.assertEqual(
+            result.allocation_failures,
+            (ItemAllocationFailure(0, "x_out_of_range"),),
+        )
         self.assertEqual(result.state.next_allocation_index, 37)
         self.assertEqual(rng.calls, 0)
 

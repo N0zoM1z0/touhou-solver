@@ -90,6 +90,12 @@ runtime claim that a particular atlas row executed.
 walks the declared active-list order, returns the exact successor, and retains
 the affected slot order as event-ledger evidence.
 
+`th08_item_pool.allocate_items_before_update` can now construct this boundary
+exactly from an already-complete ordered cleanup score-item request batch,
+including capacity, rotating-cursor, active-list, and failure semantics. The
+enemy/message consumer that must produce that complete batch remains absent,
+so the enclosing event still fails closed.
+
 The deterministic falsifier uses:
 
 - sorted occupied slots `1` and `4`;

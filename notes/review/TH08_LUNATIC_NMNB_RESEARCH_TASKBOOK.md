@@ -1057,6 +1057,11 @@ Current semantic correction (2026-07-31):
   angle/velocity, and default per-frame motion at each revalidated native
   binary32 write. Exact static-CRT `sin/cos` low bits remain open, so this
   narrows numerical error without promoting the Focus coverage envelope.
+- CE-0228 corrects the item allocator's effective-type-7 branch. Native time
+  type 7 and remapped pseudo-type 10 make one cursor probe, not a complete
+  cyclic scan. Allocation is now an explicit pre-update recurrence, so
+  source-ordered cursor/list/RNG state can compose with later item motion
+  without implying pickup or benefit.
 
 Exit gate:
 
@@ -1935,8 +1940,10 @@ Power traces are diagnostic-only.
 Current checkpoint: all 23 Route-2 message-cleanup seams, including Stage 1/2,
 are hash-bound. The exact post-allocation item sub-transition forces every
 active item to homing without changing resources, cursor, order, timer, type,
-or RNG. Which items exist, execute, or are collected and whether later
-capability improves remain open.
+or RNG. Exact pre-update allocation now preserves the native rotating cursor,
+active-list append, motion RNG, failure reason, and effective-type-7
+single-probe rule. Which source requests execute, which items are collected,
+and whether later capability improves remain open.
 
 ### Priority 1 — Turn one root into a representative corpus
 

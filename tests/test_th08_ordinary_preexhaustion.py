@@ -137,3 +137,29 @@ class OrdinaryNonspellPreexhaustionTests(unittest.TestCase):
             ),
             incomplete,
         )
+
+    def test_complete_causal_prefix_must_cover_whole_policy(self) -> None:
+        prefix = SimpleNamespace(
+            source_closure_complete=True,
+            root_frame=100,
+            horizon_frame=259,
+        )
+        result = SimpleNamespace(
+            closure=SimpleNamespace(projection=prefix)
+        )
+
+        self.assertIs(
+            _ordinary_submission_projection(
+                result,
+                policy_source_frame=179,
+                policy_horizon_frames=80,
+            ),
+            prefix,
+        )
+        self.assertIsNone(
+            _ordinary_submission_projection(
+                result,
+                policy_source_frame=180,
+                policy_horizon_frames=80,
+            )
+        )

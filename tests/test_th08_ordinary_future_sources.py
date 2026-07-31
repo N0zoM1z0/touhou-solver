@@ -260,9 +260,23 @@ class OrdinaryFutureSourceTests(unittest.TestCase):
         self.assertEqual(
             _health_transition_hp_loss_upper_bound(
                 payload,
-                horizon_frames=1,
+                damage_frames=1,
             ),
             4,
+        )
+
+    def test_health_damage_zero_updates_excludes_active_shots(self) -> None:
+        payload = deepcopy(_payload())
+        payload["route2_health_transition_damage_envelope"] = (
+            _damage_envelope(active_raw_damage=999)
+        )
+
+        self.assertEqual(
+            _health_transition_hp_loss_upper_bound(
+                payload,
+                damage_frames=0,
+            ),
+            0,
         )
 
     def test_far_timeout_is_proven_outside_bounded_horizon(self) -> None:
@@ -282,7 +296,7 @@ class OrdinaryFutureSourceTests(unittest.TestCase):
 
         self.assertTrue(closure.projection.source_closure_complete)
 
-    def test_timeout_at_horizon_remains_fail_closed(self) -> None:
+    def test_timeout_at_horizon_truncates_complete_causal_prefix(self) -> None:
         payload = deepcopy(_payload())
         phase = payload["enemy_manager_template_source"][
             "phase_transition_state"
@@ -297,11 +311,8 @@ class OrdinaryFutureSourceTests(unittest.TestCase):
             horizon_frames=100,
         )
 
-        self.assertFalse(closure.projection.source_closure_complete)
-        self.assertIn(
-            "timeout phase transition is reachable",
-            closure.projection.source_closure_reason,
-        )
+        self.assertTrue(closure.projection.source_closure_complete)
+        self.assertEqual(closure.projection.horizon_frames, 99)
 
     def test_health_transition_outside_damage_envelope_is_proven(self) -> None:
         payload = deepcopy(_payload())
@@ -317,14 +328,36 @@ class OrdinaryFutureSourceTests(unittest.TestCase):
         closure = project_ordinary_future_sources(
             payload,
             ECL,
-            horizon_frames=1,
+            horizon_frames=2,
         )
 
         self.assertTrue(closure.projection.source_closure_complete)
         self.assertEqual(closure.health_transition_proven_count, 1)
         self.assertEqual(closure.health_transition_minimum_margin, 0)
 
-    def test_health_transition_inside_damage_envelope_fails_closed(self) -> None:
+    def test_health_transition_truncates_before_reachable_check(self) -> None:
+        payload = deepcopy(_payload())
+        phase = payload["enemy_manager_template_source"][
+            "phase_transition_state"
+        ]["rows"][0]
+        phase["health_thresholds"][0] = 50
+        phase["health_successor_subroutines"][0] = 7
+        payload["route2_health_transition_damage_envelope"] = (
+            _damage_envelope(active_raw_damage=49)
+        )
+
+        closure = project_ordinary_future_sources(
+            payload,
+            ECL,
+            horizon_frames=2,
+        )
+
+        self.assertTrue(closure.projection.source_closure_complete)
+        self.assertEqual(closure.projection.horizon_frames, 1)
+        self.assertEqual(closure.health_transition_proven_count, 1)
+        self.assertEqual(closure.health_transition_minimum_margin, 50)
+
+    def test_last_frame_damage_cannot_trigger_transition_in_horizon(self) -> None:
         payload = deepcopy(_payload())
         phase = payload["enemy_manager_template_source"][
             "phase_transition_state"
@@ -341,12 +374,33 @@ class OrdinaryFutureSourceTests(unittest.TestCase):
             horizon_frames=1,
         )
 
-        self.assertFalse(closure.projection.source_closure_complete)
-        self.assertIn(
-            "health phase transition is reachable",
-            closure.projection.source_closure_reason,
+        self.assertTrue(closure.projection.source_closure_complete)
+        self.assertEqual(closure.health_transition_proven_count, 1)
+        self.assertEqual(closure.health_transition_minimum_margin, 50)
+
+    def test_cadence_damage_finds_exact_transition_free_prefix(self) -> None:
+        payload = deepcopy(_payload())
+        phase = payload["enemy_manager_template_source"][
+            "phase_transition_state"
+        ]["rows"][0]
+        phase["health_thresholds"][0] = 50
+        phase["health_successor_subroutines"][0] = 7
+        envelope = _damage_envelope()
+        envelope["future_raw_damage_by_cadence_phase"] = [10] * 20
+        payload["route2_health_transition_damage_envelope"] = envelope
+
+        closure = project_ordinary_future_sources(
+            payload,
+            ECL,
+            horizon_frames=10,
         )
-        self.assertIn("margin=-1", closure.projection.source_closure_reason)
+
+        # Four intervening 10-damage updates lose at most floor(40*1.06)=42;
+        # five lose 53.  The phase check in future frame 5 is therefore the
+        # last one proved unable to select the successor.
+        self.assertTrue(closure.projection.source_closure_complete)
+        self.assertEqual(closure.projection.horizon_frames, 5)
+        self.assertEqual(closure.health_transition_minimum_margin, 8)
 
     def test_auxiliary_timer_reset_uses_captured_integer_local(self) -> None:
         instructions = {

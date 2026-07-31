@@ -3733,6 +3733,14 @@ def _run_live_session(
                             "horizon_frame": (
                                 closure.projection.horizon_frame
                             ),
+                            "requested_horizon_frames": (
+                                ORDINARY_FUTURE_SOURCE_HORIZON_FRAMES
+                            ),
+                            "causal_prefix_truncated": bool(
+                                closure.projection.source_closure_complete
+                                and closure.projection.horizon_frames
+                                < ORDINARY_FUTURE_SOURCE_HORIZON_FRAMES
+                            ),
                             "stable_capture": (
                                 ordinary_future_source_result.snapshot.stable
                             ),

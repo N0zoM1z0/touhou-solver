@@ -51,7 +51,7 @@ from touhou_control.corridor import AabbHazard, AabbTrajectoryHazard
 
 
 ORDINARY_FUTURE_SOURCE_SEMANTICS_VERSION = (
-    "th08-ordinary-future-sources-v7-bounded-health-and-timeout-envelope"
+    "th08-ordinary-future-sources-v8-causal-phase-safe-prefix"
 )
 _PROJECTION_SCHEMA = "th08-native-snapshot-collision-control-projection-v13"
 _DIRECT_FIRE_OPCODES = frozenset(range(0x60, 0x69))
@@ -382,8 +382,19 @@ def _callback_is_clear(row: object, *, label: str) -> None:
 def _health_transition_hp_loss_upper_bound(
     payload: dict[str, object],
     *,
-    horizon_frames: int,
+    damage_frames: int,
 ) -> int:
+    """Bound HP loss visible to phase checks in ``damage_frames`` updates.
+
+    Native enemy phase checks run before player-shot collision/HP subtraction
+    in the same physical update.  A source projection through future frame H
+    therefore needs damage only from frames 1..H-1: damage first applied in H
+    cannot select a successor until H+1.  With no intervening damage update,
+    even already-active shots contribute zero to this bound.
+    """
+
+    if damage_frames < 0:
+        _fail("health damage horizon is negative")
     envelope = payload.get("route2_health_transition_damage_envelope")
     if not isinstance(envelope, dict):
         _fail("health phase transition damage envelope is absent")
@@ -424,7 +435,9 @@ def _health_transition_hp_loss_upper_bound(
     )
     if active_damage < 0 or any(value < 0 for value in phase_damage):
         _fail("health damage envelope contains negative damage")
-    cycles, remainder = divmod(horizon_frames, cadence_length)
+    if damage_frames == 0:
+        return 0
+    cycles, remainder = divmod(damage_frames, cadence_length)
     future_damage = cycles * sum(phase_damage)
     if remainder:
         doubled = phase_damage + phase_damage
@@ -441,17 +454,54 @@ def _health_transition_hp_loss_upper_bound(
     return (active_damage + future_damage) * 106 // 100
 
 
+def _maximum_health_transition_free_horizon(
+    payload: dict[str, object],
+    *,
+    current_hitpoints: int,
+    trigger_hitpoints: int,
+    requested_horizon_frames: int,
+) -> int:
+    """Return the longest prefix whose native phase checks cannot fire."""
+
+    if requested_horizon_frames < 0:
+        _fail("health transition horizon is negative")
+    if current_hitpoints < trigger_hitpoints:
+        return 0
+
+    def safe(horizon: int) -> bool:
+        return (
+            current_hitpoints
+            - _health_transition_hp_loss_upper_bound(
+                payload,
+                damage_frames=max(0, horizon - 1),
+            )
+            - trigger_hitpoints
+            >= 0
+        )
+
+    if safe(requested_horizon_frames):
+        return requested_horizon_frames
+    lower = 0
+    upper = requested_horizon_frames
+    while lower + 1 < upper:
+        midpoint = (lower + upper) // 2
+        if safe(midpoint):
+            lower = midpoint
+        else:
+            upper = midpoint
+    return lower
+
+
 def _build_sources(
     payload: dict[str, object],
     *,
     ecl_base: int,
     horizon_frames: int,
-) -> tuple[list[_SourceState], int, int, int | None]:
+) -> tuple[list[_SourceState], int, int, int | None, int]:
     sources: list[_SourceState] = []
     auxiliary_count = 0
-    health_loss_upper_bound: int | None = None
-    health_transition_proven_count = 0
-    health_transition_minimum_margin: int | None = None
+    health_guards: list[tuple[int, int]] = []
+    transition_free_horizon = horizon_frames
     for role, group in _source_groups(payload):
         inventory = group.get("main_ecl_vm_inventory")
         if not isinstance(inventory, dict):
@@ -644,47 +694,27 @@ def _build_sources(
             phase_timer_elapsed = int(
                 phase.get("phase_timer_elapsed", -0x80000000)
             )
-            phase_transition_armed = bool(
-                active_thresholds or timeout_frame >= 0
-            )
             if active_thresholds:
-                if health_loss_upper_bound is None:
-                    health_loss_upper_bound = (
-                        _health_transition_hp_loss_upper_bound(
-                            payload,
-                            horizon_frames=horizon_frames,
-                        )
-                    )
                 current_hitpoints = int(
                     phase.get("current_hitpoints", -0x80000000)
                 )
                 trigger_hitpoints = max(active_thresholds)
-                margin = (
-                    current_hitpoints
-                    - health_loss_upper_bound
-                    - trigger_hitpoints
+                health_guards.append(
+                    (current_hitpoints, trigger_hitpoints)
                 )
-                if margin < 0:
-                    _fail(
-                        f"{role}:{int(slot)} health phase transition is "
-                        "reachable within the future-source horizon: "
-                        f"hp={current_hitpoints}, trigger={trigger_hitpoints}, "
-                        f"loss_upper={health_loss_upper_bound}, margin={margin}"
-                    )
-                health_transition_proven_count += 1
-                health_transition_minimum_margin = (
-                    margin
-                    if health_transition_minimum_margin is None
-                    else min(health_transition_minimum_margin, margin)
+                transition_free_horizon = min(
+                    transition_free_horizon,
+                    _maximum_health_transition_free_horizon(
+                        payload,
+                        current_hitpoints=current_hitpoints,
+                        trigger_hitpoints=trigger_hitpoints,
+                        requested_horizon_frames=horizon_frames,
+                    ),
                 )
-            if (
-                timeout_frame >= 0
-                and phase_timer_elapsed + horizon_frames >= timeout_frame
-            ):
-                _fail(
-                    f"{role}:{int(slot)} timeout phase transition is "
-                    "reachable within the future-source horizon without "
-                    "integrated successor-source lowering"
+            if timeout_frame >= 0:
+                transition_free_horizon = min(
+                    transition_free_horizon,
+                    max(0, timeout_frame - phase_timer_elapsed - 1),
                 )
             body = body_by_pointer[pointer]
             body_half_width = float(body["half_width"])
@@ -712,8 +742,21 @@ def _build_sources(
     return (
         sources,
         auxiliary_count,
-        health_transition_proven_count,
-        health_transition_minimum_margin,
+        len(health_guards),
+        (
+            min(
+                current_hitpoints
+                - _health_transition_hp_loss_upper_bound(
+                    payload,
+                    damage_frames=max(0, transition_free_horizon - 1),
+                )
+                - trigger_hitpoints
+                for current_hitpoints, trigger_hitpoints in health_guards
+            )
+            if health_guards
+            else None
+        ),
+        transition_free_horizon,
     )
 
 
@@ -2075,6 +2118,7 @@ def _analyze(
     int,
     int,
     int | None,
+    int,
 ]:
     if str(payload.get("schema")) != _PROJECTION_SCHEMA:
         _fail(
@@ -2094,20 +2138,21 @@ def _analyze(
     player_y = float(compact["player_y"])
     _finite((player_x, player_y), label="future source player root")
     ecl_base, difficulty_mask = _runtime_program_identity(payload, ecl)
-    spawns_by_frame, timeline_steps = _lower_timeline_events(
-        payload,
-        ecl,
-        horizon_frames=horizon_frames,
-    )
     (
         sources,
         auxiliary_count,
         health_transition_proven_count,
         health_transition_minimum_margin,
+        projected_horizon_frames,
     ) = _build_sources(
         payload,
         ecl_base=ecl_base,
         horizon_frames=horizon_frames,
+    )
+    spawns_by_frame, timeline_steps = _lower_timeline_events(
+        payload,
+        ecl,
+        horizon_frames=projected_horizon_frames,
     )
     if not sources:
         _fail("manager template source is absent")
@@ -2117,7 +2162,7 @@ def _analyze(
     future_body_samples: dict[str, list[AabbHazard | None]] = {}
     silent_children = 0
     timeline_spawn_count = 0
-    for frame in range(1, horizon_frames + 1):
+    for frame in range(1, projected_horizon_frames + 1):
         for spawn in spawns_by_frame.get(frame, ()):
             source = _timeline_source(
                 template=template,
@@ -2128,7 +2173,7 @@ def _analyze(
             )
             timeline_spawn_count += 1
             future_body_samples[source.identity] = [None] * (
-                horizon_frames + 1
+                projected_horizon_frames + 1
             )
             # enemy_spawn_from_timeline runs the new ECL VM once immediately.
             # enemy_manager_update then reaches the allocated slot and performs
@@ -2142,7 +2187,7 @@ def _analyze(
                 difficulty_mask=difficulty_mask,
                 payload=payload,
                 ecl=ecl,
-                remaining_horizon=horizon_frames - frame,
+                remaining_horizon=projected_horizon_frames - frame,
             )
             events.extend(bootstrap_events)
             silent_children += child_count
@@ -2157,7 +2202,7 @@ def _analyze(
                 difficulty_mask=difficulty_mask,
                 payload=payload,
                 ecl=ecl,
-                remaining_horizon=horizon_frames - frame,
+                remaining_horizon=projected_horizon_frames - frame,
             )
             events.extend(source_events)
             silent_children += child_count
@@ -2196,6 +2241,7 @@ def _analyze(
         timeline_spawn_count,
         health_transition_proven_count,
         health_transition_minimum_margin,
+        projected_horizon_frames,
     )
 
 
@@ -2224,6 +2270,7 @@ def project_ordinary_future_sources(
             timeline_spawn_count,
             health_transition_proven_count,
             health_transition_minimum_margin,
+            projected_horizon_frames,
         ) = _analyze(payload, ecl, horizon_frames=horizon_frames)
     except (FutureSourceClosureError, KeyError, TypeError, ValueError) as error:
         projection = unknown_future_hazard_projection(
@@ -2247,7 +2294,7 @@ def project_ordinary_future_sources(
         )
     projection = complete_future_hazard_projection(
         root_frame=root_frame,
-        horizon_frames=horizon_frames,
+        horizon_frames=projected_horizon_frames,
         events=events,
         aabb_trajectories=aabb_trajectories,
         source_semantics_version=ORDINARY_FUTURE_SOURCE_SEMANTICS_VERSION,

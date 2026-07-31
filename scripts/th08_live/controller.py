@@ -192,6 +192,10 @@ from th08_live.issue_stage import (
     commit_physical_issue,
     observe_action_issue,
 )
+from th08_live.kill_before_saturation import (
+    observe_kill_before_saturation_target,
+    unfocused_peer_action,
+)
 from th08_live.local_certificates import (
     control_prefix_hazards as _control_prefix_hazards_impl,
     legacy_robust_action_certificates as _legacy_robust_action_certificates_impl,
@@ -570,6 +574,9 @@ def _issue_recertification_record(
         ),
         "selected_action": recertification.selected_action,
         "selection_reason": recertification.selection_reason,
+        "preferred_action": recertification.preferred_action,
+        "preference_reason": recertification.preference_reason,
+        "preference_applied": recertification.preference_applied,
         "global_constraint_relaxed": (
             recertification.global_constraint_relaxed
         ),
@@ -607,6 +614,8 @@ def commit_local_proposal_for_fresh_hazards(
     viability_recovery_distances: tuple[tuple[str, float], ...] = (),
     viability_safety_actions: tuple[str, ...] = (),
     viability_survival_actions: tuple[str, ...] = (),
+    preferred_action: str | None = None,
+    preference_reason: str | None = None,
     time_scale_schedule: Th08TimeScaleSchedule | None = None,
 ) -> IssuedDecision:
     """Commit a proposal against fresh hazards and retained global authority."""
@@ -638,6 +647,8 @@ def commit_local_proposal_for_fresh_hazards(
             ),
             viability_safety_actions=viability_safety_actions,
             viability_survival_actions=viability_survival_actions,
+            preferred_action=preferred_action,
+            preference_reason=preference_reason,
         ),
         IssueAdapter(
             actions=_PLANNER_ACTIONS,
@@ -668,6 +679,8 @@ def issue_transaction_for_fresh_hazards(
     viability_recovery_distances: tuple[tuple[str, float], ...] = (),
     viability_safety_actions: tuple[str, ...] = (),
     viability_survival_actions: tuple[str, ...] = (),
+    preferred_action: str | None = None,
+    preference_reason: str | None = None,
     time_scale_schedule: Th08TimeScaleSchedule | None = None,
 ) -> IssuedDecision:
     """Compatibility adapter from a flat decision to a proposal."""
@@ -689,6 +702,8 @@ def issue_transaction_for_fresh_hazards(
         viability_recovery_distances=viability_recovery_distances,
         viability_safety_actions=viability_safety_actions,
         viability_survival_actions=viability_survival_actions,
+        preferred_action=preferred_action,
+        preference_reason=preference_reason,
         time_scale_schedule=time_scale_schedule,
     )
 
@@ -711,6 +726,8 @@ def recertify_action_for_fresh_hazards(
     viability_recovery_distances: tuple[tuple[str, float], ...] = (),
     viability_safety_actions: tuple[str, ...] = (),
     viability_survival_actions: tuple[str, ...] = (),
+    preferred_action: str | None = None,
+    preference_reason: str | None = None,
     time_scale_schedule: Th08TimeScaleSchedule | None = None,
 ) -> Decision:
     """Compatibility wrapper for the explicit issue transaction."""
@@ -732,6 +749,8 @@ def recertify_action_for_fresh_hazards(
         viability_recovery_distances=viability_recovery_distances,
         viability_safety_actions=viability_safety_actions,
         viability_survival_actions=viability_survival_actions,
+        preferred_action=preferred_action,
+        preference_reason=preference_reason,
         time_scale_schedule=time_scale_schedule,
     ).decision
 
@@ -1453,6 +1472,13 @@ def _prepare_live_run(args: argparse.Namespace) -> None:
         raise ValueError(
             "Final-B scale-source authority requires explicit hard no-Bomb"
         )
+    if (
+        getattr(args, "kill_before_saturation", False)
+        and not args.no_bomb
+    ):
+        raise ValueError(
+            "kill-before-saturation requires explicit hard no-Bomb"
+        )
     if enable_finalb_scale_source_authority and (
         runtime_ecl_static_image is None
         or runtime_ecl_static_sha256 is None
@@ -1572,6 +1598,9 @@ def _run_live_session(
     )
     trace_enemy_lifecycle_events = bool(
         getattr(args, "trace_enemy_lifecycle_events", False)
+    )
+    kill_before_saturation = bool(
+        getattr(args, "kill_before_saturation", False)
     )
     enemy_lifecycle_probe: EnemyLifecycleProbe | None = None
     enemy_lifecycle_probe_last_serial: int | None = None
@@ -1774,6 +1803,19 @@ def _run_live_session(
                     "damage_objective": (
                         "shadow_lexicographic_inside_fresh_safe_set"
                     ),
+                    "kill_before_saturation": {
+                        "enabled": kill_before_saturation,
+                        "role": (
+                            "live_preference_inside_fresh_issue_safe_set"
+                            if kill_before_saturation
+                            else "disabled"
+                        ),
+                        "complete_action": (
+                            "same_direction_unfocused"
+                        ),
+                        "fallback": "fresh_issue_transaction_default",
+                        "hard_no_bomb_required": True,
+                    },
                     "enemy_body_sensor": (
                         "synchronous_latent_contact_prefix_plus_"
                         "async_enabled_tail_with_observed_world_motion"
@@ -2504,7 +2546,7 @@ def _run_live_session(
                     capture_player_enemy_mode_prefix(
                         reader,
                         include_main_ecl_vms=False,
-                        include_combat_progress=False,
+                        include_combat_progress=kill_before_saturation,
                     )
                 )
                 enemy_prefix_snapshot = (
@@ -2515,7 +2557,7 @@ def _run_live_session(
                     capture_enemy_pool_prefix_contiguous(
                         reader,
                         include_main_ecl_vms=False,
-                        include_combat_progress=False,
+                        include_combat_progress=kill_before_saturation,
                     )
                 )
             enemy_prefix_capture_ms = (
@@ -2881,6 +2923,19 @@ def _run_live_session(
             if resources is None:
                 termination_reason = "resources_unavailable"
                 break
+            kill_before_saturation_observation = (
+                observe_kill_before_saturation_target(
+                    enabled=kill_before_saturation,
+                    inventory=(
+                        enemy_prefix_snapshot.combat_progress_inventory
+                    ),
+                    enemy_bodies=enemy_prefix_bodies,
+                    player_x=float(player["x"]),
+                    player_y=float(player["y"]),
+                    power=float(resources["power"]),
+                    spell_active=bool(spell_state["active"]),
+                )
+            )
             can_bomb = (
                 not args.no_bomb
                 and args.normal_bomb
@@ -3475,6 +3530,14 @@ def _run_live_session(
                 )
             )
             decision = local_proposal.decision
+            kill_before_saturation_preferred_action = (
+                unfocused_peer_action(
+                    decision.action,
+                    actions=_PLANNER_ACTIONS,
+                )
+                if kill_before_saturation_observation.target is not None
+                else None
+            )
             plan_ms = (time.perf_counter() - plan_started) * 1000.0
             pre_issue_action = decision.action
             pre_issue_mask = decision.mask
@@ -3514,6 +3577,17 @@ def _run_live_session(
                         ),
                         viability_survival_actions=(
                             policy_guidance.survival_actions
+                        ),
+                        preferred_action=(
+                            kill_before_saturation_preferred_action
+                        ),
+                        preference_reason=(
+                            "kill_before_saturation_low_hp_ordinary_enemy"
+                            if (
+                                kill_before_saturation_preferred_action
+                                is not None
+                            )
+                            else None
                         ),
                         time_scale_schedule=(
                             captured_iteration.time_scale_schedule
@@ -3652,6 +3726,42 @@ def _run_live_session(
                 auto_confirm_apply=auto_confirm.apply,
             )
             decision = issue_overrides.decision
+            kill_before_saturation_transaction = (
+                decision.issue_recertification
+            )
+            kill_before_saturation_record = {
+                "enabled": kill_before_saturation,
+                "observation_reason": (
+                    kill_before_saturation_observation.reason
+                ),
+                "observation_frame": (
+                    enemy_prefix_snapshot.frame_after
+                ),
+                "target": (
+                    kill_before_saturation_observation.target.record()
+                    if (
+                        kill_before_saturation_observation.target
+                        is not None
+                    )
+                    else None
+                ),
+                "planned_action": pre_issue_action,
+                "preferred_action": (
+                    kill_before_saturation_preferred_action
+                ),
+                "preference_applied": bool(
+                    kill_before_saturation_transaction is not None
+                    and kill_before_saturation_transaction.preference_applied
+                ),
+                "transaction_selected_action": (
+                    kill_before_saturation_transaction.selected_action
+                    if kill_before_saturation_transaction is not None
+                    else None
+                ),
+                "issued_action": decision.action,
+                "deadline_missed": action_deadline_missed,
+                "action_authority": kill_before_saturation,
+            }
             can_deathbomb = issue_overrides.can_deathbomb
             auto_confirm_event = issue_overrides.auto_confirm_event
             last_bomb_counter = issue_overrides.last_bomb_counter
@@ -3922,6 +4032,9 @@ def _run_live_session(
                         hit_started=hit_started,
                         hit_count=hit_count,
                         auto_confirm_event=auto_confirm_event,
+                        kill_before_saturation=(
+                            kill_before_saturation_record
+                        ),
                     ),
                     local_certificate_timing_record=(
                         _local_certificate_timing_record

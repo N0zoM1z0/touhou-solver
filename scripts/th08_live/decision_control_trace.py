@@ -41,6 +41,7 @@ class DecisionControlTraceInput:
     hit_started: bool
     hit_count: int
     auto_confirm_event: str | None
+    kill_before_saturation: Mapping[str, object] | None = None
 
 
 def build_decision_control_trace_fields(
@@ -178,6 +179,7 @@ def build_decision_control_trace_fields(
             "shadow_alignment_cost": decision.damage_shadow_alignment_cost,
             "eligible_action_count": decision.damage_eligible_action_count,
         },
+        "kill_before_saturation": trace_input.kill_before_saturation,
         "action": decision.action,
         "mask": decision.mask,
         "focused": decision.planned_focus,

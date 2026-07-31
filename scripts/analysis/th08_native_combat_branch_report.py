@@ -12,7 +12,13 @@ from typing import Any
 
 
 SCHEMA = "th08-native-combat-branch-comparison-v3"
-ROLLING_SCHEMA = "th08-native-snapshot-rolling-trial-v10"
+ROLLING_SCHEMA = "th08-native-snapshot-rolling-trial-v11"
+SUPPORTED_ROLLING_SCHEMAS = frozenset(
+    {
+        "th08-native-snapshot-rolling-trial-v10",
+        ROLLING_SCHEMA,
+    }
+)
 CAUSAL_SEARCH_SCHEMA = "th08-native-snapshot-causal-secondary-search-v8"
 ROLLING_ACCEPTED_STATUS = "rolling_native_projection_snapshot_passed"
 CAUSAL_ACCEPTED_STATUS = "causal_secondary_search_passed"
@@ -607,7 +613,7 @@ def build_report(
 ) -> dict[str, object]:
     source_schema = source.get("schema")
     result = _object(source.get("result"), field="source.result")
-    if source_schema == ROLLING_SCHEMA:
+    if source_schema in SUPPORTED_ROLLING_SCHEMAS:
         rows = _rolling_rows(result)
     elif source_schema == CAUSAL_SEARCH_SCHEMA:
         rows = _causal_rows(result)

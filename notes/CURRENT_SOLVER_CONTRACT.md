@@ -111,6 +111,22 @@ later combat/survival benefit. Post-death Power recovery is outside NMNB.
 The detailed current combat/resource boundary is
 `CURRENT_COMBAT_RESOURCE_MODEL.md`.
 
+The only current physical combat experiment is default-off
+`--kill-before-saturation`. At a nonspell decision it may use the coherent
+first-64 enemy prefix to select an ordinary enemy with observed HP `1..22`,
+Power at least 100, positive vertical lead, and bounded horizontal separation.
+It may then request only the unfocused peer of the planner's complete focused
+movement action. The issue transaction applies that preference only when the
+peer is fresh-safe and, when global allowed actions exist, inside their
+intersection. No fresh transaction, an unsafe peer, deadline expiry, spell
+state, low Power, missing combat rows, stay, or an already-unfocused action
+preserves the baseline action. The option requires explicit hard no-Bomb.
+
+This rule is experimental, not promoted route-wide authority. Its first
+physical Stage-5 gate applied 27 preferences with zero Bomb/deadline
+violations, but global guidance was unavailable throughout and total hits did
+not improve on a different RNG root.
+
 ## Falsification And Promotion
 
 The fastest valid loop is:

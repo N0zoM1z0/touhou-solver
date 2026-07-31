@@ -1,0 +1,673 @@
+{
+  "authority": {
+    "inferred": "the killed enemy accounts for the 3/6/9 cadence-aligned active-bullet deficit",
+    "modeled": "80-frame global viability outcomes from each retained native snapshot under the current live planner contract",
+    "not_proved": "cross-root or physical full-route improvement",
+    "observed": "same-root original-engine damage, defeat, and hostile projectile-state differences through manager frame 4332"
+  },
+  "comparisons": [
+    {
+      "active_bullet_delta_refocus_minus_recorded": -3,
+      "clearance_volume_exact": false,
+      "manager_frame": 4314,
+      "recorded_state_viable": false,
+      "refocus_state_viable": false,
+      "safe_action_count_delta_refocus_minus_recorded": 0,
+      "safe_action_masks_exact": true,
+      "viable_mask_exact": true,
+      "viable_position_union_delta_refocus_minus_recorded": 0,
+      "viable_state_delta_refocus_minus_recorded": 0
+    },
+    {
+      "active_bullet_delta_refocus_minus_recorded": -6,
+      "clearance_volume_exact": false,
+      "manager_frame": 4323,
+      "recorded_state_viable": false,
+      "refocus_state_viable": false,
+      "safe_action_count_delta_refocus_minus_recorded": 0,
+      "safe_action_masks_exact": true,
+      "viable_mask_exact": true,
+      "viable_position_union_delta_refocus_minus_recorded": 0,
+      "viable_state_delta_refocus_minus_recorded": 0
+    },
+    {
+      "active_bullet_delta_refocus_minus_recorded": -9,
+      "clearance_volume_exact": false,
+      "manager_frame": 4332,
+      "recorded_state_viable": false,
+      "refocus_state_viable": false,
+      "safe_action_count_delta_refocus_minus_recorded": 0,
+      "safe_action_masks_exact": true,
+      "viable_mask_exact": true,
+      "viable_position_union_delta_refocus_minus_recorded": 0,
+      "viable_state_delta_refocus_minus_recorded": 0
+    }
+  ],
+  "control_delay": {
+    "nominal": 2,
+    "provenance": "retained physical Stage-5 decisions around frames 4299..4331",
+    "support": [
+      2,
+      3,
+      4
+    ]
+  },
+  "frames": [
+    4314,
+    4323,
+    4332
+  ],
+  "measurements": {
+    "recorded": [
+      {
+        "active_action": "up_left",
+        "active_bullet_count": 554,
+        "active_enemy_body_count": 17,
+        "clearance_volume_sha256": "d6bd573eac4d96450172e36bbe18d723bb3d36c8dd4f9165681f4ac597a7aec0",
+        "kernel_layer0": {
+          "safe_action_masks_sha256": "e5282b4dd499d9f6ab757573fb9a187568e8855db5a0c01d5c7c68d272c964ba",
+          "total_position_count": 648,
+          "total_state_count": 11016,
+          "viable_position_union_count": 96,
+          "viable_sha256": "7694f13d7fb92f4d6bcf3b1ac3be511616150cfaf037c530881403c34af585f0",
+          "viable_state_count": 739
+        },
+        "manager_frame": 4314,
+        "nearest_signed_box_separation": 9.786651611328125,
+        "plan": {
+          "bottleneck_clearance": -Infinity,
+          "initial_repair_volume": 0,
+          "initial_safe_action_count": 0,
+          "reachable": false,
+          "reason": "initial robust viability action set is empty",
+          "terminal_clearance": -Infinity,
+          "viability_backend": "native"
+        },
+        "player": {
+          "phase": 0,
+          "x": 171.38189697265625,
+          "y": 428.747314453125
+        },
+        "query": {
+          "available": true,
+          "position_error": 4.6922479048438,
+          "reason": "robust action set is empty; distant recovery found",
+          "recovery_distances": [
+            [
+              "stay",
+              81.58431221748455
+            ],
+            [
+              "left",
+              65.96969000988257
+            ],
+            [
+              "right",
+              113.13708498984761
+            ],
+            [
+              "up",
+              80.0
+            ],
+            [
+              "down",
+              86.16263691415206
+            ],
+            [
+              "up_left",
+              64.0
+            ],
+            [
+              "up_right",
+              80.0
+            ],
+            [
+              "down_left",
+              65.96969000988257
+            ],
+            [
+              "down_right",
+              81.58431221748455
+            ],
+            [
+              "left_fast",
+              65.96969000988257
+            ],
+            [
+              "right_fast",
+              113.13708498984761
+            ],
+            [
+              "up_fast",
+              81.58431221748455
+            ],
+            [
+              "down_fast",
+              86.16263691415206
+            ],
+            [
+              "up_left_fast",
+              102.44998779892558
+            ],
+            [
+              "up_right_fast",
+              112.0
+            ],
+            [
+              "down_left_fast",
+              65.96969000988257
+            ],
+            [
+              "down_right_fast",
+              128.0
+            ]
+          ],
+          "repair_volumes": [],
+          "safe_action_count": 0,
+          "safe_actions": [],
+          "state_viable": false
+        },
+        "timing_ms": 51.566455003921874
+      },
+      {
+        "active_action": "left",
+        "active_bullet_count": 553,
+        "active_enemy_body_count": 17,
+        "clearance_volume_sha256": "939676786e12b921d7291c7395aaec6adb8cd62c9dfc8302f76278f96e509662",
+        "kernel_layer0": {
+          "safe_action_masks_sha256": "ef0edcabd1bdb40f091ae1d84f0385134d353aef418d5717e02da26e441e0d6f",
+          "total_position_count": 648,
+          "total_state_count": 11016,
+          "viable_position_union_count": 87,
+          "viable_sha256": "c60da50bcad5fc00dad2981489c779ed7d8f2b769deef24bbad283ca3babf066",
+          "viable_state_count": 700
+        },
+        "manager_frame": 4323,
+        "nearest_signed_box_separation": 21.499099731445312,
+        "plan": {
+          "bottleneck_clearance": -Infinity,
+          "initial_repair_volume": 0,
+          "initial_safe_action_count": 0,
+          "reachable": false,
+          "reason": "initial robust viability action set is empty",
+          "terminal_clearance": -Infinity,
+          "viability_backend": "native"
+        },
+        "player": {
+          "phase": 0,
+          "x": 145.90286254882812,
+          "y": 423.8682861328125
+        },
+        "query": {
+          "available": true,
+          "position_error": 9.954145456355967,
+          "reason": "robust action set is empty; distant recovery found",
+          "recovery_distances": [
+            [
+              "stay",
+              64.0
+            ],
+            [
+              "left",
+              48.0
+            ],
+            [
+              "right",
+              81.58431221748455
+            ],
+            [
+              "up",
+              64.0
+            ],
+            [
+              "down",
+              64.0
+            ],
+            [
+              "up_left",
+              48.0
+            ],
+            [
+              "up_right",
+              64.0
+            ],
+            [
+              "down_left",
+              50.59644256269407
+            ],
+            [
+              "down_right",
+              65.96969000988257
+            ],
+            [
+              "left_fast",
+              32.0
+            ],
+            [
+              "right_fast",
+              96.0
+            ],
+            [
+              "up_fast",
+              64.0
+            ],
+            [
+              "down_fast",
+              64.0
+            ],
+            [
+              "up_left_fast",
+              86.16263691415206
+            ],
+            [
+              "up_right_fast",
+              97.32420048477151
+            ],
+            [
+              "down_left_fast",
+              50.59644256269407
+            ],
+            [
+              "down_right_fast",
+              101.19288512538814
+            ]
+          ],
+          "repair_volumes": [],
+          "safe_action_count": 0,
+          "safe_actions": [],
+          "state_viable": false
+        },
+        "timing_ms": 28.723965006065555
+      },
+      {
+        "active_action": "stay",
+        "active_bullet_count": 548,
+        "active_enemy_body_count": 17,
+        "clearance_volume_sha256": "dceb87271259cff9c16a4a9c02c703e365f7927ef35170caf8bcee34854cc66a",
+        "kernel_layer0": {
+          "safe_action_masks_sha256": "c29f972a2990525a08e91140546ea5a57a5318210cca3cf12d7f13297c9622ec",
+          "total_position_count": 648,
+          "total_state_count": 11016,
+          "viable_position_union_count": 97,
+          "viable_sha256": "77dc11031702abb9607435f1ceeb9cc1f1c01775cc56145937822bb3e59a40e0",
+          "viable_state_count": 756
+        },
+        "manager_frame": 4332,
+        "nearest_signed_box_separation": 21.146041870117188,
+        "plan": {
+          "bottleneck_clearance": -Infinity,
+          "initial_repair_volume": 0,
+          "initial_safe_action_count": 0,
+          "reachable": false,
+          "reason": "initial robust viability action set is empty",
+          "terminal_clearance": -Infinity,
+          "viability_backend": "native"
+        },
+        "player": {
+          "phase": 0,
+          "x": 139.0028533935547,
+          "y": 423.8682861328125
+        },
+        "query": {
+          "available": true,
+          "position_error": 8.421820181587375,
+          "reason": "robust action set is empty; recovery neighborhoods found",
+          "recovery_distances": [],
+          "repair_volumes": [
+            [
+              "left",
+              1
+            ]
+          ],
+          "safe_action_count": 0,
+          "safe_actions": [],
+          "state_viable": false
+        },
+        "timing_ms": 31.702900989330374
+      }
+    ],
+    "refocus": [
+      {
+        "active_action": "up_left",
+        "active_bullet_count": 551,
+        "active_enemy_body_count": 16,
+        "clearance_volume_sha256": "c09c397ac6556d732587e15210e84480d8d820c4bb13f15385a94b2a81b100e1",
+        "kernel_layer0": {
+          "safe_action_masks_sha256": "e5282b4dd499d9f6ab757573fb9a187568e8855db5a0c01d5c7c68d272c964ba",
+          "total_position_count": 648,
+          "total_state_count": 11016,
+          "viable_position_union_count": 96,
+          "viable_sha256": "7694f13d7fb92f4d6bcf3b1ac3be511616150cfaf037c530881403c34af585f0",
+          "viable_state_count": 739
+        },
+        "manager_frame": 4314,
+        "nearest_signed_box_separation": 8.70037841796875,
+        "plan": {
+          "bottleneck_clearance": -Infinity,
+          "initial_repair_volume": 0,
+          "initial_safe_action_count": 0,
+          "reachable": false,
+          "reason": "initial robust viability action set is empty",
+          "terminal_clearance": -Infinity,
+          "viability_backend": "native"
+        },
+        "player": {
+          "phase": 0,
+          "x": 167.775634765625,
+          "y": 428.747314453125
+        },
+        "query": {
+          "available": true,
+          "position_error": 3.2604145480668048,
+          "reason": "robust action set is empty; distant recovery found",
+          "recovery_distances": [
+            [
+              "stay",
+              81.58431221748455
+            ],
+            [
+              "left",
+              65.96969000988257
+            ],
+            [
+              "right",
+              113.13708498984761
+            ],
+            [
+              "up",
+              80.0
+            ],
+            [
+              "down",
+              86.16263691415206
+            ],
+            [
+              "up_left",
+              64.0
+            ],
+            [
+              "up_right",
+              80.0
+            ],
+            [
+              "down_left",
+              65.96969000988257
+            ],
+            [
+              "down_right",
+              81.58431221748455
+            ],
+            [
+              "left_fast",
+              65.96969000988257
+            ],
+            [
+              "right_fast",
+              113.13708498984761
+            ],
+            [
+              "up_fast",
+              81.58431221748455
+            ],
+            [
+              "down_fast",
+              86.16263691415206
+            ],
+            [
+              "up_left_fast",
+              102.44998779892558
+            ],
+            [
+              "up_right_fast",
+              112.0
+            ],
+            [
+              "down_left_fast",
+              65.96969000988257
+            ],
+            [
+              "down_right_fast",
+              128.0
+            ]
+          ],
+          "repair_volumes": [],
+          "safe_action_count": 0,
+          "safe_actions": [],
+          "state_viable": false
+        },
+        "timing_ms": 29.53477599658072
+      },
+      {
+        "active_action": "left",
+        "active_bullet_count": 547,
+        "active_enemy_body_count": 16,
+        "clearance_volume_sha256": "d46c62bd7d6812ae6007ce925b34a0539d25edd93cfc556bf7bcaa014e6f4cc7",
+        "kernel_layer0": {
+          "safe_action_masks_sha256": "ef0edcabd1bdb40f091ae1d84f0385134d353aef418d5717e02da26e441e0d6f",
+          "total_position_count": 648,
+          "total_state_count": 11016,
+          "viable_position_union_count": 87,
+          "viable_sha256": "c60da50bcad5fc00dad2981489c779ed7d8f2b769deef24bbad283ca3babf066",
+          "viable_state_count": 700
+        },
+        "manager_frame": 4323,
+        "nearest_signed_box_separation": 18.686248779296875,
+        "plan": {
+          "bottleneck_clearance": -Infinity,
+          "initial_repair_volume": 0,
+          "initial_safe_action_count": 0,
+          "reachable": false,
+          "reason": "initial robust viability action set is empty",
+          "terminal_clearance": -Infinity,
+          "viability_backend": "native"
+        },
+        "player": {
+          "phase": 0,
+          "x": 142.29660034179688,
+          "y": 423.8682861328125
+        },
+        "query": {
+          "available": true,
+          "position_error": 10.077554392417142,
+          "reason": "robust action set is empty; recovery neighborhoods found",
+          "recovery_distances": [],
+          "repair_volumes": [
+            [
+              "left_fast",
+              5
+            ]
+          ],
+          "safe_action_count": 0,
+          "safe_actions": [],
+          "state_viable": false
+        },
+        "timing_ms": 32.33241800626274
+      },
+      {
+        "active_action": "stay",
+        "active_bullet_count": 539,
+        "active_enemy_body_count": 16,
+        "clearance_volume_sha256": "9412aaff4783d21df6618f7f286c7c1bfab1c832c747652f70af04bcdaea9c3c",
+        "kernel_layer0": {
+          "safe_action_masks_sha256": "c29f972a2990525a08e91140546ea5a57a5318210cca3cf12d7f13297c9622ec",
+          "total_position_count": 648,
+          "total_state_count": 11016,
+          "viable_position_union_count": 97,
+          "viable_sha256": "77dc11031702abb9607435f1ceeb9cc1f1c01775cc56145937822bb3e59a40e0",
+          "viable_state_count": 756
+        },
+        "manager_frame": 4332,
+        "nearest_signed_box_separation": 17.539779663085938,
+        "plan": {
+          "bottleneck_clearance": -Infinity,
+          "initial_repair_volume": 0,
+          "initial_safe_action_count": 0,
+          "reachable": false,
+          "reason": "initial robust viability action set is empty",
+          "terminal_clearance": -Infinity,
+          "viability_backend": "native"
+        },
+        "player": {
+          "phase": 0,
+          "x": 135.39659118652344,
+          "y": 423.8682861328125
+        },
+        "query": {
+          "available": true,
+          "position_error": 7.891389539491171,
+          "reason": "robust action set is empty; recovery neighborhoods found",
+          "recovery_distances": [],
+          "repair_volumes": [
+            [
+              "left",
+              1
+            ]
+          ],
+          "safe_action_count": 0,
+          "safe_actions": [],
+          "state_viable": false
+        },
+        "timing_ms": 27.804262994322926
+      }
+    ]
+  },
+  "native_causal_event": {
+    "events": [
+      {
+        "commit_enemy_pointer": 6120384,
+        "commit_manager_frame": 4308,
+        "damage_hitbox": {
+          "height": 24.0,
+          "width": 24.0
+        },
+        "damage_timer": {
+          "current": 1884,
+          "fraction_bits": 0,
+          "previous": 1883
+        },
+        "enemy_pointer": 6120384,
+        "enemy_position": {
+          "x": 261.6579284667969,
+          "y": 54.59259796142578
+        },
+        "flags": 285225801,
+        "flags2": 50,
+        "hp_after": -2,
+        "hp_before": 20,
+        "kind": "enemy_damage",
+        "main_vm_pc": 186455936,
+        "main_vm_timer_current": 339,
+        "manager_frame": 4308,
+        "player_context": {
+          "alternate_hitbox_nonzero": false,
+          "bomb_active": false,
+          "damage_region_overlap": false,
+          "focus_logic": 0,
+          "input_current": 97,
+          "player_state": 0,
+          "power": 114.0,
+          "route_id": 2
+        },
+        "resolved_damage": 22,
+        "rng_after": {
+          "calls": 58190,
+          "state": 49591
+        },
+        "rng_before": {
+          "calls": 58186,
+          "state": 33811
+        },
+        "serial": 1,
+        "shot_emission_timer": {
+          "current": 3,
+          "fraction_bits": 0,
+          "previous": 2
+        },
+        "shot_pool": {
+          "eligible_for_damage_loop": 32,
+          "occupied": 33
+        },
+        "slot": 16,
+        "stage_route_index": 5
+      },
+      {
+        "active_previous_pointer": 24962036,
+        "allocation_next_index": 1159,
+        "caller_return_address": 4371123,
+        "focus_logic": 0,
+        "full_value": false,
+        "input_current": 97,
+        "item_pointer": 24267168,
+        "item_position": {
+          "x": 261.6579284667969,
+          "y": 54.59259796142578
+        },
+        "item_slot": 1158,
+        "item_type": 7,
+        "item_velocity": {
+          "x": -0.39140015840530396,
+          "y": -2.1568965911865234
+        },
+        "kind": "item_allocate",
+        "manager_frame": 4308,
+        "motion_state": 3,
+        "player_position": {
+          "x": 179.0283203125,
+          "y": 432.0
+        },
+        "player_state": 0,
+        "resources_after": {
+          "bombs": 3.0,
+          "lives": 8.0,
+          "power": 114.0
+        },
+        "resources_before": {
+          "bombs": 3.0,
+          "lives": 8.0,
+          "power": 114.0
+        },
+        "rng_after": {
+          "calls": 58194,
+          "state": 21877
+        },
+        "rng_before": null,
+        "serial": 2,
+        "source_enemy_pointer": null,
+        "stage_route_index": 5
+      },
+      {
+        "caller_return_address": null,
+        "enemy_pointer": 6120384,
+        "flags_after": 285225800,
+        "flags_before": 285225801,
+        "frame_damage": 22,
+        "hp_after": -2,
+        "hp_before": -2,
+        "kind": "retire_defeat_mode0",
+        "manager_frame": 4308,
+        "reconstructed_pre_damage_hp": 20,
+        "root_subroutine": null,
+        "serial": 3,
+        "slot": 16,
+        "stage_route_index": 5
+      }
+    ],
+    "recorded_branch_event_count": 0
+  },
+  "planner_contract": {
+    "action_count": 17,
+    "frames_per_layer": 8,
+    "grid_step": 16.0,
+    "horizon_frames": 80,
+    "native_future_authority": false,
+    "projection_authority": "live global viability model applied independently to each exact native branch snapshot"
+  },
+  "root_manager_frame": 4300,
+  "schema": "th08-kill-before-saturation-viability-report-v1",
+  "source": {
+    "bytes": 76001027,
+    "path": "artifacts/native_snapshot_rolling/raw/th08_stage5_root4300_lifecycle_refocus8_h32_full_20260731.json",
+    "sha256": "c42f333745ca59475a3bd8211f632ec8d6728f800e48502bed1b1a4d9fe8578a"
+  },
+  "status": "same_root_native_kill_with_live_viability_model_measured"
+}

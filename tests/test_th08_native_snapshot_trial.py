@@ -24,7 +24,10 @@ from tools.th08_native_snapshot_trial import (
     _compact_corpus_comparison,
     _compare_portfolio_branch_to_corpus,
     _load_portfolio_corpus,
+    _parse_focus_schedule,
+    _read_exact_enemy_lifecycle_batch,
     _validate_action_schedule,
+    _validate_focus_schedule,
     build_parser,
 )
 
@@ -39,10 +42,13 @@ class NativeSnapshotTrialCliTests(unittest.TestCase):
         )
         self.assertEqual(arguments.action_b, DEFAULT_ACTION_B)
         self.assertIsNone(arguments.action_schedule)
+        self.assertIsNone(arguments.focus_schedule)
         self.assertEqual(arguments.horizon, DEFAULT_HORIZON)
         self.assertEqual(arguments.hold_frames, DEFAULT_HOLD_FRAMES)
         self.assertEqual(arguments.natural_reference, "a")
         self.assertFalse(arguments.retain_collision_control_payload)
+        self.assertFalse(arguments.trace_enemy_lifecycle)
+        self.assertFalse(arguments.skip_compact_corpus)
         self.assertFalse(arguments.portfolio_all36)
         self.assertEqual(
             arguments.portfolio_corpus,
@@ -99,6 +105,48 @@ class NativeSnapshotTrialCliTests(unittest.TestCase):
 
         self.assertTrue(arguments.retain_collision_control_payload)
 
+    def test_parser_accepts_generation_safe_lifecycle_capture(self) -> None:
+        arguments = build_parser().parse_args(
+            [
+                "--output",
+                "native_snapshot.json",
+                "--natural-reference",
+                "none",
+                "--trace-enemy-lifecycle",
+                "--skip-compact-corpus",
+            ]
+        )
+
+        self.assertTrue(arguments.trace_enemy_lifecycle)
+        self.assertTrue(arguments.skip_compact_corpus)
+
+    def test_lifecycle_batch_must_be_exact_and_lossless(self) -> None:
+        class Batch:
+            status = "exact"
+            observed_serial = 12
+            dropped_event_count = 0
+            error = None
+
+            @staticmethod
+            def compact_record() -> dict[str, object]:
+                return {"status": "exact", "observed_serial": 12}
+
+        class Probe:
+            @staticmethod
+            def read_since(previous_serial: int) -> Batch:
+                self.assertEqual(previous_serial, 11)
+                return Batch()
+
+        serial, record = _read_exact_enemy_lifecycle_batch(Probe(), 11)
+
+        self.assertEqual(serial, 12)
+        self.assertEqual(record["status"], "exact")
+
+        Batch.status = "overflow_or_trace_truncation"
+        Batch.dropped_event_count = 1
+        with self.assertRaises(NativeSnapshotUnknownError):
+            _read_exact_enemy_lifecycle_batch(Probe(), 11)
+
     def test_parser_accepts_exact_action_schedule_with_recorded_ticks(self) -> None:
         arguments = build_parser().parse_args(
             [
@@ -113,6 +161,19 @@ class NativeSnapshotTrialCliTests(unittest.TestCase):
             arguments.action_schedule,
             (0x94, 0x94, None, None, None, 0x44),
         )
+
+    def test_focus_schedule_preserves_recorded_nonfocus_bits(self) -> None:
+        schedule = _parse_focus_schedule(
+            "unfocused,u,clear,recorded,r,-,focused,f,set"
+        )
+
+        self.assertEqual(
+            schedule,
+            (False, False, False, None, None, None, True, True, True),
+        )
+        _validate_focus_schedule(schedule, horizon=9)
+        with self.assertRaises(ValueError):
+            _validate_focus_schedule(schedule, horizon=8)
 
     def test_action_carrier_epoch_requires_exact_per_tick_cursor(self) -> None:
         root = NativeReplayActionCarrier(1, 2, 0x1000, 2129, 0x05)

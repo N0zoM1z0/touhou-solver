@@ -89,7 +89,10 @@ diagnostic, not causal closure.
 
 The current WS-H model can select generation-safe roots and compare completed
 native transactions for normal shots, enemy HP/defeat, phase transitions,
-items, Power, and resources. It remains offline and cannot rank live actions.
+items, Power, and resources. The general model remains offline. One narrow,
+default-off live experiment may prefer the same-direction unfocused action for
+an observed low-HP ordinary enemy, but only inside a fresh issue-safe action
+set and under hard no-Bomb.
 See `notes/CURRENT_COMBAT_RESOURCE_MODEL.md`.
 
 ## Proposed Research
@@ -101,6 +104,15 @@ hostile births only among actions already feasible under the survival
 constraint. Test across more than one root/stage before promotion.
 
 This is the highest-priority current hypothesis.
+
+Current evidence is mixed. A same-root Stage-5 branch observed one 20-HP
+enemy defeated and three additional hostile bullets suppressed every nine
+frames, while the current offline global viable/safe-action masks remained
+unchanged at three later frames. The first default-off physical gate applied
+27 fresh-safe preferences, had first hit 6981 and 13 total hits versus a
+different-RNG 2124/12 baseline, and received no global policy guidance. This
+physically exercises delivery but neither promotes nor falsifies the general
+hypothesis.
 
 ### P2 — Focus as a dynamic action factor
 

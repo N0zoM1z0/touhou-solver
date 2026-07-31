@@ -126,10 +126,29 @@ Compact retained reports:
 
 ## Current Physical Evidence
 
+At the generation-safe Stage-5 root 4300, an eight-tick unfocus then refocus
+schedule **observably** defeated the 20-HP slot-16 enemy and suppressed three
+hostile births per nine-frame cadence; the endpoint hostile count was 539
+instead of 548. Applying the current live global viability model independently
+to both exact native branches produced identical layer-0 viable masks and
+safe-action masks at frames 4314, 4323, and 4332. This says the current metric
+did not change on that root; it was not used alone to falsify the idea.
+
 The 2026-07-31 Stage 3/4A/5 ring ran with every WS-H ranking feature disabled.
 It observed 5/13/12 hits, first hits at 2150/2555/2124, zero Bombs, and valid
 replays. Different-root comparisons were 15→5, 10→13, and 19→12. These are
 workload baselines only and give no causal authority to this model.
+
+A later default-off Stage-5 physical gate exercised the narrow
+kill-before-saturation delivery rule. It observed 109 matching target
+decisions, requested 37 same-direction unfocused peers, and applied 27 after
+fresh issue certification; four unsafe peers and six decisions without a
+fresh transaction preserved baseline control. The run was accepted no-Bomb
+with first hit 6981 and 13 total hits. Relative to the different-RNG 2124/12
+baseline, that is a later first hit but one worse total hit. Global allowed
+actions and viability-constrained decisions were both zero, so this gate did
+not show that early killing rescues the global kernel. It also does not
+falsify the separate same-root native hostile-birth suppression.
 
 The latest full-route game-start baseline is 68 hits, zero Bombs, with
 per-stage counts 2/3/5/20/15/23.
@@ -138,17 +157,14 @@ per-stage counts 2/3/5/20/15/23.
 
 Do not add more atlas/schema work unless it blocks this experiment:
 
-1. Capture one natural, first-hit-bounded, generation-safe ordinary-enemy
-   root with complete player-shot, enemy, lifecycle, item, resource, RNG, and
-   active-input state.
-2. Reproduce the parent root exactly.
-3. Compare focused, unfocused, and causal refocus schedules only inside the
-   same survival-feasible action set.
-4. Measure exact enemy HP/kill time, prevented later hostile births, Power
-   transactions, and native survival horizon.
-5. Return `UNKNOWN` at the first unsupported event.
-6. Promote a rule only if it repeats across more than one enemy/root and then
-   improves a rotated focused physical workload.
+1. Repeat the native kill/prevented-birth result on a second ordinary enemy
+   and root.
+2. Restore queryable rolling global policy delivery on the workload so a
+   physical gate can actually test global-kernel rescue.
+3. Keep the live HP/alignment rule default-off and unchanged until the second
+   root and a rotated Stage 3/4A physical workload agree.
+4. Return `UNKNOWN` at the first unsupported event; do not infer a causal A/B
+   from the different-RNG physical totals.
 
 After that, test survival-feasible early Power collection on a clean prefix
 that crosses a Power threshold and has a later combat/survival join. Do not
@@ -163,4 +179,6 @@ model post-death recovery for an NMNB policy.
 - CE-0226: damage and hit-feedback accumulators are distinct.
 - CE-0227: unconsumed timeline engine events invalidate integrated simulation.
 - CE-0228: effective type 7 performs only one cursor probe.
+- CE-0230: a physically exercised early-kill preference delayed the first hit
+  but did not improve total hits or make global guidance available.
 - CE-0229: different-root physical totals are not causal A/B evidence.

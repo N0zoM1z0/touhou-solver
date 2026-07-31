@@ -1,0 +1,198 @@
+{
+  "schema": "th08-kill-before-saturation-physical-gate-v1",
+  "authority": {
+    "physical_result": "observed",
+    "baseline_comparison": "observational_different_rng_not_causal_ab",
+    "same_root_native_bullet_suppression": "separate_causal_evidence"
+  },
+  "source": {
+    "run_id": "lunatic_route2_stage5_unattended_20260731_122855",
+    "trace": "artifacts/runtime_reports/lunatic_route2_stage5_unattended_20260731_122855.jsonl",
+    "trace_sha256": "e2d836ab27cf4351e3d3f5673e1fbcd3642135b180aa0c8ed998719629d52185",
+    "session": "artifacts/runtime_reports/lunatic_route2_stage5_unattended_20260731_122855.session.json",
+    "session_sha256": "458286b66fdf8dce62c34d03f8f0bb2baea915338aa11c9fbfc0609de60a5d35",
+    "summary": "artifacts/runtime_reports/lunatic_route2_stage5_unattended_20260731_122855.summary.json",
+    "summary_sha256": "5201d8374e21420ea2b57681b923774988b21354c107067f136433d1d871e394",
+    "baseline_summary": "artifacts/runtime_reports/lunatic_route2_stage5_unattended_20260731_093027.summary.json",
+    "baseline_summary_sha256": "6285d76cf96bbe3df4778762b7a9dbddc0fe432cd601b12193962e85d88af8ae",
+    "executable_sha256": "330fbdbf58a710829d65277b4f312cfbb38d5448b3df523e79350b879213d924"
+  },
+  "physical_integrity": {
+    "trial_accepted": true,
+    "termination_reason": "route_complete",
+    "hard_no_bomb": true,
+    "decision_bomb_violation_frames": [],
+    "replay_bomb_press_frames": [],
+    "game_terminated_after_trial": true,
+    "replay": {
+      "slot": 15,
+      "sha256": "a3ee8ff57b1b4236c2c92c24c8fbf22818f4b81fdb3dc66147e8bff8a7d3d869",
+      "archive": "//wsl.localhost/ubuntu/home/pentester/coding/codex_ida/th08/artifacts/replays/archive/th8_15_a3ee8ff57b1b4236c2c92c24c8fbf22818f4b81fdb3dc66147e8bff8a7d3d869.rpy",
+      "manifest": "//wsl.localhost/ubuntu/home/pentester/coding/codex_ida/th08/artifacts/replays/archive/th8_15_a3ee8ff57b1b4236c2c92c24c8fbf22818f4b81fdb3dc66147e8bff8a7d3d869_manifest.json"
+    }
+  },
+  "policy_exercise": {
+    "decision_count": 13306,
+    "enabled_decision_count": 13306,
+    "target_observed_count": 109,
+    "target_pointer_counts": [
+      {
+        "enemy_pointer": 5777088,
+        "count": 11
+      },
+      {
+        "enemy_pointer": 5798544,
+        "count": 4
+      },
+      {
+        "enemy_pointer": 5820000,
+        "count": 14
+      },
+      {
+        "enemy_pointer": 5841456,
+        "count": 3
+      },
+      {
+        "enemy_pointer": 5862912,
+        "count": 6
+      },
+      {
+        "enemy_pointer": 5884368,
+        "count": 2
+      },
+      {
+        "enemy_pointer": 5905824,
+        "count": 6
+      },
+      {
+        "enemy_pointer": 5927280,
+        "count": 1
+      },
+      {
+        "enemy_pointer": 5970192,
+        "count": 1
+      },
+      {
+        "enemy_pointer": 5991648,
+        "count": 2
+      },
+      {
+        "enemy_pointer": 6034560,
+        "count": 1
+      },
+      {
+        "enemy_pointer": 6056016,
+        "count": 10
+      },
+      {
+        "enemy_pointer": 6077472,
+        "count": 2
+      },
+      {
+        "enemy_pointer": 6270576,
+        "count": 23
+      },
+      {
+        "enemy_pointer": 6313488,
+        "count": 2
+      },
+      {
+        "enemy_pointer": 6485136,
+        "count": 6
+      },
+      {
+        "enemy_pointer": 6549504,
+        "count": 6
+      },
+      {
+        "enemy_pointer": 6570960,
+        "count": 2
+      },
+      {
+        "enemy_pointer": 6613872,
+        "count": 7
+      }
+    ],
+    "observation_reason_counts": {
+      "low_hp_ordinary_enemy_observed": 109,
+      "no_matching_target": 6340,
+      "power_below_native_root": 2913,
+      "spell_active": 3944
+    },
+    "preference_requested_count": 37,
+    "preference_applied_count": 27,
+    "requested_without_fresh_transaction_count": 6,
+    "selection_reason_counts": {
+      "no_fresh_transaction": 6,
+      "prefer_requested_fresh_safe": 27,
+      "preserve_fresh_safe_planned": 4
+    },
+    "deadline_missed_with_preference_count": 0,
+    "applied_frames": [
+      1704,
+      1989,
+      1994,
+      1999,
+      2123,
+      2542,
+      2544,
+      2550,
+      2561,
+      3447,
+      8331,
+      12981,
+      13855,
+      13858,
+      13862,
+      13865,
+      13912,
+      13916,
+      13919,
+      13921,
+      13927,
+      13940,
+      13956,
+      13958,
+      13968,
+      13971,
+      13976
+    ],
+    "applied_before_first_hit_count": 10
+  },
+  "global_delivery": {
+    "decision_with_global_allowed_actions_count": 0,
+    "viability_constrained_decision_count": 0,
+    "result": "global_policy_unavailable_throughout_physical_gate"
+  },
+  "outcome": {
+    "hit_count": 13,
+    "hit_frames": [
+      6981,
+      23145,
+      24853,
+      28755,
+      29488,
+      30790,
+      31811,
+      36229,
+      36649,
+      40449,
+      41488,
+      41957,
+      43231
+    ],
+    "first_hit": 6981,
+    "baseline_run_id": "lunatic_route2_stage5_unattended_20260731_093027",
+    "baseline_hit_count": 12,
+    "baseline_first_hit": 2124,
+    "hit_count_delta": 1,
+    "first_hit_frame_delta": 4857,
+    "interpretation": "mixed_physical_observation_first_hit_later_total_hits_worse"
+  },
+  "conclusion": {
+    "policy_physically_exercised": true,
+    "global_kernel_rescued_in_this_gate": false,
+    "idea_falsified": false,
+    "reason": "early-kill action authority was exercised without Bomb, but the global policy remained unavailable and total hits did not improve; the comparison uses a different RNG root"
+  }
+}

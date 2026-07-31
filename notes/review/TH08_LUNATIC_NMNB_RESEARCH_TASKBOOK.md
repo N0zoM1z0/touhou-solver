@@ -269,6 +269,17 @@ Test:
 Spells remain survival-first unless native duration reduction proves a
 meaningful safety benefit.
 
+Current checkpoint:
+
+- one same-root Stage-5 branch defeated a 20-HP ordinary enemy and suppressed
+  later hostile births;
+- one default-off physical Stage-5 gate applied 27 fresh-safe unfocus
+  preferences with zero Bombs;
+- the different-RNG physical result moved first hit 2124→6981 but total hits
+  12→13, while global policy guidance remained unavailable;
+- repeat the causal result on a second root and repair global publication
+  before promotion. This checkpoint neither promotes nor falsifies D1.
+
 #### D2: Focus as control
 
 Do not assume Shift is always held. Unfocus may provide faster travel and a

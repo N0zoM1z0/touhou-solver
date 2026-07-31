@@ -101,6 +101,9 @@ class IssueRecertification:
     global_constraint_relaxed: bool
     planned_certificate: RobustActionCertificate | None
     selected_certificate: RobustActionCertificate
+    preferred_action: str | None = None
+    preference_reason: str | None = None
+    preference_applied: bool = False
 
 
 @dataclass(frozen=True)

@@ -253,6 +253,56 @@ class IssueTransactionTests(unittest.TestCase):
         self.assertIs(first, second)
         self.assertEqual(first.decision.mask & live.BOMB, 0)
 
+    def test_preference_applies_only_inside_fresh_global_safe_set(
+        self,
+    ) -> None:
+        arguments = self._arguments()
+        arguments["preferred_action"] = "up_fast"
+        arguments["preference_reason"] = "kill_before_saturation"
+        arguments["allowed_first_actions"] = ("up_fast", "up")
+        decision = dataclasses.replace(
+            self._decision(),
+            mask=live.SHOT | live.FOCUS | live.UP,
+            action="up",
+            planned_focus=True,
+        )
+        with patch.object(
+            live,
+            "_robust_action_certificates",
+            side_effect=_certificates(
+                {
+                    "up": (0, 6.0, 0.0),
+                    "up_fast": (0, 2.0, 1.0),
+                }
+            ),
+        ):
+            issued = live.issue_transaction_for_fresh_hazards(
+                decision,
+                **arguments,
+            )
+
+        self.assertEqual(issued.decision.action, "up_fast")
+        self.assertFalse(issued.decision.planned_focus)
+        self.assertEqual(issued.decision.mask & live.BOMB, 0)
+        self.assertTrue(issued.transaction.preference_applied)
+        self.assertEqual(
+            issued.transaction.selection_reason,
+            "prefer_requested_fresh_global_intersection",
+        )
+
+        arguments["allowed_first_actions"] = ("up",)
+        with patch.object(
+            live,
+            "_robust_action_certificates",
+            side_effect=_certificates({}),
+        ):
+            rejected = live.issue_transaction_for_fresh_hazards(
+                decision,
+                **arguments,
+            )
+        self.assertEqual(rejected.decision.action, "up")
+        self.assertFalse(rejected.transaction.preference_applied)
+
 
 if __name__ == "__main__":
     unittest.main()

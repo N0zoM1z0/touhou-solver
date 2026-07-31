@@ -64,6 +64,7 @@ class AgentHotkey:
         trace_transform_runtime: bool = False,
         trace_enemy_mode_transitions: bool = False,
         trace_enemy_lifecycle_events: bool = False,
+        kill_before_saturation: bool = False,
         diagnostic_continue_root_only_scale: bool = False,
         runtime_ecl_static_image: Path | None = None,
         runtime_ecl_static_sha256: str | None = None,
@@ -154,6 +155,7 @@ class AgentHotkey:
         self.trace_enemy_lifecycle_events = (
             trace_enemy_lifecycle_events
         )
+        self.kill_before_saturation = kill_before_saturation
         self.diagnostic_continue_root_only_scale = (
             diagnostic_continue_root_only_scale
         )
@@ -308,6 +310,7 @@ class AgentHotkey:
                 trace_enemy_lifecycle_events=(
                     self.trace_enemy_lifecycle_events
                 ),
+                kill_before_saturation=self.kill_before_saturation,
                 diagnostic_continue_root_only_scale=(
                     self.diagnostic_continue_root_only_scale
                 ),

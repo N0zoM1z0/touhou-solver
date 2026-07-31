@@ -68,6 +68,7 @@ from th08_runtime.native_combat_projection import (  # noqa: E402
     NativeCombatProjection,
     capture_native_combat_projection,
 )
+from th08_runtime.enemy_lifecycle_probe import EnemyLifecycleProbe  # noqa: E402
 from th08_runtime.native_snapshot_projection import (  # noqa: E402
     CollisionControlProjection,
     capture_collision_control_projection,
@@ -85,7 +86,7 @@ from th08_runtime_agent import (  # noqa: E402
 from touhou_control.pipeline_identity import VersionIdentity  # noqa: E402
 
 
-SCHEMA = "th08-native-snapshot-rolling-trial-v10"
+SCHEMA = "th08-native-snapshot-rolling-trial-v11"
 DEFAULT_GAME_DIR = Path(
     "D:/Entertainment/Game/Touhou/[th08] 东方永夜抄 (日文版)__codex_wind_tunnel"
 )
@@ -781,6 +782,50 @@ def _parse_action_schedule(value: str) -> tuple[int | None, ...]:
     return tuple(schedule)
 
 
+def _parse_focus_schedule(value: str) -> tuple[bool | None, ...]:
+    schedule: list[bool | None] = []
+    for raw_token in value.split(","):
+        token = raw_token.strip().lower()
+        if token in {"recorded", "r", "-"}:
+            schedule.append(None)
+        elif token in {"focused", "focus", "f", "set"}:
+            schedule.append(True)
+        elif token in {"unfocused", "unfocus", "u", "clear"}:
+            schedule.append(False)
+        else:
+            raise argparse.ArgumentTypeError(
+                f"invalid focus schedule tick: {raw_token!r}"
+            )
+    return tuple(schedule)
+
+
+def _validate_focus_schedule(
+    schedule: tuple[bool | None, ...],
+    *,
+    horizon: int,
+) -> None:
+    if len(schedule) != horizon:
+        raise ValueError("focus schedule length must exactly match the horizon")
+
+
+def _read_exact_enemy_lifecycle_batch(
+    probe: EnemyLifecycleProbe,
+    previous_serial: int,
+) -> tuple[int, dict[str, object]]:
+    batch = probe.read_since(previous_serial)
+    if (
+        batch.status not in {"no_events", "exact"}
+        or batch.observed_serial is None
+        or batch.dropped_event_count
+    ):
+        raise NativeSnapshotUnknownError(
+            "enemy lifecycle evidence is not an exact bounded batch: "
+            f"status={batch.status}, dropped={batch.dropped_event_count}, "
+            f"error={batch.error!r}"
+        )
+    return int(batch.observed_serial), batch.compact_record()
+
+
 def _rolling_branch(
     api: object,
     barrier: NativeCalculationBarrier,
@@ -795,7 +840,10 @@ def _rolling_branch(
     horizon: int,
     hold_frames: int,
     action_schedule: tuple[int | None, ...] | None = None,
+    focus_schedule: tuple[bool | None, ...] | None = None,
     retain_collision_control_payload: bool = False,
+    lifecycle_probe: EnemyLifecycleProbe | None = None,
+    root_lifecycle_serial: int | None = None,
 ) -> tuple[
     NativeSnapshot,
     tuple[Route2NativeFutureBodyRootSlice, ...],
@@ -808,12 +856,33 @@ def _rolling_branch(
         raise ValueError("rolling native horizon must be positive")
     if hold_frames <= 0:
         raise ValueError("rolling native hold length must be positive")
+    if action_schedule is not None and focus_schedule is not None:
+        raise ValueError(
+            "rolling branch accepts either an action or focus schedule"
+        )
     if action_schedule is not None:
         if action_override is not None:
             raise ValueError(
                 "rolling branch accepts either one hold or an action schedule"
             )
         _validate_action_schedule(action_schedule, horizon=horizon)
+    if focus_schedule is not None:
+        if action_override is not None:
+            raise ValueError(
+                "rolling branch accepts either one hold or a focus schedule"
+            )
+        _validate_focus_schedule(focus_schedule, horizon=horizon)
+    if (lifecycle_probe is None) != (root_lifecycle_serial is None):
+        raise ValueError(
+            "rolling lifecycle probe and root serial must be supplied together"
+        )
+    lifecycle_serial = root_lifecycle_serial
+    if lifecycle_probe is not None:
+        observed_root_serial = lifecycle_probe.sample_serial()
+        if observed_root_serial != root_lifecycle_serial:
+            raise NativeSnapshotUnknownError(
+                "restored enemy lifecycle serial does not match the branch root"
+            )
 
     projections: list[Route2NativeFutureBodyRootSlice] = []
     collision_control_projections: list[CollisionControlProjection] = []
@@ -831,18 +900,28 @@ def _rolling_branch(
             tick_index=tick_index,
         )
         recorded_action = int(carrier.recorded_mask)
+        if recorded_action & 0x02:
+            raise NativeSnapshotUnknownError(
+                "rolling replay unexpectedly contains a Bomb mask"
+            )
         scheduled_action = (
             action_schedule[tick_index] if action_schedule is not None else None
         )
-        action = (
-            int(scheduled_action)
-            if scheduled_action is not None
-            else (
-                int(action_override)
-                if action_override is not None and tick_index < hold_frames
-                else recorded_action
-            )
+        scheduled_focus = (
+            focus_schedule[tick_index] if focus_schedule is not None else None
         )
+        if focus_schedule is not None and scheduled_focus is not None:
+            action = (
+                recorded_action | 0x04
+                if scheduled_focus
+                else recorded_action & ~0x04
+            )
+        elif scheduled_action is not None:
+            action = int(scheduled_action)
+        elif action_override is not None and tick_index < hold_frames:
+            action = int(action_override)
+        else:
+            action = recorded_action
         action_word_written = action != recorded_action
         if action_word_written:
             write_native_replay_action(
@@ -928,6 +1007,19 @@ def _rolling_branch(
             compact_state=compact_state,
         )
         collision_control_capture_ms = _duration_ms(started)
+        lifecycle_batch_record: dict[str, object] | None = None
+        lifecycle_capture_ms: float | None = None
+        if lifecycle_probe is not None:
+            assert lifecycle_serial is not None
+            started = time.perf_counter()
+            (
+                lifecycle_serial,
+                lifecycle_batch_record,
+            ) = _read_exact_enemy_lifecycle_batch(
+                lifecycle_probe,
+                lifecycle_serial,
+            )
+            lifecycle_capture_ms = _duration_ms(started)
         expected_manager_frame = target_manager_frame + tick_index + 1
         if int(compact_state["manager_frame"]) != expected_manager_frame:
             raise NativeSnapshotUnknownError(
@@ -956,6 +1048,7 @@ def _rolling_branch(
                         include_model_payload=retain_collision_control_payload,
                     )
                 ),
+                "enemy_lifecycle_batch": lifecycle_batch_record,
                 "timing_ms": {
                     "step_wait": step_wait_ms,
                     "native_projection_capture": projection_capture_ms,
@@ -968,6 +1061,7 @@ def _rolling_branch(
                     "collision_control_projection_capture": (
                         collision_control_capture_ms
                     ),
+                    "enemy_lifecycle_capture": lifecycle_capture_ms,
                 },
             }
         )
@@ -991,6 +1085,9 @@ def _rolling_branch(
             "action_schedule": (
                 list(action_schedule) if action_schedule is not None else None
             ),
+            "focus_schedule": (
+                list(focus_schedule) if focus_schedule is not None else None
+            ),
             "hold_frames": min(hold_frames, horizon),
             "horizon": horizon,
             "parameterized_root_baseline_sha256": baseline_root.digest,
@@ -999,6 +1096,15 @@ def _rolling_branch(
             ),
             "endpoint_sha256": endpoint.digest,
             "ticks": ticks,
+            "enemy_lifecycle": (
+                {
+                    "status": "exact_per_tick",
+                    "root_serial": root_lifecycle_serial,
+                    "endpoint_serial": lifecycle_serial,
+                }
+                if lifecycle_probe is not None
+                else None
+            ),
             "dirty_to_baseline": _compact_dirty_pages(dirty_to_baseline),
             "timing_ms": {
                 "endpoint_capture": endpoint_capture_ms,
@@ -1369,10 +1475,12 @@ def _run_transaction(
     target_manager_frame: int,
     action_b: int,
     action_schedule: tuple[int | None, ...] | None,
+    focus_schedule: tuple[bool | None, ...] | None,
     horizon: int,
     hold_frames: int,
     root_timeout_seconds: float,
     retain_collision_control_payload: bool,
+    trace_enemy_lifecycle: bool,
     reference_store: dict[str, object] | None = None,
 ) -> dict[str, object]:
     root_header = barrier.wait_for_root(
@@ -1387,11 +1495,31 @@ def _run_transaction(
         )
     release_injected_keys(api)
 
-    frozen = suspend_non_owner_threads(
-        api,
-        barrier.pid,
-        owner_thread_id=root_header.owner_thread_id,
+    lifecycle_probe = (
+        EnemyLifecycleProbe.install(api, barrier.pid)
+        if trace_enemy_lifecycle
+        else None
     )
+    lifecycle_installation = (
+        lifecycle_probe.installation_record()
+        if lifecycle_probe is not None
+        else None
+    )
+    root_lifecycle_serial = (
+        lifecycle_probe.sample_serial()
+        if lifecycle_probe is not None
+        else None
+    )
+    try:
+        frozen = suspend_non_owner_threads(
+            api,
+            barrier.pid,
+            owner_thread_id=root_header.owner_thread_id,
+        )
+    except Exception:
+        if lifecycle_probe is not None:
+            lifecycle_probe.close()
+        raise
     try:
         thread_ids = tuple(
             sorted(
@@ -1432,7 +1560,17 @@ def _run_transaction(
             )
         if action_schedule is not None:
             _validate_action_schedule(action_schedule, horizon=horizon)
-        if action_schedule is None and action_b == action_a:
+        if focus_schedule is not None:
+            _validate_focus_schedule(focus_schedule, horizon=horizon)
+        if action_schedule is not None and focus_schedule is not None:
+            raise ValueError(
+                "transaction accepts either an action or focus schedule"
+            )
+        if (
+            action_schedule is None
+            and focus_schedule is None
+            and action_b == action_a
+        ):
             raise ValueError("action B must differ from the recorded action A")
 
         root_projection = _capture_native_projection(
@@ -1478,11 +1616,12 @@ def _run_transaction(
             action_override=None,
             horizon=horizon,
             hold_frames=hold_frames,
-            # A1/A2 only establish restored same-action hash equality.
-            # Persisting their duplicate multi-megabyte decoded payloads adds
-            # no model evidence; the content-addressed root plus B/natural
-            # trajectory carry the bounded differential input.
-            retain_collision_control_payload=False,
+            # A1 is the exact recorded-action side of a requested decoded
+            # differential.  A2 remains hash-only because it exists only as
+            # the restored same-action canary.
+            retain_collision_control_payload=retain_collision_control_payload,
+            lifecycle_probe=lifecycle_probe,
+            root_lifecycle_serial=root_lifecycle_serial,
         )
         restore_a1 = _restore_baseline(
             api,
@@ -1512,6 +1651,8 @@ def _run_transaction(
             horizon=horizon,
             hold_frames=hold_frames,
             retain_collision_control_payload=False,
+            lifecycle_probe=lifecycle_probe,
+            root_lifecycle_serial=root_lifecycle_serial,
         )
         endpoint_aa_changes = changed_byte_addresses(
             endpoint_a1,
@@ -1555,12 +1696,18 @@ def _run_transaction(
             tick["native_combat_projection"]["sha256"]
             for tick in branch_a2["ticks"]
         )
+        lifecycle_aa_exact = tuple(
+            tick["enemy_lifecycle_batch"] for tick in branch_a1["ticks"]
+        ) == tuple(
+            tick["enemy_lifecycle_batch"] for tick in branch_a2["ticks"]
+        )
         if (
             projection_aa_changes
             or collision_control_aa_changes
             or not compact_aa_exact
             or not player_shot_emission_aa_exact
             or not native_combat_aa_exact
+            or not lifecycle_aa_exact
         ):
             return {
                 "status": "same_action_rolling_native_nondeterministic",
@@ -1576,9 +1723,16 @@ def _run_transaction(
                 "action_carrier": carrier.record(),
                 "actions": {
                     "a": action_a,
-                    "b_not_run": (action_b if action_schedule is None else None),
+                    "b_not_run": (
+                        action_b
+                        if action_schedule is None and focus_schedule is None
+                        else None
+                    ),
                     "b_schedule_not_run": (
                         list(action_schedule) if action_schedule is not None else None
+                    ),
+                    "b_focus_schedule_not_run": (
+                        list(focus_schedule) if focus_schedule is not None else None
                     ),
                 },
                 "root_native_projection": root_projection.record(),
@@ -1593,6 +1747,14 @@ def _run_transaction(
                 "root_compact_state": root_compact_state,
                 "root_player_shot_emission_state": (
                     root_player_shot_emission_state
+                ),
+                "enemy_lifecycle_probe": (
+                    {
+                        **lifecycle_installation,
+                        "root_serial": root_lifecycle_serial,
+                    }
+                    if lifecycle_installation is not None
+                    else None
                 ),
                 "branches": {
                     "a1": branch_a1,
@@ -1621,6 +1783,7 @@ def _run_transaction(
                 "same_action_native_combat_projection_exact": (
                     native_combat_aa_exact
                 ),
+                "same_action_enemy_lifecycle_exact": lifecycle_aa_exact,
                 "same_action_compact_left": list(compact_a1),
                 "same_action_compact_right": list(compact_a2),
                 "calculation_ticks_per_branch": horizon,
@@ -1646,13 +1809,20 @@ def _run_transaction(
             root_header=root_header,
             expected_thread_ids=thread_ids,
             root_carrier=carrier,
-            action_override=(action_b if action_schedule is None else None),
+            action_override=(
+                action_b
+                if action_schedule is None and focus_schedule is None
+                else None
+            ),
             horizon=horizon,
             hold_frames=hold_frames,
             action_schedule=action_schedule,
+            focus_schedule=focus_schedule,
             retain_collision_control_payload=(
                 retain_collision_control_payload
             ),
+            lifecycle_probe=lifecycle_probe,
+            root_lifecycle_serial=root_lifecycle_serial,
         )
         endpoint_ab_changes = changed_byte_addresses(
             endpoint_a1,
@@ -1721,9 +1891,16 @@ def _run_transaction(
             "action_carrier": carrier.record(),
             "actions": {
                 "a": action_a,
-                "b": (action_b if action_schedule is None else None),
+                "b": (
+                    action_b
+                    if action_schedule is None and focus_schedule is None
+                    else None
+                ),
                 "b_schedule": (
                     list(action_schedule) if action_schedule is not None else None
+                ),
+                "b_focus_schedule": (
+                    list(focus_schedule) if focus_schedule is not None else None
                 ),
             },
             "root_native_projection": root_projection.record(),
@@ -1738,6 +1915,14 @@ def _run_transaction(
             "root_compact_state": root_compact_state,
             "root_player_shot_emission_state": (
                 root_player_shot_emission_state
+            ),
+            "enemy_lifecycle_probe": (
+                {
+                    **lifecycle_installation,
+                    "root_serial": root_lifecycle_serial,
+                }
+                if lifecycle_installation is not None
+                else None
             ),
             "branches": {
                 "a1": branch_a1,
@@ -1756,6 +1941,7 @@ def _run_transaction(
             "same_action_native_combat_projection_exact": (
                 native_combat_aa_exact
             ),
+            "same_action_enemy_lifecycle_exact": lifecycle_aa_exact,
             "same_action_full_endpoint_volatility": (
                 _group_changes_by_region(
                     baseline_root,
@@ -1789,7 +1975,11 @@ def _run_transaction(
             ),
         }
     finally:
-        release_frozen_threads(api, frozen)
+        try:
+            release_frozen_threads(api, frozen)
+        finally:
+            if lifecycle_probe is not None:
+                lifecycle_probe.close()
 
 
 def _run_natural_reference(
@@ -2158,6 +2348,14 @@ def build_parser() -> argparse.ArgumentParser:
             "to consume the replay action for one tick"
         ),
     )
+    parser.add_argument(
+        "--focus-schedule",
+        type=_parse_focus_schedule,
+        help=(
+            "comma-separated per-tick recorded-mask focus transform; use "
+            "focused/f/set, unfocused/u/clear, or recorded/r/-"
+        ),
+    )
     parser.add_argument("--horizon", type=int, default=DEFAULT_HORIZON)
     parser.add_argument(
         "--hold-frames",
@@ -2178,6 +2376,14 @@ def build_parser() -> argparse.ArgumentParser:
         type=int,
         default=DEFAULT_COMPACT_CORPUS_TICKS,
         help="number of recorded-branch endpoints compared to the corpus",
+    )
+    parser.add_argument(
+        "--skip-compact-corpus",
+        action="store_true",
+        help=(
+            "skip comparison to a retained natural corpus for a new root; "
+            "restored same-action A1/A2 equality remains mandatory"
+        ),
     )
     parser.add_argument(
         "--portfolio-all36",
@@ -2206,8 +2412,16 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help=(
             "persist full decoded hostile/player collision state for the root "
-            "and B/natural trajectory of a bounded offline model differential; "
-            "same-action A1/A2 retain hashes only; incompatible with all-36 mode"
+            "and A1/B/natural trajectories of a bounded offline differential; "
+            "same-action A2 remains hash-only; incompatible with all-36 mode"
+        ),
+    )
+    parser.add_argument(
+        "--trace-enemy-lifecycle",
+        action="store_true",
+        help=(
+            "install the reversible enemy/item/damage lifecycle ring at the "
+            "snapshot root and require exact generation-safe per-tick batches"
         ),
     )
     parser.add_argument("--output", type=Path, required=True)
@@ -2244,13 +2458,33 @@ def main(argv: list[str] | None = None) -> int:
         )
     if args.action_schedule is not None:
         _validate_action_schedule(args.action_schedule, horizon=args.horizon)
+    if args.focus_schedule is not None:
+        _validate_focus_schedule(args.focus_schedule, horizon=args.horizon)
+    if args.action_schedule is not None and args.focus_schedule is not None:
+        raise ValueError(
+            "rolling trial accepts either --action-schedule or --focus-schedule"
+        )
+    if args.focus_schedule is not None and args.natural_reference != "none":
+        raise ValueError(
+            "focus schedules currently require --natural-reference none"
+        )
     if args.portfolio_all36 and args.natural_reference != "none":
         raise ValueError("all-36 portfolio mode requires --natural-reference none")
     if args.portfolio_all36 and args.action_schedule is not None:
         raise ValueError("all-36 portfolio mode does not accept an action schedule")
+    if args.portfolio_all36 and args.focus_schedule is not None:
+        raise ValueError("all-36 portfolio mode does not accept a focus schedule")
     if args.portfolio_all36 and args.retain_collision_control_payload:
         raise ValueError(
             "all-36 portfolio mode does not retain full collision payloads"
+        )
+    if args.portfolio_all36 and args.trace_enemy_lifecycle:
+        raise ValueError(
+            "all-36 portfolio mode does not trace enemy lifecycle batches"
+        )
+    if args.trace_enemy_lifecycle and args.natural_reference != "none":
+        raise ValueError(
+            "enemy lifecycle tracing currently requires --natural-reference none"
         )
 
     game_dir = args.game_dir.resolve()
@@ -2274,14 +2508,19 @@ def main(argv: list[str] | None = None) -> int:
         "action_schedule": (
             list(args.action_schedule) if args.action_schedule is not None else None
         ),
+        "focus_schedule": (
+            list(args.focus_schedule) if args.focus_schedule is not None else None
+        ),
         "natural_reference_branch": args.natural_reference,
         "compact_corpus": str(args.compact_corpus),
         "compact_corpus_ticks": args.compact_corpus_ticks,
+        "skip_compact_corpus": args.skip_compact_corpus,
         "portfolio_all36": args.portfolio_all36,
         "portfolio_corpus": str(args.portfolio_corpus),
         "retain_collision_control_payload": (
             args.retain_collision_control_payload
         ),
+        "trace_enemy_lifecycle": args.trace_enemy_lifecycle,
         "gameplay_input": "native_replay_with_explicit_root_action_word",
         "changes_gameplay_input": True,
         "result": {"status": "not_started"},
@@ -2362,18 +2601,21 @@ def main(argv: list[str] | None = None) -> int:
                 target_manager_frame=args.target_manager_frame,
                 action_b=args.action_b,
                 action_schedule=args.action_schedule,
+                focus_schedule=args.focus_schedule,
                 horizon=args.horizon,
                 hold_frames=args.hold_frames,
                 root_timeout_seconds=args.root_timeout,
                 retain_collision_control_payload=(
                     args.retain_collision_control_payload
                 ),
+                trace_enemy_lifecycle=args.trace_enemy_lifecycle,
                 reference_store=reference_store,
             )
         )
         envelope["result"] = transaction
         if (
             not args.portfolio_all36
+            and not args.skip_compact_corpus
             and transaction["status"] == "rolling_native_projection_snapshot_passed"
         ):
             branches = transaction["branches"]
@@ -2448,7 +2690,11 @@ def main(argv: list[str] | None = None) -> int:
                 hold_frames=args.hold_frames,
                 action_override=(
                     None
-                    if args.natural_reference == "a" or args.action_schedule is not None
+                    if (
+                        args.natural_reference == "a"
+                        or args.action_schedule is not None
+                        or args.focus_schedule is not None
+                    )
                     else args.action_b
                 ),
                 action_schedule=(

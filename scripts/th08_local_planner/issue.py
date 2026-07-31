@@ -33,6 +33,8 @@ class IssueRequest:
     viability_recovery_distances: tuple[tuple[str, float], ...] = ()
     viability_safety_actions: tuple[str, ...] = ()
     viability_survival_actions: tuple[str, ...] = ()
+    preferred_action: str | None = None
+    preference_reason: str | None = None
 
 
 @dataclass(frozen=True)
@@ -108,6 +110,20 @@ class IssueTransaction:
                 raise ValueError(
                     f"unknown allowed first actions: {sorted(unknown)}"
                 )
+        if (
+            request.preferred_action is not None
+            and request.preferred_action not in action_by_name
+        ):
+            raise ValueError(
+                f"unknown preferred action: {request.preferred_action}"
+            )
+        if (
+            request.preferred_action is None
+            and request.preference_reason is not None
+        ):
+            raise ValueError(
+                "preference reason requires a preferred action"
+            )
 
         planned = certificates.get(decision.action)
         fresh_safe_actions = tuple(
@@ -147,7 +163,24 @@ class IssueTransaction:
             and planned.worst_collisions == 0
             and planned.min_clearance >= 0.0
         )
-        if planned_is_candidate_safe:
+        preferred = (
+            action_by_name.get(request.preferred_action)
+            if (
+                request.preferred_action in candidate_names
+                and request.preferred_action in fresh_safe_set
+                and (not global_applicable or bool(intersection))
+            )
+            else None
+        )
+        if preferred is not None:
+            selected = preferred
+            certificate = certificates[preferred.name]
+            reason = (
+                "prefer_requested_fresh_global_intersection"
+                if global_applicable
+                else "prefer_requested_fresh_safe"
+            )
+        elif planned_is_candidate_safe:
             selected = action_by_name[decision.action]
             certificate = planned
             if empty_intersection_relaxation:
@@ -204,6 +237,12 @@ class IssueTransaction:
             ),
             planned_certificate=planned,
             selected_certificate=certificate,
+            preferred_action=request.preferred_action,
+            preference_reason=request.preference_reason,
+            preference_applied=bool(
+                request.preferred_action is not None
+                and selected.name == request.preferred_action
+            ),
         )
         issued_mask = (
             adapter.shot_mask

@@ -254,6 +254,7 @@ def run_trial(
         "trace_enemy_lifecycle_events": (
             args.trace_enemy_lifecycle_events
         ),
+        "kill_before_saturation": args.kill_before_saturation,
         "diagnostic_continue_root_only_scale": (
             args.diagnostic_continue_root_only_scale
         ),
@@ -298,6 +299,7 @@ def run_trial(
             trace_enemy_lifecycle_events=(
                 args.trace_enemy_lifecycle_events
             ),
+            kill_before_saturation=args.kill_before_saturation,
             diagnostic_continue_root_only_scale=(
                 args.diagnostic_continue_root_only_scale
             ),
@@ -628,6 +630,14 @@ def build_parser() -> argparse.ArgumentParser:
         help=(
             "install the reversible bounded ordinary-enemy lifecycle ring "
             "for the whole stage; trace only, no action authority"
+        ),
+    )
+    parser.add_argument(
+        "--kill-before-saturation",
+        action="store_true",
+        help=(
+            "enable the default-off low-HP ordinary-enemy unfocus "
+            "preference inside the fresh certified issue action set"
         ),
     )
     parser.add_argument(

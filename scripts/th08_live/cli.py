@@ -272,6 +272,16 @@ def build_live_parser(
         ),
     )
     parser.add_argument(
+        "--kill-before-saturation",
+        action="store_true",
+        help=(
+            "prefer the same-direction unfocused complete action for an "
+            "observed low-HP ordinary enemy, but only when the fresh issue "
+            "transaction certifies it safe and retains any applicable "
+            "global action constraint; default off and hard no-Bomb only"
+        ),
+    )
+    parser.add_argument(
         "--diagnostic-continue-root-only-scale",
         action="store_true",
         help=(

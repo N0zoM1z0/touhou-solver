@@ -24,7 +24,10 @@ authority.
 - Final cleanup gates: Linux discovery passed 1,136 tests in 9.611 seconds;
   the complete Windows UNC discovery over the same test set exited zero.
   Linux and Windows native builds pass the checked-in 41-symbol ABI gate.
-- No WS-H combat, Focus, or Power ranking currently changes physical input.
+- No WS-H rule has promoted route-wide authority. One default-off
+  `--kill-before-saturation` experiment may change Focus only by selecting the
+  same-direction unfocused complete action inside the fresh issue-safe set.
+  It requires hard no-Bomb and fails closed without fresh certification.
 - `audits/` and `archive/` are untracked/local. Never stage them.
 
 ## Current Outcome
@@ -38,10 +41,14 @@ Latest user-authorized Lunatic Route-2 practice ring:
 | Stage 3 | `20260731_091104` | 5 | 2150 | 0 | accepted |
 | Stage 4A | `20260731_091925` | 13 | 2555 | 0 | accepted |
 | Stage 5 | `20260731_093027` | 12 | 2124 | 0 | accepted |
+| Stage 5 early-kill gate | `20260731_122855` | 13 | 6981 | 0 | accepted |
 
 The automatic older-root comparisons were 15→5, 10→13, and 19→12. They are
 observational only: RNG roots differ and the proposed WS-H strategies were
-disabled.
+disabled in the original ring. The later early-kill gate is also
+different-RNG: it physically applied 27 certified unfocus preferences,
+delayed first hit by 4857 frames relative to the listed Stage-5 baseline, but
+worsened total hits by one.
 
 Latest full game-start Lunatic Route-2 run:
 
@@ -104,11 +111,12 @@ rebootstrap. Do not weaken the epoch gate for speed.
 
 ### Combat/resource model
 
-The active offline WS-H reconstruction now covers Route-2 normal shots,
+The active WS-H reconstruction now covers Route-2 normal shots,
 supported native damage, enemy generations, defeat/cleanup distinction,
 Boss transition identity, item allocation/pickup, Power/resources, and
-mandatory timeline events. It is fail-closed and has no live ranking
-authority.
+mandatory timeline events. Its general combat model remains offline. The only
+live action authority is the narrow default-off low-HP ordinary-enemy
+same-direction unfocus preference described above.
 
 The immediate high-value hypothesis is not another schema:
 
@@ -118,6 +126,14 @@ The immediate high-value hypothesis is not another schema:
 - dynamically compare focused micro-control with unfocused fast movement and
   shot coverage;
 - collect early Power only when a safe path produces a causal later benefit.
+
+The first Stage-5 root-4300 test is complete. **Observed:** clearing Focus for
+eight ticks defeated one 20-HP enemy, suppressed three later hostile bullets
+per nine-frame emission cadence, and reduced the endpoint bullet count
+548→539. **Observed:** the current offline global layer-0 viable masks and
+safe-action masks remained exact-equal at frames 4314/4323/4332. That offline
+result did not end the hypothesis; the physical gate below exercised the rule
+27 times, but global live guidance still never published.
 
 See `notes/CURRENT_COMBAT_RESOURCE_MODEL.md`.
 
@@ -141,26 +157,21 @@ and explicit `STRATEGY.md` decision.
 
 ## Next Useful Gate
 
-The next agent should build one general combat/control experiment, not another
-broad audit:
+The first Stage-5 native branch and physical delivery gate are complete.
+Next:
 
-1. Select a first-hit-bounded, generation-safe ordinary-enemy root from the
-   Stage 3/4A/5 corpus.
-2. Capture complete player shots, enemy generation/HP, lifecycle, hostile
-   births, item/resource state, RNG, and active/held input.
-3. Reproduce the parent root exactly in native TH08.
-4. Branch focused, unfocused, and causal refocus schedules inside the same
-   survival-feasible action set.
-5. Measure kill timing, prevented hostile births, Power transaction, minimum
-   clearance, and native survival horizon.
-6. Stop at the first unsupported event or model/native mismatch.
-7. Repeat the winner on a second root before changing the live planner.
-8. Integrate the winner default-off and verify immutable version matching,
-   issue deadline, cancellation, and safe fallback.
-9. Only then request and pay one rotated focused physical trial.
+1. Repeat kill-before-saturation on a second generation-safe ordinary enemy
+   and root, retaining exact defeat and prevented-birth evidence.
+2. Make the rolling global policy publish/queryable on this workload; the
+   physical gate had zero global allowed-action queries and zero
+   viability-constrained decisions, so it could not demonstrate kernel
+   rescue.
+3. Keep the live rule default-off and fail-closed. Do not broaden HP,
+   alignment, or stage conditions from one different-RNG run.
+4. If the second same-root result holds, run a rotated Stage 3 or 4A physical
+   gate. Promotion still requires repeated physical evidence.
 
-If this hypothesis fails, return to the first mismatch or planner/action
-factorization. Do not compensate with a stage-specific waypoint.
+Do not compensate with a stage-specific waypoint.
 
 ## Research Loop
 

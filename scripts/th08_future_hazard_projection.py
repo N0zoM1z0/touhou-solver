@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import json
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from th08_future_birth_envelope import (
     FUTURE_BIRTH_SECTOR_SEMANTICS_VERSION,
@@ -12,9 +12,11 @@ from th08_future_birth_envelope import (
     lower_complete_future_birth_sectors,
 )
 from touhou_control.corridor import (
+    AabbHazard,
     AabbTrajectoryHazard,
     AnnularSectorTrajectoryHazard,
 )
+from touhou_control.packed_hazards import PackedAnnularSectorFrames
 from touhou_control.hazard_coverage import (
     HazardCoverageAssessment,
     HazardCoverageClass,
@@ -79,6 +81,16 @@ class OrdinaryFutureHazardProjection:
     digest: str
     version: VersionIdentity
     coverage: HazardCoverageAssessment
+    _packed_annular_sector_frames: PackedAnnularSectorFrames = field(
+        init=False,
+        repr=False,
+        compare=False,
+    )
+    _aabb_samples_by_frame: tuple[tuple[AabbHazard, ...], ...] = field(
+        init=False,
+        repr=False,
+        compare=False,
+    )
 
     def __post_init__(self) -> None:
         if self.root_frame < 0 or self.horizon_frames < 0:
@@ -105,10 +117,40 @@ class OrdinaryFutureHazardProjection:
             and not self.source_closure_reason
         ):
             raise ValueError("incomplete source closure requires a reason")
+        frame_count = self.horizon_frames + 1
+        object.__setattr__(
+            self,
+            "_packed_annular_sector_frames",
+            PackedAnnularSectorFrames.from_trajectories(
+                self.trajectories,
+                frame_count=frame_count,
+            ),
+        )
+        object.__setattr__(
+            self,
+            "_aabb_samples_by_frame",
+            tuple(
+                tuple(
+                    sample
+                    for trajectory in self.aabb_trajectories
+                    if (sample := trajectory.sample(frame)) is not None
+                )
+                for frame in range(frame_count)
+            ),
+        )
 
     @property
     def horizon_frame(self) -> int:
         return self.root_frame + self.horizon_frames
+
+    @property
+    def packed_annular_sector_frames(self) -> PackedAnnularSectorFrames:
+        return self._packed_annular_sector_frames
+
+    def aabb_samples(self, frame: int) -> tuple[AabbHazard, ...]:
+        if frame < 0 or frame >= len(self._aabb_samples_by_frame):
+            return ()
+        return self._aabb_samples_by_frame[frame]
 
     def trajectories_for_policy(
         self,

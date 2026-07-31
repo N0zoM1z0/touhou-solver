@@ -7,7 +7,7 @@ import math
 import numpy as np
 
 from .. import native_backend
-from ..packed_hazards import PackedSegmentFrames
+from ..packed_hazards import PackedAnnularSectorFrames, PackedSegmentFrames
 from .model import (
     AabbHazard,
     AabbTrajectoryHazard,
@@ -195,6 +195,81 @@ def _annular_sector_clearance_field(
         0.0,
     )
 
+    lower_cos = np.cos(minimum_angle)[None, :]
+    lower_sin = np.sin(minimum_angle)[None, :]
+    upper_cos = np.cos(maximum_angle)[None, :]
+    upper_sin = np.sin(maximum_angle)[None, :]
+    lower_projection = np.clip(
+        dx * lower_cos + dy * lower_sin,
+        minimum_radius[None, :],
+        maximum_radius[None, :],
+    )
+    upper_projection = np.clip(
+        dx * upper_cos + dy * upper_sin,
+        minimum_radius[None, :],
+        maximum_radius[None, :],
+    )
+    lower_distance = np.hypot(
+        dx - lower_projection * lower_cos,
+        dy - lower_projection * lower_sin,
+    )
+    upper_distance = np.hypot(
+        dx - upper_projection * upper_cos,
+        dy - upper_projection * upper_sin,
+    )
+    center_distance = np.where(
+        inside_angle,
+        radial_distance,
+        np.minimum(lower_distance, upper_distance),
+    )
+    clearance = center_distance - inflation[None, :] - _SECTOR_NUMERIC_GUARD
+    return clearance.min(axis=1).reshape(grid_x.shape).astype(np.float32)
+
+
+def _packed_annular_sector_clearance_field(
+    grid_x: np.ndarray,
+    grid_y: np.ndarray,
+    hazards: PackedAnnularSectorFrames,
+    *,
+    frame: int,
+    player_radius: float,
+) -> np.ndarray:
+    """Equivalent point clearance from one pre-indexed sector frame."""
+
+    frame_slice = hazards.frame_slice(frame)
+    if frame_slice.start == frame_slice.stop:
+        return np.full(grid_x.shape, np.inf, dtype=np.float32)
+
+    origin_x = hazards.origin_x[frame_slice]
+    origin_y = hazards.origin_y[frame_slice]
+    minimum_angle = hazards.minimum_angle[frame_slice]
+    maximum_angle = hazards.maximum_angle[frame_slice]
+    minimum_radius = hazards.minimum_radius[frame_slice]
+    maximum_radius = hazards.maximum_radius[frame_slice]
+    inflation = (
+        player_radius
+        + hazards.half_extent_radius[frame_slice]
+        + hazards.origin_uncertainty[frame_slice]
+        + hazards.base_uncertainty[frame_slice]
+        + hazards.uncertainty_per_frame[frame_slice] * frame
+    )
+
+    dx = grid_x.reshape(-1, 1).astype(np.float64) - origin_x[None, :]
+    dy = grid_y.reshape(-1, 1).astype(np.float64) - origin_y[None, :]
+    radius = np.hypot(dx, dy)
+    angle = np.arctan2(dy, dx)
+    angle_span = maximum_angle - minimum_angle
+    phase = np.remainder(angle - minimum_angle[None, :], _TWO_PI)
+    inside_angle = (angle_span[None, :] >= _TWO_PI) | (
+        phase <= angle_span[None, :]
+    )
+    radial_distance = np.maximum(
+        np.maximum(
+            minimum_radius[None, :] - radius,
+            radius - maximum_radius[None, :],
+        ),
+        0.0,
+    )
     lower_cos = np.cos(minimum_angle)[None, :]
     lower_sin = np.sin(minimum_angle)[None, :]
     upper_cos = np.cos(maximum_angle)[None, :]
@@ -879,6 +954,9 @@ def _hazard_clearance_volume(
 aabb_clearance_field = _aabb_clearance_field
 aabb_sample_clearance_field = _aabb_sample_clearance_field
 annular_sector_clearance_field = _annular_sector_clearance_field
+packed_annular_sector_clearance_field = (
+    _packed_annular_sector_clearance_field
+)
 aabb_clearance_volume = _aabb_clearance_volume
 segment_clearance_field = _segment_clearance_field
 packed_segment_clearance_field = _packed_segment_clearance_field
@@ -891,6 +969,7 @@ __all__ = [
     "aabb_clearance_volume",
     "aabb_sample_clearance_field",
     "annular_sector_clearance_field",
+    "packed_annular_sector_clearance_field",
     "clearance_field",
     "hazard_clearance_volume",
     "packed_segment_clearance_field",

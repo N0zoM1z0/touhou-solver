@@ -10,8 +10,10 @@ import numpy as np
 from touhou_control.corridor import (
     AnnularSectorTrajectoryHazard,
     annular_sector_clearance_field,
+    packed_annular_sector_clearance_field,
 )
 from touhou_control import native_backend
+from touhou_control.packed_hazards import PackedAnnularSectorFrames
 
 
 class AnnularSectorClearanceTests(unittest.TestCase):
@@ -89,6 +91,55 @@ class AnnularSectorClearanceTests(unittest.TestCase):
         )
         clearance = self._field(((0.0, 0.0),), hazard)
         self.assertTrue(np.isinf(clearance[0]))
+
+    def test_packed_frame_field_matches_object_reference(self) -> None:
+        hazards = (
+            AnnularSectorTrajectoryHazard(
+                origin_x=1.25,
+                origin_y=-2.5,
+                minimum_angle=-0.7,
+                maximum_angle=1.2,
+                minimum_radii=(None, 3.0, 5.0),
+                maximum_radii=(None, 5.0, 8.0),
+                half_extent_radius=1.5,
+                origin_uncertainty=0.25,
+                base_uncertainty=0.5,
+                uncertainty_per_frame=0.125,
+            ),
+            AnnularSectorTrajectoryHazard(
+                origin_x=-3.0,
+                origin_y=4.0,
+                minimum_angle=2.8,
+                maximum_angle=2.8 + 2.0 * math.pi,
+                minimum_radii=(2.0, 4.0, None),
+                maximum_radii=(4.0, 7.0, None),
+                half_extent_radius=0.75,
+            ),
+        )
+        grid_x, grid_y = np.meshgrid(
+            np.arange(-16.0, 17.0, 4.0, dtype=np.float32),
+            np.arange(-16.0, 17.0, 4.0, dtype=np.float32),
+        )
+        packed = PackedAnnularSectorFrames.from_trajectories(
+            hazards,
+            frame_count=3,
+        )
+        for frame in (-1, 0, 1, 2, 3):
+            expected = annular_sector_clearance_field(
+                grid_x,
+                grid_y,
+                hazards,
+                frame=frame,
+                player_radius=2.0,
+            )
+            actual = packed_annular_sector_clearance_field(
+                grid_x,
+                grid_y,
+                packed,
+                frame=frame,
+                player_radius=2.0,
+            )
+            np.testing.assert_allclose(actual, expected, rtol=0.0, atol=2e-5)
 
     def test_native_volume_matches_independent_python_field(self) -> None:
         hazards = (

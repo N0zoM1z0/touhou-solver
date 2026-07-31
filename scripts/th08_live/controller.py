@@ -238,7 +238,7 @@ from touhou_control.hazard_coverage import (
 )
 from touhou_control.corridor import (
     aabb_sample_clearance_field,
-    annular_sector_clearance_field,
+    packed_annular_sector_clearance_field,
 )
 from touhou_control.prepublication import (
     CausalPrepublicationFilter,
@@ -1129,11 +1129,7 @@ def _hazards_for_positions_with_future_projection(
         enemy_bodies=enemy_bodies,
     )
     projection_frame = future_projection_offset + step
-    future_bodies = tuple(
-        sample
-        for trajectory in future_hazard_projection.aabb_trajectories
-        if (sample := trajectory.sample(projection_frame)) is not None
-    )
+    future_bodies = future_hazard_projection.aabb_samples(projection_frame)
     body_clearance = aabb_sample_clearance_field(
         positions_x,
         positions_y,
@@ -1141,10 +1137,10 @@ def _hazards_for_positions_with_future_projection(
         frame=projection_frame,
         player_radius=PLAYER_RADIUS,
     )
-    emission_clearance = annular_sector_clearance_field(
+    emission_clearance = packed_annular_sector_clearance_field(
         positions_x,
         positions_y,
-        future_hazard_projection.trajectories,
+        future_hazard_projection.packed_annular_sector_frames,
         frame=projection_frame,
         player_radius=PLAYER_RADIUS,
     )
@@ -4118,6 +4114,7 @@ def _run_live_session(
             ordinary_future_hazard_coverage = None
             ordinary_prefix_certified_frames = 0
             ordinary_prefix_safe_actions: tuple[str, ...] | None = None
+            ordinary_prefix_certificate_ms = 0.0
             ordinary_authority_solution: CorridorSolution | None = None
             ordinary_future_policy_query_frame = 0
             (
@@ -4229,6 +4226,7 @@ def _run_live_session(
                         ordinary_prefix_certified_frames = (
                             candidate_prefix_certified_frames
                         )
+                        ordinary_prefix_started = time.perf_counter()
                         ordinary_prefix_certificates = _robust_action_certificates(
                             player_x=player_control_root.x,
                             player_y=player_control_root.y,
@@ -4264,6 +4262,9 @@ def _run_live_session(
                                 future_projection_offset
                             ),
                         )
+                        ordinary_prefix_certificate_ms = (
+                            time.perf_counter() - ordinary_prefix_started
+                        ) * 1000.0
                         ordinary_prefix_safe_actions = tuple(
                             action.name
                             for action in _PLANNER_ACTIONS
@@ -5208,6 +5209,9 @@ def _run_live_session(
                         previous_iteration_ms=previous_iteration_ms,
                     )
                 )
+                timing_trace_fields["timing_ms"][
+                    "ordinary_preexhaustion_prefix"
+                ] = ordinary_prefix_certificate_ms
                 record.update(timing_trace_fields)
                 if hit_contact_observation is not None:
                     record["hit_contact_observation"] = (

@@ -103,6 +103,25 @@ class FutureHazardProjectionTests(unittest.TestCase):
         )
         self.assertIsNone(rebased[0].sample(0))
         self.assertEqual(rebased[0].sample(1).x, 120.0)
+        self.assertEqual(projection.aabb_samples(-1), ())
+        self.assertEqual(projection.aabb_samples(0), ())
+        self.assertEqual(projection.aabb_samples(2)[0].x, 120.0)
+        self.assertEqual(projection.aabb_samples(4), ())
+
+    def test_projection_preindexes_annular_sector_frames(self) -> None:
+        projection = complete_future_hazard_projection(
+            root_frame=100,
+            horizon_frames=20,
+            events=(_event(),),
+            source_semantics_version="test-source-v1",
+        )
+        packed = projection.packed_annular_sector_frames
+        self.assertEqual(packed.frame_count, 21)
+        self.assertEqual(packed.sample_count, sum(
+            trajectory.radial_sample(frame) is not None
+            for frame in range(21)
+            for trajectory in projection.trajectories
+        ))
 
     def test_unknown_source_closure_has_no_authority(self) -> None:
         projection = unknown_future_hazard_projection(

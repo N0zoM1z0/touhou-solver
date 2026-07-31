@@ -228,6 +228,14 @@ class PackedAnnularSectorFrames:
     def sample_count(self) -> int:
         return int(self.frame_offsets[-1])
 
+    def frame_slice(self, frame: int) -> slice:
+        if frame < 0 or frame >= self.frame_count:
+            return slice(0, 0)
+        return slice(
+            int(self.frame_offsets[frame]),
+            int(self.frame_offsets[frame + 1]),
+        )
+
     @classmethod
     def from_trajectories(
         cls,

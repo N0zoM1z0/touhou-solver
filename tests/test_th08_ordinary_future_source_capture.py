@@ -11,6 +11,7 @@ from th08_live.enemy_sensor import (
     ENEMY_STRIDE,
 )
 from th08_runtime.ordinary_future_source_capture import (
+    OrdinaryFutureSourceSnapshot,
     _read_active_enemy_records,
 )
 
@@ -47,6 +48,29 @@ class _IntoReader(_Reader):
 
 
 class OrdinaryFutureSourceCaptureTests(unittest.TestCase):
+    def test_snapshot_requires_both_manager_and_player_clock_stability(self) -> None:
+        stable = OrdinaryFutureSourceSnapshot(
+            frame_before=10,
+            frame_after=10,
+            update_serial_before=20,
+            update_serial_after=20,
+            payload={},
+            read_ms=1.0,
+            attempts=1,
+        )
+        crossed_player = OrdinaryFutureSourceSnapshot(
+            frame_before=10,
+            frame_after=10,
+            update_serial_before=20,
+            update_serial_after=21,
+            payload={},
+            read_ms=1.0,
+            attempts=1,
+        )
+
+        self.assertTrue(stable.stable)
+        self.assertFalse(crossed_player.stable)
+
     def test_manager_and_pool_use_one_contiguous_versioned_read(self) -> None:
         slab = bytearray((ENEMY_POOL_SIZE + 1) * ENEMY_STRIDE)
         struct.pack_into(

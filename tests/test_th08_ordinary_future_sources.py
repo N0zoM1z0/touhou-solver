@@ -13,6 +13,7 @@ from th08_ordinary_future_sources import (
     _direct_fire_count,
     _eval_float_operand,
     _execute_auxiliary,
+    _health_transition_hp_loss_upper_bound,
     project_ordinary_future_sources,
 )
 
@@ -58,6 +59,7 @@ def _damage_envelope(*, active_raw_damage: int = 0) -> dict[str, object]:
         "root_conditions": {"fixture": True},
         "active_raw_damage_upper_bound": active_raw_damage,
         "future_raw_damage_by_cadence_phase": [0] * 20,
+        "future_cadence_phase_support": [0],
         "cadence_length": 20,
         "player_damage_bonus_upper_ratio": [106, 100],
     }
@@ -249,6 +251,20 @@ def _payload() -> dict[str, object]:
 
 
 class OrdinaryFutureSourceTests(unittest.TestCase):
+    def test_health_damage_uses_captured_cadence_phase(self) -> None:
+        payload = deepcopy(_payload())
+        envelope = payload["route2_health_transition_damage_envelope"]
+        envelope["future_raw_damage_by_cadence_phase"] = list(range(1, 21))
+        envelope["future_cadence_phase_support"] = [3]
+
+        self.assertEqual(
+            _health_transition_hp_loss_upper_bound(
+                payload,
+                horizon_frames=1,
+            ),
+            4,
+        )
+
     def test_far_timeout_is_proven_outside_bounded_horizon(self) -> None:
         payload = deepcopy(_payload())
         phase = payload["enemy_manager_template_source"][

@@ -3742,6 +3742,10 @@ def _run_live_session(
                             "capture_attempts": (
                                 ordinary_future_source_result.snapshot.attempts
                             ),
+                            "capture_frscreen_update_serial": (
+                                ordinary_future_source_result.snapshot
+                                .update_serial_after
+                            ),
                             "source_closure_complete": (
                                 closure.projection.source_closure_complete
                             ),

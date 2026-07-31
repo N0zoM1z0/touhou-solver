@@ -19,7 +19,10 @@ from th08_live.enemy_sensor import (
     ENEMY_POOL_SIZE,
     ENEMY_STRIDE,
 )
-from th08_runtime.game_state import ADDR_ENEMY_MANAGER_FRAME
+from th08_runtime.game_state import (
+    ADDR_ENEMY_MANAGER_FRAME,
+    ADDR_FRSCREEN_UPDATE_SERIAL,
+)
 from th08_runtime.native_combat_projection import (
     capture_player_shot_combat_state,
 )
@@ -41,7 +44,7 @@ from th08_ordinary_future_sources import (
 
 
 ORDINARY_FUTURE_SOURCE_SNAPSHOT_SCHEMA = (
-    "th08-ordinary-future-source-snapshot-v1"
+    "th08-ordinary-future-source-snapshot-v2-player-enemy-clock-bracket"
 )
 ROUTE2_HEALTH_DAMAGE_ENVELOPE_SCHEMA = (
     "th08-route2-normal-shot-health-transition-damage-envelope-v1"
@@ -54,13 +57,18 @@ _SHOT_CADENCE_LENGTH = 20
 class OrdinaryFutureSourceSnapshot:
     frame_before: int
     frame_after: int
+    update_serial_before: int
+    update_serial_after: int
     payload: dict[str, object]
     read_ms: float
     attempts: int
 
     @property
     def stable(self) -> bool:
-        return self.frame_before == self.frame_after
+        return (
+            self.frame_before == self.frame_after
+            and self.update_serial_before == self.update_serial_after
+        )
 
 
 @dataclass(frozen=True)
@@ -199,6 +207,9 @@ def _route2_health_damage_envelope_record(
             and power >= 0.0
             and current_normal_level >= 0
         ),
+        "active_shot_cadence_timer_is_in_cycle": bool(
+            0 <= shots.emission_timer.current < _SHOT_CADENCE_LENGTH
+        ),
     }
     return {
         "schema": ROUTE2_HEALTH_DAMAGE_ENVELOPE_SCHEMA,
@@ -216,6 +227,8 @@ def _route2_health_damage_envelope_record(
         "root_native_power": native_power,
         "minimum_future_normal_sht_level": current_normal_level,
         "future_raw_damage_by_cadence_phase": list(cadence_damage),
+        "future_cadence_phase_support": [shots.emission_timer.current],
+        "root_emission_timer": shots.emission_timer.record(),
         "cadence_length": _SHOT_CADENCE_LENGTH,
         "loaded_sht_normalized_sha256": {
             "primary": loaded.primary.normalized_sha256,
@@ -437,6 +450,7 @@ def capture_ordinary_future_source_snapshot(
     enemy_slab_buffer = _persistent_enemy_slab_buffer(reader)
     snapshot: OrdinaryFutureSourceSnapshot | None = None
     for attempt in range(1, maximum_attempts + 1):
+        update_serial_before = reader.u32(ADDR_FRSCREEN_UPDATE_SERIAL)
         frame_before = reader.u32(ADDR_ENEMY_MANAGER_FRAME)
         manager_blob, ordinary_blob, _active_count = (
             _read_active_enemy_records(
@@ -452,9 +466,12 @@ def capture_ordinary_future_source_snapshot(
             state=state,
         )
         frame_after = reader.u32(ADDR_ENEMY_MANAGER_FRAME)
+        update_serial_after = reader.u32(ADDR_FRSCREEN_UPDATE_SERIAL)
         snapshot = OrdinaryFutureSourceSnapshot(
             frame_before=frame_before,
             frame_after=frame_after,
+            update_serial_before=update_serial_before,
+            update_serial_after=update_serial_after,
             payload=payload,
             read_ms=(time.perf_counter() - started) * 1000.0,
             attempts=attempt,
@@ -482,8 +499,10 @@ def capture_and_project_ordinary_future_sources(
     )
     if not snapshot.stable:
         raise RuntimeError(
-            "ordinary future-source snapshot crossed manager frames "
-            f"{snapshot.frame_before}->{snapshot.frame_after}"
+            "ordinary future-source snapshot crossed native clock bracket: "
+            f"manager={snapshot.frame_before}->{snapshot.frame_after}, "
+            "frscreen_serial="
+            f"{snapshot.update_serial_before}->{snapshot.update_serial_after}"
         )
     closure = project_ordinary_future_sources(
         snapshot.payload,

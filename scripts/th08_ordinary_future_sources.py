@@ -413,6 +413,12 @@ def _health_transition_hp_loss_upper_bound(
     ):
         _fail("health damage cadence envelope layout drifted")
     phase_damage = tuple(int(value) for value in phases)
+    raw_phase_support = envelope.get("future_cadence_phase_support")
+    if not isinstance(raw_phase_support, list) or not raw_phase_support:
+        _fail("health damage cadence root support is absent")
+    phase_support = tuple(int(value) for value in raw_phase_support)
+    if any(not 0 <= phase < cadence_length for phase in phase_support):
+        _fail("health damage cadence root support is outside the cycle")
     active_damage = int(
         envelope.get("active_raw_damage_upper_bound", -1)
     )
@@ -424,7 +430,7 @@ def _health_transition_hp_loss_upper_bound(
         doubled = phase_damage + phase_damage
         future_damage += max(
             sum(doubled[start : start + remainder])
-            for start in range(cadence_length)
+            for start in phase_support
         )
     ratio = envelope.get("player_damage_bonus_upper_ratio")
     if ratio != [106, 100]:

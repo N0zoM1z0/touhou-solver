@@ -239,10 +239,7 @@ class IssueTransaction:
             selected_certificate=certificate,
             preferred_action=request.preferred_action,
             preference_reason=request.preference_reason,
-            preference_applied=bool(
-                request.preferred_action is not None
-                and selected.name == request.preferred_action
-            ),
+            preference_applied=preferred is not None,
         )
         issued_mask = (
             adapter.shot_mask

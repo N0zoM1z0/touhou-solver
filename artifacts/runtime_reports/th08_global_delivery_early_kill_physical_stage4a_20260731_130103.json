@@ -1,0 +1,146 @@
+{
+  "schema": "th08-global-delivery-early-kill-physical-gate-v1",
+  "authority": {
+    "physical_result": "observed",
+    "hit_comparison": "observational_different_rng_not_causal_ab",
+    "global_policy": "queryable_shadow_no_action_authority",
+    "early_kill_strategy": "retained_default_off_not_promoted_or_falsified"
+  },
+  "source": {
+    "run_id": "lunatic_route2_stage4a_unattended_20260731_130103",
+    "repository_checkpoint": "5f931531dcf95569fc5e63a732ebccc3fc4a7e96",
+    "trace": "artifacts/runtime_reports/lunatic_route2_stage4a_unattended_20260731_130103.jsonl",
+    "trace_sha256": "406691170ecc594af0f4c7295dd078c1fc4132d52da0a3b9e7339460d20c0a4a",
+    "session": "artifacts/runtime_reports/lunatic_route2_stage4a_unattended_20260731_130103.session.json",
+    "session_sha256": "27df9009d84abb0c4eacf5dc54b5323be64ae85e7cd0589f1f7e1b8a1c772116",
+    "summary": "artifacts/runtime_reports/lunatic_route2_stage4a_unattended_20260731_130103.summary.json",
+    "summary_sha256": "102a21d462881d195290ebd7c7358200535f0c9a574a910cb37ff1cbf772d3e4",
+    "executable_sha256": "330fbdbf58a710829d65277b4f312cfbb38d5448b3df523e79350b879213d924"
+  },
+  "physical_integrity": {
+    "trial_accepted": true,
+    "termination_reason": "route_complete",
+    "decision_count": 12340,
+    "frames": [
+      1,
+      45746
+    ],
+    "hard_no_bomb": true,
+    "decision_bomb_violations": [],
+    "replay_bomb_press_frames": [],
+    "game_terminated_after_trial": true,
+    "replay": {
+      "slot": 14,
+      "sha256": "b5b433b98125c03b37e3b71c2bb71e92cd93d5480f2f47c3cf4c916681377edc",
+      "archive": "artifacts/replays/archive/th8_14_b5b433b98125c03b37e3b71c2bb71e92cd93d5480f2f47c3cf4c916681377edc.rpy"
+    }
+  },
+  "global_delivery": {
+    "delivery_record_count": 12340,
+    "scale_schedule_supported_count": 12340,
+    "available_scale_horizon": 269,
+    "required_scale_horizon": {
+      "minimum": 97,
+      "median": 97,
+      "maximum": 162
+    },
+    "submission_count": 1926,
+    "completion_count": 1925,
+    "unique_policy_count": 1915,
+    "corridor_record_count": 12253,
+    "viability_query_count": 12156,
+    "policy_status_counts": {
+      "pending_future_epoch": 79,
+      "queryable": 12159,
+      "expired": 15
+    },
+    "solve_latency_ms": {
+      "median": 116.4889000065159,
+      "p95": 324.02850000653416,
+      "maximum": 399.91639999789186
+    },
+    "player_projection_authority_counts": {
+      "exact_current_control_root": 12340
+    },
+    "action_authority_true_count": 0,
+    "action_authority_false_count": 12253,
+    "result": "submit_complete_publish_query_restored"
+  },
+  "kernel_health": {
+    "available_query_count": 12156,
+    "winning_query_count": 5521,
+    "losing_empty_query_count": 6635,
+    "losing_empty_fraction": 0.5458209937479434,
+    "losing_global_but_safe_short_prefix_count": 2775,
+    "first_attempt_last_winning_query_frame": 1471,
+    "first_hit_frame": 1827,
+    "first_hit_warning_lead_frames": 356,
+    "hit_failure_class_counts": {
+      "global_viability_kernel_exhausted_before_hit": 16
+    },
+    "boundary_contributor_hit_count": 13,
+    "interpretation": "delivery_is_fixed_but_the_queryable_kernel_is_empty_for_more_than_half_of_decisions_and_before_every_hit"
+  },
+  "early_kill": {
+    "enabled_decision_count": 12340,
+    "target_observed_count": 170,
+    "preference_requested_count": 63,
+    "fresh_safe_preference_applied_count": 39,
+    "no_fresh_transaction_count": 17,
+    "fresh_safe_planned_preserved_count": 3,
+    "least_bad_fallback_count": 4,
+    "telemetry_only_false_positive_count": 1,
+    "telemetry_false_positive_frame": 1773,
+    "target_kernel_counts": {
+      "winning": 64,
+      "losing": 106
+    },
+    "requested_kernel_counts": {
+      "winning": 24,
+      "losing": 39
+    },
+    "fresh_safe_applied_kernel_counts": {
+      "winning": 13,
+      "losing": 26
+    },
+    "fresh_safe_applied_and_shadow_global_safe_count": 9,
+    "fresh_safe_applied_but_outside_winning_shadow_set_count": 4,
+    "fresh_safe_applied_before_first_hit_count": 15,
+    "fresh_safe_applied_after_last_win_before_first_hit_count": 8,
+    "interpretation": "the_narrow_rule_is_locally_fresh_safe_but_not_yet_the_intended_global_survival_filtered_combat_objective"
+  },
+  "outcome": {
+    "hit_count": 16,
+    "hit_frames": [
+      1827,
+      4112,
+      10335,
+      11859,
+      12424,
+      12988,
+      13444,
+      13863,
+      22291,
+      23147,
+      30698,
+      31264,
+      32199,
+      39016,
+      43334,
+      43643
+    ],
+    "baseline_run_id": "lunatic_route2_stage4a_unattended_20260731_091925",
+    "baseline_hit_count": 13,
+    "baseline_first_hit": 2555,
+    "hit_count_delta": 3,
+    "first_hit_frame_delta": -728,
+    "interpretation": "different_rng_observation_only"
+  },
+  "conclusion": {
+    "global_delivery_fixed": true,
+    "global_kernel_rescued": false,
+    "early_kill_falsified": false,
+    "next_responsible_layer": "exact_global_action_authority_and_pre_exhaustion_viable_set_objective",
+    "reason": "the policy now publishes and predicts every hit after kernel exhaustion, but diagnostic scale keeps it shadow-only and most early-kill applications occur after or outside the winning global set"
+  }
+}

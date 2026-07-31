@@ -13,8 +13,8 @@ authority.
 ## Checkpoint
 
 - Branch: `main`.
-- Last physical checkpoint: `d2b810d` (`Retain Stage 3 4A and 5 physical
-  ring`).
+- Last physical checkpoint: current `main` HEAD (`Retain Stage 4A global
+  delivery gate`), based on immutable live-code checkpoint `5f93153`.
 - Native H=32 wind-tunnel checkpoint: `3d15953`.
 - Workspace-prune checkpoint: `be3e583` (`Prune TH08 active research
   workspace`). It removed dormant supplemental, candidate, prewarm, G5,
@@ -42,6 +42,7 @@ Latest user-authorized Lunatic Route-2 practice ring:
 | Stage 4A | `20260731_091925` | 13 | 2555 | 0 | accepted |
 | Stage 5 | `20260731_093027` | 12 | 2124 | 0 | accepted |
 | Stage 5 early-kill gate | `20260731_122855` | 13 | 6981 | 0 | accepted |
+| Stage 4A global/early-kill gate | `20260731_130103` | 16 | 1827 | 0 | accepted |
 
 The automatic older-root comparisons were 15→5, 10→13, and 19→12. They are
 observational only: RNG roots differ and the proposed WS-H strategies were
@@ -160,13 +161,17 @@ and explicit `STRATEGY.md` decision.
 The first Stage-5 native branch and physical delivery gate are complete.
 Next:
 
-1. Physically verify the repaired rolling global delivery on rotated Stage
-   4A. The retained Stage-5 trace proved the old 120-frame diagnostic schedule
-   could never meet the initial 161–162-frame submit requirement; the new
-   269-frame schedule is queryable shadow-only and records its gate state.
-2. Repeat kill-before-saturation on a second generation-safe ordinary enemy
+1. Establish exact ordinary-stage global action authority or an equally
+   causal pre-exhaustion viability filter. Stage 4A physically delivered 1,915
+   unique policies and 12,156 queries, but the diagnostic scale schedule
+   correctly kept them shadow-only.
+2. Move the combat objective before kernel loss and require membership in the
+   exact winning action set. The rotated gate had 6,635/12,156 losing queries;
+   only nine of 39 actual fresh-safe early-kill choices were also
+   shadow-global safe.
+3. Repeat kill-before-saturation on a second generation-safe ordinary enemy
    and root, retaining exact defeat and prevented-birth evidence.
-3. Keep the live rule default-off and fail-closed. Do not broaden HP,
+4. Keep the live rule default-off and fail-closed. Do not broaden HP,
    alignment, or stage conditions from one different-RNG run.
 4. If the second same-root result holds, run a rotated Stage 3 or 4A physical
    gate. Promotion still requires repeated physical evidence.

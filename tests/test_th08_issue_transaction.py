@@ -303,6 +303,42 @@ class IssueTransactionTests(unittest.TestCase):
         self.assertEqual(rejected.decision.action, "up")
         self.assertFalse(rejected.transaction.preference_applied)
 
+    def test_least_bad_coincidence_is_not_preference_authority(
+        self,
+    ) -> None:
+        arguments = self._arguments()
+        arguments["allowed_first_actions"] = None
+        arguments["preferred_action"] = "up_fast"
+        arguments["preference_reason"] = "kill_before_saturation"
+        decision = dataclasses.replace(
+            self._decision(),
+            mask=live.SHOT | live.FOCUS | live.UP,
+            action="up",
+            planned_focus=True,
+        )
+        unsafe = {
+            action.name: (1, -2.0, 10.0)
+            for action in live._PLANNER_ACTIONS
+        }
+        unsafe["up_fast"] = (1, -1.0, 0.0)
+
+        with patch.object(
+            live,
+            "_robust_action_certificates",
+            side_effect=_certificates(unsafe),
+        ):
+            issued = live.issue_transaction_for_fresh_hazards(
+                decision,
+                **arguments,
+            )
+
+        self.assertEqual(issued.decision.action, "up_fast")
+        self.assertEqual(
+            issued.transaction.selection_reason,
+            "replace_unsafe_with_least_bad",
+        )
+        self.assertFalse(issued.transaction.preference_applied)
+
 
 if __name__ == "__main__":
     unittest.main()

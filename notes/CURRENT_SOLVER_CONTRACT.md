@@ -133,6 +133,14 @@ physical Stage-5 gate applied 27 preferences with zero Bomb/deadline
 violations, but global guidance was unavailable throughout and total hits did
 not improve on a different RNG root.
 
+The rotated Stage-4A gate made the diagnostic global policy queryable but did
+not promote it to action authority. It observed 39 actual fresh-safe
+preferences; 26 occurred in an already-losing shadow-global state and only
+nine were also members of a winning shadow-global action set. Therefore
+fresh-local safety alone is not the intended “inside the viable set” rule.
+Move the combat objective earlier and require exact global membership before
+promotion; retain the current default-off rule as a physical probe.
+
 ## Falsification And Promotion
 
 The fastest valid loop is:

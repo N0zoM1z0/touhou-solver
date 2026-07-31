@@ -279,8 +279,11 @@ Current checkpoint:
   12→13, while global policy guidance remained unavailable;
 - the publication failure was a deterministic 120-frame diagnostic-scale
   horizon versus a 161–162-frame initial rolling-policy requirement. The
-  repaired 269-frame path is queryable shadow-only and still needs a rotated
-  physical delivery gate;
+  repaired 269-frame path physically delivered 1,915 unique Stage-4A policies
+  and 12,156 queries while remaining shadow-only;
+- 26 of 39 actual fresh-safe early-kill selections occurred after shadow
+  kernel loss and only nine were also shadow-global safe, so short local
+  safety is not the intended survival filter;
 - repeat the causal result on a second root before promotion. This checkpoint
   neither promotes nor falsifies D1.
 

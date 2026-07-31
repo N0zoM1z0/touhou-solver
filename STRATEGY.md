@@ -116,8 +116,11 @@ different-RNG 2124/12 baseline, and received no global policy guidance. This
 physically exercises delivery but neither promotes nor falsifies the general
 hypothesis. The zero-publication cause was the diagnostic scale horizon
 (120 available versus 161–162 required), not kernel exhaustion or player
-projection; the repaired 269-frame diagnostic path remains shadow-only until
-rotated physical publication/query evidence exists.
+projection. The rotated Stage-4A gate then delivered 1,915 unique policies and
+12,156 available queries. Of 39 actual fresh-safe early-kill choices, 26
+occurred after the shadow kernel was already losing and only nine were also in
+a winning shadow-global action set. This preserves the strategy but rejects
+short local safety as its global survival filter.
 
 ### P2 — Focus as a dynamic action factor
 

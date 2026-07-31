@@ -157,6 +157,14 @@ required by sensor age + initial asynchronous lead + the kernel. The repaired
 269-frame diagnostic schedule can publish/query shadow policies but cannot
 constrain live actions because its future scale remains unknown-direction.
 
+The rotated Stage-4A gate confirmed the repair physically: 1,926 submissions,
+1,925 completions, 1,915 unique policies, and 12,156 available queries. The
+kernel was losing/empty for 6,635 queries, and every one of 16 hits followed
+kernel exhaustion. Early kill made 39 actual fresh-safe selections, but 26
+were already in a losing shadow-global state and only nine were also members
+of a winning shadow-global action set. This rejects short local safety as the
+global survival filter; it does not reject killing enemies earlier.
+
 The latest full-route game-start baseline is 68 hits, zero Bombs, with
 per-stage counts 2/3/5/20/15/23.
 
@@ -164,9 +172,11 @@ per-stage counts 2/3/5/20/15/23.
 
 Do not add more atlas/schema work unless it blocks this experiment:
 
-1. Verify submit, completion, publication, and query of the repaired
-   shadow-only global policy on rotated Stage 4A.
-2. Repeat the native kill/prevented-birth result on a second ordinary enemy
+1. Establish exact ordinary-stage global action authority or an equivalent
+   causal pre-exhaustion viability filter.
+2. Test the combat objective before kernel loss and only inside the exact
+   winning action set.
+3. Repeat the native kill/prevented-birth result on a second ordinary enemy
    and root.
 3. Keep the live HP/alignment rule default-off and unchanged until the second
    root and a rotated Stage 3/4A physical workload agree.

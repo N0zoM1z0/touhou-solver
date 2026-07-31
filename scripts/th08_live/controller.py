@@ -193,8 +193,8 @@ from th08_live.issue_stage import (
     observe_action_issue,
 )
 from th08_live.kill_before_saturation import (
+    choose_kill_before_saturation_preference,
     observe_kill_before_saturation_target,
-    unfocused_peer_action,
 )
 from th08_live.local_certificates import (
     control_prefix_hazards as _control_prefix_hazards_impl,
@@ -1813,14 +1813,20 @@ def _run_live_session(
                     "kill_before_saturation": {
                         "enabled": kill_before_saturation,
                         "role": (
-                            "live_preference_inside_fresh_issue_safe_set"
+                            "global_pre_exhaustion_objective_filter_"
+                            "inside_fresh_issue_safe_set"
                             if kill_before_saturation
                             else "disabled"
                         ),
                         "complete_action": (
-                            "same_direction_unfocused"
+                            "target_alignment_then_same_direction_"
+                            "unfocused"
                         ),
-                        "fallback": "fresh_issue_transaction_default",
+                        "fallback": (
+                            "preserve_survival_baseline_on_missing_or_"
+                            "losing_global_query_or_fresh_rejection"
+                        ),
+                        "global_shadow_is_hard_authority": False,
                         "hard_no_bomb_required": True,
                     },
                     "enemy_body_sensor": (
@@ -2967,6 +2973,7 @@ def _run_live_session(
                     player_y=float(player["y"]),
                     power=float(resources["power"]),
                     spell_active=bool(spell_state["active"]),
+                    excluded_enemy_pointer=boss_enemy_pointer,
                 )
             )
             can_bomb = (
@@ -3576,12 +3583,36 @@ def _run_live_session(
                 )
             )
             decision = local_proposal.decision
-            kill_before_saturation_preferred_action = (
-                unfocused_peer_action(
+            kill_before_saturation_preference = (
+                choose_kill_before_saturation_preference(
                     decision.action,
+                    target=kill_before_saturation_observation.target,
+                    player_x=(
+                        published_guidance.capture.projected_player_x
+                    ),
+                    action_hold_frames=action_hold_frames,
+                    target_forecast_frames=(
+                        max(
+                            published_guidance.capture
+                            .delay_estimate.support,
+                            default=(
+                                published_guidance.capture
+                                .control_delay_frames
+                            ),
+                        )
+                        + action_hold_frames
+                    ),
+                    allowed_first_actions=(
+                        policy_guidance.allowed_first_actions
+                    ),
                     actions=_PLANNER_ACTIONS,
                 )
                 if kill_before_saturation_observation.target is not None
+                else None
+            )
+            kill_before_saturation_preferred_action = (
+                kill_before_saturation_preference.action
+                if kill_before_saturation_preference is not None
                 else None
             )
             plan_ms = (time.perf_counter() - plan_started) * 1000.0
@@ -3628,9 +3659,14 @@ def _run_live_session(
                             kill_before_saturation_preferred_action
                         ),
                         preference_reason=(
-                            "kill_before_saturation_low_hp_ordinary_enemy"
+                            (
+                                "kill_before_saturation_"
+                                f"{kill_before_saturation_preference.reason}"
+                            )
                             if (
                                 kill_before_saturation_preferred_action
+                                is not None
+                                and kill_before_saturation_preference
                                 is not None
                             )
                             else None
@@ -3795,6 +3831,11 @@ def _run_live_session(
                 "preferred_action": (
                     kill_before_saturation_preferred_action
                 ),
+                "preference": (
+                    kill_before_saturation_preference.record()
+                    if kill_before_saturation_preference is not None
+                    else None
+                ),
                 "preference_applied": bool(
                     kill_before_saturation_transaction is not None
                     and kill_before_saturation_transaction.preference_applied
@@ -3806,7 +3847,13 @@ def _run_live_session(
                 ),
                 "issued_action": decision.action,
                 "deadline_missed": action_deadline_missed,
-                "action_authority": kill_before_saturation,
+                "global_role": (
+                    "causal_pre_exhaustion_objective_filter"
+                    if kill_before_saturation
+                    else "disabled"
+                ),
+                "global_action_authority": corridor_action_authority,
+                "fresh_local_action_authority": kill_before_saturation,
             }
             can_deathbomb = issue_overrides.can_deathbomb
             auto_confirm_event = issue_overrides.auto_confirm_event

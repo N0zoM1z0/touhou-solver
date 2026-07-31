@@ -9,11 +9,14 @@ from th08_local_planner import PlannerAction
 
 from .enemy_combat_progress import EnemyCombatProgressInventory
 from .models import EnemyBody
+from .movement import PLAYFIELD_LEFT, PLAYFIELD_RIGHT
 
 
 MAXIMUM_TARGET_HP = 22
+MAXIMUM_SMALL_ENEMY_HEALTH = 30
 MINIMUM_PLAYER_POWER = 100.0
-MAXIMUM_HORIZONTAL_SEPARATION = 96.0
+MAXIMUM_HORIZONTAL_SEPARATION = 184.0
+MINIMUM_ALIGNMENT_IMPROVEMENT = 0.25
 
 
 @dataclass(frozen=True, slots=True)
@@ -26,6 +29,10 @@ class KillBeforeSaturationTarget:
     maximum_health: int
     x: float
     y: float
+    vx: float
+    vy: float
+    half_width: float
+    position_uncertainty: float
     horizontal_separation: float
     vertical_separation: float
     local_damage_flags_open: bool
@@ -38,6 +45,10 @@ class KillBeforeSaturationTarget:
             "maximum_health": self.maximum_health,
             "x": self.x,
             "y": self.y,
+            "vx": self.vx,
+            "vy": self.vy,
+            "half_width": self.half_width,
+            "position_uncertainty": self.position_uncertainty,
             "horizontal_separation": self.horizontal_separation,
             "vertical_separation": self.vertical_separation,
             "local_damage_flags_open": self.local_damage_flags_open,
@@ -52,6 +63,32 @@ class KillBeforeSaturationObservation:
     reason: str
 
 
+@dataclass(frozen=True, slots=True)
+class KillBeforeSaturationPreference:
+    """One optional action selected inside a winning global safe set."""
+
+    action: str | None
+    reason: str
+    target_x: float
+    planned_endpoint_x: float | None
+    preferred_endpoint_x: float | None
+    alignment_improvement: float
+    forecast_frames: int
+    global_safe_action_count: int
+
+    def record(self) -> dict[str, str | int | float | None]:
+        return {
+            "action": self.action,
+            "reason": self.reason,
+            "target_x": self.target_x,
+            "planned_endpoint_x": self.planned_endpoint_x,
+            "preferred_endpoint_x": self.preferred_endpoint_x,
+            "alignment_improvement": self.alignment_improvement,
+            "forecast_frames": self.forecast_frames,
+            "global_safe_action_count": self.global_safe_action_count,
+        }
+
+
 def observe_kill_before_saturation_target(
     *,
     enabled: bool,
@@ -61,8 +98,9 @@ def observe_kill_before_saturation_target(
     player_y: float,
     power: float,
     spell_active: bool,
+    excluded_enemy_pointer: int = 0,
 ) -> KillBeforeSaturationObservation:
-    """Select a low-HP ordinary enemy using only current-prefix evidence."""
+    """Select an observed ordinary enemy using only current-prefix evidence."""
 
     if not enabled:
         return KillBeforeSaturationObservation(None, "disabled")
@@ -82,11 +120,18 @@ def observe_kill_before_saturation_target(
         body = bodies_by_pointer.get(progress.enemy_pointer)
         if body is None:
             continue
+        small_enemy = (
+            0 < progress.maximum_health <= MAXIMUM_SMALL_ENEMY_HEALTH
+        )
         if (
-            progress.defeat_mode != 0
+            progress.enemy_pointer == excluded_enemy_pointer
+            or progress.defeat_mode != 0
             or progress.current_health <= 0
-            or progress.current_health > MAXIMUM_TARGET_HP
             or progress.maximum_health <= 0
+            or (
+                not small_enemy
+                and progress.current_health > MAXIMUM_TARGET_HP
+            )
         ):
             continue
         horizontal_separation = body.x - player_x
@@ -106,6 +151,10 @@ def observe_kill_before_saturation_target(
                 maximum_health=progress.maximum_health,
                 x=body.x,
                 y=body.y,
+                vx=body.vx,
+                vy=body.vy,
+                half_width=body.half_width,
+                position_uncertainty=body.uncertainty,
                 horizontal_separation=horizontal_separation,
                 vertical_separation=vertical_separation,
                 local_damage_flags_open=(
@@ -115,16 +164,22 @@ def observe_kill_before_saturation_target(
         )
     if not candidates:
         return KillBeforeSaturationObservation(None, "no_matching_target")
-    return KillBeforeSaturationObservation(
-        min(
-            candidates,
-            key=lambda target: (
-                target.current_health,
-                abs(target.horizontal_separation),
-                target.enemy_pointer,
-            ),
+    selected = min(
+        candidates,
+        key=lambda target: (
+            target.maximum_health > MAXIMUM_SMALL_ENEMY_HEALTH,
+            abs(target.horizontal_separation),
+            target.current_health,
+            target.enemy_pointer,
         ),
-        "low_hp_ordinary_enemy_observed",
+    )
+    return KillBeforeSaturationObservation(
+        selected,
+        (
+            "small_ordinary_enemy_observed"
+            if selected.maximum_health <= MAXIMUM_SMALL_ENEMY_HEALTH
+            else "low_hp_ordinary_enemy_observed"
+        ),
     )
 
 
@@ -152,12 +207,153 @@ def unfocused_peer_action(
     )
 
 
+def choose_kill_before_saturation_preference(
+    planned_action: str,
+    *,
+    target: KillBeforeSaturationTarget,
+    player_x: float,
+    action_hold_frames: int,
+    target_forecast_frames: int,
+    allowed_first_actions: tuple[str, ...] | None,
+    actions: Sequence[PlannerAction],
+) -> KillBeforeSaturationPreference:
+    """Prefer target alignment only before the global kernel is exhausted.
+
+    The returned action is an objective proposal, not safety authority.  The
+    issue transaction must still intersect it with fresh local certificates.
+    """
+
+    forecast_frames = max(int(target_forecast_frames), 0)
+    target_x = min(
+        PLAYFIELD_RIGHT,
+        max(
+            PLAYFIELD_LEFT,
+            target.x + target.vx * forecast_frames,
+        ),
+    )
+    safe_action_count = len(allowed_first_actions or ())
+
+    def result(
+        action: str | None,
+        reason: str,
+        *,
+        planned_endpoint_x: float | None = None,
+        preferred_endpoint_x: float | None = None,
+        alignment_improvement: float = 0.0,
+    ) -> KillBeforeSaturationPreference:
+        return KillBeforeSaturationPreference(
+            action=action,
+            reason=reason,
+            target_x=target_x,
+            planned_endpoint_x=planned_endpoint_x,
+            preferred_endpoint_x=preferred_endpoint_x,
+            alignment_improvement=alignment_improvement,
+            forecast_frames=forecast_frames,
+            global_safe_action_count=safe_action_count,
+        )
+
+    if allowed_first_actions is None or not allowed_first_actions:
+        return result(None, "global_viability_unavailable_or_exhausted")
+    if action_hold_frames <= 0:
+        return result(None, "invalid_action_hold")
+
+    action_by_name = {action.name: action for action in actions}
+    planned = action_by_name.get(planned_action)
+    if planned is None:
+        return result(None, "planned_action_unrepresentable")
+
+    def endpoint_x(action: PlannerAction) -> float:
+        return min(
+            PLAYFIELD_RIGHT,
+            max(
+                PLAYFIELD_LEFT,
+                player_x + action.dx * action_hold_frames,
+            ),
+        )
+
+    def vertical_sign(action: PlannerAction) -> int:
+        return (action.dy > 0.0) - (action.dy < 0.0)
+
+    planned_endpoint_x = endpoint_x(planned)
+    planned_distance = abs(planned_endpoint_x - target_x)
+    planned_vertical_sign = vertical_sign(planned)
+    allowed = set(allowed_first_actions)
+    candidates = tuple(
+        action
+        for action in actions
+        if (
+            action.name in allowed
+            and vertical_sign(action) == planned_vertical_sign
+        )
+    )
+    if not candidates:
+        return result(
+            None,
+            "no_global_safe_action_preserves_vertical_tendency",
+            planned_endpoint_x=planned_endpoint_x,
+        )
+
+    preferred = min(
+        candidates,
+        key=lambda action: (
+            abs(endpoint_x(action) - target_x),
+            action.focused,
+            action.name != planned.name,
+            action.name,
+        ),
+    )
+    preferred_endpoint_x = endpoint_x(preferred)
+    improvement = (
+        planned_distance - abs(preferred_endpoint_x - target_x)
+    )
+    if (
+        preferred.name != planned.name
+        and improvement >= MINIMUM_ALIGNMENT_IMPROVEMENT
+    ):
+        return result(
+            preferred.name,
+            "global_viable_target_alignment",
+            planned_endpoint_x=planned_endpoint_x,
+            preferred_endpoint_x=preferred_endpoint_x,
+            alignment_improvement=improvement,
+        )
+
+    unfocused_peer = unfocused_peer_action(
+        planned.name,
+        actions=actions,
+    )
+    if unfocused_peer is not None and unfocused_peer in allowed:
+        peer = action_by_name[unfocused_peer]
+        peer_endpoint_x = endpoint_x(peer)
+        peer_distance = abs(peer_endpoint_x - target_x)
+        if peer_distance <= planned_distance + target.half_width:
+            return result(
+                peer.name,
+                "global_viable_same_direction_unfocused",
+                planned_endpoint_x=planned_endpoint_x,
+                preferred_endpoint_x=peer_endpoint_x,
+                alignment_improvement=planned_distance - peer_distance,
+            )
+
+    return result(
+        None,
+        "no_improving_global_safe_early_kill_action",
+        planned_endpoint_x=planned_endpoint_x,
+        preferred_endpoint_x=preferred_endpoint_x,
+        alignment_improvement=improvement,
+    )
+
+
 __all__ = [
     "KillBeforeSaturationObservation",
+    "KillBeforeSaturationPreference",
     "KillBeforeSaturationTarget",
     "MAXIMUM_HORIZONTAL_SEPARATION",
+    "MAXIMUM_SMALL_ENEMY_HEALTH",
     "MAXIMUM_TARGET_HP",
+    "MINIMUM_ALIGNMENT_IMPROVEMENT",
     "MINIMUM_PLAYER_POWER",
+    "choose_kill_before_saturation_preference",
     "observe_kill_before_saturation_target",
     "unfocused_peer_action",
 ]

@@ -636,8 +636,9 @@ def build_parser() -> argparse.ArgumentParser:
         "--kill-before-saturation",
         action="store_true",
         help=(
-            "enable the default-off low-HP ordinary-enemy unfocus "
-            "preference inside the fresh certified issue action set"
+            "enable the default-off ordinary-enemy pre-exhaustion "
+            "target-alignment/unfocus preference inside the fresh "
+            "certified issue action set"
         ),
     )
     parser.add_argument(

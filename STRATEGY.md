@@ -1,6 +1,6 @@
 # Touhou Solver Strategy Ledger
 
-Last updated: 2026-07-31.
+Last updated: 2026-08-01.
 
 This file records current action authority, not chronology. Evidence belongs
 in compact reports, run dossiers, and counterexamples.
@@ -154,6 +154,16 @@ nonempty effective authority occurred within 80 frames of any hit. Source
 semantics v4/projection v13 now lowers native motion-angle variable `10069`,
 the complete auxiliary timer root, and generic opcode-`0x02` delay scheduling.
 Armed phase-successor coverage remains the next fail-closed blocker.
+
+Stage-4A `20260801_002006` physically falsified the remaining publication
+path: despite complete source roots 1137..1200, an earlier UNKNOWN-source
+kernel occupied the serial worker/pending slot and exact authority was absent
+from all 383 decisions in the 80-frame nonspell hit windows. L3 now refuses to
+solve an incomplete ordinary source and admits a completed exact pending
+future policy as the causal predecessor's terminal kernel before activation.
+This preserves fail-closed coverage while removing work and publication that
+could never carry hard authority. Physical revalidation is pending; phase,
+transform, opcode, callback, and movement closure is still incomplete.
 
 ## Offline Native Authority
 

@@ -51,7 +51,6 @@ from th08_ecl_runtime import (
 from th08_ecl_tool.core import parse_ecl
 from th08_future_hazard_projection import (
     OrdinaryFutureHazardProjection,
-    unknown_future_hazard_projection,
 )
 from th08_laser_runtime import (
     Laser,
@@ -94,9 +93,6 @@ from th08_live import (
 from th08_live.runtime_ecl_identity import (
     RuntimeEclIdentityService,
     RuntimeEclPhysicalProvenance,
-)
-from th08_ordinary_future_sources import (
-    ORDINARY_FUTURE_SOURCE_SEMANTICS_VERSION,
 )
 from th08_runtime.ordinary_future_source_capture import (
     OrdinaryFutureSourceCaptureResult,
@@ -609,13 +605,11 @@ def _ordinary_target_query_frame(
     policy: RobustViabilityPolicy,
     policy_age: int,
 ) -> int | None:
-    if policy_age < 0:
-        return None
     frames_per_layer = policy.config.frames_per_layer
     target_layer = math.ceil(
-        (
-            policy_age
-            + ORDINARY_AUTHORITY_MIN_TERMINAL_LEAD
+        max(
+            0,
+            policy_age + ORDINARY_AUTHORITY_MIN_TERMINAL_LEAD,
         )
         / frames_per_layer
     )
@@ -623,6 +617,66 @@ def _ordinary_target_query_frame(
     if target_frame >= policy.horizon_frames:
         return None
     return target_frame
+
+
+def _ordinary_authority_target(
+    *,
+    active_solution: CorridorSolution | None,
+    pending_solution: CorridorSolution | None,
+    current_frame: int,
+) -> tuple[CorridorSolution | None, int]:
+    """Choose the earliest exact terminal kernel still ahead of this root.
+
+    A completed policy whose source epoch is still in the future is precisely
+    the terminal object needed by the causal pre-publication predecessor.  It
+    must not be hidden merely because it is not yet the active rolling policy.
+    """
+
+    candidates: list[tuple[int, int, CorridorSolution]] = []
+    for order, solution in enumerate((active_solution, pending_solution)):
+        policy = _ordinary_lower_kernel(solution)
+        if (
+            solution is None
+            or policy is None
+            or not _ordinary_solution_hazard_authority(solution)
+        ):
+            continue
+        query_frame = _ordinary_target_query_frame(
+            policy=policy,
+            policy_age=current_frame - solution.source_frame,
+        )
+        if query_frame is None:
+            continue
+        publication_frame = solution.source_frame + query_frame
+        if publication_frame <= current_frame:
+            continue
+        candidates.append(
+            (publication_frame, order, solution)
+        )
+    if not candidates:
+        return None, 0
+    publication_frame, _order, solution = min(candidates)
+    return solution, publication_frame - solution.source_frame
+
+
+def _ordinary_submission_projection(
+    result: OrdinaryFutureSourceCaptureResult | None,
+    *,
+    policy_source_frame: int,
+    policy_horizon_frames: int,
+) -> OrdinaryFutureHazardProjection | None:
+    """Return only a complete source slab that covers the proposed kernel."""
+
+    projection = result.closure.projection if result is not None else None
+    if (
+        projection is None
+        or not projection.source_closure_complete
+        or projection.root_frame > policy_source_frame
+        or projection.horizon_frame
+        < policy_source_frame + policy_horizon_frames
+    ):
+        return None
+    return projection
 
 
 def _ordinary_nonspell_preexhaustion_filter(
@@ -3819,6 +3873,28 @@ def _run_live_session(
                 last_submit_frame=corridor_last_submit,
                 interval_frames=args.corridor_every,
             )
+            forecast_lead_frames = corridor_policy_lead.frames
+            policy_source_frame = counter_after_read + forecast_lead_frames
+            policy_hazard_horizon_frame = (
+                policy_source_frame + TH08_CORRIDOR_CONFIG.horizon_frames
+            )
+            ordinary_submission = bool(
+                ordinary_preexhaustion_authority
+                and not bool(spell_state["active"])
+            )
+            ordinary_future_projection: (
+                OrdinaryFutureHazardProjection | None
+            ) = None
+            if ordinary_submission:
+                ordinary_future_projection = (
+                    _ordinary_submission_projection(
+                        ordinary_future_source_result,
+                        policy_source_frame=policy_source_frame,
+                        policy_horizon_frames=(
+                            TH08_CORRIDOR_CONFIG.horizon_frames
+                        ),
+                    )
+                )
             if (
                 corridor_executor is not None
                 and corridor_future is None
@@ -3829,8 +3905,11 @@ def _run_live_session(
                 )
                 and corridor_scale_schedule_supported
                 and corridor_submission_due
+                and (
+                    not ordinary_submission
+                    or ordinary_future_projection is not None
+                )
             ):
-                forecast_lead_frames = corridor_policy_lead.frames
                 policy_delay_support = delay_support_envelope(
                     delay_estimate.support,
                     minimum=LIVE_CONTROL_DELAY_MIN,
@@ -3860,51 +3939,6 @@ def _run_live_session(
                         ),
                     )
                 )
-                policy_source_frame = (
-                    counter_after_read + forecast_lead_frames
-                )
-                policy_hazard_horizon_frame = (
-                    policy_source_frame
-                    + TH08_CORRIDOR_CONFIG.horizon_frames
-                )
-                ordinary_future_projection: (
-                    OrdinaryFutureHazardProjection | None
-                ) = None
-                if (
-                    ordinary_preexhaustion_authority
-                    and not bool(spell_state["active"])
-                ):
-                    candidate_projection = (
-                        ordinary_future_source_result.closure.projection
-                        if ordinary_future_source_result is not None
-                        else None
-                    )
-                    if (
-                        candidate_projection is not None
-                        and candidate_projection.root_frame
-                        <= policy_source_frame
-                        and candidate_projection.horizon_frame
-                        >= policy_hazard_horizon_frame
-                    ):
-                        ordinary_future_projection = candidate_projection
-                    else:
-                        ordinary_future_projection = (
-                            unknown_future_hazard_projection(
-                                root_frame=counter_after_read,
-                                horizon_frames=(
-                                    forecast_lead_frames
-                                    + TH08_CORRIDOR_CONFIG.horizon_frames
-                                ),
-                                reason=(
-                                    "no stable complete future-source "
-                                    "projection covers the publication "
-                                    "epoch and corridor horizon"
-                                ),
-                                source_semantics_version=(
-                                    ORDINARY_FUTURE_SOURCE_SEMANTICS_VERSION
-                                ),
-                            )
-                        )
                 corridor_future = corridor_executor.submit(
                     _solve_corridor,
                     source_frame=policy_source_frame,
@@ -4079,28 +4113,17 @@ def _run_live_session(
             ordinary_prefix_safe_actions: tuple[str, ...] | None = None
             ordinary_authority_solution: CorridorSolution | None = None
             ordinary_future_policy_query_frame = 0
-            future_viability_policy = _ordinary_lower_kernel(
-                corridor_solution
+            (
+                ordinary_authority_solution,
+                ordinary_future_policy_query_frame,
+            ) = _ordinary_authority_target(
+                active_solution=corridor_solution,
+                pending_solution=corridor_pending_solution,
+                current_frame=captured_iteration.snapshot_frame,
             )
-            if (
-                future_viability_policy is not None
-                and _ordinary_solution_hazard_authority(
-                    corridor_solution
-                )
-            ):
-                policy_age = (
-                    captured_iteration.snapshot_frame
-                    - corridor_solution.source_frame
-                )
-                candidate_query_frame = _ordinary_target_query_frame(
-                    policy=future_viability_policy,
-                    policy_age=policy_age,
-                )
-                if candidate_query_frame is not None:
-                    ordinary_authority_solution = corridor_solution
-                    ordinary_future_policy_query_frame = (
-                        candidate_query_frame
-                    )
+            future_viability_policy = _ordinary_lower_kernel(
+                ordinary_authority_solution
+            )
             if ordinary_authority_solution is not None:
                 ordinary_required_hazard_horizon = (
                     ordinary_authority_solution.source_frame
@@ -4997,6 +5020,19 @@ def _run_live_session(
                 )
                 ordinary_preexhaustion_record.update(
                     {
+                        "terminal_policy_state": (
+                            "pending"
+                            if (
+                                ordinary_authority_solution is not None
+                                and ordinary_authority_solution
+                                is corridor_pending_solution
+                            )
+                            else (
+                                "active"
+                                if ordinary_authority_solution is not None
+                                else None
+                            )
+                        ),
                         "selected_as_allowed_action_authority": (
                             allowed_action_authority
                             == ORDINARY_PREEXHAUSTION_AUTHORITY
@@ -5026,6 +5062,16 @@ def _run_live_session(
                     "completed_this_decision": corridor_completed,
                     "submitted_this_decision": corridor_submitted,
                     "submission_due": corridor_submission_due,
+                    "ordinary_source_ready_for_submission": (
+                        ordinary_future_projection is not None
+                        if ordinary_submission
+                        else None
+                    ),
+                    "ordinary_source_blocked_submission": bool(
+                        ordinary_submission
+                        and corridor_submission_due
+                        and ordinary_future_projection is None
+                    ),
                     "required_scale_horizon": (
                         corridor_required_scale_horizon
                     ),

@@ -1,6 +1,6 @@
 # Touhou Solver Current Handoff
 
-Last updated: 2026-07-31.
+Last updated: 2026-08-01.
 
 This is the only volatile entrypoint. Read `AGENTS.md`, `GOAL.MD`, then this
 file, `STRATEGY.md`, and the focused task card in
@@ -14,8 +14,8 @@ authority.
 
 - Branch: `main`.
 - Last physical checkpoint:
-  `lunatic_route2_stage4a_unattended_20260731_233856`, based on immutable
-  live-code checkpoint `70a8ccb`.
+  `lunatic_route2_stage4a_unattended_20260801_002006`, based on immutable
+  live-code checkpoint `7558f47`.
 - Native H=32 wind-tunnel checkpoint: `3d15953`; it is historical evidence,
   not the live ordinary horizon.
 - Workspace-prune checkpoint: `be3e583` (`Prune TH08 active research
@@ -116,6 +116,15 @@ authority.
   semantic classes plus generic auxiliary opcode-`0x02` wait scheduling are
   now lowered from shipped-code evidence in source semantics v4/projection
   v13. Armed phase successor coverage remains fail closed.
+- **Observed source-v4 delivery falsifier and implemented correction:**
+  Stage-4A `20260801_002006` completed 24/1205/no-Bomb. It produced 159/1,942
+  complete projections, but exact authority was effective on 135/6,146
+  nonspell decisions and 0/383 decisions in the 80-frame nonspell hit windows.
+  Complete roots 1137..1200 were stranded behind an UNKNOWN-source future
+  publication. Ordinary mode now spends no solver slot on incomplete source
+  coverage and exposes a completed exact pending policy to the causal
+  pre-publication predecessor before its epoch. The next gate tests this
+  delivery fix; phase/transform/opcode/callback/movement closure remains open.
 - `--kill-before-saturation` now uses observed ordinary bodies only. The
   falsified timeline spawn forecast is withheld from live input.
   Observed-body alignment/unfocus remains a proposed objective, but the
@@ -144,6 +153,7 @@ Latest user-authorized Lunatic Route-2 practice ring:
 | Stage 4A ECL-config-invalid replay | `20260731_230657` | 18 | 499 | 0 | invalid gate |
 | Stage 4A contiguous-capture falsifier | `20260731_231944` | 35 | 498 | 0 | accepted |
 | Stage 4A exact-authority activation | `20260731_233856` | 24 | 845 | 0 | accepted |
+| Stage 4A source-v4/delivery falsifier | `20260801_002006` | 24 | 1205 | 0 | accepted |
 
 The automatic older-root comparisons were 15→5, 10→13, and 19→12. They are
 observational only: RNG roots differ and the proposed WS-H strategies were
@@ -191,6 +201,15 @@ nontrivial directional sets and nine exact empty predecessors; the early
 applicable sets before hit 845 were all 17-action safe sets. The 24-hit
 different-RNG aggregate is not a causal regression verdict. Its actionable
 falsifier is pressure-wave semantic starvation, not authority wiring.
+
+Stage-4A `20260801_002006` verifies that source v4 removed the earlier
+`10069` and legal auxiliary-delay-root failures, but it did not deliver useful
+authority near hits. Exact authority was effective on none of 383 decisions
+inside the 80-frame windows before the 14 nonspell hits. At the first hit,
+complete roots 1137..1200 existed while an UNKNOWN-source future publication
+blocked the serial worker. This is now corrected by gating solve submission on
+complete source coverage and treating a completed exact pending policy as the
+pre-publication terminal kernel. Stage 5 was correctly skipped.
 
 The physical forecast gate also falsified the current timeline observer as a
 general later-wave source. All 376 observations recycled the same timeline-0

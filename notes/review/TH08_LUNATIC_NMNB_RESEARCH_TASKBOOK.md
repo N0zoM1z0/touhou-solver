@@ -287,11 +287,18 @@ the exact bracket.
 That activation gate ran as `20260731_233856`: 119/1,914 source roots
 completed and 196/193 ordinary constraints were applicable/effective, but no
 useful nonempty authority survived within 80 frames of a hit. Treat capture
-delivery as closed and source-semantic starvation as current. Source v4
+bracketing as activated and source-semantic starvation as current. Source v4
 lowers captured enemy-angle variable `10069`, legal auxiliary timer roots,
-and generic native opcode-`0x02` delay scheduling. Next integrate armed
-health/timeout successor sources without relaxing fail-closed future-event
-coverage, then repeat 4A. Total hits remain secondary different-RNG evidence;
+and generic native opcode-`0x02` delay scheduling. Stage-4A
+`20260801_002006` verified those two semantic failures disappeared, but exact
+authority was absent from all 383 decisions in the 80-frame nonspell hit
+windows. Complete roots 1137..1200 were stranded behind an UNKNOWN-source
+future publication. Ordinary mode now refuses to spend a solver slot on
+incomplete source coverage and uses a completed exact pending policy as the
+pre-publication terminal kernel before its epoch. Revalidate that delivery
+correction, then integrate armed health/timeout successor sources and the
+remaining transform/opcode/callback/movement gaps without relaxing
+fail-closed coverage. Total hits remain secondary different-RNG evidence;
 local scoring and hostile-birth ranking remain later.
 
 ### WS-D — Combat, Focus, and Power

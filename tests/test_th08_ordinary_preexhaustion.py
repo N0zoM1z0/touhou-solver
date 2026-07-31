@@ -2,9 +2,12 @@ from __future__ import annotations
 
 import unittest
 from types import SimpleNamespace
+from unittest.mock import patch
 
 from th08_live.controller import (
+    _ordinary_authority_target,
     _ordinary_nonspell_preexhaustion_filter,
+    _ordinary_submission_projection,
     _ordinary_target_query_frame,
 )
 from th08_time_scale import TH08_UNIT_TIME_SCALE_BITS
@@ -79,4 +82,58 @@ class OrdinaryNonspellPreexhaustionTests(unittest.TestCase):
         )
         self.assertIsNone(
             _ordinary_target_query_frame(policy=policy, policy_age=73)
+        )
+
+    def test_pending_policy_is_a_prepublication_terminal_kernel(self) -> None:
+        policy = SimpleNamespace(
+            config=SimpleNamespace(frames_per_layer=8),
+            horizon_frames=80,
+        )
+        pending = SimpleNamespace(
+            source_frame=180,
+            plan=SimpleNamespace(viability_policy=policy),
+        )
+
+        with patch(
+            "th08_live.controller._ordinary_lower_kernel",
+            return_value=policy,
+        ), patch(
+            "th08_live.controller._ordinary_solution_hazard_authority",
+            return_value=True,
+        ):
+            solution, query_frame = _ordinary_authority_target(
+                active_solution=None,
+                pending_solution=pending,
+                current_frame=100,
+            )
+
+        self.assertIs(solution, pending)
+        self.assertEqual(query_frame, 0)
+
+    def test_incomplete_source_never_consumes_a_solver_slot(self) -> None:
+        incomplete = SimpleNamespace(
+            source_closure_complete=False,
+            root_frame=100,
+            horizon_frame=368,
+        )
+        result = SimpleNamespace(
+            closure=SimpleNamespace(projection=incomplete)
+        )
+
+        self.assertIsNone(
+            _ordinary_submission_projection(
+                result,
+                policy_source_frame=180,
+                policy_horizon_frames=80,
+            )
+        )
+
+        incomplete.source_closure_complete = True
+        self.assertIs(
+            _ordinary_submission_projection(
+                result,
+                policy_source_frame=180,
+                policy_horizon_frames=80,
+            ),
+            incomplete,
         )

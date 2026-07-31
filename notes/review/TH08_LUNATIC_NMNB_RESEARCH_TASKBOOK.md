@@ -334,6 +334,17 @@ player-relative stop/re-aim as a full-direction bounded disc and interval-adds
 `0x19`; every unhandled active transform remains fail closed. Re-run Stage 4A
 and require nonzero useful pressure-window authority before Stage 5.
 
+Stage-4A `20260801_022228` removes transform and `0x19` from live failure
+counts and reaches the first directional nonspell hit-window sets (5/8/6
+actions at frames 3501/3518/3532). All three were deadline-held and therefore
+ineffective: post-capture advance 15/16/12 exceeded pickup-support high 6
+while held `up_right` persisted. Reserve controller/game capacity by lowering
+the ordinary background owner priority and capping native workers at eight;
+accept the retained Windows solve maximum increase 804→1,095 ms because the
+initial publication lead is 80 frames and action sets are unchanged. Close
+reached auxiliary `0x05`/`0x2E` exactly, then rerun Stage 4A. Stage 5 still
+requires effective, not merely applicable, pressure-window authority.
+
 ### WS-D — Combat, Focus, and Power
 
 This is the highest-priority experiment after cleanup.

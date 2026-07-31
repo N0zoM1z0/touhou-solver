@@ -408,6 +408,95 @@ class OrdinaryFutureSourceTests(unittest.TestCase):
 
         self.assertEqual(vm.float_locals[0], FloatInterval(5.0, 7.0))
 
+    def test_auxiliary_integer_le_jump_uses_captured_local(self) -> None:
+        instructions = {
+            0: SubInstruction(
+                offset=0,
+                time=0,
+                opcode=0x2E,
+                size=28,
+                byte_08=0,
+                difficulty_mask=0xFF,
+                parameter_mask=0x01,
+                arguments=(10000, 8, 3, 44),
+            ),
+            44: SubInstruction(
+                offset=44,
+                time=3,
+                opcode=0x02,
+                size=16,
+                byte_08=0,
+                difficulty_mask=0xFF,
+                parameter_mask=0x01,
+                arguments=(10036,),
+            ),
+        }
+        vm = _VmState(
+            instruction_offset=0,
+            timer_elapsed=0,
+            integer_locals=[8, 0, 0, 0, 0, 0, 0, 0],
+            float_locals=[FloatInterval.point(0.0)] * 8,
+            scratch_integers=[1, 0, 0, 0],
+        )
+
+        _execute_auxiliary(
+            source=SimpleNamespace(identity="test"),
+            vm=vm,
+            instructions=instructions,
+            difficulty_mask=0x08,
+            frame=1,
+            aim_angle=FloatInterval.point(0.0),
+            payload={},
+        )
+
+        self.assertEqual(vm.instruction_offset, 60)
+        self.assertEqual(vm.timer_elapsed, 3)
+
+    def test_auxiliary_loop_decrements_and_jumps_while_positive(self) -> None:
+        instructions = {
+            88: SubInstruction(
+                offset=88,
+                time=4,
+                opcode=0x05,
+                size=24,
+                byte_08=0,
+                difficulty_mask=0xFF,
+                parameter_mask=0x04,
+                arguments=(0, -88, 10000),
+            ),
+            0: SubInstruction(
+                offset=0,
+                time=0,
+                opcode=0x02,
+                size=16,
+                byte_08=0,
+                difficulty_mask=0xFF,
+                parameter_mask=0x01,
+                arguments=(10036,),
+            ),
+        }
+        vm = _VmState(
+            instruction_offset=88,
+            timer_elapsed=4,
+            integer_locals=[2, 0, 0, 0, 0, 0, 0, 0],
+            float_locals=[FloatInterval.point(0.0)] * 8,
+            scratch_integers=[1, 0, 0, 0],
+        )
+
+        _execute_auxiliary(
+            source=SimpleNamespace(identity="test"),
+            vm=vm,
+            instructions=instructions,
+            difficulty_mask=0x08,
+            frame=1,
+            aim_angle=FloatInterval.point(0.0),
+            payload={},
+        )
+
+        self.assertEqual(vm.integer_locals[0], 1)
+        self.assertEqual(vm.instruction_offset, 16)
+        self.assertEqual(vm.timer_elapsed, 0)
+
     def test_dynamic_direct_fire_count_resolves_captured_integer_local(
         self,
     ) -> None:

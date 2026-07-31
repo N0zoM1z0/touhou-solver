@@ -67,7 +67,7 @@ PUBLICATION_LEAD_FRAMES = 16
 DECISION_FRAME_SUPPORT = (2, 3, 4)
 NEW_COMMAND_DELAY_FRAMES = tuple(range(1, 7))
 FUTURE_DELAY_FRAMES = tuple(range(7))
-NATIVE_WORKERS = 16
+NATIVE_WORKERS = 8
 
 
 def _terminal_viability_margins(

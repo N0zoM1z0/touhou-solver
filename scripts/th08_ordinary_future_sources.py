@@ -51,7 +51,7 @@ from touhou_control.corridor import AabbHazard, AabbTrajectoryHazard
 
 
 ORDINARY_FUTURE_SOURCE_SEMANTICS_VERSION = (
-    "th08-ordinary-future-sources-v5-stop-reaim-float-add-envelope"
+    "th08-ordinary-future-sources-v5-stop-reaim-aux-flow-envelope"
 )
 _PROJECTION_SCHEMA = "th08-native-snapshot-collision-control-projection-v13"
 _DIRECT_FIRE_OPCODES = frozenset(range(0x60, 0x69))
@@ -1005,6 +1005,24 @@ def _execute_auxiliary(
                 int(instruction.arguments[1])
             )
             continue
+        if opcode == 0x05:
+            if len(instruction.arguments) != 3:
+                _fail("auxiliary loop-jump argument layout drifted")
+            values, destination = _integer_lvalue(
+                int(instruction.arguments[2]),
+                vm,
+            )
+            values[destination] -= 1
+            if values[destination] > 0:
+                vm.timer_elapsed = _signed_u32(
+                    int(instruction.arguments[0])
+                )
+                vm.instruction_offset += _signed_u32(
+                    int(instruction.arguments[1])
+                )
+                continue
+            vm.instruction_offset += int(instruction.size)
+            continue
         if opcode == 0x02:
             if len(instruction.arguments) != 1:
                 _fail("auxiliary timer reset argument layout drifted")
@@ -1099,6 +1117,27 @@ def _execute_auxiliary(
             vm.float_locals[destination] = (
                 vm.float_locals[destination].add(value)
             )
+        elif opcode == 0x2E:
+            if len(instruction.arguments) != 4:
+                _fail("auxiliary integer-LE jump layout drifted")
+            left = _eval_integer_operand(
+                int(instruction.arguments[0]),
+                dynamic=bool(instruction.parameter_mask & 0x01),
+                vm=vm,
+            )
+            right = _eval_integer_operand(
+                int(instruction.arguments[1]),
+                dynamic=bool(instruction.parameter_mask & 0x02),
+                vm=vm,
+            )
+            if left <= right:
+                vm.timer_elapsed = _signed_u32(
+                    int(instruction.arguments[2])
+                )
+                vm.instruction_offset += _signed_u32(
+                    int(instruction.arguments[3])
+                )
+                continue
         elif opcode in _DIRECT_FIRE_OPCODES:
             events.extend(
                 _direct_fire_events(

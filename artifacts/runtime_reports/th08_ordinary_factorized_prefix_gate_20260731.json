@@ -1,14 +1,14 @@
 {
   "authority": "offline_exact_finite_model_no_physical_promotion",
-  "future_source_semantics_version": "th08-ordinary-future-sources-v5-stop-reaim-float-add-envelope",
-  "maximum_certificate_ms": 22.62279999558814,
-  "maximum_future_solve_ms": 804.2806000012206,
+  "future_source_semantics_version": "th08-ordinary-future-sources-v5-stop-reaim-aux-flow-envelope",
+  "maximum_certificate_ms": 29.716100005316548,
+  "maximum_future_solve_ms": 1094.583900005091,
   "native_worker_limit_applied": true,
-  "native_workers": 16,
+  "native_workers": 8,
   "platform": "Windows",
   "points": [
     {
-      "certificate_ms": 21.868600000743754,
+      "certificate_ms": 29.716100005316548,
       "complete": true,
       "decision_frame": 817,
       "decision_frame_support": [
@@ -27,9 +27,9 @@
         6
       ],
       "future_grid_step": 4.0,
-      "future_projection_digest": "21c4a7ea83bd7d9424aeb493191f2128318235f2348f66b3157fd72bbceb0c2a",
+      "future_projection_digest": "78dc24f3b59d3a0e4a1c3181cdd8306cec95b6e4a9791607bac9226a82481777",
       "future_required_clearance": 2.8284271247461903,
-      "future_solve_ms": 804.2806000012206,
+      "future_solve_ms": 1094.583900005091,
       "hidden_simulations": 29808,
       "live_adapter_allowed_actions": [
         "left_fast",
@@ -55,7 +55,7 @@
       "publication_lead_frames": 16,
       "root_position_error": 0.7040679383946182,
       "source_closure_complete": true,
-      "source_closure_ms": 30.89949999412056,
+      "source_closure_ms": 28.26140000252053,
       "unresolved_actions": [],
       "winning_actions": [
         "left_fast",
@@ -63,7 +63,7 @@
       ]
     },
     {
-      "certificate_ms": 16.517399999429472,
+      "certificate_ms": 19.086999993305653,
       "complete": true,
       "decision_frame": 833,
       "decision_frame_support": [
@@ -82,9 +82,9 @@
         6
       ],
       "future_grid_step": 4.0,
-      "future_projection_digest": "94c1e4b05b595aeeabd7f40e299d42fbeb383d3f5e65f2ce1e0b613d89a18242",
+      "future_projection_digest": "e348ad8b5fe4ab54c2fa42b4d0d8a6a3205f012a98d8c30b7ffb54b3613fb64c",
       "future_required_clearance": 2.8284271247461903,
-      "future_solve_ms": 533.3644000056665,
+      "future_solve_ms": 825.4988999979105,
       "hidden_simulations": 26535,
       "live_adapter_allowed_actions": [],
       "live_adapter_authority_eligible": true,
@@ -107,12 +107,12 @@
       "publication_lead_frames": 16,
       "root_position_error": 0.6833322297257917,
       "source_closure_complete": true,
-      "source_closure_ms": 26.730700003099628,
+      "source_closure_ms": 37.87200000078883,
       "unresolved_actions": [],
       "winning_actions": []
     },
     {
-      "certificate_ms": 18.669299999601208,
+      "certificate_ms": 16.948299991781823,
       "complete": true,
       "decision_frame": 835,
       "decision_frame_support": [
@@ -131,9 +131,9 @@
         6
       ],
       "future_grid_step": 4.0,
-      "future_projection_digest": "d9e48425d6194154dd71954e240c7635fddb4b765071331a8706cad46cea9f57",
+      "future_projection_digest": "ff512b05e998b48c04cbbc1690df2516db1c1dc193b8ac97b8e2863d7ed2ba20",
       "future_required_clearance": 2.8284271247461903,
-      "future_solve_ms": 561.0429999942426,
+      "future_solve_ms": 843.9138999965508,
       "hidden_simulations": 26769,
       "live_adapter_allowed_actions": [],
       "live_adapter_authority_eligible": true,
@@ -156,12 +156,12 @@
       "publication_lead_frames": 16,
       "root_position_error": 0.5739165049113679,
       "source_closure_complete": true,
-      "source_closure_ms": 26.82430000277236,
+      "source_closure_ms": 28.825399989727885,
       "unresolved_actions": [],
       "winning_actions": []
     },
     {
-      "certificate_ms": 22.62279999558814,
+      "certificate_ms": 22.220700004254468,
       "complete": true,
       "decision_frame": 850,
       "decision_frame_support": [
@@ -180,9 +180,9 @@
         6
       ],
       "future_grid_step": 4.0,
-      "future_projection_digest": "1fa87e1e1d271f23f090dbc01d249b0daf7c20b370ca82c3462bcacb8fd688b0",
+      "future_projection_digest": "1114e8b75c376c3ff63f271b0a1675e53ee1ddace78de170685b65ce445e516f",
       "future_required_clearance": 2.8284271247461903,
-      "future_solve_ms": 572.5153999956092,
+      "future_solve_ms": 880.8246999979019,
       "hidden_simulations": 38295,
       "live_adapter_allowed_actions": [],
       "live_adapter_authority_eligible": true,
@@ -210,12 +210,12 @@
       "publication_lead_frames": 16,
       "root_position_error": 1.2230581043645326,
       "source_closure_complete": true,
-      "source_closure_ms": 34.710200008703396,
+      "source_closure_ms": 32.64270001091063,
       "unresolved_actions": [],
       "winning_actions": []
     },
     {
-      "certificate_ms": 10.877299995627254,
+      "certificate_ms": 11.577500001294538,
       "complete": true,
       "decision_frame": 910,
       "decision_frame_support": [
@@ -234,9 +234,9 @@
         6
       ],
       "future_grid_step": 4.0,
-      "future_projection_digest": "8d9eed99576fe519277bdfb1c6ebd51c23db11fd6aaecb25cefd0379386f5b58",
+      "future_projection_digest": "809a52df627dc33407a01ef990fd722a2e88ec77ef374c8ae4c310d89462bfd0",
       "future_required_clearance": 2.8284271247461903,
-      "future_solve_ms": 576.2619000015547,
+      "future_solve_ms": 891.3907000096515,
       "hidden_simulations": 13539,
       "live_adapter_allowed_actions": [],
       "live_adapter_authority_eligible": true,
@@ -259,7 +259,7 @@
       "publication_lead_frames": 16,
       "root_position_error": 0.0,
       "source_closure_complete": true,
-      "source_closure_ms": 26.46120000281371,
+      "source_closure_ms": 24.855800002114847,
       "unresolved_actions": [],
       "winning_actions": []
     }

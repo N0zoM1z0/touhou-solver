@@ -218,6 +218,23 @@ active transform kinds remain UNKNOWN. Auxiliary float addition (`0x19`) is
 advanced with interval arithmetic. Retained Windows action sets are
 unchanged; physical pressure-window revalidation remains required.
 
+Stage-4A `20260801_022228` confirms transform/`0x19` closure: neither failure
+class remains in 1,952 live projections. Three decisions in the frame-3568
+nonspell hit window obtained directional exact sets of 5/8/6 actions, the
+first nonzero pressure-window applicability. They were not effective at issue.
+Post-capture advance was 15/16/12 frames against pickup-support high 6, so the
+deadline guard preserved held `up_right`; at frame 3501 that held action was
+outside the five-action exact set.
+
+This is now a causal delivery/resource-isolation failure, not scalar reserve,
+transform coverage, or local ranking. Ordinary background solves run at
+below-normal owner-thread priority and use eight native workers rather than
+sixteen, reserving CPU for the game, sensor, and issue controller. Windows
+retained solve maximum changes 804→1,095 ms while the exact five-root sets are
+unchanged. Reached auxiliary loop-jump `0x05` and integer-LE jump `0x2E` are
+also lowered from exact captured integer state. Physical revalidation is
+required; unhandled source flow still fails closed.
+
 ## Offline Native Authority
 
 ### O1 — Rolling native snapshot wind tunnel

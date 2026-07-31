@@ -474,7 +474,10 @@ ORDINARY_AUTHORITY_CORRIDOR_CONFIG = replace(
     grid_step=ORDINARY_AUTHORITY_GRID_STEP,
     required_clearance=ORDINARY_AUTHORITY_CELL_RADIUS,
 )
-ORDINARY_AUTHORITY_NATIVE_WORKERS = 16
+# Leave physical CPU capacity for TH08, sensing, and issue-time control.  A
+# 16-way background solve produced 12..16-frame action lag while an already
+# published directional exact set was waiting to be issued.
+ORDINARY_AUTHORITY_NATIVE_WORKERS = 8
 ORDINARY_AUTHORITY_MIN_TERMINAL_LEAD = LIVE_ACTION_HOLD_MAX + 1
 DIAGNOSTIC_ROOT_ONLY_SCALE_HORIZON = max(
     MAX_ACTION_CONTIGUOUS_ADVANCE_FRAMES,
@@ -2429,6 +2432,7 @@ def _run_live_session(
                     "ordinary_authority_native_viability_workers": (
                         ORDINARY_AUTHORITY_NATIVE_WORKERS
                     ),
+                    "ordinary_authority_background_low_priority": True,
                     "local_planner_horizon_frames": args.horizon,
                     "local_terminal_threat_horizon_frames": (
                         args.threat_horizon
@@ -3971,7 +3975,10 @@ def _run_live_session(
                     context_key=corridor_context,
                     audit_capsule_dir=args.viability_audit_dir,
                     audit_executor=audit_executor,
-                    background_low_priority=False,
+                    background_low_priority=(
+                        ordinary_preexhaustion_authority
+                        and not bool(spell_state["active"])
+                    ),
                     native_viability_worker_limit=(
                         ORDINARY_AUTHORITY_NATIVE_WORKERS
                         if (

@@ -39,6 +39,7 @@ from th08_future_hazard_projection import (
     complete_future_hazard_projection,
     unknown_future_hazard_projection,
 )
+from th08_native_timer import Th08TimerState
 from th08_timeline_model import (
     IndexedEnemyView,
     StageTimelineState,
@@ -51,7 +52,7 @@ from touhou_control.corridor import AabbHazard, AabbTrajectoryHazard
 
 
 ORDINARY_FUTURE_SOURCE_SEMANTICS_VERSION = (
-    "th08-ordinary-future-sources-v11-affine-player-aim-causal-events"
+    "th08-ordinary-future-sources-v12-unit-timeline-fraction"
 )
 _PROJECTION_SCHEMA = "th08-native-snapshot-collision-control-projection-v13"
 _DIRECT_FIRE_OPCODES = frozenset(range(0x60, 0x69))
@@ -1993,12 +1994,22 @@ def _timeline_root(
         )
         if index is None:
             _fail(f"timeline {timeline.index} PC is not static ECL")
-        if int(raw_row.get("fraction_bits", -1)) != 0:
-            _fail(f"timeline {timeline.index} has fractional time")
+        try:
+            timer = Th08TimerState(
+                elapsed=int(raw_row["elapsed"]),
+                fraction_bits=int(raw_row.get("fraction_bits", -1)),
+            )
+        except (KeyError, TypeError, ValueError) as exc:
+            _fail(f"timeline {timeline.index} timer is not finite: {exc}")
+        # _analyze has already required exact unit time scale.  The native
+        # fast path at 0x00447421 increments the integer component and
+        # preserves the fraction verbatim, while timeline dispatch observes
+        # only the integer component.  The finite fraction is therefore
+        # causally inert in this reduced unit-scale clock, not UNKNOWN state.
         clocks.append(
             TimelineClock(
                 instruction_index=index,
-                elapsed=int(raw_row["elapsed"]),
+                elapsed=timer.elapsed,
                 stopped=bool(current.get("terminal")),
             )
         )

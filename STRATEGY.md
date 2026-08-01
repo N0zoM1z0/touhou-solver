@@ -165,6 +165,20 @@ AABBs already consumed by the witness. An uncontained envelope still fails
 closed. Linux and Windows deterministic gates pass; this remains default-off
 pending a rotated Stage-3 physical gate.
 
+Rotated Stage-3 run `20260801_134853` completed with one nonspell hit, zero
+Bombs, Power 128 throughout, an accepted replay, and cleanup. This is a useful
+fallback-path observation but not lease promotion: zero leases were created,
+renewed, selected, or effective, and all 4,725 ordinary-eligible roots lacked
+a future policy. Of 1,214 future-source attempts, 701 were rejected solely by
+a nonzero Stage-3 timeline fraction and 465 by a native clock-bracket crossing.
+The fraction blocker was over-conservative under already-required exact unit
+scale: native timer `0x00447421` preserves the fraction and increments the
+integer component, while timeline dispatch compares that integer. Source
+semantics v12 therefore accepts any finite fraction at unit scale and projects
+the same integer clock. Nonfinite timer state or nonunit scale remains
+`UNKNOWN`. A fresh Stage-3 run must demonstrate nonzero complete publications
+before its hit result can validate the lease.
+
 The authorized Stage-4A physical run `20260731_220830` did not exercise that
 authority: all 1,754 live source projections were incomplete, chiefly because
 the former sparse capture crossed the manager frame 1,726 times. Consequently

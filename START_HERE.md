@@ -14,11 +14,26 @@ authority.
 
 - Branch: `main`.
 - Last physical checkpoint:
-  `lunatic_route2_stage4a_unattended_20260801_130742`. It completed 21 hits,
-  12 nonspell, hard no-Bomb, accepted Route-2 Lunatic replay SHA-256
-  `1cfb13852fc8230abec784b068c9dd2530cb88860b1d9938bdeacac56f7212bc`,
-  and cleanup. Its different-RNG total is observational. It created six exact
-  leases and renewed 34, but effective no-write lease consumption was zero.
+  `lunatic_route2_stage3_unattended_20260801_134853`. It completed Stage 3
+  with one hit at nonspell frame 7935, hard no-Bomb, Power 128 throughout, an
+  accepted Route-2 Lunatic replay SHA-256
+  `9e2a1272623843f39ebd5c68ee5deec02f36731ba79ac7af0fad67f4d91c71ad`,
+  and cleanup. The old Stage-3 workload had five hits, but the roots differ,
+  so that aggregate is observational rather than causal A/B evidence.
+  Crucially, this run created and consumed zero exact leases: all 4,725
+  eligible ordinary roots lacked a completed future policy. It is a strong
+  fallback-path result, not physical validation of recursive authority.
+- **Observed Stage-3 first mismatch:** 701/1,214 source attempts failed because
+  timeline 2 retained a nonzero fractional timer component; 465 crossed the
+  native clock bracket. Every one of the 49 source attempts in the f7695..7935
+  pressure window failed on the fraction, leaving no global submission before
+  the hit. Native unit-scale timer advance at `0x00447421` preserves that
+  fraction while incrementing the integer clock, and timeline instruction
+  eligibility observes only the integer component. Source semantics v12 now
+  validates finite timer state and discards the causally inert fraction only
+  after exact unit scale is proved. Nonunit scale and nonfinite state remain
+  fail closed. Focused Linux tests pass; Windows and rotated physical gates
+  remain pending.
 - **Observed physical latency correction:** the ordinary fallback now builds
   an action-conditioned H80 predecessor indexed by final observed issue age,
   including computation, old pending evolution, held no-write, replacement,

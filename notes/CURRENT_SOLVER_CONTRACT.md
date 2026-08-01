@@ -149,6 +149,17 @@ while a new or changed body outside an already certified future-source set
 revokes fail closed. The Windows retained chain still has empty actual issue
 rows at f817/833/835/850/910. Rotated Stage-3 physical validation is pending.
 
+Stage-3 `20260801_134853` completed with one hit and no Bomb, but it did not
+exercise this contract: all 4,725 ordinary-eligible roots reported no future
+policy and no lease was created or consumed. The dominant false UNKNOWN was a
+finite nonzero stage-timeline fraction. Future source analysis already
+requires exact unit time scale; under that condition native timer
+`0x00447421` increments the integer elapsed component and preserves the
+fraction, while timeline dispatch observes only the integer. Source semantics
+v12 validates the full timer state and reduces any finite fraction to that
+integer clock. Nonfinite state and nonunit scale still fail closed. Physical
+validation remains pending a fresh run with nonzero complete source delivery.
+
 Physical run `20260731_152921` found two independent invalidations. First,
 `player+0xE2A68` retains the deathbomb-window limit installed by
 `0x0044AB40`; it is not a zero-when-alive predeath predicate, so all 7,202

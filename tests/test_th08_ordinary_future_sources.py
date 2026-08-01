@@ -870,6 +870,45 @@ class OrdinaryFutureSourceTests(unittest.TestCase):
         self.assertEqual(timeline_events[0].origin_x.lower, 48.0)
         self.assertEqual(timeline_events[0].origin_x.upper, 160.0)
 
+    def test_unit_scale_timeline_fraction_is_causally_inert(self) -> None:
+        payload = deepcopy(_payload())
+        spawn = next(
+            instruction
+            for instruction in ECL.timelines[0].instructions
+            if instruction.offset == 43348
+        )
+        row = payload["stage_timeline_runtime"]["rows"][0]
+        row["elapsed"] = spawn.time
+        row["fraction_bits"] = _bits(0.5)
+        row["current_instruction"]["static_offset"] = spawn.offset
+        row["current_instruction"]["terminal"] = False
+
+        closure = project_ordinary_future_sources(
+            payload,
+            ECL,
+            horizon_frames=1,
+        )
+
+        self.assertTrue(closure.projection.source_closure_complete)
+        self.assertEqual(closure.timeline_spawn_count, 1)
+
+    def test_nonfinite_timeline_fraction_fails_closed(self) -> None:
+        payload = deepcopy(_payload())
+        row = payload["stage_timeline_runtime"]["rows"][0]
+        row["fraction_bits"] = 0x7FC00000
+
+        closure = project_ordinary_future_sources(
+            payload,
+            ECL,
+            horizon_frames=1,
+        )
+
+        self.assertFalse(closure.projection.source_closure_complete)
+        self.assertIn(
+            "timeline 0 timer is not finite",
+            closure.projection.source_closure_reason,
+        )
+
     def test_frscreen_gates_are_lifted_as_hazard_maximal_variants(
         self,
     ) -> None:

@@ -596,10 +596,13 @@ it.
    envelope revokes it. Preserve the native one-frame publication-to-motion
    phase: observations use published input; positions use shifted motion.
 6. The retained f817/833/835/850/910 empty actual rows and physical
-   f1456/f1469/f1470/f1479 and f3191/f3192 continuations regress. Rotate now
-   to Lunatic Stage 3 with hard no-Bomb and observed-body early kill only
-   inside the exact set; require nonzero effective no-write consumption or a
-   concrete fail-closed revocation.
+   f1456/f1469/f1470/f1479 and f3191/f3192 continuations regress. Stage-3
+   `20260801_134853` produced only one hit/no-Bomb but zero leases because all
+   ordinary roots lacked a future policy. Source semantics v12 removes its
+   false finite-fraction UNKNOWN only under exact unit time scale. Repeat
+   Stage 3 and require nonzero complete publication plus effective no-write
+   consumption or a concrete fail-closed revocation; aggregate hits alone do
+   not validate the lease.
 7. Evaluate remaining hostile-birth uncertainty and only then local micro
    ranking after lease authority is physically effective; repeat a winner
    before a full route.

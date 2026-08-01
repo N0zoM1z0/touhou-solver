@@ -270,6 +270,17 @@ terminal action selection may use current exact-kernel repair volumes only as
 probe ordering. Those suggestions gain no authority until their own complete
 hazard prefix and terminal membership pass.
 
+The computation guard is implemented with the existing exact held-action H80
+certificate. It uses the captured active/held/pending root, complete-mask
+no-write behavior, pickup support, unit player/laser scale, observed
+bullet/laser/contact-body geometry, and the same complete versioned future
+projection consumed by the delayed table. The scan is permitted only if that
+certificate is positive or an older continuation lease is compatible. A
+failed guard leaves `allowed_action_authority` unset and does not delay input
+for the long table. Repair volume changes only the bounded probe order. The
+retained f566 geometry rejects held `down_left`; focused Linux and Windows
+gates pass 33/33.
+
 Physical run `20260731_152921` found two independent invalidations. First,
 `player+0xE2A68` retains the deathbomb-window limit installed by
 `0x0044AB40`; it is not a zero-when-alive predeath predicate, so all 7,202

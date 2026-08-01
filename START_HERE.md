@@ -40,6 +40,19 @@ authority.
   the bullet was observed, but the finite terminal proof expired during
   computation. The next correction is a hard held-action computation guard
   plus viable-kernel-informed exact probe ordering, not another ECL opcode.
+- **Implemented computation guard, awaiting physical falsifier:** the former
+  held-only H80 exact certificate is now a prerequisite for a synchronous
+  delayed scan whenever no compatible lease exists. It consumes the complete
+  native bullet/laser/body slab, future-source projection, no-write semantics,
+  and the full effective issue-age/pickup support. An unsafe or unavailable
+  held certificate blocks the scan and returns immediately to the bounded
+  issue path; it grants no replacement action. The three-action terminal
+  probe now orders current-kernel repair-volume candidates before fixed
+  compass defaults, but each candidate still requires its independent exact
+  prefix and terminal membership. The retained f566 slot-1 certificate is
+  losing and therefore blocks the former 394.522 ms scan. Focused Linux and
+  Windows gates pass 33/33. Rotate the physical falsifier to Stage 4A; do not
+  infer success from aggregate hits alone.
 - **Observed source-v14 physical result:** 801/1,275 source roots completed
   versus 645/1,235 in source-v13 `155718`; 58 versus 47 carried the full
   H268. The targeted main `0x05`/`0x06` and captured movement-state-2

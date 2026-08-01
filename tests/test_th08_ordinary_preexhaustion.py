@@ -6,6 +6,7 @@ from unittest.mock import patch
 
 from th08_live.controller import (
     _ordinary_authority_target,
+    _ordinary_delayed_computation_guard,
     _ordinary_nonspell_preexhaustion_filter,
     _ordinary_prefix_candidate_actions,
     _ordinary_submission_projection,
@@ -81,6 +82,57 @@ class OrdinaryNonspellPreexhaustionTests(unittest.TestCase):
         self.assertEqual(
             tuple(action.name for action in selected),
             ("right_fast", "left_fast", "up_fast"),
+        )
+
+    def test_terminal_probe_prioritizes_current_viable_repair_volume(
+        self,
+    ) -> None:
+        selected = _ordinary_terminal_probe_actions(
+            held_action="down_left",
+            recovery_distances=(),
+            viable_repair_volumes=(
+                ("stay", 7),
+                ("down", 8),
+                ("up_left", 25),
+                ("down_left", 28),
+                ("down_fast", 8),
+            ),
+            limit=3,
+        )
+
+        self.assertEqual(
+            tuple(action.name for action in selected),
+            ("down_left", "up_left", "down"),
+        )
+
+    def test_long_scan_requires_lease_or_exact_held_action_guard(self) -> None:
+        self.assertEqual(
+            _ordinary_delayed_computation_guard(
+                continuation_lease_active=False,
+                held_action_safe=False,
+                held_action_reason="constant_hold_remaining_horizon_unsafe",
+            ),
+            (
+                False,
+                "blocked_without_exact_hold:"
+                "constant_hold_remaining_horizon_unsafe",
+            ),
+        )
+        self.assertEqual(
+            _ordinary_delayed_computation_guard(
+                continuation_lease_active=False,
+                held_action_safe=True,
+                held_action_reason="constant_hold_remaining_horizon_safe",
+            ),
+            (True, "exact_constant_hold_horizon"),
+        )
+        self.assertEqual(
+            _ordinary_delayed_computation_guard(
+                continuation_lease_active=True,
+                held_action_safe=False,
+                held_action_reason="not_needed",
+            ),
+            (True, "compatible_continuation_lease"),
         )
 
     def test_delayed_computation_prioritizes_local_proposal_without_authority(

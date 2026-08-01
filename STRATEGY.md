@@ -303,6 +303,19 @@ before arbitrary compass defaults. This changes candidate computation only;
 the selected action still requires the complete prefix and terminal
 predecessor, and unknown coverage remains fail closed.
 
+That correction is now implemented. The exact held-action H80 certificate is
+active as a computation guard rather than a compatibility trace. Without a
+compatible lease, the synchronous delayed table runs only when that
+certificate covers the complete effective issue-age and pickup support. If
+the held path is unsafe or its future projection is unavailable, the scan is
+skipped and no global authority is manufactured. The retained f566 slot-1
+root deterministically fails this guard. Terminal candidate ordering now uses
+current-kernel repair volumes after the held action; the retained order is
+`down_left/up_left/down` instead of `down_left/left_fast/right_fast`.
+Focused Linux and Windows tests pass 33/33. Rotate the physical gate to Stage
+4A and require the same guard/authority mechanism; aggregate hits alone are
+not acceptance.
+
 The authorized Stage-4A physical run `20260731_220830` did not exercise that
 authority: all 1,754 live source projections were incomplete, chiefly because
 the former sparse capture crossed the manager frame 1,726 times. Consequently

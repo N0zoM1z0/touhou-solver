@@ -505,7 +505,7 @@ ORDINARY_CAUSAL_ISSUE_DELAY_MIN = 0
 ORDINARY_CAUSAL_ISSUE_DELAY_MAX = 79
 ORDINARY_CAUSAL_ISSUE_BIN_FRAMES = 16
 ORDINARY_CAUSAL_SCAN_INTERVAL_FRAMES = 60
-ORDINARY_CAUSAL_HOLD_COMPATIBILITY_ENABLED = False
+ORDINARY_CAUSAL_COMPUTATION_GUARD_ENABLED = True
 DIAGNOSTIC_ROOT_ONLY_SCALE_HORIZON = max(
     MAX_ACTION_CONTIGUOUS_ADVANCE_FRAMES,
     MAX_SENSOR_EPOCH_EXTENT_FRAMES
@@ -593,9 +593,15 @@ def _ordinary_terminal_probe_actions(
     *,
     held_action: str,
     recovery_distances: tuple[tuple[str, float], ...],
+    viable_repair_volumes: tuple[tuple[str, int], ...] = (),
     limit: int = ORDINARY_TERMINAL_PROBE_ACTION_LIMIT,
 ) -> tuple[PlannerAction, ...]:
-    """Select a small exact predecessor subset before any policy queries."""
+    """Select a small exact predecessor subset before any policy queries.
+
+    Current-kernel repair volume is candidate ordering only.  Every selected
+    candidate still has to pass the independent prefix and terminal
+    predecessor before it can acquire authority.
+    """
 
     if limit <= 0:
         raise ValueError("ordinary terminal probe limit must be positive")
@@ -606,8 +612,16 @@ def _ordinary_terminal_probe_actions(
             key=lambda item: (item[1], item[0]),
         )
     )
+    viable_names = tuple(
+        name
+        for name, _ in sorted(
+            viable_repair_volumes,
+            key=lambda item: (-item[1], item[0]),
+        )
+    )
     priority_names = (
         held_action,
+        *viable_names,
         *recovery_names,
         "left_fast",
         "right_fast",
@@ -630,6 +644,21 @@ def _ordinary_terminal_probe_actions(
         for action in _PLANNER_ACTIONS
         if action.name == name
     )
+
+
+def _ordinary_delayed_computation_guard(
+    *,
+    continuation_lease_active: bool,
+    held_action_safe: bool,
+    held_action_reason: str,
+) -> tuple[bool, str]:
+    """Require an exact no-write witness before a synchronous long scan."""
+
+    if continuation_lease_active:
+        return True, "compatible_continuation_lease"
+    if held_action_safe:
+        return True, "exact_constant_hold_horizon"
+    return False, f"blocked_without_exact_hold:{held_action_reason}"
 
 
 def _prioritize_ordinary_delayed_actions(
@@ -5107,6 +5136,9 @@ def _run_live_session(
                                 recovery_distances=(
                                     policy_guidance.recovery_distances
                                 ),
+                                viable_repair_volumes=(
+                                    policy_guidance.repair_volumes
+                                ),
                             )
                         )
                         ordinary_terminal_probe_actions = tuple(
@@ -5384,9 +5416,11 @@ def _run_live_session(
             ordinary_continuation_renewal_due = bool(
                 ordinary_continuation_lease_active
             )
-            # Compatibility trace only: the held-only v2 authority is
-            # superseded by the contingent delayed-issue table below.
-            ordinary_causal_hold_reason = "superseded_by_delayed_issue_v1"
+            # The held-only v2 certificate is the computation guard for the
+            # contingent delayed-issue table below.  The scan is itself a
+            # no-write control interval and may not start without this proof
+            # or a compatible older continuation lease.
+            ordinary_causal_hold_reason = "not_needed"
             ordinary_causal_hold_action: str | None = None
             ordinary_causal_hold_safe = False
             ordinary_causal_hold_min_clearance: float | None = None
@@ -5452,7 +5486,7 @@ def _run_live_session(
                     "older_pending_must_resolve_before_delayed_direction_scan"
                 )
             if (
-                ORDINARY_CAUSAL_HOLD_COMPATIBILITY_ENABLED
+                ORDINARY_CAUSAL_COMPUTATION_GUARD_ENABLED
                 and ordinary_preexhaustion_authority
                 and ordinary_preexhaustion.authority_eligible
                 and ordinary_preexhaustion.reason
@@ -5590,6 +5624,32 @@ def _run_live_session(
                     ordinary_causal_hold_ms = (
                         time.perf_counter() - causal_hold_started
                     ) * 1000.0
+            (
+                ordinary_causal_delayed_computation_guard_passed,
+                ordinary_causal_delayed_computation_guard_reason,
+            ) = _ordinary_delayed_computation_guard(
+                continuation_lease_active=(
+                    ordinary_continuation_lease_active
+                ),
+                held_action_safe=ordinary_causal_hold_safe,
+                held_action_reason=ordinary_causal_hold_reason,
+            )
+            if (
+                ordinary_preexhaustion_authority
+                and ordinary_preexhaustion.reason
+                in {
+                    "prepublication_viable_predecessor_empty",
+                    "future_policy_unavailable",
+                }
+                and observed_local_pipeline_root is not None
+                and observed_local_pipeline_root.pending_action is None
+                and ordinary_causal_delayed_scan_due
+                and not ordinary_causal_delayed_computation_guard_passed
+            ):
+                ordinary_causal_delayed_reason = (
+                    "computation_guard_"
+                    f"{ordinary_causal_delayed_computation_guard_reason}"
+                )
             if (
                 ordinary_preexhaustion_authority
                 and not bool(spell_state["active"])
@@ -5615,6 +5675,7 @@ def _run_live_session(
                     )
                 )
                 and ordinary_causal_delayed_scan_due
+                and ordinary_causal_delayed_computation_guard_passed
             ):
                 ordinary_causal_delayed_last_scan = (
                     ordinary_causal_delayed_scan_key,
@@ -5633,6 +5694,9 @@ def _run_live_session(
                         held_action=ordinary_continuation_lease.action,
                         recovery_distances=(
                             policy_guidance.recovery_distances
+                        ),
+                        viable_repair_volumes=(
+                            policy_guidance.repair_volumes
                         ),
                     )
                 else:
@@ -5682,6 +5746,9 @@ def _run_live_session(
                         ),
                         recovery_distances=(
                             policy_guidance.recovery_distances
+                        ),
+                        viable_repair_volumes=(
+                            policy_guidance.repair_volumes
                         ),
                     )
                     causal_actions = _prioritize_ordinary_delayed_actions(
@@ -7391,6 +7458,27 @@ def _run_live_session(
                     "scan_interval_frames": (
                         ORDINARY_CAUSAL_SCAN_INTERVAL_FRAMES
                     ),
+                    "computation_guard": {
+                        "passed": (
+                            ordinary_causal_delayed_computation_guard_passed
+                        ),
+                        "reason": (
+                            ordinary_causal_delayed_computation_guard_reason
+                        ),
+                        "lease_active": (
+                            ordinary_continuation_lease_active
+                        ),
+                        "held_action_safe": ordinary_causal_hold_safe,
+                        "held_certified_horizon_frames": (
+                            ordinary_causal_hold_horizon
+                        ),
+                        "configured_issue_delay_cap": (
+                            ORDINARY_CAUSAL_ISSUE_DELAY_MAX
+                        ),
+                        "semantics": (
+                            "long_scan_is_a_no_write_control_interval"
+                        ),
+                    },
                     "future_projection_source": delayed_projection_source,
                     "candidate_actions": ordinary_causal_delayed_actions,
                     "local_ranking_action": (

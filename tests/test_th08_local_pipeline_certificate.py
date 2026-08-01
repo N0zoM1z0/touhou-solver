@@ -15,6 +15,7 @@ from th08_live_dodge_agent import (
     DOWN,
     EnemyBody,
     FOCUS,
+    LEFT,
     Laser,
     PLAYFIELD_BOTTOM,
     PLAYFIELD_LEFT,
@@ -58,6 +59,47 @@ def _unit_scale_bits(horizon: int) -> tuple[int, ...]:
 
 
 class Th08LocalPipelineCertificateTests(unittest.TestCase):
+    def test_retained_stage3_f566_held_path_hits_observed_slot_one(
+        self,
+    ) -> None:
+        down_left = next(
+            action for action in _PLANNER_ACTIONS
+            if action.name == "down_left"
+        )
+        certificate = _robust_action_certificates(
+            player_x=182.241943359375,
+            player_y=425.9578857421875,
+            previous_mask=SHOT | FOCUS | DOWN | LEFT,
+            actions=(down_left,),
+            delay_frames=tuple(range(7)),
+            action_hold_frames=74,
+            bullets=(
+                Bullet(
+                    slot=1,
+                    x=151.16783142089844,
+                    y=378.149169921875,
+                    vx=-0.31652605533599854,
+                    vy=2.4042537212371826,
+                    half_width=2.0,
+                    half_height=2.0,
+                ),
+            ),
+            lasers=(),
+            enemy_bodies=(),
+            snapshot_lag=0,
+            player_scale_bits=_unit_scale_bits(80),
+            laser_scale_bits=_unit_scale_bits(80),
+            pipeline_root=LocalPipelineRoot(
+                "down_left",
+                "down_left",
+                input_publication_to_motion_lag_frames=1,
+            ),
+        )["down_left"]
+
+        self.assertGreater(certificate.worst_collisions, 0)
+        self.assertLess(certificate.min_clearance, 0.0)
+        self.assertEqual(certificate.pipeline_branch_count, 1)
+
     def test_retained_stage4a_write_pickup_observation_precedes_motion(
         self,
     ) -> None:

@@ -651,6 +651,11 @@ it.
    before any long scan and prioritize current-kernel viable repair actions
    inside the bounded terminal probe. The guard must prevent this scan from
    starting; merely relabeling the later hit is failure.
+   The guard and probe-order change are implemented. Retained f566 exact
+   geometry rejects the held path, and current-kernel ordering selects
+   `down_left/up_left/down`; 33/33 focused Linux and Windows tests pass. The
+   rotated Stage-4A trace must show the guard blocking unsafe scans and no
+   shadow-only widening.
 7. Evaluate remaining hostile-birth uncertainty and only then local micro
    ranking after lease authority is physically effective; repeat a winner
    before a full route.

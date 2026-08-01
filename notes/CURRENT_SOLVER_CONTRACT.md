@@ -191,7 +191,15 @@ longer invents a fresh linear future for all remaining frames. The issue seam
 uses the fresh native prefix snapshot at its own frame. Unstable observations,
 an uncontained current body, old source semantics, incomplete source/topology
 coverage, or version mismatch revoke/fail closed. This is deterministic
-contract evidence pending physical Stage-3 rotation.
+contract evidence. Physical Stage-3 `20260801_152531` retained complete source
+delivery and exact action activity but consumed zero leases: ten creates and
+three renewals produced two selected lease issues, both rejected. The retained
+trace identifies false contract seams rather than an empty exact predecessor:
+six capture revocations involved only contact-disabled bodies, three
+direction/focus-identical commands differed only by a decorated label or SHOT
+wall pulse, and one exact lease was vetoed solely because no separate fresh
+local transaction existed. Lease v3 therefore remains rejected as recursive
+live authority pending the narrowly scoped correction.
 
 Physical run `20260731_152921` found two independent invalidations. First,
 `player+0xE2A68` retains the deathbomb-window limit installed by

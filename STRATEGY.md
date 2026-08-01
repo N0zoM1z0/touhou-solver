@@ -212,6 +212,19 @@ older source semantics, while unstable snapshots, an uncontained observation,
 incomplete topology, or missing future coverage still fail closed. Focused
 Linux and Windows gates pass. Physical Stage-3 rotation remains required.
 
+The Stage-3 rotation `20260801_152531` falsified lease v3 as a live authority,
+not source v13 as a whole. It completed six hits/four nonspell with no Bomb;
+different RNG prevents comparing that total causally with the v12 four-hit
+run. Mechanistically, 653/1,190 source captures completed, 267 prepublication
+and 13 delayed exact issues were effective, and leases were created ten times
+and renewed three. Two leases reached authority selection, but neither was
+effective at issue. Of 13 captured leases, six were revoked by bodies whose
+native contact gate was disabled, three by a decorated action/SHOT-only mask
+change despite identical direction/focus, and one by a redundant fresh-local
+veto after the exact old proof and observed body seam already passed. These
+are structural false revocations; fix them without widening direction/focus or
+future-source coverage, then repeat Stage 3 before rotating Stage 4A.
+
 The authorized Stage-4A physical run `20260731_220830` did not exercise that
 authority: all 1,754 live source projections were incomplete, chiefly because
 the former sparse capture crossed the manager frame 1,726 times. Consequently

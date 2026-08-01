@@ -109,6 +109,7 @@ from th08_live_dodge_agent import (
     decode_player_lethal_aabb,
     merge_spell_enemy_body_guard,
     merge_enemy_pool_prefix,
+    issue_transaction_for_fresh_hazards,
     project_enemy_pool_snapshot,
     recertify_action_for_fresh_hazards,
     read_enemy_bodies_sparse,
@@ -1461,6 +1462,53 @@ class LiveDodgeAgentTests(unittest.TestCase):
         assert record is not None
         self.assertFalse(
             record["selected_outside_global_without_relaxation"]
+        )
+
+    def test_issue_recertification_cannot_escape_exact_action_authority(
+        self,
+    ) -> None:
+        decision = Decision(
+            SHOT | UP,
+            "up_fast",
+            10.0,
+            10.0,
+            0.0,
+            False,
+            viability_constrained=True,
+            viability_safe_action_count=1,
+        )
+        with patch(
+            "th08_live_dodge_agent._robust_action_certificates",
+            side_effect=_issue_certificates(
+                {
+                    "up_fast": (1, -2.0, 100.0),
+                    "down_fast": (0, 8.0, 0.0),
+                }
+            ),
+        ):
+            corrected = issue_transaction_for_fresh_hazards(
+                decision,
+                player_x=192.0,
+                player_y=400.0,
+                previous_mask=SHOT | UP,
+                delay_frames=(2, 3),
+                action_hold_frames=4,
+                bullets=(),
+                lasers=(),
+                enemy_bodies=(),
+                snapshot_lag=0,
+                allowed_first_actions=("up_fast",),
+                allowed_action_authority="exact_test_authority",
+            ).decision
+
+        self.assertEqual(corrected.action, "up_fast")
+        self.assertTrue(corrected.viability_constrained)
+        self.assertFalse(corrected.viability_constraint_relaxed)
+        self.assertFalse(corrected.viability_fresh_prefix_relaxed)
+        assert corrected.issue_recertification is not None
+        self.assertEqual(
+            corrected.issue_recertification.selection_reason,
+            "retain_hard_global_authority_least_bad",
         )
 
     def test_empty_intersection_can_preserve_safe_plan_with_relaxation(

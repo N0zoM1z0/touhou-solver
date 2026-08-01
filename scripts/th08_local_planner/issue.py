@@ -153,11 +153,22 @@ class IssueTransaction:
         intersection = tuple(
             action for action in (allowed or ()) if action in fresh_safe_set
         )
+        hard_global_authority = bool(
+            global_applicable
+            and request.allowed_action_authority is not None
+        )
         empty_intersection_relaxation = bool(
-            global_applicable and not intersection
+            global_applicable
+            and not intersection
+            and not hard_global_authority
         )
         if global_applicable and intersection:
             candidate_names = intersection
+        elif hard_global_authority:
+            # Fresh local disagreement is evidence to retain, not authority to
+            # escape an exact global set.  Pick the least-bad globally allowed
+            # action and keep the global constraint explicit.
+            candidate_names = allowed or ()
         elif fresh_safe_actions:
             candidate_names = fresh_safe_actions
         else:
@@ -222,6 +233,8 @@ class IssueTransaction:
                     if fresh_safe_actions
                     else "relax_empty_fresh_global_intersection_least_bad"
                 )
+            elif hard_global_authority and not intersection:
+                reason = "retain_hard_global_authority_least_bad"
             elif global_applicable:
                 reason = "replace_unsafe_from_fresh_global_intersection"
             elif fresh_safe_actions:
@@ -271,7 +284,8 @@ class IssueTransaction:
             robust_cvar_risk=certificate.cvar_risk,
             robust_worst_delay=certificate.worst_delay,
             viability_constrained=bool(
-                global_applicable and intersection
+                global_applicable
+                and (intersection or hard_global_authority)
             ),
             viability_safe_action_count=len(allowed or ()),
             viability_repair_volume=repair_by_action.get(

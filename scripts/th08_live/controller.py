@@ -51,6 +51,7 @@ from th08_ecl_runtime import (
 from th08_ecl_tool.core import parse_ecl
 from th08_future_hazard_projection import (
     OrdinaryFutureHazardProjection,
+    condition_future_hazard_projection_on_player_paths,
 )
 from th08_laser_runtime import (
     Laser,
@@ -403,7 +404,10 @@ from touhou_control.input_clock import (
     SemanticClockEvent,
     SemanticClockObservation,
 )
-from touhou_control.local_pipeline_oracle import LocalPipelineRoot
+from touhou_control.local_pipeline_oracle import (
+    LocalPipelineRoot,
+    enumerate_local_pipeline_branches,
+)
 from touhou_control.phase_progress import (  # noqa: F401
     PhaseProgressObservation,
     PhaseProgressTracker,
@@ -479,6 +483,8 @@ ORDINARY_AUTHORITY_CORRIDOR_CONFIG = replace(
 # published directional exact set was waiting to be issued.
 ORDINARY_AUTHORITY_NATIVE_WORKERS = 8
 ORDINARY_AUTHORITY_MIN_TERMINAL_LEAD = LIVE_ACTION_HOLD_MAX + 1
+ORDINARY_TERMINAL_PROBE_ACTION_LIMIT = 3
+ORDINARY_PREFIX_CERTIFICATE_ACTION_LIMIT = 3
 DIAGNOSTIC_ROOT_ONLY_SCALE_HORIZON = max(
     MAX_ACTION_CONTIGUOUS_ADVANCE_FRAMES,
     MAX_SENSOR_EPOCH_EXTENT_FRAMES
@@ -508,6 +514,9 @@ ROUTE2_STAGE_SUCCESSORS = {
 ORDINARY_PREEXHAUSTION_AUTHORITY = (
     "causal_ordinary_nonspell_prepublication_viability_v1"
 )
+ORDINARY_CAUSAL_HOLD_AUTHORITY = (
+    "causal_ordinary_nonspell_constant_hold_remaining_horizon_v2"
+)
 CORRIDOR_ALLOWED_ACTION_AUTHORITY = "exact_corridor_viability_v1"
 _ORDINARY_PREEXHAUSTION_ACTIONS = tuple(
     action.name for action in _PLANNER_ACTIONS
@@ -516,6 +525,120 @@ _ORDINARY_PREEXHAUSTION_VELOCITIES = {
     action.name: (action.dx, action.dy)
     for action in _LOCAL_PIPELINE_STATE_ACTIONS
 }
+
+
+def _ordinary_prefix_candidate_actions(
+    *,
+    held_action: str,
+    terminal_candidates: tuple[str, ...],
+    recovery_actions: tuple[str, ...],
+    limit: int = ORDINARY_PREFIX_CERTIFICATE_ACTION_LIMIT,
+) -> tuple[PlannerAction, ...]:
+    """Choose a bounded hard-authority subset without adding an action."""
+
+    if limit <= 0:
+        raise ValueError("ordinary prefix action limit must be positive")
+    candidate_set = set(terminal_candidates)
+    priority_names = (
+        held_action,
+        *recovery_actions[:3],
+        "left_fast",
+        "right_fast",
+        "up_fast",
+        "down_fast",
+        *terminal_candidates,
+    )
+    selected_names: list[str] = []
+    for name in priority_names:
+        if name in candidate_set and name not in selected_names:
+            selected_names.append(name)
+        if len(selected_names) >= limit:
+            break
+    return tuple(
+        action
+        for name in selected_names
+        for action in _PLANNER_ACTIONS
+        if action.name == name
+    )
+
+
+def _ordinary_terminal_probe_actions(
+    *,
+    held_action: str,
+    recovery_distances: tuple[tuple[str, float], ...],
+    limit: int = ORDINARY_TERMINAL_PROBE_ACTION_LIMIT,
+) -> tuple[PlannerAction, ...]:
+    """Select a small exact predecessor subset before any policy queries."""
+
+    if limit <= 0:
+        raise ValueError("ordinary terminal probe limit must be positive")
+    recovery_names = tuple(
+        name
+        for name, _ in sorted(
+            recovery_distances,
+            key=lambda item: (item[1], item[0]),
+        )
+    )
+    priority_names = (
+        held_action,
+        *recovery_names,
+        "left_fast",
+        "right_fast",
+        "up_fast",
+        "down_fast",
+        *_ORDINARY_PREEXHAUSTION_ACTIONS,
+    )
+    selected_names: list[str] = []
+    for name in priority_names:
+        if (
+            name in _ORDINARY_PREEXHAUSTION_VELOCITIES
+            and name not in selected_names
+        ):
+            selected_names.append(name)
+        if len(selected_names) >= limit:
+            break
+    return tuple(
+        action
+        for name in selected_names
+        for action in _PLANNER_ACTIONS
+        if action.name == name
+    )
+
+
+def _finalize_ordinary_terminal_probe(
+    terminal_probe: CausalPrepublicationFilter,
+    *,
+    prefix_safe_actions: tuple[str, ...],
+) -> CausalPrepublicationFilter:
+    """Attach the exact prefix slab without repeating terminal queries."""
+
+    prefix_set = set(prefix_safe_actions)
+    candidate_viable = tuple(
+        action
+        for action in terminal_probe.candidate_viable_actions
+        if action in prefix_set
+    )
+    allowed_actions = (
+        candidate_viable if terminal_probe.authority_eligible else None
+    )
+    if not terminal_probe.authority_eligible:
+        reason = terminal_probe.reason
+    elif not candidate_viable:
+        reason = "prepublication_viable_predecessor_empty"
+    elif len(candidate_viable) == len(terminal_probe.actions):
+        reason = "all_selected_actions_reach_future_viable_set"
+    else:
+        reason = "prepublication_viable_actions_found"
+    return replace(
+        terminal_probe,
+        applicable=bool(
+            terminal_probe.authority_eligible and candidate_viable
+        ),
+        reason=reason,
+        allowed_actions=allowed_actions,
+        candidate_viable_actions=candidate_viable,
+        prefix_safe_actions=prefix_safe_actions,
+    )
 
 
 def _corridor_scale_schedule_supported(
@@ -699,6 +822,7 @@ def _ordinary_nonspell_preexhaustion_filter(
     future_policy_source_frame: int | None = None,
     prefix_certified_frames: int = 0,
     prefix_safe_actions: tuple[str, ...] | None = None,
+    selected_actions: tuple[str, ...] = _ORDINARY_PREEXHAUSTION_ACTIONS,
 ) -> CausalPrepublicationFilter:
     """Build fail-closed authority into the next published ordinary kernel."""
 
@@ -742,7 +866,7 @@ def _ordinary_nonspell_preexhaustion_filter(
     return build_causal_prepublication_filter(
         enabled=True,
         root=root,
-        selected_actions=_ORDINARY_PREEXHAUSTION_ACTIONS,
+        selected_actions=selected_actions,
         action_velocities=_ORDINARY_PREEXHAUSTION_VELOCITIES,
         delay_frames=pickup_delay_frames,
         current_frame=current_frame,
@@ -1302,6 +1426,60 @@ def _robust_action_certificates(
         pipeline_root=pipeline_root,
         timing_accumulator=timing_accumulator,
     )
+
+
+def _causal_pipeline_player_positions(
+    *,
+    root: LocalPipelineRoot,
+    selected_action: str,
+    delay_frames: tuple[int, ...],
+    horizon_frames: int,
+    player_x: float,
+    player_y: float,
+    player_scale_bits: tuple[int, ...],
+) -> tuple[tuple[tuple[float, float], ...], ...]:
+    """Enumerate player positions seen by each future native emission.
+
+    Index zero is the observed root. Later indices retain every hidden
+    pending/pickup branch for the selected complete desired mask. The held
+    action therefore remains the exact no-write branch.
+    """
+
+    if len(player_scale_bits) < horizon_frames:
+        raise ValueError("causal player path lacks time-scale coverage")
+    action_by_name = {
+        action.name: action for action in _LOCAL_PIPELINE_STATE_ACTIONS
+    }
+    branches = enumerate_local_pipeline_branches(
+        root=root,
+        selected_action=selected_action,
+        delay_frames=delay_frames,
+        horizon_frames=horizon_frames,
+    )
+    positions_by_step: list[list[tuple[float, float]]] = [
+        [(float(player_x), float(player_y)) for _ in branches]
+    ]
+    branch_positions = [
+        (float(player_x), float(player_y)) for _ in branches
+    ]
+    for step in range(1, horizon_frames + 1):
+        next_positions: list[tuple[float, float]] = []
+        for branch_index, branch in enumerate(branches):
+            action = action_by_name.get(branch.active_actions[step - 1])
+            if action is None:
+                raise ValueError("causal player path contains unknown action")
+            x, y = branch_positions[branch_index]
+            next_positions.append(
+                _advance_planner_action(
+                    x,
+                    y,
+                    action,
+                    time_scale_bits=player_scale_bits[step - 1],
+                )
+            )
+        positions_by_step.append(next_positions)
+        branch_positions = next_positions
+    return tuple(tuple(positions) for positions in positions_by_step)
 
 
 def _direct_root_certificate_shadow(
@@ -2217,6 +2395,9 @@ def _run_live_session(
                         "enabled": ordinary_preexhaustion_authority,
                         "scope": "ordinary_nonspell_only",
                         "authority": ORDINARY_PREEXHAUSTION_AUTHORITY,
+                        "empty_kernel_causal_hold_authority": (
+                            ORDINARY_CAUSAL_HOLD_AUTHORITY
+                        ),
                         "hard_inputs": (
                             "observed_active_held_pending_pipeline_root_"
                             "pickup_delay_support_completed_future_policy_"
@@ -2230,6 +2411,11 @@ def _run_live_session(
                         "predecessor": (
                             "set_valued_hazard_space_all_pickup_branches_"
                             "to_next_publication_epoch"
+                        ),
+                        "empty_kernel_fallback": (
+                            "remaining_horizon_constant_held_no_write_"
+                            "witness_with_"
+                            "action_conditioned_future_player_aim"
                         ),
                         "recovery_role": (
                             "directional_set_distance_diagnostic_only"
@@ -4135,7 +4321,16 @@ def _run_live_session(
             ordinary_future_hazard_coverage = None
             ordinary_prefix_certified_frames = 0
             ordinary_prefix_safe_actions: tuple[str, ...] | None = None
+            ordinary_prefix_evaluated_actions: tuple[str, ...] = ()
+            ordinary_terminal_candidate_actions: tuple[str, ...] = ()
+            ordinary_terminal_probe_actions: tuple[str, ...] = ()
+            ordinary_terminal_probe_result: (
+                CausalPrepublicationFilter | None
+            ) = None
             ordinary_prefix_certificate_ms = 0.0
+            ordinary_terminal_probe_ms = 0.0
+            published_future_projection = None
+            future_projection_offset = -1
             ordinary_authority_solution: CorridorSolution | None = None
             ordinary_future_policy_query_frame = 0
             (
@@ -4247,63 +4442,162 @@ def _run_live_session(
                         ordinary_prefix_certified_frames = (
                             candidate_prefix_certified_frames
                         )
-                        ordinary_prefix_started = time.perf_counter()
-                        ordinary_prefix_certificates = _robust_action_certificates(
-                            player_x=player_control_root.x,
-                            player_y=player_control_root.y,
-                            previous_mask=held_desired_mask,
-                            actions=_PLANNER_ACTIONS,
-                            delay_frames=ordinary_prefix_delay_frames,
-                            action_hold_frames=(
-                                ordinary_prefix_hold_frames
-                            ),
-                            bullets=bullets,
-                            lasers=lasers,
-                            enemy_bodies=enemy_bodies,
-                            snapshot_lag=player_to_hazard_lag,
-                            player_scale_bits=(
-                                captured_iteration.time_scale_schedule
-                                .require_player_horizon(
-                                    candidate_prefix_certified_frames
-                                )
-                            ),
-                            laser_scale_bits=(
-                                captured_iteration.time_scale_schedule
-                                .require_laser_horizon(
-                                    candidate_prefix_certified_frames
-                                )
-                            ),
-                            pipeline_root=(
-                                observed_local_pipeline_root
-                            ),
-                            future_hazard_projection=(
-                                published_future_projection
-                            ),
-                            future_projection_offset=(
-                                future_projection_offset
-                            ),
+                        # First query only terminal Boolean membership. This
+                        # pass has no prefix authority and is never published;
+                        # it selects a small conservative subset for the
+                        # expensive per-frame hazard certificate below.
+                        held_action_name = (
+                            observed_local_pipeline_root
+                            .held_desired_action
                         )
-                        ordinary_prefix_certificate_ms = (
-                            time.perf_counter() - ordinary_prefix_started
-                        ) * 1000.0
-                        ordinary_prefix_safe_actions = tuple(
-                            action.name
-                            for action in _PLANNER_ACTIONS
-                            if (
-                                (
-                                    certificate := (
-                                        ordinary_prefix_certificates.get(
-                                            action.name
-                                        )
-                                    )
-                                )
-                                is not None
-                                and certificate.worst_collisions == 0
-                                and certificate.min_clearance > 0.0
+                        terminal_probe_planner_actions = (
+                            _ordinary_terminal_probe_actions(
+                                held_action=held_action_name,
+                                recovery_distances=(
+                                    policy_guidance.recovery_distances
+                                ),
                             )
                         )
-            ordinary_preexhaustion = (
-                _ordinary_nonspell_preexhaustion_filter(
+                        ordinary_terminal_probe_actions = tuple(
+                            action.name
+                            for action in terminal_probe_planner_actions
+                        )
+                        terminal_probe_started = time.perf_counter()
+                        terminal_probe = (
+                            _ordinary_nonspell_preexhaustion_filter(
+                                enabled=True,
+                                spell_active=False,
+                                player_phase=int(player["phase"]),
+                                root_scale_bits=(
+                                    player_control_root.scale_bits
+                                ),
+                                root=observed_local_pipeline_root,
+                                action_hold_frames=LIVE_ACTION_HOLD_MAX,
+                                player_x=player_control_root.x,
+                                player_y=player_control_root.y,
+                                current_frame=(
+                                    captured_iteration.snapshot_frame
+                                ),
+                                future_solution=(
+                                    ordinary_authority_solution
+                                ),
+                                future_hazard_coverage=(
+                                    ordinary_future_hazard_coverage
+                                ),
+                                future_policy_query_frame=(
+                                    ordinary_future_policy_query_frame
+                                ),
+                                future_policy_source_frame=(
+                                    ordinary_authority_solution.source_frame
+                                ),
+                                prefix_certified_frames=(
+                                    candidate_prefix_certified_frames
+                                ),
+                                prefix_safe_actions=(
+                                    ordinary_terminal_probe_actions
+                                ),
+                                selected_actions=(
+                                    ordinary_terminal_probe_actions
+                                ),
+                            )
+                        )
+                        ordinary_terminal_probe_result = terminal_probe
+                        ordinary_terminal_probe_ms = (
+                            time.perf_counter() - terminal_probe_started
+                        ) * 1000.0
+                        ordinary_terminal_candidate_actions = (
+                            terminal_probe.candidate_viable_actions
+                        )
+                        ordinary_prefix_actions = (
+                            _ordinary_prefix_candidate_actions(
+                                held_action=held_action_name,
+                                terminal_candidates=(
+                                    terminal_probe
+                                    .candidate_viable_actions
+                                ),
+                                recovery_actions=(
+                                    terminal_probe.recovery_actions
+                                ),
+                            )
+                        )
+                        ordinary_prefix_evaluated_actions = tuple(
+                            action.name for action in ordinary_prefix_actions
+                        )
+                        if not ordinary_prefix_actions:
+                            ordinary_prefix_safe_actions = ()
+                        else:
+                            ordinary_prefix_started = time.perf_counter()
+                            ordinary_prefix_certificates = (
+                                _robust_action_certificates(
+                                    player_x=player_control_root.x,
+                                    player_y=player_control_root.y,
+                                    previous_mask=held_desired_mask,
+                                    actions=ordinary_prefix_actions,
+                                    delay_frames=(
+                                        ordinary_prefix_delay_frames
+                                    ),
+                                    action_hold_frames=(
+                                        ordinary_prefix_hold_frames
+                                    ),
+                                    bullets=bullets,
+                                    lasers=lasers,
+                                    enemy_bodies=enemy_bodies,
+                                    snapshot_lag=player_to_hazard_lag,
+                                    player_scale_bits=(
+                                        captured_iteration
+                                        .time_scale_schedule
+                                        .require_player_horizon(
+                                            candidate_prefix_certified_frames
+                                        )
+                                    ),
+                                    laser_scale_bits=(
+                                        captured_iteration
+                                        .time_scale_schedule
+                                        .require_laser_horizon(
+                                            candidate_prefix_certified_frames
+                                        )
+                                    ),
+                                    pipeline_root=(
+                                        observed_local_pipeline_root
+                                    ),
+                                    future_hazard_projection=(
+                                        published_future_projection
+                                    ),
+                                    future_projection_offset=(
+                                        future_projection_offset
+                                    ),
+                                )
+                            )
+                            ordinary_prefix_certificate_ms = (
+                                time.perf_counter()
+                                - ordinary_prefix_started
+                            ) * 1000.0
+                            ordinary_prefix_safe_actions = tuple(
+                                action.name
+                                for action in ordinary_prefix_actions
+                                if (
+                                    ordinary_prefix_certificates[
+                                        action.name
+                                    ].worst_collisions
+                                    == 0
+                                    and ordinary_prefix_certificates[
+                                        action.name
+                                    ].min_clearance
+                                    > 0.0
+                                )
+                            )
+            if ordinary_terminal_probe_result is not None:
+                ordinary_preexhaustion = (
+                    _finalize_ordinary_terminal_probe(
+                        ordinary_terminal_probe_result,
+                        prefix_safe_actions=(
+                            ordinary_prefix_safe_actions or ()
+                        ),
+                    )
+                )
+            else:
+                ordinary_preexhaustion = (
+                    _ordinary_nonspell_preexhaustion_filter(
                     enabled=ordinary_preexhaustion_authority,
                     spell_active=bool(spell_state["active"]),
                     player_phase=int(player["phase"]),
@@ -4331,8 +4625,159 @@ def _run_live_session(
                     prefix_safe_actions=(
                         ordinary_prefix_safe_actions
                     ),
+                    # No complete prefix slab means no terminal query can
+                    # acquire authority; avoid spending the physical lease on
+                    # a diagnostic all-action scan.
+                    selected_actions=(),
+                    )
                 )
-            )
+            ordinary_causal_hold_reason = "not_needed"
+            ordinary_causal_hold_action: str | None = None
+            ordinary_causal_hold_safe = False
+            ordinary_causal_hold_min_clearance: float | None = None
+            ordinary_causal_hold_collisions: int | None = None
+            ordinary_causal_hold_branch_count = 0
+            ordinary_causal_hold_event_count = 0
+            ordinary_causal_hold_projection_digest: str | None = None
+            ordinary_causal_hold_horizon = 0
+            ordinary_causal_hold_ms = 0.0
+            if (
+                ordinary_preexhaustion_authority
+                and ordinary_preexhaustion.authority_eligible
+                and ordinary_preexhaustion.reason
+                == "prepublication_viable_predecessor_empty"
+                and observed_local_pipeline_root is not None
+            ):
+                ordinary_causal_hold_reason = "prerequisite_unavailable"
+                held_action_name = (
+                    observed_local_pipeline_root.held_desired_action
+                )
+                held_action = next(
+                    (
+                        action
+                        for action in _PLANNER_ACTIONS
+                        if action.name == held_action_name
+                    ),
+                    None,
+                )
+                causal_horizon = (
+                    min(
+                        TH08_CORRIDOR_CONFIG.horizon_frames,
+                        (
+                            published_future_projection.horizon_frames
+                            - future_projection_offset
+                        ),
+                    )
+                    if isinstance(
+                        published_future_projection,
+                        OrdinaryFutureHazardProjection,
+                    )
+                    and future_projection_offset >= 0
+                    else 0
+                )
+                causal_delay_frames = tuple(
+                    range(LIVE_ACTION_HOLD_MAX + 1)
+                )
+                causal_hold_frames = (
+                    causal_horizon - max(causal_delay_frames)
+                )
+                causal_projection_usable = bool(
+                    held_action is not None
+                    and isinstance(
+                        published_future_projection,
+                        OrdinaryFutureHazardProjection,
+                    )
+                    and future_projection_offset >= 0
+                    and causal_hold_frames > 0
+                    and future_projection_offset + causal_horizon
+                    <= published_future_projection.horizon_frames
+                )
+                if causal_projection_usable:
+                    ordinary_causal_hold_horizon = causal_horizon
+                    causal_hold_started = time.perf_counter()
+                    try:
+                        causal_player_scale_bits = (
+                            captured_iteration.time_scale_schedule
+                            .require_player_horizon(causal_horizon)
+                        )
+                        causal_player_positions = (
+                            _causal_pipeline_player_positions(
+                                root=observed_local_pipeline_root,
+                                selected_action=held_action_name,
+                                delay_frames=causal_delay_frames,
+                                horizon_frames=causal_horizon,
+                                player_x=player_control_root.x,
+                                player_y=player_control_root.y,
+                                player_scale_bits=(
+                                    causal_player_scale_bits
+                                ),
+                            )
+                        )
+                        causal_projection = (
+                            condition_future_hazard_projection_on_player_paths(
+                                published_future_projection,
+                                source_frame=(
+                                    captured_iteration.snapshot_frame
+                                ),
+                                horizon_frames=causal_horizon,
+                                player_positions_by_step=(
+                                    causal_player_positions
+                                ),
+                            )
+                        )
+                        causal_certificate = _robust_action_certificates(
+                            player_x=player_control_root.x,
+                            player_y=player_control_root.y,
+                            previous_mask=held_desired_mask,
+                            actions=(held_action,),
+                            delay_frames=causal_delay_frames,
+                            action_hold_frames=causal_hold_frames,
+                            bullets=bullets,
+                            lasers=lasers,
+                            enemy_bodies=enemy_bodies,
+                            snapshot_lag=player_to_hazard_lag,
+                            player_scale_bits=causal_player_scale_bits,
+                            laser_scale_bits=(
+                                captured_iteration.time_scale_schedule
+                                .require_laser_horizon(causal_horizon)
+                            ),
+                            pipeline_root=observed_local_pipeline_root,
+                            future_hazard_projection=causal_projection,
+                            future_projection_offset=0,
+                        )[held_action_name]
+                        ordinary_causal_hold_action = held_action_name
+                        ordinary_causal_hold_min_clearance = (
+                            causal_certificate.min_clearance
+                        )
+                        ordinary_causal_hold_collisions = (
+                            causal_certificate.worst_collisions
+                        )
+                        ordinary_causal_hold_branch_count = (
+                            causal_certificate.pipeline_branch_count
+                        )
+                        ordinary_causal_hold_event_count = len(
+                            causal_projection.direct_fire_events
+                        )
+                        ordinary_causal_hold_projection_digest = (
+                            causal_projection.digest
+                        )
+                        ordinary_causal_hold_safe = bool(
+                            causal_certificate.worst_collisions == 0
+                            and causal_certificate.min_clearance > 0.0
+                        )
+                        ordinary_causal_hold_reason = (
+                            "constant_hold_remaining_horizon_safe"
+                            if ordinary_causal_hold_safe
+                            else "constant_hold_remaining_horizon_unsafe"
+                        )
+                    except (KeyError, TypeError, ValueError) as error:
+                        ordinary_causal_hold_reason = (
+                            "causal_conditioning_failed:"
+                            f"{type(error).__name__}:{error}"
+                        )
+                    ordinary_causal_hold_ms = (
+                        time.perf_counter() - causal_hold_started
+                    ) * 1000.0
             allowed_action_authority = (
                 CORRIDOR_ALLOWED_ACTION_AUTHORITY
                 if (
@@ -4365,6 +4810,25 @@ def _run_live_session(
                 allowed_action_authority = (
                     ORDINARY_PREEXHAUSTION_AUTHORITY
                 )
+            if (
+                allowed_action_authority is None
+                and ordinary_causal_hold_safe
+                and ordinary_causal_hold_action is not None
+            ):
+                actionable_policy_guidance = replace(
+                    actionable_policy_guidance,
+                    support_covers_current=True,
+                    allowed_first_actions=(ordinary_causal_hold_action,),
+                    repair_volumes=(),
+                    recovery_distances=(),
+                    safety_actions=(),
+                    safety_state_value=None,
+                    survival_actions=(),
+                    survival_frames=None,
+                    survival_bottleneck_margin=None,
+                    position_error=0.0,
+                )
+                allowed_action_authority = ORDINARY_CAUSAL_HOLD_AUTHORITY
             early_kill_allowed_actions = (
                 actionable_policy_guidance.allowed_first_actions
             )
@@ -4455,7 +4919,10 @@ def _run_live_session(
                         ),
                         allow_coarse_viability_relaxation=(
                             allowed_action_authority
-                            != ORDINARY_PREEXHAUSTION_AUTHORITY
+                            not in (
+                                ORDINARY_PREEXHAUSTION_AUTHORITY,
+                                ORDINARY_CAUSAL_HOLD_AUTHORITY,
+                            )
                         ),
                         viability_repair_volumes=(
                             actionable_policy_guidance.repair_volumes
@@ -4713,6 +5180,25 @@ def _run_live_session(
                 previous_mask=previous_mask,
                 focus_bit=FOCUS,
                 action_name_from_mask=_action_name_from_mask,
+            )
+            ordinary_issue_age = (
+                counter_at_action - captured_iteration.snapshot_frame
+            )
+            ordinary_issued_action = _action_name_from_mask(decision.mask)
+            ordinary_preexhaustion_effective_at_issue = bool(
+                allowed_action_authority
+                == ORDINARY_PREEXHAUSTION_AUTHORITY
+                and ordinary_issue_phase_eligible
+                and ordinary_issue_age <= ordinary_prefix_certified_frames
+                and ordinary_preexhaustion.allowed_actions is not None
+                and ordinary_issued_action
+                in ordinary_preexhaustion.allowed_actions
+            )
+            ordinary_causal_hold_effective_at_issue = bool(
+                allowed_action_authority == ORDINARY_CAUSAL_HOLD_AUTHORITY
+                and ordinary_issue_phase_eligible
+                and ordinary_issue_age <= ordinary_causal_hold_horizon
+                and decision.mask == held_desired_mask
             )
             hit_started = phase_now == 2 and previous_action_phase != 2
             hit_contact_observation = None
@@ -5067,20 +5553,70 @@ def _run_live_session(
                             == ORDINARY_PREEXHAUSTION_AUTHORITY
                         ),
                         "effective_at_issue": bool(
-                            allowed_action_authority
-                            == ORDINARY_PREEXHAUSTION_AUTHORITY
-                            and not action_deadline_missed
-                            and ordinary_issue_phase_eligible
+                            ordinary_preexhaustion_effective_at_issue
                         ),
                         "deadline_missed": action_deadline_missed,
                         "issue_phase_eligible": (
                             ordinary_issue_phase_eligible
+                        ),
+                        "terminal_candidate_actions": (
+                            ordinary_terminal_candidate_actions
+                        ),
+                        "terminal_probe_actions": (
+                            ordinary_terminal_probe_actions
+                        ),
+                        "terminal_probe_action_limit": (
+                            ORDINARY_TERMINAL_PROBE_ACTION_LIMIT
+                        ),
+                        "prefix_evaluated_actions": (
+                            ordinary_prefix_evaluated_actions
+                        ),
+                        "prefix_action_limit": (
+                            ORDINARY_PREFIX_CERTIFICATE_ACTION_LIMIT
                         ),
                     }
                 )
                 record["ordinary_preexhaustion"] = (
                     ordinary_preexhaustion_record
                 )
+                record["ordinary_causal_hold"] = {
+                    "schema": (
+                        "th08-ordinary-causal-hold-remaining-horizon-v2"
+                    ),
+                    "authority": ORDINARY_CAUSAL_HOLD_AUTHORITY,
+                    "reason": ordinary_causal_hold_reason,
+                    "action": ordinary_causal_hold_action,
+                    "safe": ordinary_causal_hold_safe,
+                    "min_clearance": ordinary_causal_hold_min_clearance,
+                    "worst_collisions": ordinary_causal_hold_collisions,
+                    "pipeline_branch_count": (
+                        ordinary_causal_hold_branch_count
+                    ),
+                    "conditioned_event_count": (
+                        ordinary_causal_hold_event_count
+                    ),
+                    "conditioned_projection_digest": (
+                        ordinary_causal_hold_projection_digest
+                    ),
+                    "certified_horizon_frames": (
+                        ordinary_causal_hold_horizon
+                    ),
+                    "issue_age_frames": ordinary_issue_age,
+                    "elapsed_ms": ordinary_causal_hold_ms,
+                    "selected_as_allowed_action_authority": (
+                        allowed_action_authority
+                        == ORDINARY_CAUSAL_HOLD_AUTHORITY
+                    ),
+                    "effective_at_issue": bool(
+                        ordinary_causal_hold_effective_at_issue
+                    ),
+                    "births_at_or_before_root": (
+                        "covered_by_complete_native_bullet_pool"
+                    ),
+                    "future_observation_merge": (
+                        "only_selected_action_hidden_pickup_paths"
+                    ),
+                }
                 record["corridor_delivery"] = {
                     "executor_enabled": corridor_executor is not None,
                     "worker_pending": corridor_future is not None,
@@ -5233,6 +5769,12 @@ def _run_live_session(
                 timing_trace_fields["timing_ms"][
                     "ordinary_preexhaustion_prefix"
                 ] = ordinary_prefix_certificate_ms
+                timing_trace_fields["timing_ms"][
+                    "ordinary_preexhaustion_terminal_probe"
+                ] = ordinary_terminal_probe_ms
+                timing_trace_fields["timing_ms"][
+                    "ordinary_causal_hold_remaining_horizon"
+                ] = ordinary_causal_hold_ms
                 record.update(timing_trace_fields)
                 if hit_contact_observation is not None:
                     record["hit_contact_observation"] = (

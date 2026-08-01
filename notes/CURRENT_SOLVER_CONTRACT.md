@@ -79,6 +79,22 @@ every active/held/pending root-to-publication prefix query and by the future
 corridor horizon. A complete coverage record without this geometric
 consumption cannot authorize input.
 
+The ordinary predecessor may publish any exact nonempty subset; it need not
+exhaustively enumerate all 17 actions. Live terminal queries currently start
+with held input plus two nearest directional recovery candidates and reuse the
+same immutable terminal result after prefix certification. A named exact
+authority is hard through local planning and fresh issue recertification; a
+short-horizon disagreement may be recorded but cannot widen its action set.
+
+Selecting the held complete mask remains no-write even when a nominal
+new-command pickup deadline has passed. Its action-conditioned future witness
+is effective only while actual snapshot-to-issue age remains inside the
+certified remaining projection horizon and the issued mask is still the held
+mask. This does not authorize a different input. Physical CE-0250 proves the
+next missing state: a new write must model computation/issue delay, evolution
+of the old pending command before issue, replacement at issue, new pickup
+delay, and publication lead in one causal predecessor.
+
 Physical run `20260731_152921` found two independent invalidations. First,
 `player+0xE2A68` retains the deathbomb-window limit installed by
 `0x0044AB40`; it is not a zero-when-alive predeath predicate, so all 7,202

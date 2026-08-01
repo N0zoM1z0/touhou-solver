@@ -99,6 +99,47 @@ class LocalPlannerRequestTests(unittest.TestCase):
         self.assertIsNone(validated.viability_degeneracy)
         self.assertFalse(validated.viability_relaxation_candidate)
 
+    def test_exact_authority_survives_empty_fresh_local_intersection(
+        self,
+    ) -> None:
+        request = LocalPlannerRequest(
+            physical=PhysicalHazardSnapshot(
+                player_x=192.0,
+                player_y=432.0,
+                bullets=(
+                    live.Bullet(160.0, 432.0, 4.0, 0.0, 2.0, 2.0),
+                ),
+                lasers=(),
+                time_scale_schedule=_UNIT_SCALE,
+            ),
+            actuator=ActuatorPipeline(
+                previous_direction=0,
+                can_bomb=False,
+                control_delay_frames=3,
+                control_delay_candidates=(3, 4, 5, 6),
+                action_hold_frames=5,
+            ),
+            guidance=GlobalGuidance(
+                allowed_first_actions=("stay", "down", "left"),
+                allowed_action_authority=(
+                    "causal_ordinary_nonspell_control_reserve_v1"
+                ),
+                allow_coarse_viability_relaxation=False,
+            ),
+            config=PlannerConfig(
+                horizon=10,
+                threat_horizon=32,
+                beam_width=8,
+            ),
+        )
+
+        decision = live.choose_action_request(request)
+
+        self.assertIn(decision.action, request.guidance.allowed_first_actions)
+        self.assertTrue(decision.viability_constrained)
+        self.assertFalse(decision.viability_constraint_relaxed)
+        self.assertFalse(decision.viability_fresh_prefix_relaxed)
+
     def test_root_only_scale_cannot_acquire_hard_planner_authority(self) -> None:
         request = LocalPlannerRequest(
             physical=PhysicalHazardSnapshot(

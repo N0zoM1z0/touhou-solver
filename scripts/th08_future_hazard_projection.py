@@ -4,10 +4,12 @@ from __future__ import annotations
 
 import hashlib
 import json
+import math
 from dataclasses import dataclass, field
 
 from th08_future_birth_envelope import (
     FUTURE_BIRTH_SECTOR_SEMANTICS_VERSION,
+    FloatInterval,
     FutureDirectFire,
     lower_complete_future_birth_sectors,
 )
@@ -27,8 +29,11 @@ from touhou_control.pipeline_identity import VersionIdentity
 
 
 ORDINARY_FUTURE_HAZARD_PROJECTION_SCHEMA = (
-    "th08-ordinary-future-hazard-projection-v3-annular-sector-and-aabb"
+    "th08-ordinary-future-hazard-projection-v4-causal-events"
 )
+
+_TWO_PI = 2.0 * math.pi
+_CAUSAL_POSITION_NUMERIC_GUARD = 2.0e-5
 
 
 def _trajectory_record(
@@ -66,6 +71,51 @@ def _aabb_trajectory_record(
     ]
 
 
+def _interval_record(interval: FloatInterval) -> list[float]:
+    return [float(interval.lower), float(interval.upper)]
+
+
+def _causal_event_record(event: FutureDirectFire) -> dict[str, object]:
+    return {
+        "source": event.source,
+        "activation_frames": event.activation_frames,
+        "origin_x": _interval_record(event.origin_x),
+        "origin_y": _interval_record(event.origin_y),
+        "mode": event.mode,
+        "count1": event.count1,
+        "count2": event.count2,
+        "speed1": _interval_record(event.speed1),
+        "speed2": _interval_record(event.speed2),
+        "angle1": _interval_record(event.angle1),
+        "angle2": _interval_record(event.angle2),
+        "aim_angle": _interval_record(event.aim_angle),
+        "half_width": event.half_width,
+        "half_height": event.half_height,
+        "original_flags": event.original_flags,
+        "transform_program_zero": event.transform_program_zero,
+        "transform_program_size": len(event.transform_program),
+        "transform_program_sha256": hashlib.sha256(
+            event.transform_program
+        ).hexdigest(),
+        "angle1_player_aim_coefficient": (
+            event.angle1_player_aim_coefficient
+        ),
+        "angle1_player_aim_residual": (
+            None
+            if event.angle1_player_aim_residual is None
+            else _interval_record(event.angle1_player_aim_residual)
+        ),
+        "angle2_player_aim_coefficient": (
+            event.angle2_player_aim_coefficient
+        ),
+        "angle2_player_aim_residual": (
+            None
+            if event.angle2_player_aim_residual is None
+            else _interval_record(event.angle2_player_aim_residual)
+        ),
+    }
+
+
 @dataclass(frozen=True)
 class OrdinaryFutureHazardProjection:
     """Complete or fail-closed future hostility rooted at one observation."""
@@ -74,6 +124,7 @@ class OrdinaryFutureHazardProjection:
     horizon_frames: int
     trajectories: tuple[AnnularSectorTrajectoryHazard, ...]
     aabb_trajectories: tuple[AabbTrajectoryHazard, ...]
+    direct_fire_events: tuple[FutureDirectFire, ...]
     source_closure_complete: bool
     source_closure_reason: str | None
     source_semantics_version: str
@@ -211,6 +262,12 @@ class OrdinaryFutureHazardProjection:
             "producer_count": self.producer_count,
             "trajectory_count": len(self.trajectories),
             "aabb_trajectory_count": len(self.aabb_trajectories),
+            "direct_fire_event_count": len(self.direct_fire_events),
+            "causal_player_aim_event_count": sum(
+                event.angle1_player_aim_coefficient is not None
+                and event.angle2_player_aim_coefficient is not None
+                for event in self.direct_fire_events
+            ),
             "digest": self.digest,
             "version": self.version.record(),
             "coverage": self.coverage.record(),
@@ -223,6 +280,7 @@ def _build_projection(
     horizon_frames: int,
     trajectories: tuple[AnnularSectorTrajectoryHazard, ...],
     aabb_trajectories: tuple[AabbTrajectoryHazard, ...],
+    direct_fire_events: tuple[FutureDirectFire, ...],
     source_closure_complete: bool,
     source_closure_reason: str | None,
     source_semantics_version: str,
@@ -247,6 +305,9 @@ def _build_projection(
             _aabb_trajectory_record(trajectory)
             for trajectory in aabb_trajectories
         ],
+        "direct_fire_events": [
+            _causal_event_record(event) for event in direct_fire_events
+        ],
     }
     digest = hashlib.sha256(
         json.dumps(
@@ -257,7 +318,7 @@ def _build_projection(
         ).encode("utf-8")
     ).hexdigest()
     version = VersionIdentity.from_mapping(
-        "th08-ordinary-future-hazard-projection-v3",
+        "th08-ordinary-future-hazard-projection-v4",
         {
             "root_frame": root_frame,
             "horizon_frames": horizon_frames,
@@ -298,6 +359,7 @@ def _build_projection(
         horizon_frames=horizon_frames,
         trajectories=trajectories,
         aabb_trajectories=aabb_trajectories,
+        direct_fire_events=direct_fire_events,
         source_closure_complete=source_closure_complete,
         source_closure_reason=source_closure_reason,
         source_semantics_version=source_semantics_version,
@@ -327,6 +389,7 @@ def complete_future_hazard_projection(
             envelope.trajectory for envelope in envelopes
         ),
         aabb_trajectories=aabb_trajectories,
+        direct_fire_events=events,
         source_closure_complete=True,
         source_closure_reason=None,
         source_semantics_version=source_semantics_version,
@@ -348,6 +411,7 @@ def unknown_future_hazard_projection(
         horizon_frames=horizon_frames,
         trajectories=(),
         aabb_trajectories=(),
+        direct_fire_events=(),
         source_closure_complete=False,
         source_closure_reason=reason,
         source_semantics_version=source_semantics_version,
@@ -355,9 +419,178 @@ def unknown_future_hazard_projection(
     )
 
 
+def _causal_aim_interval(
+    *,
+    player_positions: tuple[tuple[float, float], ...],
+    origin_x: FloatInterval,
+    origin_y: FloatInterval,
+) -> FloatInterval:
+    """Bound atan2(player-origin) by the shortest containing circular arc."""
+
+    if not player_positions:
+        raise ValueError("causal player path has no position at an emission")
+    if any(
+        not math.isfinite(x) or not math.isfinite(y)
+        for x, y in player_positions
+    ):
+        raise ValueError("causal player path contains a nonfinite position")
+    player_x_low = min(x for x, _ in player_positions)
+    player_x_high = max(x for x, _ in player_positions)
+    player_y_low = min(y for _, y in player_positions)
+    player_y_high = max(y for _, y in player_positions)
+    dx_low = (
+        player_x_low
+        - float(origin_x.upper)
+        - _CAUSAL_POSITION_NUMERIC_GUARD
+    )
+    dx_high = (
+        player_x_high
+        - float(origin_x.lower)
+        + _CAUSAL_POSITION_NUMERIC_GUARD
+    )
+    dy_low = (
+        player_y_low
+        - float(origin_y.upper)
+        - _CAUSAL_POSITION_NUMERIC_GUARD
+    )
+    dy_high = (
+        player_y_high
+        - float(origin_y.lower)
+        + _CAUSAL_POSITION_NUMERIC_GUARD
+    )
+    if dx_low <= 0.0 <= dx_high and dy_low <= 0.0 <= dy_high:
+        return FloatInterval(-math.pi, math.pi)
+    angles = sorted(
+        math.atan2(y, x) % _TWO_PI
+        for x in (dx_low, dx_high)
+        for y in (dy_low, dy_high)
+    )
+    gaps = [
+        angles[index + 1] - angles[index]
+        for index in range(len(angles) - 1)
+    ]
+    gaps.append(angles[0] + _TWO_PI - angles[-1])
+    largest_gap_index = max(range(len(gaps)), key=gaps.__getitem__)
+    start = angles[(largest_gap_index + 1) % len(angles)]
+    end = angles[largest_gap_index]
+    if end < start:
+        end += _TWO_PI
+    return FloatInterval(start, end)
+
+
+def condition_future_hazard_projection_on_player_paths(
+    projection: OrdinaryFutureHazardProjection,
+    *,
+    source_frame: int,
+    horizon_frames: int,
+    player_positions_by_step: tuple[
+        tuple[tuple[float, float], ...], ...
+    ],
+) -> OrdinaryFutureHazardProjection:
+    """Build a hard future slab for one selected action's hidden paths.
+
+    Births at or before ``source_frame`` are already exhaustively represented
+    by the current native bullet-pool snapshot. Future ECL births retain all
+    RNG/source uncertainty, but replace the noncausal global player-reachable
+    rectangle by the selected action's exact pickup/pending path set.
+    """
+
+    if not projection.source_closure_complete or not projection.coverage.complete:
+        raise ValueError("causal conditioning requires complete source coverage")
+    if source_frame < projection.root_frame or horizon_frames <= 0:
+        raise ValueError("causal conditioning interval is invalid")
+    source_offset = source_frame - projection.root_frame
+    if source_offset + horizon_frames > projection.horizon_frames:
+        raise ValueError("causal conditioning exceeds projection coverage")
+    if len(player_positions_by_step) < horizon_frames + 1:
+        raise ValueError("causal player paths do not cover the horizon")
+
+    conditioned_events: list[FutureDirectFire] = []
+    for event in projection.direct_fire_events:
+        if (
+            event.angle1_player_aim_coefficient is None
+            or event.angle1_player_aim_residual is None
+            or event.angle2_player_aim_coefficient is None
+            or event.angle2_player_aim_residual is None
+        ):
+            raise ValueError(
+                f"{event.source} lacks complete causal player-aim metadata"
+            )
+        for activation in event.activation_frames:
+            relative_activation = activation - source_offset
+            if relative_activation <= 0 or relative_activation > horizon_frames:
+                continue
+            causal_aim = _causal_aim_interval(
+                player_positions=player_positions_by_step[
+                    relative_activation
+                ],
+                origin_x=event.origin_x,
+                origin_y=event.origin_y,
+            )
+            conditioned_events.append(
+                FutureDirectFire(
+                    source=f"{event.source}:causal@{activation}",
+                    activation_frames=(relative_activation,),
+                    origin_x=event.origin_x,
+                    origin_y=event.origin_y,
+                    mode=event.mode,
+                    count1=event.count1,
+                    count2=event.count2,
+                    speed1=event.speed1,
+                    speed2=event.speed2,
+                    angle1=event.angle1_player_aim_residual.add(
+                        causal_aim.scale(
+                            event.angle1_player_aim_coefficient
+                        )
+                    ),
+                    angle2=event.angle2_player_aim_residual.add(
+                        causal_aim.scale(
+                            event.angle2_player_aim_coefficient
+                        )
+                    ),
+                    # The analyzer already folds native player-aim operands
+                    # into angle1/angle2 and publishes zero here. Preserve
+                    # any independently proven mode offset instead of
+                    # manufacturing a second player dependency.
+                    aim_angle=event.aim_angle,
+                    half_width=event.half_width,
+                    half_height=event.half_height,
+                    original_flags=event.original_flags,
+                    transform_program_zero=event.transform_program_zero,
+                    transform_program=event.transform_program,
+                    angle1_player_aim_coefficient=(
+                        event.angle1_player_aim_coefficient
+                    ),
+                    angle1_player_aim_residual=(
+                        event.angle1_player_aim_residual
+                    ),
+                    angle2_player_aim_coefficient=(
+                        event.angle2_player_aim_coefficient
+                    ),
+                    angle2_player_aim_residual=(
+                        event.angle2_player_aim_residual
+                    ),
+                )
+            )
+
+    return complete_future_hazard_projection(
+        root_frame=source_frame,
+        horizon_frames=horizon_frames,
+        events=tuple(conditioned_events),
+        aabb_trajectories=projection.aabb_trajectories_for_policy(
+            source_frame=source_frame,
+            horizon_frames=horizon_frames,
+        ),
+        source_semantics_version=(
+            f"{projection.source_semantics_version}+causal-player-path-v1"
+        ),
+    )
+
+
 __all__ = [
     "ORDINARY_FUTURE_HAZARD_PROJECTION_SCHEMA",
     "OrdinaryFutureHazardProjection",
+    "condition_future_hazard_projection_on_player_paths",
     "complete_future_hazard_projection",
     "unknown_future_hazard_projection",
 ]

@@ -14,8 +14,17 @@ authority.
 
 - Branch: `main`.
 - Last physical checkpoint:
-  `lunatic_route2_stage4a_unattended_20260801_024419`, based on immutable
-  live-code checkpoint `223ba01`.
+  `lunatic_route2_stage5_unattended_20260801_093817`. It completed 20 hits,
+  first hit 1873, hard no-Bomb, accepted replay, and cleanup. Its different-RNG
+  total is observational; CE-0250's latency/authority sequence is the result.
+- **Observed physical latency boundary:** predecessor geometry can be correct
+  offline yet expire in live delivery. Stage-5 `092136` spent 796.649 ms in
+  one all-action terminal probe and issued from a snapshot 70 frames old.
+  The bounded-subset correction made the action-conditioned held witness
+  effective seven times in `093817`, then it correctly became unsafe 106
+  frames before the canonical hit. The unresolved priority is the exact
+  computation-delay/old-pending/new-write causal transition, not scalar
+  reserve, hostile-birth ranking, or local micro-ranking.
 - Native H=32 wind-tunnel checkpoint: `3d15953`; it is historical evidence,
   not the live ordinary horizon.
 - Workspace-prune checkpoint: `be3e583` (`Prune TH08 active research

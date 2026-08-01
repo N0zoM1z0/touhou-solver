@@ -157,6 +157,15 @@ class FutureDirectFire:
     original_flags: int
     transform_program_zero: bool
     transform_program: bytes = b""
+    # Optional affine dependency retained by the ordinary ECL analyzer.
+    # ``angleN == residual + coefficient * angle_to_player`` at the event's
+    # native allocation update.  ``None`` means the analyzer could not prove
+    # that factorization and any causal action-conditioned consumer must fail
+    # closed.  The ordinary union envelope above remains valid either way.
+    angle1_player_aim_coefficient: float | None = None
+    angle1_player_aim_residual: FloatInterval | None = None
+    angle2_player_aim_coefficient: float | None = None
+    angle2_player_aim_residual: FloatInterval | None = None
 
     def __post_init__(self) -> None:
         if not self.source:
@@ -174,6 +183,24 @@ class FutureDirectFire:
             raise ValueError("direct-fire mode must be in 0..8")
         if self.count1 <= 0 or self.count2 <= 0:
             raise ValueError("direct-fire counts must be positive")
+        for label, coefficient, residual in (
+            (
+                "angle1",
+                self.angle1_player_aim_coefficient,
+                self.angle1_player_aim_residual,
+            ),
+            (
+                "angle2",
+                self.angle2_player_aim_coefficient,
+                self.angle2_player_aim_residual,
+            ),
+        ):
+            if (coefficient is None) != (residual is None):
+                raise ValueError(
+                    f"{label} causal aim coefficient/residual must be paired"
+                )
+            if coefficient is not None and not math.isfinite(coefficient):
+                raise ValueError(f"{label} causal aim coefficient is nonfinite")
         if (
             not math.isfinite(self.half_width)
             or not math.isfinite(self.half_height)

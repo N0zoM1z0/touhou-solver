@@ -7,7 +7,9 @@ from unittest.mock import patch
 from th08_live.controller import (
     _ordinary_authority_target,
     _ordinary_nonspell_preexhaustion_filter,
+    _ordinary_prefix_candidate_actions,
     _ordinary_submission_projection,
+    _ordinary_terminal_probe_actions,
     _ordinary_target_query_frame,
 )
 from th08_time_scale import TH08_UNIT_TIME_SCALE_BITS
@@ -15,6 +17,61 @@ from touhou_control.local_pipeline_oracle import LocalPipelineRoot
 
 
 class OrdinaryNonspellPreexhaustionTests(unittest.TestCase):
+    def test_terminal_probe_is_a_bounded_held_and_recovery_subset(
+        self,
+    ) -> None:
+        selected = _ordinary_terminal_probe_actions(
+            held_action="right_fast",
+            recovery_distances=(
+                ("down_fast", 8.0),
+                ("left_fast", 2.0),
+                ("up_fast", 4.0),
+            ),
+            limit=3,
+        )
+
+        self.assertEqual(
+            tuple(action.name for action in selected),
+            ("right_fast", "left_fast", "up_fast"),
+        )
+
+    def test_prefix_certificate_selection_is_a_bounded_terminal_subset(
+        self,
+    ) -> None:
+        terminal = (
+            "stay",
+            "left",
+            "right",
+            "up",
+            "down",
+            "left_fast",
+            "right_fast",
+            "up_fast",
+            "down_fast",
+        )
+
+        selected = _ordinary_prefix_candidate_actions(
+            held_action="right",
+            terminal_candidates=terminal,
+            recovery_actions=("up", "left", "down"),
+            limit=6,
+        )
+
+        names = tuple(action.name for action in selected)
+        self.assertEqual(names[0], "right")
+        self.assertLessEqual(len(names), 6)
+        self.assertTrue(set(names).issubset(terminal))
+
+    def test_empty_terminal_set_never_manufactures_a_prefix_action(self) -> None:
+        self.assertEqual(
+            _ordinary_prefix_candidate_actions(
+                held_action="right_fast",
+                terminal_candidates=(),
+                recovery_actions=("left_fast",),
+            ),
+            (),
+        )
+
     def _build(self, **overrides):
         arguments = {
             "enabled": True,

@@ -117,6 +117,19 @@ fail closed. Windows measured f817 kernel/certificate delivery at 1412/21 ms;
 the five roots have no unresolved action. This is deterministic native-replay
 evidence.
 
+Stage-5 physical runs `20260801_092136` and `20260801_093817` establish the
+current boundary. Offline/native hazard parity is insufficient because the
+live terminal query, sensor, and issue pipeline consume the action lease. The
+first run retained a 796.649 ms terminal probe and a 70-frame-old issue. The
+second run bounded terminal authority to held plus two recovery actions,
+reused the terminal result, and made the remaining-horizon held/no-write
+witness effective seven times. It then declared held `right` unsafe 106 frames
+before the canonical hit, but no exact transition could issue a different
+mask after computation while preserving the old pending command. L3 remains
+default-off and unpromoted. The next general change is an action-conditioned
+predecessor over computation delay, old pending evolution, new write pickup,
+and publication lead; hostile-birth objectives and local ranking remain later.
+
 The authorized Stage-4A physical run `20260731_220830` did not exercise that
 authority: all 1,754 live source projections were incomplete, chiefly because
 the former sparse capture crossed the manager frame 1,726 times. Consequently

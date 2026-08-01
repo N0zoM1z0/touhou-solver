@@ -788,6 +788,13 @@ class OrdinaryFutureSourceTests(unittest.TestCase):
         self.assertEqual(len(closure.direct_fire_events), 1)
         event = closure.direct_fire_events[0]
         self.assertGreater(event.angle1.upper, event.angle1.lower)
+        self.assertEqual(event.angle1_player_aim_coefficient, 1.0)
+        self.assertIsNotNone(event.angle1_player_aim_residual)
+        self.assertEqual(event.angle2_player_aim_coefficient, 0.0)
+        self.assertEqual(
+            event.angle2_player_aim_residual,
+            FloatInterval.point(0.0),
+        )
         self.assertEqual(
             len(closure.projection.trajectories),
             len(closure.direct_fire_events),

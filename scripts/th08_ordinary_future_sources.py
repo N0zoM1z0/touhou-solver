@@ -28,7 +28,7 @@ from __future__ import annotations
 import math
 import struct
 from copy import deepcopy
-from dataclasses import dataclass, replace
+from dataclasses import dataclass, field, replace
 from itertools import product
 from typing import Any
 
@@ -51,7 +51,7 @@ from touhou_control.corridor import AabbHazard, AabbTrajectoryHazard
 
 
 ORDINARY_FUTURE_SOURCE_SEMANTICS_VERSION = (
-    "th08-ordinary-future-sources-v10-causal-unknown-prefix-and-aux-clock"
+    "th08-ordinary-future-sources-v11-affine-player-aim-causal-events"
 )
 _PROJECTION_SCHEMA = "th08-native-snapshot-collision-control-projection-v13"
 _DIRECT_FIRE_OPCODES = frozenset(range(0x60, 0x69))
@@ -148,6 +148,14 @@ class _VmState:
     scratch_integers: list[int]
     stopped: bool = False
     delay_remaining: int = 0
+    # Affine dependency of each observed/local float on the player-aim
+    # operand for the current native source update.  Captured locals begin at
+    # zero because their concrete values are already observed.  ``None`` is
+    # a fail-closed marker for a reached nonlinear/unfactorable expression;
+    # it never invalidates the existing set-valued union envelope.
+    float_local_aim_coefficients: list[float | None] = field(
+        default_factory=lambda: [0.0] * 8
+    )
 
 
 @dataclass
@@ -799,6 +807,66 @@ def _eval_float_operand(
     raise AssertionError("unreachable")
 
 
+def _float_operand_aim_coefficient(
+    raw: int,
+    *,
+    dynamic: bool,
+    vm: _VmState,
+) -> float | None:
+    """Return a proved affine coefficient for native angle-to-player."""
+
+    if not dynamic:
+        return 0.0
+    variable = _variable_identifier(raw)
+    if _FLOAT_LOCAL_FIRST <= variable <= _FLOAT_LOCAL_LAST:
+        return vm.float_local_aim_coefficients[
+            variable - _FLOAT_LOCAL_FIRST
+        ]
+    if variable in (
+        _RNG_UNIT_VARIABLE,
+        _RNG_SIGNED_UNIT_VARIABLE,
+        _SOURCE_MOTION_ANGLE_VARIABLE,
+    ):
+        return 0.0
+    if variable == _ANGLE_TO_PLAYER_VARIABLE:
+        return 1.0
+    return None
+
+
+def _scaled_affine_coefficient(
+    left: FloatInterval,
+    left_coefficient: float | None,
+    right: FloatInterval,
+    right_coefficient: float | None,
+) -> float | None:
+    """Factor a product only when the other operand is a proved point."""
+
+    if left_coefficient is None or right_coefficient is None:
+        return None
+    if left_coefficient == 0.0 and right_coefficient == 0.0:
+        return 0.0
+    if left_coefficient == 0.0 and left.lower == left.upper:
+        return left.lower * right_coefficient
+    if right_coefficient == 0.0 and right.lower == right.upper:
+        return right.lower * left_coefficient
+    return None
+
+
+def _aim_residual(
+    value: FloatInterval,
+    *,
+    aim_angle: FloatInterval,
+    coefficient: float | None,
+) -> FloatInterval | None:
+    if coefficient is None:
+        return None
+    dependency = aim_angle.scale(coefficient)
+    return FloatInterval(
+        value.lower - dependency.lower,
+        value.upper - dependency.upper,
+    )
+
+
 def _float_lvalue(raw: int) -> int:
     variable = _variable_identifier(raw)
     if not _FLOAT_LOCAL_FIRST <= variable <= _FLOAT_LOCAL_LAST:
@@ -1022,6 +1090,16 @@ def _direct_fire_events(
         aim_angle=aim_angle,
         source=source,
     )
+    angle1_aim_coefficient = _float_operand_aim_coefficient(
+        int(instruction.arguments[5]),
+        dynamic=bool(instruction.parameter_mask & 0x40),
+        vm=vm,
+    )
+    angle2_aim_coefficient = _float_operand_aim_coefficient(
+        int(instruction.arguments[6]),
+        dynamic=bool(instruction.parameter_mask & 0x80),
+        vm=vm,
+    )
     original_flags = int(instruction.arguments[7])
     rank_count = source.emission.get("rank_count_interval")
     rank_speed = source.emission.get("rank_speed_interval")
@@ -1097,6 +1175,18 @@ def _direct_fire_events(
             original_flags=original_flags,
             transform_program_zero=transform_zero,
             transform_program=transform_program,
+            angle1_player_aim_coefficient=angle1_aim_coefficient,
+            angle1_player_aim_residual=_aim_residual(
+                angle1,
+                aim_angle=aim_angle,
+                coefficient=angle1_aim_coefficient,
+            ),
+            angle2_player_aim_coefficient=angle2_aim_coefficient,
+            angle2_player_aim_residual=_aim_residual(
+                angle2,
+                aim_angle=aim_angle,
+                coefficient=angle2_aim_coefficient,
+            ),
         ),
     )
 
@@ -1231,6 +1321,13 @@ def _execute_auxiliary(
                 aim_angle=aim_angle,
                 source=source,
             )
+            vm.float_local_aim_coefficients[destination] = (
+                _float_operand_aim_coefficient(
+                    int(instruction.arguments[1]),
+                    dynamic=bool(instruction.parameter_mask & 0x02),
+                    vm=vm,
+                )
+            )
         elif opcode == 0x1B:
             if len(instruction.arguments) != 3:
                 _fail("auxiliary multiply argument layout drifted")
@@ -1250,6 +1347,22 @@ def _execute_auxiliary(
                 source=source,
             )
             vm.float_locals[destination] = left.multiply(right)
+            vm.float_local_aim_coefficients[destination] = (
+                _scaled_affine_coefficient(
+                    left,
+                    _float_operand_aim_coefficient(
+                        int(instruction.arguments[1]),
+                        dynamic=bool(instruction.parameter_mask & 0x02),
+                        vm=vm,
+                    ),
+                    right,
+                    _float_operand_aim_coefficient(
+                        int(instruction.arguments[2]),
+                        dynamic=bool(instruction.parameter_mask & 0x04),
+                        vm=vm,
+                    ),
+                )
+            )
         elif opcode in (0x19, 0x1A):
             if len(instruction.arguments) != 3:
                 _fail("auxiliary add/subtract argument layout drifted")
@@ -1276,6 +1389,28 @@ def _execute_auxiliary(
                     left.upper - right.lower,
                 )
             )
+            left_coefficient = _float_operand_aim_coefficient(
+                int(instruction.arguments[1]),
+                dynamic=bool(instruction.parameter_mask & 0x02),
+                vm=vm,
+            )
+            right_coefficient = _float_operand_aim_coefficient(
+                int(instruction.arguments[2]),
+                dynamic=bool(instruction.parameter_mask & 0x04),
+                vm=vm,
+            )
+            vm.float_local_aim_coefficients[destination] = (
+                None
+                if (
+                    left_coefficient is None
+                    or right_coefficient is None
+                )
+                else (
+                    left_coefficient + right_coefficient
+                    if opcode == 0x19
+                    else left_coefficient - right_coefficient
+                )
+            )
         elif opcode == 0x0F:
             if len(instruction.arguments) != 2:
                 _fail("auxiliary add argument layout drifted")
@@ -1289,6 +1424,22 @@ def _execute_auxiliary(
             )
             vm.float_locals[destination] = (
                 vm.float_locals[destination].add(value)
+            )
+            current_coefficient = vm.float_local_aim_coefficients[
+                destination
+            ]
+            value_coefficient = _float_operand_aim_coefficient(
+                int(instruction.arguments[1]),
+                dynamic=bool(instruction.parameter_mask & 0x02),
+                vm=vm,
+            )
+            vm.float_local_aim_coefficients[destination] = (
+                None
+                if (
+                    current_coefficient is None
+                    or value_coefficient is None
+                )
+                else current_coefficient + value_coefficient
             )
         elif opcode == 0x2E:
             if len(instruction.arguments) != 4:
@@ -1350,6 +1501,9 @@ def _clone_vm(vm: _VmState) -> _VmState:
         scratch_integers=list(vm.scratch_integers),
         stopped=vm.stopped,
         delay_remaining=vm.delay_remaining,
+        float_local_aim_coefficients=list(
+            vm.float_local_aim_coefficients
+        ),
     )
 
 
@@ -1551,6 +1705,13 @@ def _execute_main(
                 vm=vm,
                 aim_angle=aim_angle,
                 source=source,
+            )
+            vm.float_local_aim_coefficients[destination] = (
+                _float_operand_aim_coefficient(
+                    int(instruction.arguments[1]),
+                    dynamic=bool(instruction.parameter_mask & 0x02),
+                    vm=vm,
+                )
             )
         elif opcode == 0x41:
             if len(instruction.arguments) != 2:

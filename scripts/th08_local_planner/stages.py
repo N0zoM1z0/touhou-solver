@@ -257,6 +257,12 @@ def run_hard_preflight(
                 len(locally_safe_global) != len(effective_allowed)
             )
             effective_allowed = locally_safe_global
+        elif not guidance.allow_coarse_viability_relaxation:
+            # An exact action authority may not be widened merely because the
+            # shorter-horizon local certificate disagrees.  Preserve the hard
+            # set and let ranking choose its least-bad member; the issue-time
+            # transaction will recertify the same set against fresh hazards.
+            pass
         else:
             certificates = certificate_provider(
                 player_x=physical.player_x,

@@ -3,9 +3,12 @@
 from __future__ import annotations
 
 import unittest
+from dataclasses import replace
+import math
 
 from th08_future_birth_envelope import FloatInterval, FutureDirectFire
 from th08_future_hazard_projection import (
+    condition_future_hazard_projection_on_player_paths,
     complete_future_hazard_projection,
     unknown_future_hazard_projection,
 )
@@ -133,6 +136,65 @@ class FutureHazardProjectionTests(unittest.TestCase):
         self.assertTrue(projection.coverage.model_unknown)
         self.assertEqual(projection.coverage.unknown_from_frame, 101)
         self.assertEqual(projection.trajectories, ())
+
+    def test_causal_player_path_narrows_future_aim_without_dropping_rng(self) -> None:
+        event = replace(
+            _event(),
+            activation_frames=(2,),
+            angle1=FloatInterval(-math.pi, math.pi),
+            angle1_player_aim_coefficient=1.0,
+            angle1_player_aim_residual=FloatInterval(-0.25, 0.25),
+            angle2_player_aim_coefficient=0.0,
+            angle2_player_aim_residual=FloatInterval.point(0.0),
+        )
+        projection = complete_future_hazard_projection(
+            root_frame=100,
+            horizon_frames=10,
+            events=(event,),
+            source_semantics_version="test-source-causal-v1",
+        )
+        paths = tuple(
+            (((200.0, 80.0),)) for _ in range(11)
+        )
+
+        conditioned = condition_future_hazard_projection_on_player_paths(
+            projection,
+            source_frame=100,
+            horizon_frames=10,
+            player_positions_by_step=paths,
+        )
+
+        self.assertTrue(conditioned.coverage.complete)
+        self.assertEqual(len(conditioned.direct_fire_events), 1)
+        causal = conditioned.direct_fire_events[0]
+        self.assertEqual(causal.activation_frames, (2,))
+        self.assertLess(causal.angle1.upper - causal.angle1.lower, 0.501)
+        wrapped_midpoint = (
+            (causal.angle1.midpoint + math.pi) % (2.0 * math.pi)
+            - math.pi
+        )
+        self.assertAlmostEqual(wrapped_midpoint, 0.0, places=5)
+        self.assertEqual(
+            causal.angle2,
+            FloatInterval.point(0.0),
+        )
+
+    def test_causal_player_path_fails_closed_without_affine_metadata(self) -> None:
+        projection = complete_future_hazard_projection(
+            root_frame=100,
+            horizon_frames=10,
+            events=(_event(),),
+            source_semantics_version="test-source-v1",
+        )
+        paths = tuple((((200.0, 80.0),)) for _ in range(11))
+
+        with self.assertRaisesRegex(ValueError, "lacks complete causal"):
+            condition_future_hazard_projection_on_player_paths(
+                projection,
+                source_frame=100,
+                horizon_frames=10,
+                player_positions_by_step=paths,
+            )
 
 
 if __name__ == "__main__":

@@ -27,6 +27,7 @@ from th08_live_dodge_agent import (
     _boundary_risk_for_positions,
     _build_bullet_frames,
     _build_packed_laser_collision_frames,
+    _causal_pipeline_player_positions,
     _hazards_for_positions,
     _legacy_robust_action_certificates,
     _robust_action_certificates,
@@ -45,6 +46,34 @@ def _unit_scale_bits(horizon: int) -> tuple[int, ...]:
 
 
 class Th08LocalPipelineCertificateTests(unittest.TestCase):
+    def test_causal_player_paths_preserve_held_no_write_pending_support(
+        self,
+    ) -> None:
+        positions = _causal_pipeline_player_positions(
+            root=LocalPipelineRoot(
+                active_action="left",
+                held_desired_action="right",
+                pending_action="right",
+                remaining_delay_support=(1, 3),
+            ),
+            selected_action="right",
+            delay_frames=(0, 1, 2, 3),
+            horizon_frames=4,
+            player_x=100.0,
+            player_y=200.0,
+            player_scale_bits=_unit_scale_bits(4),
+        )
+
+        self.assertEqual(len(positions), 5)
+        self.assertEqual(len(positions[0]), 2)
+        self.assertAlmostEqual(positions[1][0][0], 97.69999694824219)
+        self.assertAlmostEqual(positions[1][1][0], 97.69999694824219)
+        self.assertGreater(positions[2][0][0], positions[2][1][0])
+        self.assertEqual(
+            {position[1] for step in positions for position in step},
+            {200.0},
+        )
+
     def test_future_birth_geometry_is_consumed_during_publication_prefix(
         self,
     ) -> None:

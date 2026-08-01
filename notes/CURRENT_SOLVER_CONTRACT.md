@@ -248,6 +248,28 @@ geometry, set-valued transform fields, unknown kinds, and unavailable stack
 state fail closed. The authority, delay, version, and no-write contracts are
 unchanged.
 
+Physical Stage-3 `20260801_171249` changes the active ordinary blocker. The
+v15 semantic targets disappeared and the first-hit f354..594 window had 13
+full-H268 roots plus 43/50 effective prepublication issues. Source absence is
+therefore not the canonical cause. The f565 predecessor retained
+`down_left` only through f571 and created no lease. From the next f566
+capture, a synchronous delayed scan consumed 394.522 ms; issue occurred at
+f594 after 28 physical frames and after native phase had entered predeath.
+The f566 bullet pool contains slot 1, whose exact linear trajectory against
+the held focused `down_left` path first reaches negative signed AABB clearance
+at f587. Post-hit nearest-bullet classification at f594 must not be used to
+call this a sensor gap.
+
+Consequently computation is now an explicit control transition: no long
+ordinary delayed scan may execute unless a compatible lease or an exact
+constant-held-action certificate covers the scan's full issue-age support.
+If that guard is unavailable or unsafe, the controller must fail closed on
+global authority and return to the bounded issue path; it may not consume an
+unproved held-input interval while searching for a certificate. Bounded
+terminal action selection may use current exact-kernel repair volumes only as
+probe ordering. Those suggestions gain no authority until their own complete
+hazard prefix and terminal membership pass.
+
 Physical run `20260731_152921` found two independent invalidations. First,
 `player+0xE2A68` retains the deathbomb-window limit installed by
 `0x0044AB40`; it is not a zero-when-alive predeath predicate, so all 7,202

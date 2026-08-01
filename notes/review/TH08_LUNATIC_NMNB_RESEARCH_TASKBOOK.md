@@ -641,6 +641,16 @@ it.
    time-65 wave closes through six fires in the deterministic gate. Repeat
    Stage 3 and require earlier full-H268 lead plus authority in a former hit
    window; a label-only shift or no added lead fails the experiment.
+   Stage-3 `171249` passes that narrow gate: 83 roots carried full H268 and
+   the canonical f594 window had 13 full roots plus 43/50 effective exact
+   prepublication issues. It instead exposes an unsafe computation gap.
+   f565 certified held `down_left` only through f571; f566 then spent 394.522
+   ms in the synchronous constant-H80 delayed scan and did not issue until
+   f594. Retained slot 1 first overlaps the unchanged held path at f587.
+   Before another stage rotation, require an exact held-action/lease guard
+   before any long scan and prioritize current-kernel viable repair actions
+   inside the bounded terminal probe. The guard must prevent this scan from
+   starting; merely relabeling the later hit is failure.
 7. Evaluate remaining hostile-birth uncertainty and only then local micro
    ranking after lease authority is physically effective; repeat a winner
    before a full route.

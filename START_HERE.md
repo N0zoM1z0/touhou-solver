@@ -14,12 +14,32 @@ authority.
 
 - Branch: `main`.
 - Last physical checkpoint:
-  `lunatic_route2_stage3_unattended_20260801_163434`. It completed Stage 3
-  with four hits at `[1253,2141,8884,16134]` (three nonspell, one spell),
-  hard no-Bomb, an accepted Route-2 Lunatic replay
+  `lunatic_route2_stage3_unattended_20260801_171249`. It completed Stage 3
+  with ten hits at
+  `[594,946,2260,3838,7959,8973,14085,15363,23042,26069]` (eight nonspell,
+  spell 38, and spell 50), hard no-Bomb, accepted Route-2 Lunatic replay
   SHA-256
-  `0c65e8835b7cd9c6837cc0cbf37575552dc86e660d11d1e6c0cc7cc057bda80e`,
-  and cleanup. Different-RNG totals remain observational.
+  `4af27ae69259182ed580f1b764cbd131583abacd266b31580c544ef0c95db5aa`,
+  and cleanup. Its 10/8 total is a different-RNG observation, not causal A/B.
+- **Observed source-v15 physical result:** 519/1,065 source roots completed,
+  436 were truncated, and 83 carried the full H268. The v15-targeted dynamic
+  type/color, `0x19`, `0x25`, `0x35`, `0x6F`, and supported-transform failure
+  reasons disappeared. Exact prepublication/delayed/lease authority was
+  effective on 229/17/16 issues, with ten lease creates and seven renewals.
+  Source v15 therefore passes its named semantic gate but does not improve
+  the different-RNG hit total.
+- **Observed canonical computation-gap falsifier:** the first hit's prior
+  240-frame window contained 13 full-H268 source roots and exact
+  prepublication authority on 43/50 decisions. Thus source publication was
+  no longer absent before this hit. At the last safe issue f565, `down_left`
+  was certified only through terminal f571 and no continuation lease was
+  created. The next f566 capture launched a 394.522 ms synchronous delayed
+  scan; input was not revisited until f594, 28 physical frames later.
+  Retained bullet slot 1 crosses the held `down_left` path at f587
+  (signed clearance -0.432), so the generated `sensor_gap` label is false:
+  the bullet was observed, but the finite terminal proof expired during
+  computation. The next correction is a hard held-action computation guard
+  plus viable-kernel-informed exact probe ordering, not another ECL opcode.
 - **Observed source-v14 physical result:** 801/1,275 source roots completed
   versus 645/1,235 in source-v13 `155718`; 58 versus 47 carried the full
   H268. The targeted main `0x05`/`0x06` and captured movement-state-2
@@ -36,7 +56,7 @@ authority.
   next concrete blockers are main float-add `0x19`, main/auxiliary transform
   definition `0x6F`, auxiliary return `0x35`, dynamic type/color, auxiliary
   `0x25`, and the resulting active transform programs.
-- **Implemented source semantics v15, awaiting physical lead gate:** shipped
+- **Implemented source semantics v15; physical semantic gate passed:** shipped
   code confirms direct-fire type/color are independent dynamic i16 operands,
   `0x25` normalizes one float lvalue, depth-zero auxiliary `0x35` terminates
   without a saved-frame restore, and `0x6F` writes one exact 24-byte transform
@@ -46,7 +66,10 @@ authority.
   template hitbox. Unsupported stack state, set-valued transform fields, and
   other transform kinds remain UNKNOWN. A real Stage-3 time-65 wave now closes
   through six fires, including active angular-velocity geometry. 93 Linux and
-  93 Windows focused tests pass.
+  93 Windows focused tests pass. Physical `171249` removed the named failure
+  reasons and delivered exact authority in the canonical pre-hit window; its
+  new blocker is unsafe synchronous computation after a finite terminal
+  certificate, not missing source lead.
 - **Observed lease-v4 physical result:** one lease was created and one
   renewed; 31 decisions captured it, 30 selected it, and 29 exact no-write
   issues were effective from f1725 through f1783. All retained the certified

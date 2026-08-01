@@ -281,6 +281,28 @@ template replacement expands geometry to every reached target template.
 The actual Stage-3 time-65 main wave now deterministically closes through six
 fires. This earns a physical source-lead gate, not live promotion.
 
+Stage-3 `20260801_171249` passes that source-lead gate but falsifies the
+current recursive-delivery contract. Source v15 produced 83 full-H268 roots
+and removed its named failure reasons. The canonical f594 window contained
+13 full roots and 43/50 effective exact prepublication issues, unlike every
+ordinary hit window under v14. At f565, however, `down_left` was proved only
+to terminal f571 and did not create a continuation lease. A new f566 root
+then spent 394.522 ms synchronously evaluating a constant-H80 delayed table;
+the game advanced 28 frames while the held input remained unchanged.
+Retained bullet slot 1 was already present at f566 and intersects that exact
+held path at f587. The automatic `sensor_gap` label observes only the later
+f594 row and is rejected by the retained causal reconstruction.
+
+The next live change must treat computation itself as a held-input action.
+A long delayed scan may start only under an exact constant-hold guard or a
+compatible lease that covers its issue-age support. When no such guard
+exists, issue the bounded local/exact-prepublication result instead of
+blocking. Exact terminal probes should spend their bounded action budget on
+the held action and the current kernel's highest-repair viable alternatives
+before arbitrary compass defaults. This changes candidate computation only;
+the selected action still requires the complete prefix and terminal
+predecessor, and unknown coverage remains fail closed.
+
 The authorized Stage-4A physical run `20260731_220830` did not exercise that
 authority: all 1,754 live source projections were incomplete, chiefly because
 the former sparse capture crossed the manager frame 1,726 times. Consequently

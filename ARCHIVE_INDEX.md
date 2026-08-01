@@ -18,24 +18,19 @@ historical recovery.
   `archive/bundles/code-tests-pre-prune-d2b810d.tar.zst`
   (`4a11724151f524f3a58b4bea67f93881f429d3af338ff6170ead1ddcc4660daa`)
 
-The local `archive/` directory is ignored by Git. It also contains retired
-raw JSONL, launch logs, captures, old roots, and external reference clones.
+The local `archive/` directory is ignored by Git. Retired raw JSONL, launch
+logs, captures, and old roots were removed on 2026-08-01 after compact
+evidence and current-workload raw retention were verified. The archive keeps
+only the recovery bundles, manifests, and external reference clones.
 
-## Relocated active-run raw evidence
+## Retired raw evidence
 
-The 2026-07-31 Stage 3/4A/5 compact dossiers intentionally preserve their
-capture-time `artifacts/runtime_reports/*.jsonl` provenance paths. The large
-ignored files now live at:
-
-```text
-archive/raw/runtime_reports/lunatic_route2_stage3_unattended_20260731_091104.jsonl
-archive/raw/runtime_reports/lunatic_route2_stage4a_unattended_20260731_091925.jsonl
-archive/raw/runtime_reports/lunatic_route2_stage5_unattended_20260731_093027.jsonl
-```
-
-Do not rewrite retained dossier provenance to reflect local relocation.
-Resolve the basename through `archive/raw/runtime_reports/` and verify the
-recorded SHA-256 before use.
+The 2026-07-31 compact dossiers intentionally preserve their capture-time
+`artifacts/runtime_reports/*.jsonl` provenance paths, but those retired raw
+files are no longer present locally. Historical comparisons use the compact
+dossiers and accepted replays. Active physical workloads keep only their two
+newest compatible replay-capable raw bundles; older raw is disposable once
+newer compact evidence exists.
 
 ## Inspect without restoring
 

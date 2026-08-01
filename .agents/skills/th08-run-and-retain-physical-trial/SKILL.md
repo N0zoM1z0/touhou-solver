@@ -51,3 +51,8 @@ audit.
    `notes/COUNTEREXAMPLES.md`, and chronology to `notes/RESEARCH_LOG.md`.
    Update handoff/strategy only when changed; make one focused commit without
    unrelated checks, reports, or documentation.
+6. After compact reports, run note, and the accepted content-addressed replay
+   are verified, run `scripts/tools/prune_th08_physical_raw.py` first as a
+   dry run and then with `--apply`. It keeps the two newest complete,
+   replay-capable hard-no-Bomb raw bundles per workload. Never auto-delete an
+   unaccepted, failed, or incompletely compacted attempt.

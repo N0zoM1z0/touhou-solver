@@ -49,6 +49,7 @@ PROJECTION_SCHEMAS = frozenset(
         "th08-native-snapshot-collision-control-projection-v11",
         "th08-native-snapshot-collision-control-projection-v12",
         "th08-native-snapshot-collision-control-projection-v13",
+        "th08-native-snapshot-collision-control-projection-v14",
     }
 )
 EXPECTED_RAW_SHA256 = (

@@ -10,10 +10,13 @@ from th08_ecl_tool.core import SubInstruction, parse_ecl
 from th08_future_birth_envelope import FloatInterval
 from th08_ordinary_future_sources import (
     _VmState,
+    _advance_motion,
     _direct_fire_count,
     _eval_float_operand,
     _execute_auxiliary,
+    _execute_main,
     _health_transition_hp_loss_upper_bound,
+    _motion_state,
     project_ordinary_future_sources,
 )
 
@@ -98,6 +101,7 @@ def _payload() -> dict[str, object]:
     motion = {
         "enemy_pointer": SOURCE_POINTER,
         "movement_state": 0,
+        "timed_mode": 0,
         "mirror_x": False,
         "base_position": [60.0, 32.0, 0.0],
         "relative_position": [0.0, 0.0, 0.0],
@@ -111,8 +115,10 @@ def _payload() -> dict[str, object]:
         "orbit_angular_velocity": 0.0,
         "orbit_radius": 0.0,
         "orbit_radius_acceleration": 0.0,
+        "timed_displacement": [0.0, 0.0, 0.0],
         "orbit_center_position": [0.0, 0.0, 0.0],
         "motion_timer_elapsed": 0,
+        "motion_timer_fraction_bits": 0,
         "motion_duration": 0,
     }
     auxiliary = {
@@ -177,7 +183,7 @@ def _payload() -> dict[str, object]:
     }
     ordinary = _empty_source_group()
     return {
-        "schema": "th08-native-snapshot-collision-control-projection-v13",
+        "schema": "th08-native-snapshot-collision-control-projection-v14",
         "compact_state": {
             "manager_frame": 2129,
             "time_scale_bits": 0x3F800000,
@@ -251,6 +257,236 @@ def _payload() -> dict[str, object]:
 
 
 class OrdinaryFutureSourceTests(unittest.TestCase):
+    def test_main_integer_assignment_uses_captured_local_contract(self) -> None:
+        vm = _VmState(
+            instruction_offset=0,
+            timer_elapsed=0,
+            integer_locals=[0] * 8,
+            float_locals=[FloatInterval.point(0.0)] * 8,
+            scratch_integers=[0] * 4,
+        )
+        source = SimpleNamespace(identity="test", main=vm)
+        instructions = {
+            0: SubInstruction(
+                offset=0,
+                time=0,
+                opcode=0x06,
+                size=20,
+                byte_08=0,
+                difficulty_mask=0xFF,
+                parameter_mask=0x01,
+                arguments=(10004, 8),
+            ),
+            20: SubInstruction(
+                offset=20,
+                time=0,
+                opcode=0x01,
+                size=12,
+                byte_08=0,
+                difficulty_mask=0xFF,
+                parameter_mask=0,
+                arguments=(),
+            ),
+        }
+
+        _execute_main(
+            source=source,
+            instructions=instructions,
+            difficulty_mask=0x08,
+            frame=1,
+            aim_angle=FloatInterval.point(0.0),
+            payload={},
+            ecl=ECL,
+            remaining_horizon=1,
+        )
+
+        self.assertEqual(vm.integer_locals[4], 8)
+        self.assertTrue(vm.stopped)
+
+    def test_main_loop_decrements_dynamic_local_before_branch(self) -> None:
+        vm = _VmState(
+            instruction_offset=24,
+            timer_elapsed=4,
+            integer_locals=[2, 0, 0, 0, 0, 0, 0, 0],
+            float_locals=[FloatInterval.point(0.0)] * 8,
+            scratch_integers=[0] * 4,
+        )
+        source = SimpleNamespace(identity="test", main=vm)
+        instructions = {
+            0: SubInstruction(
+                offset=0,
+                time=0,
+                opcode=0x01,
+                size=12,
+                byte_08=0,
+                difficulty_mask=0xFF,
+                parameter_mask=0,
+                arguments=(),
+            ),
+            24: SubInstruction(
+                offset=24,
+                time=4,
+                opcode=0x05,
+                size=24,
+                byte_08=0,
+                difficulty_mask=0xFF,
+                parameter_mask=0x04,
+                arguments=(0, -24, 10000),
+            ),
+        }
+
+        _execute_main(
+            source=source,
+            instructions=instructions,
+            difficulty_mask=0x08,
+            frame=1,
+            aim_angle=FloatInterval.point(0.0),
+            payload={},
+            ecl=ECL,
+            remaining_horizon=1,
+        )
+
+        self.assertEqual(vm.integer_locals[0], 1)
+        self.assertEqual(vm.timer_elapsed, 0)
+        self.assertTrue(vm.stopped)
+
+    def test_captured_state2_uses_native_origin_displacement_and_fraction(
+        self,
+    ) -> None:
+        row = deepcopy(
+            _payload()["enemy_manager_template_source"]["motion_state"][
+                "rows"
+            ][0]
+        )
+        row.update(
+            {
+                "movement_state": 2,
+                "timed_mode": 0,
+                "base_position": [100.0, 52.0, 0.0],
+                "velocity": [10.0, 5.0, 0.0],
+                "world_position": [100.0, 52.0, 0.0],
+                "timed_displacement": [100.0, 50.0, 0.0],
+                "orbit_center_position": [60.0, 32.0, 0.0],
+                "motion_timer_elapsed": 6,
+                "motion_timer_fraction_bits": _bits(0.5),
+                "motion_duration": 10,
+            }
+        )
+        motion = _motion_state(row)
+        source = SimpleNamespace(
+            identity="test",
+            motion=motion,
+            auxiliaries=[],
+            precompose_origin_x=None,
+            precompose_origin_y=None,
+            precompose_world_x=None,
+            precompose_world_y=None,
+        )
+
+        _advance_motion(source)
+
+        self.assertEqual(motion.timed_remaining, 5)
+        self.assertAlmostEqual(motion.base_x, 105.0)
+        self.assertAlmostEqual(motion.base_y, 54.5)
+
+    def test_captured_state2_integer_expiry_snaps_to_endpoint(self) -> None:
+        row = deepcopy(
+            _payload()["enemy_manager_template_source"]["motion_state"][
+                "rows"
+            ][0]
+        )
+        row.update(
+            {
+                "movement_state": 2,
+                "timed_mode": 4,
+                "base_position": [150.0, 77.0, 0.0],
+                "velocity": [1.0, 1.0, 0.0],
+                "world_position": [150.0, 77.0, 0.0],
+                "timed_displacement": [100.0, 50.0, 0.0],
+                "orbit_center_position": [60.0, 32.0, 0.0],
+                "motion_timer_elapsed": 1,
+                "motion_timer_fraction_bits": _bits(0.5),
+                "motion_duration": 10,
+            }
+        )
+        motion = _motion_state(row)
+        source = SimpleNamespace(
+            identity="test",
+            motion=motion,
+            auxiliaries=[],
+            precompose_origin_x=None,
+            precompose_origin_y=None,
+            precompose_world_x=None,
+            precompose_world_y=None,
+        )
+
+        _advance_motion(source)
+
+        self.assertEqual((motion.base_x, motion.base_y), (160.0, 82.0))
+        self.assertEqual((motion.velocity_x, motion.velocity_y), (0.0, 0.0))
+        self.assertEqual(motion.movement_state, 0)
+
+    def test_active_auxiliary_remains_closed_from_captured_state2(self) -> None:
+        payload = deepcopy(_payload())
+        motion = payload["enemy_manager_template_source"]["motion_state"][
+            "rows"
+        ][0]
+        motion.update(
+            {
+                "movement_state": 2,
+                "timed_mode": 0,
+                "base_position": [61.0, 32.0, 0.0],
+                "velocity": [1.0, 0.0, 0.0],
+                "world_position": [61.0, 32.0, 0.0],
+                "timed_displacement": [4.0, 0.0, 0.0],
+                "orbit_center_position": [60.0, 32.0, 0.0],
+                "motion_timer_elapsed": 3,
+                "motion_timer_fraction_bits": 0,
+                "motion_duration": 4,
+            }
+        )
+
+        closure = project_ordinary_future_sources(
+            payload,
+            ECL,
+            horizon_frames=1,
+        )
+
+        self.assertTrue(closure.projection.source_closure_complete)
+        self.assertIsNone(closure.causal_prefix_reason)
+
+    def test_captured_state2_missing_timer_fraction_fails_closed(self) -> None:
+        payload = deepcopy(_payload())
+        motion = payload["enemy_manager_template_source"]["motion_state"][
+            "rows"
+        ][0]
+        motion.update(
+            {
+                "movement_state": 2,
+                "timed_mode": 0,
+                "base_position": [61.0, 32.0, 0.0],
+                "velocity": [1.0, 0.0, 0.0],
+                "world_position": [61.0, 32.0, 0.0],
+                "timed_displacement": [4.0, 0.0, 0.0],
+                "orbit_center_position": [60.0, 32.0, 0.0],
+                "motion_timer_elapsed": 3,
+                "motion_duration": 4,
+            }
+        )
+        del motion["motion_timer_fraction_bits"]
+
+        closure = project_ordinary_future_sources(
+            payload,
+            ECL,
+            horizon_frames=1,
+        )
+
+        self.assertFalse(closure.projection.source_closure_complete)
+        self.assertIn(
+            "non-finite",
+            closure.projection.source_closure_reason,
+        )
+
     def test_health_damage_uses_captured_cadence_phase(self) -> None:
         payload = deepcopy(_payload())
         envelope = payload["route2_health_transition_damage_envelope"]

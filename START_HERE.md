@@ -36,6 +36,17 @@ authority.
   f1263, the first nontruncated full-H268 root appeared only at f1249, too late
   to solve and publish. Exact closure of these reached source states is now
   the next general gate; local ranking and stage waypoints remain behind it.
+- **Implemented source semantics v14, awaiting physical delivery gate:**
+  shipped `enemy_ecl_vm_step` confirms main opcodes `0x05` and `0x06` share
+  the already-bounded local loop/set semantics. Shipped
+  `enemy_motion_update` confirms state 2 requires stored displacement
+  `+0x2DC4`, start `+0x2DD0`, easing bits 14..16, Th08Timer fraction/current
+  at `+0x2DE0/+0x2DE4`, and duration `+0x2DE8`. Native projection v14 captures
+  those fields and corrects the former `+0x2DDC` previous/current timer
+  confusion, which also affected state 3. Missing or malformed timed state
+  remains UNKNOWN. Linux focused and 147 Windows tests pass. Old retained
+  state-2/3 roots cannot be uplifted; the next Stage-3 run must measure true
+  full-H268 delivery and proximate authority.
 - **Observed Stage-3 first mismatch:** 701/1,214 source attempts failed because
   timeline 2 retained a nonzero fractional timer component; 465 crossed the
   native clock bracket. Every one of the 49 source attempts in the f7695..7935
@@ -118,9 +129,10 @@ authority.
   into the next active-policy layer. A still-pending command must be a member
   of that layer's exact action set.
 - **Implemented, deterministic hard gate passed:** collision-control
-  projection v13 now captures the manager singleton and every active ordinary
+  projection v14 now captures the manager singleton and every active ordinary
   ECL/timeline source, auxiliary VM, installed callback gate, emission
-  descriptor, phase state, and motion state needed by the retained roots.
+  descriptor, phase state, and reconstructable motion state. Legacy timed
+  roots are not uplifted.
   Reachable timeline spawns and ECL emissions are lowered fail-closed into
   consumed annular-sector bullet and hostile-body AABB trajectories for 268
   frames. Unsupported opcodes, callbacks, timeline gates, motion, content
@@ -517,9 +529,10 @@ pass. Next:
    certified direction and the only revocation was terminal expiry. Do not
    interpret the different-RNG seven-hit/five-nonspell result as improvement.
    Every ordinary hit's prior 240-frame window still had zero exact authority.
-   Close the reached main ECL `0x05`/`0x06` and captured movement-state-2
-   source truncations so full H268 is available early enough to solve and
-   publish.
+   Source semantics v14 now closes reached main ECL `0x05`/`0x06`, captures
+   the complete state-2 motion root, and fixes the state-3 current-timer
+   offset. Run Stage 3 to test whether full H268 is now available early enough
+   to solve and publish; reject it if those blockers merely move downstream.
 2. The f817/833/835/850/910 retained chain and physical f1456/f1469/f1470/
    f1479 continuation now regress. Empty actual rows, terminal expiry, and
    final-age misses remain fail closed.

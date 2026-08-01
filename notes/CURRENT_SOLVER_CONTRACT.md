@@ -62,7 +62,7 @@ the required hazard version exactly. Missing prefix certification, a
 non-4px/expired policy layer, interval/version mismatch, or unknown future
 birth/event geometry yields `allowed_actions = None`.
 
-For supported ordinary nonspells, native collision-control projection v13
+For supported ordinary nonspells, native collision-control projection v14
 captures the manager singleton and ordinary enemy main/auxiliary ECL roots,
 installed callback gates, emission/template state, phase/motion state, and
 timeline runtime. A fail-closed source executor advances every reachable
@@ -203,7 +203,7 @@ live authority. Lease v4 supplies the narrowly scoped replacement:
 
 - current enemy AABBs enter hard ordinary/global contact slabs only while the
   native contact gate is enabled; a future enable must still be present in
-  the immutable source-v13 trajectory;
+  the immutable exact source trajectory;
 - `+deadline_hold` is a trace label, and a SHOT-only auto-confirm pulse is
   movement-equivalent. Direction, focus, Bomb, root position, active/pending
   movement, phase, stage, epoch, source version, and expiry remain exact;
@@ -219,9 +219,13 @@ consumed the compatible held lease on 29 issues without an input write or
 direction/focus widening; the only revocation was terminal expiry. This
 promotes the v4 persistence seam, not ordinary global survival. All five
 ordinary hits had no exact authority in their preceding 240-frame windows.
-Reached main ECL `0x05`/`0x06` and captured movement state 2 truncated many
-otherwise complete source roots below H268, so source coverage still fails
-closed and remains the next authority blocker.
+Source semantics v14 lowers reached main ECL local loop/set opcodes
+`0x05`/`0x06`. Captured movement state 2 is reconstructed from native stored
+displacement/start, easing mode, fractional/current timer, and duration; it is
+never inferred from instantaneous velocity. The native timer current field is
+`+0x2DE4`, not timer-base/previous `+0x2DDC`, so state 3 now also receives the
+actual remaining timer. Missing/malformed fields remain UNKNOWN. Physical
+full-H268 delivery remains unpromoted.
 
 Physical run `20260731_152921` found two independent invalidations. First,
 `player+0xE2A68` retains the deathbomb-window limit installed by

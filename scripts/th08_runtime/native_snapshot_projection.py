@@ -59,7 +59,7 @@ from th08_runtime.game_state import ADDR_PLAYER
 
 
 COLLISION_CONTROL_PROJECTION_SCHEMA = (
-    "th08-native-snapshot-collision-control-projection-v13"
+    "th08-native-snapshot-collision-control-projection-v14"
 )
 
 # Revalidated in bullet_manager_update (0x00431240).  These two adjacent
@@ -142,6 +142,10 @@ ENEMY_MOTION_ORBIT_ANGLE_OFFSET = 0x2D9C
 ENEMY_MOTION_ORBIT_ANGULAR_VELOCITY_OFFSET = 0x2DA0
 ENEMY_MOTION_ORBIT_RADIUS_OFFSET = 0x2DB0
 ENEMY_MOTION_ORBIT_RADIUS_ACCELERATION_OFFSET = 0x2DB4
+# State 2 reads this displacement vector and the shared +0x2DD0 origin on
+# every update (enemy_motion_update 0x00422F77..0x00422FAF). It cannot be
+# reconstructed from the instantaneous +0x2D4C velocity.
+ENEMY_MOTION_TIMED_DISPLACEMENT_OFFSET = 0x2DC4
 ENEMY_MOTION_ORBIT_CENTER_OFFSET = 0x2DD0
 ENEMY_MOTION_TIMER_OFFSET = 0x2DDC
 ENEMY_MOTION_DURATION_OFFSET = 0x2DE8
@@ -534,6 +538,7 @@ def _enemy_motion_state_records(
                 "slot": observation.slot,
                 "enemy_pointer": observation.enemy_pointer,
                 "movement_state": (int(observation.enemy_flags) >> 12) & 3,
+                "timed_mode": (int(observation.enemy_flags) >> 14) & 7,
                 "mirror_x": bool(int(observation.enemy_flags) & 0x00040000),
                 "base_position": list(
                     struct.unpack_from(
@@ -603,6 +608,13 @@ def _enemy_motion_state_records(
                     enemy_blob,
                     base + ENEMY_MOTION_ORBIT_RADIUS_ACCELERATION_OFFSET,
                 )[0],
+                "timed_displacement": list(
+                    struct.unpack_from(
+                        "<fff",
+                        enemy_blob,
+                        base + ENEMY_MOTION_TIMED_DISPLACEMENT_OFFSET,
+                    )
+                ),
                 "orbit_center_position": list(
                     struct.unpack_from(
                         "<fff",
@@ -613,7 +625,16 @@ def _enemy_motion_state_records(
                 "motion_timer_elapsed": struct.unpack_from(
                     "<i",
                     enemy_blob,
-                    base + ENEMY_MOTION_TIMER_OFFSET,
+                    base
+                    + ENEMY_MOTION_TIMER_OFFSET
+                    + TH08_TIMER_ELAPSED_OFFSET,
+                )[0],
+                "motion_timer_fraction_bits": struct.unpack_from(
+                    "<I",
+                    enemy_blob,
+                    base
+                    + ENEMY_MOTION_TIMER_OFFSET
+                    + TH08_TIMER_FRACTION_OFFSET,
                 )[0],
                 "motion_duration": struct.unpack_from(
                     "<i",

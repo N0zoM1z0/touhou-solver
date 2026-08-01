@@ -103,7 +103,7 @@ the earlier eight-action f817 result came from H=32.
 
 The factorized lower replacement passes its deterministic semantic gate.
 Native
-collision-control projection v13 captures the ordinary manager singleton,
+collision-control projection v14 captures the ordinary manager singleton,
 active enemy main/auxiliary VMs, callback gates, emission descriptors, motion,
 phase, and timeline runtime. Reachable sources are executed fail-closed for
 268 frames and lowered to bounded bullet sectors and hostile-body AABBs.
@@ -226,13 +226,14 @@ are structural false revocations; fix them without widening direction/focus or
 future-source coverage, then repeat Stage 3 before rotating Stage 4A.
 
 Lease v4 implements that narrow correction. Hard ordinary certificates and
-global submissions use only currently contact-enabled enemy bodies; source
-v13 remains responsible for every future contact-enable transition. A lease
+global submissions use only currently contact-enabled enemy bodies; the
+current exact source projection remains responsible for every future
+contact-enable transition. A lease
 consumes the held direction/focus mask and may survive only a SHOT-only
 auto-confirm write; Bomb, focus, or direction changes are still unequal. When
 a renewal table has no safe final issue-age row, the compatible older lease
 is selected before falling back to unconstrained local control. Stable
-contact-body seam containment and source-v13 coverage remain hard; the fresh
+contact-body seam containment and exact source coverage remain hard; the fresh
 local recertificate is diagnostic because it rereads no bullets and cannot
 supersede the old causal proof. Linux and focused Windows gates pass.
 
@@ -245,6 +246,16 @@ hit's preceding 240 frames had zero exact authority. Source prefixes were
 commonly truncated below H268 by reached main ECL `0x05`/`0x06` or captured
 movement state 2. Exact source closure, not another lease or scalar-reserve
 patch, is now the next authority gate.
+
+Source semantics v14 implements that closure from shipped-code evidence.
+Main `0x05` decrements its captured integer lvalue and branches on the
+post-decrement operand; `0x06` writes its captured integer lvalue. Native
+state 2 is continued from stored displacement `+0x2DC4`, start `+0x2DD0`,
+easing bits, current/fractional timer `+0x2DE4/+0x2DE0`, and duration
+`+0x2DE8`. This also corrects the earlier state-3 timer read from previous
+`+0x2DDC`. No velocity inference or old-root uplift is allowed. Focused
+Linux and 147 Windows tests pass; Stage-3 full-horizon delivery is the next
+physical falsifier.
 
 The authorized Stage-4A physical run `20260731_220830` did not exercise that
 authority: all 1,754 live source projections were incomplete, chiefly because

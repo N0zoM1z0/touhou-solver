@@ -42,6 +42,10 @@ from th08_runtime.native_snapshot_projection import (
     ENEMY_ANM_PREFIX_SIZE,
     ENEMY_HITPOINTS_OFFSET,
     ENEMY_MAX_HITPOINTS_OFFSET,
+    ENEMY_MOTION_DURATION_OFFSET,
+    ENEMY_MOTION_ORBIT_CENTER_OFFSET,
+    ENEMY_MOTION_TIMED_DISPLACEMENT_OFFSET,
+    ENEMY_MOTION_TIMER_OFFSET,
     ENEMY_PHASE_START_HITPOINTS_OFFSET,
     ENEMY_HEALTH_TRANSITION_SUCCESSORS_OFFSET,
     ENEMY_HEALTH_TRANSITION_THRESHOLDS_OFFSET,
@@ -68,6 +72,7 @@ from th08_runtime.native_snapshot_projection import (
     _enemy_current_instruction_records,
     _enemy_main_ecl_callback_records,
     _enemy_main_ecl_inventory_record,
+    _enemy_motion_state_records,
     _enemy_periodic_emission_records,
     _enemy_phase_transition_state_records,
     _enemy_source_record,
@@ -84,6 +89,60 @@ def _component(name: str, data: bytes) -> object:
 
 
 class NativeSnapshotProjectionTests(unittest.TestCase):
+    def test_enemy_state2_retains_causal_timed_motion_root(self) -> None:
+        enemy_blob = bytearray(ENEMY_STRIDE)
+        flags = ENEMY_ACTIVE_FLAG | (2 << 12) | (5 << 14)
+        struct.pack_into(
+            "<fff",
+            enemy_blob,
+            ENEMY_MOTION_TIMED_DISPLACEMENT_OFFSET,
+            96.0,
+            -48.0,
+            0.0,
+        )
+        struct.pack_into(
+            "<fff",
+            enemy_blob,
+            ENEMY_MOTION_ORBIT_CENTER_OFFSET,
+            80.0,
+            40.0,
+            0.0,
+        )
+        struct.pack_into(
+            "<iIi",
+            enemy_blob,
+            ENEMY_MOTION_TIMER_OFFSET,
+            -999,
+            0x3F000000,
+            7,
+        )
+        struct.pack_into(
+            "<i",
+            enemy_blob,
+            ENEMY_MOTION_DURATION_OFFSET,
+            12,
+        )
+        inventory = SimpleNamespace(
+            observations=(
+                SimpleNamespace(
+                    slot=0,
+                    enemy_pointer=ENEMY_POOL_BASE,
+                    enemy_flags=flags,
+                ),
+            )
+        )
+
+        result = _enemy_motion_state_records(bytes(enemy_blob), inventory)
+
+        row = result["rows"][0]
+        self.assertEqual(row["movement_state"], 2)
+        self.assertEqual(row["timed_mode"], 5)
+        self.assertEqual(row["timed_displacement"], [96.0, -48.0, 0.0])
+        self.assertEqual(row["orbit_center_position"], [80.0, 40.0, 0.0])
+        self.assertEqual(row["motion_timer_fraction_bits"], 0x3F000000)
+        self.assertEqual(row["motion_timer_elapsed"], 7)
+        self.assertEqual(row["motion_duration"], 12)
+
     def test_enemy_phase_transition_retains_timer_and_successor_registry(
         self,
     ) -> None:

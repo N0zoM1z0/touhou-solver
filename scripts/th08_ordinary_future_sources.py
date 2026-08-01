@@ -54,9 +54,9 @@ from touhou_control.corridor import AabbHazard, AabbTrajectoryHazard
 
 
 ORDINARY_FUTURE_SOURCE_SEMANTICS_VERSION = (
-    "th08-ordinary-future-sources-v13-active-hostile-body-trajectories"
+    "th08-ordinary-future-sources-v14-main-loop-and-captured-timed-motion"
 )
-_PROJECTION_SCHEMA = "th08-native-snapshot-collision-control-projection-v13"
+_PROJECTION_SCHEMA = "th08-native-snapshot-collision-control-projection-v14"
 _DIRECT_FIRE_OPCODES = frozenset(range(0x60, 0x69))
 # Native table entry 51 is ANM/effect-only:
 #   table 0x004C6F94 -> init 0x00426280, update 0x004264F0.
@@ -115,6 +115,7 @@ class _MotionState:
     motion_duration: int = 0
     timed_duration: int = 0
     timed_remaining: int = 0
+    timed_fraction: float = 0.0
     timed_mode: int = 0
     timed_start_x: float = 0.0
     timed_start_y: float = 0.0
@@ -352,10 +353,21 @@ def _motion_state(row: dict[str, object]) -> _MotionState:
         row.get("orbit_radius"),
         row.get("orbit_radius_acceleration"),
     )
+    movement_state = int(row.get("movement_state", -1))
     orbit_center = row.get("orbit_center_position")
     if not isinstance(orbit_center, list) or len(orbit_center) != 3:
         _fail("future source orbit-center layout drifted")
+    timed_displacement = row.get("timed_displacement")
+    if not isinstance(timed_displacement, list) or len(timed_displacement) != 3:
+        _fail("future source timed-displacement layout drifted")
+    timer_fraction = (
+        _float32(int(row.get("motion_timer_fraction_bits", -1)))
+        if movement_state == 2
+        else 0.0
+    )
     numeric = (*numeric, *orbit_center)
+    if movement_state == 2:
+        numeric = (*numeric, *timed_displacement, timer_fraction)
     _finite(numeric, label="future source motion state")
     if (
         abs(float(base[0]) + float(relative[0]) - float(world[0]))
@@ -364,7 +376,6 @@ def _motion_state(row: dict[str, object]) -> _MotionState:
         > _POSITION_TOLERANCE
     ):
         _fail("composed source world position disagrees with base+relative")
-    movement_state = int(row.get("movement_state", -1))
     state = _MotionState(
         base_x=float(base[0]),
         base_y=float(base[1]),
@@ -380,7 +391,7 @@ def _motion_state(row: dict[str, object]) -> _MotionState:
         velocity_y=float(velocity[1]),
         uncertainty_x=0.0,
         uncertainty_y=0.0,
-        supported=movement_state in (0, 1, 3),
+        supported=movement_state in (0, 1, 2, 3),
         orbit_angle=float(row["orbit_angle"]),
         orbit_angular_velocity=float(row["orbit_angular_velocity"]),
         orbit_radius=float(row["orbit_radius"]),
@@ -391,12 +402,37 @@ def _motion_state(row: dict[str, object]) -> _MotionState:
         orbit_center_y=float(orbit_center[1]),
         motion_timer_elapsed=int(row["motion_timer_elapsed"]),
         motion_duration=int(row["motion_duration"]),
+        timed_duration=(
+            int(row["motion_duration"]) if movement_state == 2 else 0
+        ),
+        timed_remaining=(
+            int(row["motion_timer_elapsed"]) if movement_state == 2 else 0
+        ),
+        timed_fraction=timer_fraction if movement_state == 2 else 0.0,
+        timed_mode=(
+            int(row.get("timed_mode", -1)) if movement_state == 2 else 0
+        ),
+        timed_start_x=(float(orbit_center[0]) if movement_state == 2 else 0.0),
+        timed_start_y=(float(orbit_center[1]) if movement_state == 2 else 0.0),
+        timed_displacement_x=(
+            float(timed_displacement[0]) if movement_state == 2 else 0.0
+        ),
+        timed_displacement_y=(
+            float(timed_displacement[1]) if movement_state == 2 else 0.0
+        ),
     )
     if movement_state == 0 and (
         abs(state.velocity_x) > _POSITION_TOLERANCE
         or abs(state.velocity_y) > _POSITION_TOLERANCE
     ):
         _fail("movement state 0 carries nonzero unlowered velocity")
+    if movement_state == 2 and (
+        state.timed_duration <= 0
+        or state.timed_remaining <= 0
+        or not 0 <= state.timed_mode <= 6
+        or not 0.0 <= state.timed_fraction < 1.0
+    ):
+        _fail("captured timed movement state is malformed")
     return state
 
 
@@ -1299,7 +1335,12 @@ def _execute_auxiliary(
                 vm,
             )
             values[destination] -= 1
-            if values[destination] > 0:
+            loop_value = _eval_integer_operand(
+                int(instruction.arguments[2]),
+                dynamic=bool(instruction.parameter_mask & 0x04),
+                vm=vm,
+            )
+            if loop_value > 0:
                 vm.timer_elapsed = _signed_u32(
                     int(instruction.arguments[0])
                 )
@@ -1332,7 +1373,11 @@ def _execute_auxiliary(
                 int(instruction.arguments[0]),
                 vm,
             )
-            values[destination] = _literal_integer(instruction, 1)
+            values[destination] = _eval_integer_operand(
+                int(instruction.arguments[1]),
+                dynamic=bool(instruction.parameter_mask & 0x02),
+                vm=vm,
+            )
         elif opcode == 0x07:
             if len(instruction.arguments) != 2:
                 _fail("auxiliary float assignment argument layout drifted")
@@ -1659,6 +1704,7 @@ def _install_timed_polar_motion(
     motion.supported = True
     motion.timed_duration = duration
     motion.timed_remaining = duration
+    motion.timed_fraction = 0.0
     motion.timed_mode = mode
     motion.timed_start_x = 0.5 * (start_x.lower + start_x.upper)
     motion.timed_start_y = 0.5 * (start_y.lower + start_y.upper)
@@ -1716,8 +1762,43 @@ def _execute_main(
                 int(instruction.arguments[1])
             )
             continue
+        if opcode == 0x05:
+            if len(instruction.arguments) != 3:
+                _fail("main loop-jump argument layout drifted")
+            values, destination = _integer_lvalue(
+                int(instruction.arguments[2]),
+                vm,
+            )
+            values[destination] -= 1
+            loop_value = _eval_integer_operand(
+                int(instruction.arguments[2]),
+                dynamic=bool(instruction.parameter_mask & 0x04),
+                vm=vm,
+            )
+            if loop_value > 0:
+                vm.timer_elapsed = _signed_u32(
+                    int(instruction.arguments[0])
+                )
+                vm.instruction_offset += _signed_u32(
+                    int(instruction.arguments[1])
+                )
+                continue
+            vm.instruction_offset += int(instruction.size)
+            continue
         if opcode in (0x00, 0x03, 0x36, 0x39, 0x7C):
             pass
+        elif opcode == 0x06:
+            if len(instruction.arguments) != 2:
+                _fail("main integer assignment argument layout drifted")
+            values, destination = _integer_lvalue(
+                int(instruction.arguments[0]),
+                vm,
+            )
+            values[destination] = _eval_integer_operand(
+                int(instruction.arguments[1]),
+                dynamic=bool(instruction.parameter_mask & 0x02),
+                vm=vm,
+            )
         elif opcode == 0x07:
             if len(instruction.arguments) != 2:
                 _fail("main float assignment argument layout drifted")
@@ -1903,7 +1984,8 @@ def _advance_motion(source: _SourceState) -> None:
             _fail(f"{source.identity} timed movement state is malformed")
         motion.timed_remaining -= 1
         progress = 1.0 - (
-            float(motion.timed_remaining) / float(motion.timed_duration)
+            (float(motion.timed_remaining) + motion.timed_fraction)
+            / float(motion.timed_duration)
         )
         progress = max(0.0, progress)
         if motion.timed_mode == 1:
@@ -1932,7 +2014,16 @@ def _advance_motion(source: _SourceState) -> None:
         motion.velocity_y = desired_y - motion.base_y
         motion.base_x = desired_x
         motion.base_y = desired_y
-        if motion.timed_remaining == 0:
+        if motion.timed_remaining <= 0:
+            # Native expiry tests only the integer timer component and snaps
+            # to the exact endpoint even when a retained fraction made the
+            # intermediate eased point incomplete.
+            motion.base_x = (
+                motion.timed_start_x + motion.timed_displacement_x
+            )
+            motion.base_y = (
+                motion.timed_start_y + motion.timed_displacement_y
+            )
             motion.movement_state = 0
             motion.velocity_x = 0.0
             motion.velocity_y = 0.0

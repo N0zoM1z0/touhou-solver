@@ -259,7 +259,7 @@ replacement now uses phase-only transition semantics, fresh prefix
 certificates, exact active/held/pending pickup branches, a 4px Boolean lower
 kernel with cell-radius clearance, and exact active-policy version binding.
 
-Collision-control projection v13 and the fail-closed ordinary source executor
+Collision-control projection v14 and the fail-closed ordinary source executor
 now cover the manager singleton, ordinary main/auxiliary ECL, callback gates,
 emission descriptors, motion/phase state, and timeline births for the full
 268-frame source horizon. The exact annular-sector/AABB projection is consumed
@@ -589,7 +589,7 @@ it.
    ECL/timeline/callback/motion case into free space.
 4. Keep the physically effective computation-delay/action-conditioned table:
    local ranking orders work only; the fresh exact issue-age row is authority.
-5. Keep source-v13 future coverage fail closed. Stage-3 `152531` physically
+5. Keep source-v14 future coverage fail closed. Stage-3 `152531` physically
    falsified lease v3 consumption despite 653 complete source roots, 267
    prepublication issues, 13 delayed issues, ten creates, and three renewals:
    both selected leases failed at issue. Lease v4 corrects only the retained
@@ -623,8 +623,10 @@ it.
    effective lease issues and no Bomb. Aggregate hits remain different-RNG
    observations. All five ordinary hit windows still lacked exact authority;
    the next gate is exact full-H268 source closure for reached main ECL
-   `0x05`/`0x06` and captured movement state 2. Rotate Stage 4A only after
-   deterministic closure and a focused Stage-3 delivery check.
+   `0x05`/`0x06` and captured movement state 2. Source v14 implements those
+   semantics and fixes the state-3 timer current offset from `+0x2DDC` to
+   `+0x2DE4`; missing timed roots remain UNKNOWN. Rotate Stage 4A only after
+   a focused Stage-3 full-H268 delivery check.
 7. Evaluate remaining hostile-birth uncertainty and only then local micro
    ranking after lease authority is physically effective; repeat a winner
    before a full route.

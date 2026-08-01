@@ -181,7 +181,20 @@ def _native_payload(
             row["phase_timer_previous"] = -1
             row["phase_timer_fraction_bits"] = 0
             row["phase_timer_elapsed"] = 0
-    payload["schema"] = "th08-native-snapshot-collision-control-projection-v13"
+    for group in (
+        payload["enemy_manager_template_source"]["motion_state"],
+        payload["enemy_motion_state"],
+    ):
+        for row in group["rows"]:
+            if int(row["movement_state"]) in (2, 3):
+                raise RuntimeError(
+                    "legacy retained timed/orbit root lacks exact current "
+                    "motion timer state"
+                )
+            row["timed_mode"] = 0
+            row["timed_displacement"] = [0.0, 0.0, 0.0]
+            row["motion_timer_fraction_bits"] = 0
+    payload["schema"] = "th08-native-snapshot-collision-control-projection-v14"
     return path, trial, payload
 
 

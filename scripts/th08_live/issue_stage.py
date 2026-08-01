@@ -10,7 +10,10 @@ from th08_local_planner import Decision, LocalProposal
 from th08_runtime.game_state import (
     ADDR_ENEMY_MANAGER_FRAME,
     ADDR_PLAYER,
+    ADDR_SPELL_CARD_STATE,
+    ADDR_STAGE_ROUTE_INDEX,
     PLAYER_PREDEATH_COUNTER_OFFSET,
+    SPELL_STATE_ACTIVE_FLAG,
 )
 from touhou_control.epochs import ActionIssueAlignment
 
@@ -38,6 +41,8 @@ class ActionIssueObservation:
 
     player_phase: int
     predeath_counter: int
+    spell_active: bool
+    stage_route_index: int
     alignment: ActionIssueAlignment
 
     @property
@@ -127,10 +132,16 @@ def observe_action_issue(
     predeath_counter = reader.i32(
         ADDR_PLAYER + PLAYER_PREDEATH_COUNTER_OFFSET
     )
+    spell_active = bool(
+        reader.u32(ADDR_SPELL_CARD_STATE) & SPELL_STATE_ACTIVE_FLAG
+    )
+    stage_route_index = reader.u32(ADDR_STAGE_ROUTE_INDEX)
     issue_frame = reader.u32(ADDR_ENEMY_MANAGER_FRAME)
     return ActionIssueObservation(
         player_phase=player_phase,
         predeath_counter=predeath_counter,
+        spell_active=spell_active,
+        stage_route_index=stage_route_index,
         alignment=ActionIssueAlignment(
             source_frame=source_frame,
             capture_frame=capture_frame,

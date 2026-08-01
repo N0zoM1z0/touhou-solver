@@ -223,6 +223,12 @@ from th08_live.local_hazards import (  # noqa: F401
     _segment_clearance,
     _select_items,
 )
+from th08_live.ordinary_continuation_lease import (
+    ContinuationLeaseCheck,
+    OrdinaryContinuationLease,
+    check_continuation_lease_capture,
+    check_continuation_lease_issue,
+)
 from th08_live.local_objectives import (
     COLLECTION_HALF_WIDTH,
     ITEM_APPROACH_POTENTIAL_WEIGHT,  # noqa: F401 - compatibility export
@@ -527,6 +533,9 @@ ORDINARY_CAUSAL_HOLD_AUTHORITY = (
 )
 ORDINARY_CAUSAL_DELAYED_ISSUE_AUTHORITY = (
     "causal_ordinary_nonspell_delayed_issue_horizon_v1"
+)
+ORDINARY_CAUSAL_CONTINUATION_LEASE_AUTHORITY = (
+    "causal_ordinary_nonspell_terminal_continuation_lease_v1"
 )
 CORRIDOR_ALLOWED_ACTION_AUTHORITY = "exact_corridor_viability_v1"
 _ORDINARY_PREEXHAUSTION_ACTIONS = tuple(
@@ -1647,7 +1656,7 @@ def _delayed_issue_action_certificates(
     conditioned_projections: dict[
         str, OrdinaryFutureHazardProjection
     ] = {}
-    issue_delay_bins = tuple(
+    general_issue_delay_bins = tuple(
         issue_delay_frames[start : start + ORDINARY_CAUSAL_ISSUE_BIN_FRAMES]
         for start in range(
             0,
@@ -1666,6 +1675,12 @@ def _delayed_issue_action_certificates(
         time_scale_schedule_bits=laser_scale_bits[:horizon_frames],
     )
     for action in actions:
+        held_no_write = action.name == root.held_desired_action
+        issue_delay_bins = (
+            ((issue_delay_frames[0],),)
+            if held_no_write
+            else general_issue_delay_bins
+        )
         for issue_delay_bin in issue_delay_bins:
             player_positions = _delayed_causal_pipeline_player_positions(
                 root=root,
@@ -1727,8 +1742,15 @@ def _delayed_issue_action_certificates(
                 bullet_frames=bullet_frames,
                 laser_frames=laser_frames,
             )
-            for issue_delay, row in action_rows.items():
-                certificates[issue_delay].update(row)
+            if held_no_write:
+                held_certificate = action_rows[issue_delay_bin[0]][
+                    action.name
+                ]
+                for issue_delay in issue_delay_frames:
+                    certificates[issue_delay][action.name] = held_certificate
+            else:
+                for issue_delay, row in action_rows.items():
+                    certificates[issue_delay].update(row)
     return certificates, conditioned_projections
 
 
@@ -1845,6 +1867,72 @@ def _select_delayed_issue_action(
         ),
     )
     return action, certificate, "best_margin_for_observed_issue_age"
+
+
+def _build_ordinary_continuation_lease(
+    *,
+    gameplay_epoch: int,
+    stage_route_index: int,
+    action: str,
+    mask: int,
+    root_frame: int,
+    issue_frame: int,
+    horizon_frames: int,
+    projection: OrdinaryFutureHazardProjection,
+    projection_source: str,
+    pipeline_root: LocalPipelineRoot,
+    pickup_delay_support: tuple[int, ...],
+    player_x: float,
+    player_y: float,
+    player_scale_bits: tuple[int, ...],
+    certificate: RobustActionCertificate,
+    fresh_geometry_frame: int,
+    fresh_geometry_changed: bool,
+) -> OrdinaryContinuationLease:
+    """Retain one exact delayed predecessor as a no-write continuation."""
+
+    issue_delay = issue_frame - root_frame
+    branches = enumerate_delayed_issue_pipeline_branches(
+        root=pipeline_root,
+        selected_action=action,
+        issue_delay_frames=(issue_delay,),
+        pickup_delay_frames=pickup_delay_support,
+        horizon_frames=horizon_frames,
+    )
+    positions_by_step = _delayed_causal_pipeline_player_positions(
+        root=pipeline_root,
+        selected_action=action,
+        issue_delay_frames=(issue_delay,),
+        pickup_delay_frames=pickup_delay_support,
+        horizon_frames=horizon_frames,
+        player_x=player_x,
+        player_y=player_y,
+        player_scale_bits=player_scale_bits,
+    )
+    return OrdinaryContinuationLease(
+        lease_id=(
+            f"{gameplay_epoch}:{stage_route_index}:{root_frame}:"
+            f"{issue_frame}:{action}:{projection.digest[:16]}"
+        ),
+        gameplay_epoch=gameplay_epoch,
+        stage_route_index=stage_route_index,
+        action=action,
+        mask=mask,
+        root_frame=root_frame,
+        issue_frame=issue_frame,
+        horizon_frames=horizon_frames,
+        projection_digest=projection.digest,
+        projection_source=projection_source,
+        projection_version=projection.version,
+        pipeline_root=pipeline_root,
+        issue_delay=issue_delay,
+        pickup_delay_support=pickup_delay_support,
+        branches=branches,
+        positions_by_step=positions_by_step,
+        minimum_clearance=certificate.min_clearance,
+        fresh_geometry_frame=fresh_geometry_frame,
+        fresh_geometry_changed=fresh_geometry_changed,
+    )
 
 
 def _contiguous_integer_ranges(
@@ -2184,6 +2272,8 @@ def _local_planner_request_from_capture(
                 not in (
                     ORDINARY_PREEXHAUSTION_AUTHORITY,
                     ORDINARY_CAUSAL_HOLD_AUTHORITY,
+                    ORDINARY_CAUSAL_DELAYED_ISSUE_AUTHORITY,
+                    ORDINARY_CAUSAL_CONTINUATION_LEASE_AUTHORITY,
                 )
             ),
             viability_repair_volumes=policy_guidance.repair_volumes,
@@ -2579,6 +2669,7 @@ def _run_live_session(
     ordinary_causal_delayed_last_scan: (
         tuple[tuple[int, int], int] | None
     ) = None
+    ordinary_continuation_lease: OrdinaryContinuationLease | None = None
     enemy_future: Future[EnemyPoolSnapshot] | None = None
     enemy_snapshot: EnemyPoolSnapshot | None = None
     enemy_last_submit = CORRIDOR_INITIAL_SUBMIT_FRAME
@@ -2872,6 +2963,12 @@ def _run_live_session(
                         "empty_kernel_causal_hold_authority": (
                             ORDINARY_CAUSAL_HOLD_AUTHORITY
                         ),
+                        "delayed_issue_authority": (
+                            ORDINARY_CAUSAL_DELAYED_ISSUE_AUTHORITY
+                        ),
+                        "terminal_continuation_lease_authority": (
+                            ORDINARY_CAUSAL_CONTINUATION_LEASE_AUTHORITY
+                        ),
                         "hard_inputs": (
                             "observed_active_held_pending_pipeline_root_"
                             "pickup_delay_support_completed_future_policy_"
@@ -2887,9 +2984,9 @@ def _run_live_session(
                             "to_next_publication_epoch"
                         ),
                         "empty_kernel_fallback": (
-                            "remaining_horizon_constant_held_no_write_"
-                            "witness_with_"
-                            "action_conditioned_future_player_aim"
+                            "rolling_exact_held_no_write_renewal_then_"
+                            "new_direction_only_through_a_new_delayed_"
+                            "predecessor"
                         ),
                         "recovery_role": (
                             "directional_set_distance_diagnostic_only"
@@ -3289,6 +3386,7 @@ def _run_live_session(
                         memory.clear()
                     if corridor_future is not None and corridor_future.cancel():
                         corridor_future = None
+                    ordinary_continuation_lease = None
                     ordinary_future_source_result = None
                     if ordinary_future_source_future is not None:
                         ordinary_future_source_future.cancel()
@@ -3386,6 +3484,7 @@ def _run_live_session(
                 ecl_instruction_cache.clear()
                 if corridor_future is not None and corridor_future.cancel():
                     corridor_future = None
+                ordinary_continuation_lease = None
                 ordinary_future_source_result = None
                 if ordinary_future_source_future is not None:
                     ordinary_future_source_future.cancel()
@@ -3641,6 +3740,7 @@ def _run_live_session(
                     and corridor_future.cancel()
                 ):
                     corridor_future = None
+                ordinary_continuation_lease = None
                 ordinary_future_source_result = None
                 if ordinary_future_source_future is not None:
                     ordinary_future_source_future.cancel()
@@ -3998,6 +4098,7 @@ def _run_live_session(
                 ecl_instruction_cache.clear()
                 if corridor_future is not None:
                     corridor_future.cancel()
+                ordinary_continuation_lease = None
                 ordinary_future_source_result = None
                 if ordinary_future_source_future is not None:
                     ordinary_future_source_future.cancel()
@@ -5133,6 +5234,54 @@ def _run_live_session(
                     selected_actions=(),
                     )
                 )
+            ordinary_continuation_lease_present_at_capture = bool(
+                ordinary_continuation_lease is not None
+            )
+            ordinary_continuation_lease_capture_record = (
+                ordinary_continuation_lease.record()
+                if ordinary_continuation_lease is not None
+                else None
+            )
+            ordinary_continuation_lease_revoked_reason: str | None = None
+            ordinary_continuation_capture_check = ContinuationLeaseCheck(
+                valid=False,
+                reason="no_active_lease",
+                age_frames=0,
+                remaining_frames=0,
+            )
+            if ordinary_continuation_lease is not None:
+                ordinary_continuation_capture_check = (
+                    check_continuation_lease_capture(
+                        ordinary_continuation_lease,
+                        gameplay_epoch=gameplay_epoch,
+                        stage_route_index=int(state["stage_route_index"]),
+                        spell_active=bool(spell_state["active"]),
+                        player_phase=int(player["phase"]),
+                        unit_time_scale=bool(
+                            player_control_root.scale_bits
+                            == TH08_UNIT_TIME_SCALE_BITS
+                        ),
+                        current_frame=captured_iteration.snapshot_frame,
+                        player_x=player_control_root.x,
+                        player_y=player_control_root.y,
+                        pipeline_root=observed_local_pipeline_root,
+                        minimum_remaining_frames=(
+                            ORDINARY_AUTHORITY_MIN_TERMINAL_LEAD
+                        ),
+                    )
+                )
+                if not ordinary_continuation_capture_check.valid:
+                    ordinary_continuation_lease_revoked_reason = (
+                        ordinary_continuation_capture_check.reason
+                    )
+                    ordinary_continuation_lease = None
+            ordinary_continuation_lease_active = bool(
+                ordinary_continuation_lease is not None
+                and ordinary_continuation_capture_check.valid
+            )
+            ordinary_continuation_renewal_due = bool(
+                ordinary_continuation_lease_active
+            )
             # Compatibility trace only: the held-only v2 authority is
             # superseded by the contingent delayed-issue table below.
             ordinary_causal_hold_reason = "superseded_by_delayed_issue_v1"
@@ -5181,7 +5330,9 @@ def _run_live_session(
                 int(state["stage_route_index"]),
             )
             ordinary_causal_delayed_scan_due = bool(
-                ordinary_causal_delayed_last_scan is None
+                ordinary_continuation_renewal_due
+                or ordinary_continuation_lease_revoked_reason is not None
+                or ordinary_causal_delayed_last_scan is None
                 or ordinary_causal_delayed_last_scan[0]
                 != ordinary_causal_delayed_scan_key
                 or (
@@ -5193,6 +5344,7 @@ def _run_live_session(
             if (
                 observed_local_pipeline_root is not None
                 and observed_local_pipeline_root.pending_action is not None
+                and not ordinary_continuation_lease_active
             ):
                 ordinary_causal_delayed_reason = (
                     "older_pending_must_resolve_before_delayed_direction_scan"
@@ -5350,7 +5502,16 @@ def _run_live_session(
                     "future_policy_unavailable",
                 }
                 and observed_local_pipeline_root is not None
-                and observed_local_pipeline_root.pending_action is None
+                and (
+                    (
+                        ordinary_continuation_lease_active
+                        and ordinary_continuation_renewal_due
+                    )
+                    or (
+                        not ordinary_continuation_lease_active
+                        and observed_local_pipeline_root.pending_action is None
+                    )
+                )
                 and ordinary_causal_delayed_scan_due
             ):
                 ordinary_causal_delayed_last_scan = (
@@ -5358,54 +5519,75 @@ def _run_live_session(
                     captured_iteration.snapshot_frame,
                 )
                 ordinary_causal_delayed_reason = "prerequisite_unavailable"
-                ranking_started = time.perf_counter()
-                ranking_authority = (
-                    CORRIDOR_ALLOWED_ACTION_AUTHORITY
-                    if (
-                        corridor_action_authority
-                        and actionable_policy_guidance.allowed_first_actions
-                        is not None
+                if ordinary_continuation_lease_active:
+                    assert ordinary_continuation_lease is not None
+                    ordinary_causal_delayed_trigger_reason = (
+                        "terminal_continuation_renewal_due"
                     )
-                    else None
-                )
-                ranking_proposal = choose_local_proposal_request(
-                    _local_planner_request_from_capture(
-                        capture=published_guidance.capture,
-                        pipeline_root=observed_local_pipeline_root,
-                        action_hold_frames=action_hold_frames,
-                        corridor_target=actionable_corridor_target,
-                        policy_guidance=actionable_policy_guidance,
-                        allowed_action_authority=ranking_authority,
-                        horizon=args.horizon,
-                        threat_horizon=args.threat_horizon,
-                        beam_width=args.beam_width,
-                        losing_control_reserve=(
-                            args.losing_control_reserve
-                        ),
-                        preserve_previous_direction_inertia=(
-                            not corridor_context_changed
+                    ordinary_causal_delayed_ranking_action = (
+                        ordinary_continuation_lease.action
+                    )
+                    causal_actions = _ordinary_terminal_probe_actions(
+                        held_action=ordinary_continuation_lease.action,
+                        recovery_distances=(
+                            policy_guidance.recovery_distances
                         ),
                     )
-                )
-                ordinary_causal_delayed_ranking_action = (
-                    ranking_proposal.decision.action
-                )
-                ordinary_causal_delayed_ranking_proposal = ranking_proposal
-                ordinary_causal_delayed_ranking_ms = (
-                    time.perf_counter() - ranking_started
-                ) * 1000.0
-                causal_actions = _ordinary_terminal_probe_actions(
-                    held_action=(
-                        observed_local_pipeline_root.held_desired_action
-                    ),
-                    recovery_distances=policy_guidance.recovery_distances,
-                )
-                causal_actions = _prioritize_ordinary_delayed_actions(
-                    causal_actions,
-                    planned_action=(
-                        ordinary_causal_delayed_ranking_action
-                    ),
-                )
+                else:
+                    ranking_started = time.perf_counter()
+                    ranking_authority = (
+                        CORRIDOR_ALLOWED_ACTION_AUTHORITY
+                        if (
+                            corridor_action_authority
+                            and actionable_policy_guidance
+                            .allowed_first_actions
+                            is not None
+                        )
+                        else None
+                    )
+                    ranking_proposal = choose_local_proposal_request(
+                        _local_planner_request_from_capture(
+                            capture=published_guidance.capture,
+                            pipeline_root=observed_local_pipeline_root,
+                            action_hold_frames=action_hold_frames,
+                            corridor_target=actionable_corridor_target,
+                            policy_guidance=actionable_policy_guidance,
+                            allowed_action_authority=ranking_authority,
+                            horizon=args.horizon,
+                            threat_horizon=args.threat_horizon,
+                            beam_width=args.beam_width,
+                            losing_control_reserve=(
+                                args.losing_control_reserve
+                            ),
+                            preserve_previous_direction_inertia=(
+                                not corridor_context_changed
+                            ),
+                        )
+                    )
+                    ordinary_causal_delayed_ranking_action = (
+                        ranking_proposal.decision.action
+                    )
+                    ordinary_causal_delayed_ranking_proposal = (
+                        ranking_proposal
+                    )
+                    ordinary_causal_delayed_ranking_ms = (
+                        time.perf_counter() - ranking_started
+                    ) * 1000.0
+                    causal_actions = _ordinary_terminal_probe_actions(
+                        held_action=(
+                            observed_local_pipeline_root
+                            .held_desired_action
+                        ),
+                        recovery_distances=(
+                            policy_guidance.recovery_distances
+                        ),
+                    )
+                    causal_actions = _prioritize_ordinary_delayed_actions(
+                        causal_actions,
+                        planned_action=(
+                            ordinary_causal_delayed_ranking_action
+                        ),
+                    )
                 causal_horizon = (
                     min(
                         TH08_CORRIDOR_CONFIG.horizon_frames,
@@ -5652,6 +5834,29 @@ def _run_live_session(
                 )
             if (
                 allowed_action_authority is None
+                and ordinary_continuation_lease_active
+                and ordinary_continuation_lease is not None
+            ):
+                actionable_policy_guidance = replace(
+                    actionable_policy_guidance,
+                    support_covers_current=True,
+                    allowed_first_actions=(
+                        ordinary_continuation_lease.action,
+                    ),
+                    repair_volumes=(),
+                    recovery_distances=(),
+                    safety_actions=(),
+                    safety_state_value=None,
+                    survival_actions=(),
+                    survival_frames=None,
+                    survival_bottleneck_margin=None,
+                    position_error=0.0,
+                )
+                allowed_action_authority = (
+                    ORDINARY_CAUSAL_CONTINUATION_LEASE_AUTHORITY
+                )
+            if (
+                allowed_action_authority is None
                 and ordinary_causal_hold_safe
                 and ordinary_causal_hold_action is not None
             ):
@@ -5765,6 +5970,8 @@ def _run_live_session(
                             not in (
                                 ORDINARY_PREEXHAUSTION_AUTHORITY,
                                 ORDINARY_CAUSAL_HOLD_AUTHORITY,
+                                ORDINARY_CAUSAL_DELAYED_ISSUE_AUTHORITY,
+                                ORDINARY_CAUSAL_CONTINUATION_LEASE_AUTHORITY,
                             )
                         ),
                         viability_repair_volumes=(
@@ -6050,7 +6257,21 @@ def _run_live_session(
             )
             phase_now = action_issue_observation.player_phase
             predeath_now = action_issue_observation.predeath_counter
-            ordinary_issue_phase_eligible = phase_now not in (1, 2)
+            ordinary_issue_spell_active = (
+                action_issue_observation.spell_active
+            )
+            ordinary_issue_stage_route_index = (
+                action_issue_observation.stage_route_index
+            )
+            ordinary_issue_context_eligible = bool(
+                not ordinary_issue_spell_active
+                and ordinary_issue_stage_route_index
+                == int(state["stage_route_index"])
+            )
+            ordinary_issue_phase_eligible = bool(
+                phase_now not in (1, 2)
+                and ordinary_issue_context_eligible
+            )
             counter_at_action = action_issue_observation.issue_frame
             action_alignment = action_issue_observation.alignment
             if action_alignment.crosses_contiguous_epoch(
@@ -6082,6 +6303,7 @@ def _run_live_session(
                 ecl_instruction_cache.clear()
                 if corridor_future is not None:
                     corridor_future.cancel()
+                ordinary_continuation_lease = None
                 ordinary_future_source_result = None
                 if ordinary_future_source_future is not None:
                     ordinary_future_source_future.cancel()
@@ -6299,6 +6521,88 @@ def _run_live_session(
                             issue_recertification=transaction,
                         )
                         ordinary_causal_delayed_effective_at_issue = True
+            ordinary_continuation_issue_check = ContinuationLeaseCheck(
+                valid=False,
+                reason="lease_authority_not_selected",
+                age_frames=ordinary_issue_age,
+                remaining_frames=0,
+            )
+            ordinary_continuation_lease_effective_at_issue = False
+            if (
+                allowed_action_authority
+                == ORDINARY_CAUSAL_CONTINUATION_LEASE_AUTHORITY
+                and ordinary_continuation_lease is not None
+            ):
+                ordinary_continuation_issue_check = (
+                    check_continuation_lease_issue(
+                        ordinary_continuation_lease,
+                        gameplay_epoch=gameplay_epoch,
+                        stage_route_index=ordinary_issue_stage_route_index,
+                        spell_active=ordinary_issue_spell_active,
+                        player_phase=phase_now,
+                        issue_frame=counter_at_action,
+                        selected_action=decision.action,
+                        selected_mask=decision.mask,
+                        minimum_remaining_frames=(
+                            ORDINARY_AUTHORITY_MIN_TERMINAL_LEAD
+                        ),
+                    )
+                )
+                lease_transaction = decision.issue_recertification
+                lease_fresh_safe = bool(
+                    lease_transaction is not None
+                    and not lease_transaction.global_constraint_relaxed
+                    and lease_transaction.selected_action
+                    in lease_transaction.fresh_global_intersection
+                    and lease_transaction.selected_certificate
+                    .worst_collisions
+                    == 0
+                    and lease_transaction.selected_certificate
+                    .min_clearance
+                    >= 0.0
+                )
+                if issue_enemy_changes:
+                    ordinary_continuation_issue_check = (
+                        ContinuationLeaseCheck(
+                            valid=False,
+                            reason=(
+                                "fresh_geometry_changed_without_full_"
+                                "continuation_recertification"
+                            ),
+                            age_frames=(
+                                ordinary_continuation_issue_check.age_frames
+                            ),
+                            remaining_frames=(
+                                ordinary_continuation_issue_check
+                                .remaining_frames
+                            ),
+                            matched_branch_count=(
+                                ordinary_continuation_capture_check
+                                .matched_branch_count
+                            ),
+                        )
+                    )
+                elif not lease_fresh_safe:
+                    ordinary_continuation_issue_check = (
+                        ContinuationLeaseCheck(
+                            valid=False,
+                            reason="fresh_local_lease_recertification_failed",
+                            age_frames=(
+                                ordinary_continuation_issue_check.age_frames
+                            ),
+                            remaining_frames=(
+                                ordinary_continuation_issue_check
+                                .remaining_frames
+                            ),
+                            matched_branch_count=(
+                                ordinary_continuation_capture_check
+                                .matched_branch_count
+                            ),
+                        )
+                    )
+                ordinary_continuation_lease_effective_at_issue = (
+                    ordinary_continuation_issue_check.valid
+                )
             decision = apply_deadline_hold(
                 decision,
                 deadline_missed=bool(
@@ -6306,6 +6610,11 @@ def _run_live_session(
                         allowed_action_authority
                         == ORDINARY_CAUSAL_DELAYED_ISSUE_AUTHORITY
                         and not ordinary_causal_delayed_effective_at_issue
+                    )
+                    or (
+                        allowed_action_authority
+                        == ORDINARY_CAUSAL_CONTINUATION_LEASE_AUTHORITY
+                        and not ordinary_continuation_lease_effective_at_issue
                     )
                     or (
                         action_deadline_missed
@@ -6470,11 +6779,159 @@ def _run_live_session(
             )
             fresh_issue_result = physical_issue.issue
             input_dispatch = fresh_issue_result.dispatch
+            if (
+                ordinary_continuation_lease_effective_at_issue
+                and input_dispatch.transitions
+            ):
+                raise AssertionError(
+                    "continuation lease must consume held input as no-write"
+                )
             input_ms = input_dispatch.input_ms
             issue_path_ms = fresh_issue_result.issue_path_ms
             observe_to_issue_ms = fresh_issue_result.observe_to_issue_ms
             previous_mask = physical_issue.previous_mask
             previous_direction = physical_issue.previous_direction
+            ordinary_continuation_lease_created = False
+            ordinary_continuation_lease_renewed = False
+            ordinary_continuation_post_issue_reason = "no_lease_change"
+            lease_before_post_issue = ordinary_continuation_lease
+            if ordinary_causal_delayed_effective_at_issue:
+                if (
+                    ordinary_causal_delayed_issue_action is not None
+                    and ordinary_causal_delayed_issue_certificate is not None
+                    and decision.action
+                    == ordinary_causal_delayed_issue_action
+                    and decision.mask == previous_mask
+                    and ordinary_issue_phase_eligible
+                    and not hit_started
+                    and isinstance(
+                        published_future_projection,
+                        OrdinaryFutureHazardProjection,
+                    )
+                    and observed_local_pipeline_root is not None
+                ):
+                    try:
+                        ordinary_continuation_lease = (
+                            _build_ordinary_continuation_lease(
+                                gameplay_epoch=gameplay_epoch,
+                                stage_route_index=int(
+                                    state["stage_route_index"]
+                                ),
+                                action=(
+                                    ordinary_causal_delayed_issue_action
+                                ),
+                                mask=decision.mask,
+                                root_frame=(
+                                    captured_iteration.snapshot_frame
+                                ),
+                                issue_frame=counter_at_action,
+                                horizon_frames=(
+                                    ordinary_causal_delayed_horizon
+                                ),
+                                projection=published_future_projection,
+                                projection_source=(
+                                    delayed_projection_source
+                                ),
+                                pipeline_root=(
+                                    observed_local_pipeline_root
+                                ),
+                                pickup_delay_support=(
+                                    ordinary_causal_delayed_pickup_support
+                                ),
+                                player_x=player_control_root.x,
+                                player_y=player_control_root.y,
+                                player_scale_bits=(
+                                    captured_iteration.time_scale_schedule
+                                    .require_player_horizon(
+                                        ordinary_causal_delayed_horizon
+                                    )
+                                ),
+                                certificate=(
+                                    ordinary_causal_delayed_issue_certificate
+                                ),
+                                fresh_geometry_frame=int(
+                                    issue_enemy_prefix_snapshot.frame_after
+                                ),
+                                fresh_geometry_changed=bool(
+                                    issue_enemy_changes
+                                ),
+                            )
+                        )
+                        ordinary_continuation_lease_created = bool(
+                            lease_before_post_issue is None
+                        )
+                        ordinary_continuation_lease_renewed = bool(
+                            lease_before_post_issue is not None
+                        )
+                        ordinary_continuation_post_issue_reason = (
+                            "exact_delayed_predecessor_renewed_lease"
+                            if ordinary_continuation_lease_renewed
+                            else "exact_delayed_predecessor_created_lease"
+                        )
+                    except (KeyError, TypeError, ValueError) as error:
+                        ordinary_continuation_lease = None
+                        ordinary_continuation_lease_revoked_reason = (
+                            "lease_construction_failed:"
+                            f"{type(error).__name__}:{error}"
+                        )
+                        ordinary_continuation_post_issue_reason = (
+                            ordinary_continuation_lease_revoked_reason
+                        )
+                else:
+                    ordinary_continuation_lease = None
+                    ordinary_continuation_lease_revoked_reason = (
+                        "delayed_authority_changed_before_physical_commit"
+                    )
+                    ordinary_continuation_post_issue_reason = (
+                        ordinary_continuation_lease_revoked_reason
+                    )
+            elif lease_before_post_issue is not None:
+                retained_issue_check = check_continuation_lease_issue(
+                    lease_before_post_issue,
+                    gameplay_epoch=gameplay_epoch,
+                    stage_route_index=ordinary_issue_stage_route_index,
+                    spell_active=ordinary_issue_spell_active,
+                    player_phase=phase_now,
+                    issue_frame=counter_at_action,
+                    selected_action=decision.action,
+                    selected_mask=decision.mask,
+                    minimum_remaining_frames=(
+                        ORDINARY_AUTHORITY_MIN_TERMINAL_LEAD
+                    ),
+                )
+                retain_old_lease = bool(
+                    retained_issue_check.valid
+                    and not issue_enemy_changes
+                    and (
+                        ordinary_continuation_lease_effective_at_issue
+                        or allowed_action_authority
+                        == ORDINARY_CAUSAL_DELAYED_ISSUE_AUTHORITY
+                    )
+                )
+                if retain_old_lease:
+                    ordinary_continuation_lease = lease_before_post_issue
+                    ordinary_continuation_post_issue_reason = (
+                        "old_exact_lease_retained_without_write"
+                    )
+                else:
+                    ordinary_continuation_lease = None
+                    ordinary_continuation_lease_revoked_reason = (
+                        ordinary_continuation_issue_check.reason
+                        if (
+                            allowed_action_authority
+                            == ORDINARY_CAUSAL_CONTINUATION_LEASE_AUTHORITY
+                        )
+                        else retained_issue_check.reason
+                    )
+                    if issue_enemy_changes:
+                        ordinary_continuation_lease_revoked_reason = (
+                            "fresh_geometry_changed_without_full_"
+                            "continuation_recertification"
+                        )
+                    ordinary_continuation_post_issue_reason = (
+                        ordinary_continuation_lease_revoked_reason
+                    )
+                    ordinary_causal_delayed_last_scan = None
             if runtime_ecl_identity_service is not None:
                 runtime_ecl_identity_service.observe_if_due(
                     reader,
@@ -6577,6 +7034,10 @@ def _run_live_session(
                 or auto_confirm_event is not None
                 or action_deadline_missed
                 or local_pipeline_certificate_shadow is not None
+                or ordinary_continuation_lease_effective_at_issue
+                or ordinary_continuation_lease_created
+                or ordinary_continuation_lease_renewed
+                or ordinary_continuation_lease_revoked_reason is not None
             ):
                 record = {
                     "kind": "decision",
@@ -6884,6 +7345,13 @@ def _run_live_session(
                     "player_phase_eligible": (
                         ordinary_issue_phase_eligible
                     ),
+                    "issue_spell_active": ordinary_issue_spell_active,
+                    "issue_stage_route_index": (
+                        ordinary_issue_stage_route_index
+                    ),
+                    "issue_context_eligible": (
+                        ordinary_issue_context_eligible
+                    ),
                     "nominal_deadline_missed": action_deadline_missed,
                     "effective_at_issue": bool(
                         ordinary_causal_delayed_effective_at_issue
@@ -6901,6 +7369,59 @@ def _run_live_session(
                     "future_observation_merge": (
                         "hidden_old_pending_and_pickup_merged_per_"
                         "observable_issue_age_bin_before_action_selection"
+                    ),
+                }
+                record["ordinary_terminal_continuation_lease"] = {
+                    "schema": (
+                        "th08-ordinary-terminal-continuation-lease-v1"
+                    ),
+                    "authority": (
+                        ORDINARY_CAUSAL_CONTINUATION_LEASE_AUTHORITY
+                    ),
+                    "present_at_capture": (
+                        ordinary_continuation_lease_present_at_capture
+                    ),
+                    "capture_lease": (
+                        ordinary_continuation_lease_capture_record
+                    ),
+                    "capture_check": (
+                        ordinary_continuation_capture_check.record()
+                    ),
+                    "renewal_due": ordinary_continuation_renewal_due,
+                    "renewal_policy": (
+                        "every_compatible_fallback_root_old_exact_lease_"
+                        "bridges_computation"
+                    ),
+                    "selected_as_allowed_action_authority": (
+                        allowed_action_authority
+                        == ORDINARY_CAUSAL_CONTINUATION_LEASE_AUTHORITY
+                    ),
+                    "issue_check": ordinary_continuation_issue_check.record(),
+                    "effective_at_issue": (
+                        ordinary_continuation_lease_effective_at_issue
+                    ),
+                    "physical_no_write": not bool(
+                        input_dispatch.transitions
+                    ),
+                    "created": ordinary_continuation_lease_created,
+                    "renewed": ordinary_continuation_lease_renewed,
+                    "revoked_reason": (
+                        ordinary_continuation_lease_revoked_reason
+                    ),
+                    "post_issue_reason": (
+                        ordinary_continuation_post_issue_reason
+                    ),
+                    "active_after_issue": (
+                        ordinary_continuation_lease.record()
+                        if ordinary_continuation_lease is not None
+                        else None
+                    ),
+                    "direction_change_rule": (
+                        "new_complete_mask_requires_new_exact_predecessor"
+                    ),
+                    "fresh_geometry_rule": (
+                        "capture_to_issue_change_requires_full_delayed_"
+                        "recertification_or_revocation"
                     ),
                 }
                 record["corridor_delivery"] = {

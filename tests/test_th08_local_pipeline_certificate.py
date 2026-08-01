@@ -29,6 +29,7 @@ from th08_live_dodge_agent import (
     _build_bullet_frames,
     _build_packed_laser_collision_frames,
     _causal_pipeline_player_positions,
+    _delayed_issue_action_certificates,
     _delayed_causal_pipeline_player_positions,
     _advance_planner_action,
     _hazards_for_positions,
@@ -38,11 +39,16 @@ from th08_live_dodge_agent import (
     _recertify_delayed_issue_rows_for_fresh_enemy_bodies,
 )
 from th08_live.local_certificates import delayed_issue_action_certificates
+from th08_live.ordinary_continuation_lease import (
+    OrdinaryContinuationLease,
+    check_continuation_lease_capture,
+)
 from touhou_control.local_pipeline_oracle import (
     LocalPipelineRoot,
     enumerate_delayed_issue_pipeline_branches,
     scalar_local_pipeline_certificates,
 )
+from touhou_control.pipeline_identity import VersionIdentity
 from touhou_control.corridor import AabbHazard, AabbTrajectoryHazard
 from th08_time_scale import TH08_UNIT_TIME_SCALE_BITS
 
@@ -52,6 +58,138 @@ def _unit_scale_bits(horizon: int) -> tuple[int, ...]:
 
 
 class Th08LocalPipelineCertificateTests(unittest.TestCase):
+    def test_retained_physical_no_write_path_forms_exact_lease(self) -> None:
+        root = LocalPipelineRoot("left_fast", "left_fast")
+        branches = enumerate_delayed_issue_pipeline_branches(
+            root=root,
+            selected_action="left_fast",
+            issue_delay_frames=(13,),
+            pickup_delay_frames=tuple(range(7)),
+            horizon_frames=80,
+        )
+        positions = _delayed_causal_pipeline_player_positions(
+            root=root,
+            selected_action="left_fast",
+            issue_delay_frames=(13,),
+            pickup_delay_frames=tuple(range(7)),
+            horizon_frames=80,
+            player_x=101.80775451660156,
+            player_y=402.46063232421875,
+            player_scale_bits=_unit_scale_bits(80),
+        )
+        lease = OrdinaryContinuationLease(
+            lease_id="stage5-f1456-left-fast",
+            gameplay_epoch=0,
+            stage_route_index=5,
+            action="left_fast",
+            mask=0x41,
+            root_frame=1456,
+            issue_frame=1469,
+            horizon_frames=80,
+            projection_digest="retained-stage5-projection",
+            projection_source="retained-physical",
+            projection_version=VersionIdentity.from_mapping(
+                "retained-stage5-projection-v1",
+                {"root_frame": 1456},
+            ),
+            pipeline_root=root,
+            issue_delay=13,
+            pickup_delay_support=tuple(range(7)),
+            branches=branches,
+            positions_by_step=positions,
+            minimum_clearance=48.942928314208984,
+            fresh_geometry_frame=1469,
+            fresh_geometry_changed=True,
+        )
+
+        retained = check_continuation_lease_capture(
+            lease,
+            gameplay_epoch=0,
+            stage_route_index=5,
+            spell_active=False,
+            player_phase=0,
+            unit_time_scale=True,
+            current_frame=1470,
+            player_x=45.80775451660156,
+            player_y=402.46063232421875,
+            pipeline_root=LocalPipelineRoot("left_fast", "left_fast"),
+            minimum_remaining_frames=7,
+        )
+        discarded_by_old_controller = check_continuation_lease_capture(
+            lease,
+            gameplay_epoch=0,
+            stage_route_index=5,
+            spell_active=False,
+            player_phase=0,
+            unit_time_scale=True,
+            current_frame=1479,
+            player_x=9.807754516601562,
+            player_y=402.46063232421875,
+            pipeline_root=LocalPipelineRoot("right_fast", "right_fast"),
+            minimum_remaining_frames=7,
+        )
+
+        self.assertTrue(retained.valid)
+        self.assertEqual(
+            discarded_by_old_controller.reason,
+            "held_action_mismatch",
+        )
+
+    def test_held_no_write_rows_share_one_exact_physical_path(self) -> None:
+        stay = next(
+            action for action in _PLANNER_ACTIONS if action.name == "stay"
+        )
+        issue_delays = tuple(range(6))
+        scale_bits = _unit_scale_bits(8)
+        root = LocalPipelineRoot("stay", "stay")
+        projection = complete_future_hazard_projection(
+            root_frame=100,
+            horizon_frames=8,
+            events=(),
+            source_semantics_version="test-held-renewal-v1",
+        )
+
+        optimized, conditioned = _delayed_issue_action_certificates(
+            root=root,
+            actions=(stay,),
+            issue_delay_frames=issue_delays,
+            pickup_delay_frames=(0, 1, 2),
+            horizon_frames=8,
+            player_x=192.0,
+            player_y=400.0,
+            bullets=(),
+            lasers=(),
+            enemy_bodies=(),
+            snapshot_lag=0,
+            player_scale_bits=scale_bits,
+            laser_scale_bits=scale_bits,
+            future_hazard_projection=projection,
+            source_frame=100,
+        )
+        scalar_rows = delayed_issue_action_certificates(
+            hazards_for_positions=_hazards_for_positions,
+            player_x=192.0,
+            player_y=400.0,
+            actions=(stay,),
+            issue_delay_frames=issue_delays,
+            pickup_delay_frames=(0, 1, 2),
+            horizon_frames=8,
+            bullets=(),
+            lasers=(),
+            enemy_bodies=(),
+            snapshot_lag=0,
+            player_scale_bits=scale_bits,
+            laser_scale_bits=scale_bits,
+            pipeline_root=root,
+        )
+
+        self.assertEqual(len(conditioned), 1)
+        for issue_delay in issue_delays:
+            self.assertEqual(
+                optimized[issue_delay]["stay"],
+                scalar_rows[issue_delay]["stay"],
+            )
+
     def test_fresh_enemy_body_slab_is_conditioned_after_each_issue_age(
         self,
     ) -> None:

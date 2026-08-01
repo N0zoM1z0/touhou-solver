@@ -28,13 +28,20 @@ authority.
   and reuses that immutable proposal after the scan. In `115838`, 11/21 scans
   physically acquired exact authority; median issue age was 25 frames versus
   43 before proposal reuse. CE-0250's zero-transition blocker is closed.
-- **Remaining ordinary blocker:** exact authority is not yet a persistent
-  lease. Some final-age rows are empty, unsafe candidate sequences can still
-  consume H80, and a later unconstrained iteration can replace a previously
-  safe direction. `115838` still had 10 nonspell hits. The next general work
-  is terminal-continuation/lease authority, followed by a rotated Stage-3 or
-  4A gate; scalar reserve remains rejected and local ranking is not safety
-  authority.
+- **Implemented, awaiting rotated physical falsification:** an effective
+  delayed action now creates an immutable H80 terminal-continuation lease.
+  Each compatible fallback root first renews the held no-write action; only
+  if that predecessor is unsafe may independent recovery directions be
+  evaluated. Exact float32 position, active/held/pending support, epoch,
+  stage, phase, unit scale, remaining horizon, fresh geometry, and the full
+  content-addressed projection version are fail-closed. Spell-active and
+  stage-route are reread at final issue, so computation may not carry an
+  ordinary lease across a phase/context transition. A new complete mask
+  requires a new exact delayed
+  predecessor. The retained `115838` f1456/f1469 witness remains exact at
+  f1470; the old unconstrained f1479 switch is now rejected. Rotated Stage-3
+  or 4A physical validation is next; scalar reserve remains rejected and
+  local ranking is not safety authority.
 - Native H=32 wind-tunnel checkpoint: `3d15953`; it is historical evidence,
   not the live ordinary horizon.
 - Workspace-prune checkpoint: `be3e583` (`Prune TH08 active research
@@ -42,8 +49,9 @@ authority.
   priority-17, and old focused Final-B lanes while preserving the promoted
   baseline/pre-loss live path, native snapshot executor, exact pipeline
   workspace, and Final-B scale authority.
-- Affected Linux and Windows focused discovery passes 126 delayed-pipeline,
-  local-certificate, preexhaustion, and controller tests. Complete Linux
+- Affected Linux and Windows focused discovery passes 130 issue-stage,
+  continuation-lease, local-certificate, preexhaustion, and controller tests.
+  Complete Linux
   discovery ran 1,284 tests in 10.659 seconds and exposed five unrelated
   workspace failures: four pre-existing native ABI header/binary-versus-
   manifest mismatches and the preserved user-edited factorized report's
@@ -451,14 +459,13 @@ Do not rerun the rejected scalar-reserve or H=32 signed-terminal design. The
 future-source, retained-chain, delayed-pipeline, and fresh-hostile-body gates
 pass. Next:
 
-1. Turn one effective delayed action into a versioned lease: later iterations
-   may retain it only while the original exact row still covers the current
-   age, player phase, action/pending state, complete future slab, and fresh
-   hostile-body geometry. A new direction requires a new exact predecessor.
-2. Regress the f817/833/835/850/910 retained chain and the physical
-   intermediate-safe/final-miss records. Empty rows, terminal expiry, and
-   timeouts must remain fail closed.
-3. Rotate the next physical workload to Lunatic Stage 3 or 4A with observed-
+1. Physically falsify the versioned rolling lease on Lunatic Stage 3 or 4A.
+   Require nonzero no-write lease consumption or exact renewal, no action-set
+   widening, and explicit revocation on mismatch.
+2. The f817/833/835/850/910 retained chain and physical f1456/f1469/f1470/
+   f1479 continuation now regress. Empty actual rows, terminal expiry, and
+   final-age misses remain fail closed.
+3. Keep observed-
    body early kill still only an objective inside the hard set. Retain the
    first ordinary hit and exact lease exposure.
 4. Only after lease authority is physically effective, classify remaining

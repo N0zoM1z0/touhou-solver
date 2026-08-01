@@ -217,6 +217,9 @@ def build_report() -> dict[str, object]:
             point["actual_issue_age"] in ISSUE_DELAY_FRAMES
             for point in points
         ),
+        "empty_actual_rows_cannot_create_a_lease": all(
+            not point["actual_issue_safe_actions"] for point in points
+        ),
     }
     return {
         "schema": "th08-ordinary-delayed-issue-retained-gate-v1",

@@ -1,0 +1,206 @@
+{
+  "schema": "th08-ordinary-delayed-issue-retained-gate-v1",
+  "scope": "ordinary_nonspell_only",
+  "authority": "deterministic_native_replay_regression",
+  "contract": {
+    "horizon_frames": 80,
+    "issue_delay_frames": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24
+    ],
+    "pickup_delay_frames": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ],
+    "action_selection": "after_issue_age_observation_from_that_exact_table_row",
+    "held_complete_mask": "no_write_preserves_pending"
+  },
+  "chain": [
+    {
+      "decision_frame": 817,
+      "observation_frame": 816,
+      "pipeline_root": {
+        "active_action": "up_fast",
+        "held_desired_action": "up_fast",
+        "pending_action": null,
+        "remaining_delay_support": []
+      },
+      "actual_issue_age": 0,
+      "actions": [
+        "up_fast",
+        "left_fast",
+        "right_fast"
+      ],
+      "safe_issue_age_ranges": {
+        "up_fast": [],
+        "left_fast": [],
+        "right_fast": []
+      },
+      "actual_issue_safe_actions": [],
+      "branch_contract_exact": true,
+      "row_count": 25,
+      "conditioned_projection_count": 5,
+      "source_closure_complete": true,
+      "coverage_complete": true,
+      "elapsed_ms": 102.76915700524114
+    },
+    {
+      "decision_frame": 833,
+      "observation_frame": 831,
+      "pipeline_root": {
+        "active_action": "down_left",
+        "held_desired_action": "down_left",
+        "pending_action": null,
+        "remaining_delay_support": []
+      },
+      "actual_issue_age": 0,
+      "actions": [
+        "down_left",
+        "left_fast",
+        "right_fast"
+      ],
+      "safe_issue_age_ranges": {
+        "down_left": [],
+        "left_fast": [],
+        "right_fast": [
+          [
+            24,
+            24
+          ]
+        ]
+      },
+      "actual_issue_safe_actions": [],
+      "branch_contract_exact": true,
+      "row_count": 25,
+      "conditioned_projection_count": 5,
+      "source_closure_complete": true,
+      "coverage_complete": true,
+      "elapsed_ms": 86.46149301785044
+    },
+    {
+      "decision_frame": 835,
+      "observation_frame": 834,
+      "pipeline_root": {
+        "active_action": "down_left",
+        "held_desired_action": "down_left",
+        "pending_action": null,
+        "remaining_delay_support": []
+      },
+      "actual_issue_age": 0,
+      "actions": [
+        "down_left",
+        "left_fast",
+        "right_fast"
+      ],
+      "safe_issue_age_ranges": {
+        "down_left": [],
+        "left_fast": [],
+        "right_fast": []
+      },
+      "actual_issue_safe_actions": [],
+      "branch_contract_exact": true,
+      "row_count": 25,
+      "conditioned_projection_count": 5,
+      "source_closure_complete": true,
+      "coverage_complete": true,
+      "elapsed_ms": 83.41605099849403
+    },
+    {
+      "decision_frame": 850,
+      "observation_frame": 848,
+      "pipeline_root": {
+        "active_action": "down_right_fast",
+        "held_desired_action": "right_fast",
+        "pending_action": "right_fast",
+        "remaining_delay_support": [
+          1,
+          2,
+          3,
+          4
+        ]
+      },
+      "actual_issue_age": 1,
+      "actions": [
+        "right_fast",
+        "left_fast",
+        "up_fast"
+      ],
+      "safe_issue_age_ranges": {
+        "right_fast": [],
+        "left_fast": [],
+        "up_fast": []
+      },
+      "actual_issue_safe_actions": [],
+      "branch_contract_exact": true,
+      "row_count": 25,
+      "conditioned_projection_count": 5,
+      "source_closure_complete": true,
+      "coverage_complete": true,
+      "elapsed_ms": 229.42188201704994
+    },
+    {
+      "decision_frame": 910,
+      "observation_frame": 908,
+      "pipeline_root": {
+        "active_action": "stay",
+        "held_desired_action": "stay",
+        "pending_action": null,
+        "remaining_delay_support": []
+      },
+      "actual_issue_age": 0,
+      "actions": [
+        "stay",
+        "left_fast",
+        "right_fast"
+      ],
+      "safe_issue_age_ranges": {
+        "stay": [],
+        "left_fast": [],
+        "right_fast": []
+      },
+      "actual_issue_safe_actions": [],
+      "branch_contract_exact": true,
+      "row_count": 25,
+      "conditioned_projection_count": 5,
+      "source_closure_complete": true,
+      "coverage_complete": true,
+      "elapsed_ms": 87.24404498934746
+    }
+  ],
+  "checks": {
+    "complete_future_coverage": true,
+    "complete_issue_delay_table": true,
+    "held_no_write_and_write_branch_counts_exact": true,
+    "retained_actual_issue_ages_covered": true,
+    "empty_actual_rows_cannot_create_a_lease": true
+  },
+  "hard_gate_passed": true
+}

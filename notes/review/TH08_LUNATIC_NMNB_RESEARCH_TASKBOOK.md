@@ -589,12 +589,14 @@ it.
    ECL/timeline/callback/motion case into free space.
 4. Keep the physically effective computation-delay/action-conditioned table:
    local ranking orders work only; the fresh exact issue-age row is authority.
-5. Build a versioned terminal-continuation lease so a later unconstrained
-   iteration cannot immediately discard an effective delayed direction. Any
-   root/version/phase/pending/fresh-body mismatch must revoke it.
-6. Regress retained f817/833/835/850/910 plus the physical intermediate-safe/
-   final-miss records, then rotate to Lunatic Stage 3 or 4A with hard no-Bomb
-   and observed-body early kill only inside the exact set.
+5. Keep the implemented versioned terminal-continuation lease fail closed: a
+   compatible fallback root renews held/no-write first; another direction
+   requires a new safe final-age predecessor. Root, epoch, stage, phase,
+   pending support, exact position, expiry, or fresh-body mismatch revokes it.
+6. The retained f817/833/835/850/910 empty actual rows and physical
+   f1456/f1469/f1470/f1479 continuation regress. Rotate now to Lunatic Stage 3
+   or 4A with hard no-Bomb and observed-body early kill only inside the exact
+   set; require nonzero lease creation/renewal or a concrete revocation.
 7. Evaluate remaining hostile-birth uncertainty and only then local micro
    ranking after lease authority is physically effective; repeat a winner
    before a full route.

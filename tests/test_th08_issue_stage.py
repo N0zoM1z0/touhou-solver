@@ -17,6 +17,8 @@ from th08_live.issue_stage import (
 from th08_runtime.game_state import (
     ADDR_ENEMY_MANAGER_FRAME,
     ADDR_PLAYER,
+    ADDR_SPELL_CARD_STATE,
+    ADDR_STAGE_ROUTE_INDEX,
     PLAYER_PREDEATH_COUNTER_OFFSET,
 )
 from th08_live import CapturedIteration
@@ -178,11 +180,15 @@ class IssueStageTests(unittest.TestCase):
                     "i32",
                     ADDR_PLAYER + PLAYER_PREDEATH_COUNTER_OFFSET,
                 ),
+                ("u32", ADDR_SPELL_CARD_STATE),
+                ("u32", ADDR_STAGE_ROUTE_INDEX),
                 ("u32", ADDR_ENEMY_MANAGER_FRAME),
             ],
         )
         self.assertEqual(observation.player_phase, 2)
         self.assertEqual(observation.predeath_counter, 14)
+        self.assertTrue(observation.spell_active)
+        self.assertEqual(observation.stage_route_index, 13)
         self.assertEqual(observation.issue_frame, 13)
         self.assertEqual(observation.alignment.action_lag, 3)
 

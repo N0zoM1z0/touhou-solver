@@ -109,8 +109,28 @@ row. The immutable ranking proposal is reused after the scan, but fresh issue
 independently recertifies all local actions. Physical CE-0251 proves this path
 can issue a different safe mask: Stage-5 `20260801_115838` made 11/21 delayed
 scans effective. It does not prove recursive viability. No delayed result may
-persist beyond its exact version/age/root unless a separate lease contract
-proves that continuation.
+persist merely because its action was previously safe. The default-off lease
+contract now retains the exact selected action, full content-addressed
+projection version and digest, original
+pipeline root, issue age, pickup support, binary32 branch positions, fresh
+geometry frame, and remaining H80 horizon. A later observation conditions
+that witness only when its epoch, stage, ordinary phase, unit scale, held
+action, active/pending branch, complete remaining support, and exact player
+position match. The held mask is no-write and must generate no input
+transition. Final issue rereads native spell-active and stage-route; either a
+spell transition or a route-index mismatch makes ordinary authority
+ineligible before dispatch.
+
+On each compatible fallback root, the solver first renews that held action
+against the current complete future projection and fresh hazards. Held
+no-write paths are independent of issue age, so their base certificate is
+computed once and copied to the observable age rows; issue-time fresh-body
+intersection remains age-conditioned. If held renewal is unsafe, other
+directions are independent delayed predecessors. A new mask may be issued
+only from its safe final-age row. The old lease bridges computation only until
+its finite horizon; phase, context, position, pending-support, expiry, fresh
+geometry, or final-row mismatch revokes it. Empty and timed-out rows never
+create or renew a lease. Rotated physical validation is still pending.
 
 Physical run `20260731_152921` found two independent invalidations. First,
 `player+0xE2A68` retains the deathbomb-window limit installed by

@@ -134,12 +134,25 @@ recertifies all local actions, and the exact final-age row alone may override
 input. In `115838`, 11/21 delayed scans were physically effective; median
 issue age was 25 frames versus 43 before proposal reuse. The run completed 18
 hits, 10 nonspell, zero Bombs, accepted replay, and cleanup. Different-RNG hit
-counts remain observational. L3 remains default-off and unpromoted because
-this is one-step authority, not a persistent exact lease; later iterations
-can still discard the safe direction and some terminal rows are empty or
-expired. Lease/terminal-continuation authority is next, then a rotated Stage-3
-or 4A gate. Local ranking remains computation order/objective only, never
-survival authority.
+counts remain observational.
+
+The default-off successor now retains each effective delayed action as a
+versioned terminal-continuation lease. On every compatible fallback root it
+first computes the held no-write predecessor; if that is unsafe, bounded
+recovery directions may be evaluated independently, and a direction change
+requires a safe final-age row. The old lease bridges this computation only
+while exact binary32 position, active/held/pending support, epoch, stage,
+phase, unit scale, remaining horizon, fresh geometry, and its immutable
+content-addressed projection version remain compatible. Stage-route and
+spell-active are reread at final issue instead of inherited from capture.
+Any mismatch revokes it. Held no-write issue-age rows share one physical path,
+so renewal does not repeat 74 equivalent paths. The retained Stage-5
+f1456/f1469 action is compatible at f1470; the former unconstrained f1479
+switch is rejected. Empty actual rows at f817/833/835/850/910 remain empty.
+This is deterministic evidence, not physical promotion. L3 remains
+default-off until a rotated Stage-3 or 4A run exercises renewal/revocation.
+Local ranking remains computation order/objective only, never survival
+authority.
 
 The authorized Stage-4A physical run `20260731_220830` did not exercise that
 authority: all 1,754 live source projections were incomplete, chiefly because

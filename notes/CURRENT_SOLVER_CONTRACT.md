@@ -160,6 +160,16 @@ v12 validates the full timer state and reduces any finite fraction to that
 integer clock. Nonfinite state and nonunit scale still fail closed. Physical
 validation remains pending a fresh run with nonzero complete source delivery.
 
+That source-delivery condition passed in Stage-3 `20260801_141250`: 692/1,261
+source roots completed, 595 future policies completed, and 265 exact ordinary
+issues were effective. Persistent lease authority did not pass. Four effective
+delayed actions created four leases, all later revoked because a fresh hostile
+body envelope was outside the certified active/future AABB set; zero leases
+were effective at issue. The canonical f3181 hit followed a long authority
+gap: the last exact issue was f1406 and all 103 decisions in f2941..3181 had no
+future policy. Source v12 is therefore live-mechanism evidence only, not hit
+promotion or recursive viability closure.
+
 Physical run `20260731_152921` found two independent invalidations. First,
 `player+0xE2A68` retains the deathbomb-window limit installed by
 `0x0044AB40`; it is not a zero-when-alive predeath predicate, so all 7,202

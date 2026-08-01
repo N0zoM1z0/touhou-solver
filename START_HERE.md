@@ -14,15 +14,12 @@ authority.
 
 - Branch: `main`.
 - Last physical checkpoint:
-  `lunatic_route2_stage3_unattended_20260801_134853`. It completed Stage 3
-  with one hit at nonspell frame 7935, hard no-Bomb, Power 128 throughout, an
-  accepted Route-2 Lunatic replay SHA-256
-  `9e2a1272623843f39ebd5c68ee5deec02f36731ba79ac7af0fad67f4d91c71ad`,
-  and cleanup. The old Stage-3 workload had five hits, but the roots differ,
-  so that aggregate is observational rather than causal A/B evidence.
-  Crucially, this run created and consumed zero exact leases: all 4,725
-  eligible ordinary roots lacked a completed future policy. It is a strong
-  fallback-path result, not physical validation of recursive authority.
+  `lunatic_route2_stage3_unattended_20260801_141250`. It completed Stage 3
+  with four hits at `[3181,7956,8414,25932]` (three nonspell, one spell 50),
+  hard no-Bomb, an accepted Route-2 Lunatic replay SHA-256
+  `c1b99e9215e4bd044f574c449a2064837afa531c062cb5709ba559c7371a7d11`,
+  and cleanup. Power fell 128 to 93 after misses. The preceding different-RNG
+  Stage-3 run had one hit; neither aggregate is causal A/B evidence.
 - **Observed Stage-3 first mismatch:** 701/1,214 source attempts failed because
   timeline 2 retained a nonzero fractional timer component; 465 crossed the
   native clock bracket. Every one of the 49 source attempts in the f7695..7935
@@ -32,8 +29,18 @@ authority.
   eligibility observes only the integer component. Source semantics v12 now
   validates finite timer state and discards the causally inert fraction only
   after exact unit scale is proved. Nonunit scale and nonfinite state remain
-  fail closed. Focused Linux tests pass; Windows and rotated physical gates
-  remain pending.
+  fail closed. Focused Linux and 88 Windows tests pass.
+- **Observed physical activation and remaining discontinuity:** the corrected
+  run produced 692/1,261 complete source projections, 596 submissions, 595
+  completed policies, and 265 effective ordinary exact-authority issues.
+  Four delayed predecessors were effective and created four leases, but no
+  lease was consumed: every lease was revoked by an uncontained fresh-body
+  envelope. Before first hit f3181, exact authority ended at f1406; all 103
+  decisions in f2941..3181 were `future_policy_unavailable` despite 14
+  complete source captures in that window. The fraction correction is
+  physically validated as source delivery, not as hit reduction or persistent
+  recursive viability. Cross-workload Stage-4A/5 trials at parent checkpoint
+  `5fc6d92` are the next user-requested observational gate.
 - **Observed physical latency correction:** the ordinary fallback now builds
   an action-conditioned H80 predecessor indexed by final observed issue age,
   including computation, old pending evolution, held no-write, replacement,

@@ -599,10 +599,13 @@ it.
    f1456/f1469/f1470/f1479 and f3191/f3192 continuations regress. Stage-3
    `20260801_134853` produced only one hit/no-Bomb but zero leases because all
    ordinary roots lacked a future policy. Source semantics v12 removes its
-   false finite-fraction UNKNOWN only under exact unit time scale. Repeat
-   Stage 3 and require nonzero complete publication plus effective no-write
-   consumption or a concrete fail-closed revocation; aggregate hits alone do
-   not validate the lease.
+   false finite-fraction UNKNOWN only under exact unit time scale. The repeat
+   `141250` delivered 692 complete sources and 265 effective exact issues, but
+   all four created leases were revoked by fresh-body containment and none was
+   consumed. Preserve this fail-closed result. Run the requested parent
+   `5fc6d92` Stage-4A/5 cross-workload observations, then return to continuity
+   of future-policy publication and hostile-body coverage; aggregate hits
+   alone do not validate the lease.
 7. Evaluate remaining hostile-birth uncertainty and only then local micro
    ranking after lease authority is physically effective; repeat a winner
    before a full route.

@@ -179,6 +179,17 @@ the same integer clock. Nonfinite timer state or nonunit scale remains
 `UNKNOWN`. A fresh Stage-3 run must demonstrate nonzero complete publications
 before its hit result can validate the lease.
 
+The v12 repeat `20260801_141250` physically validates that semantic correction
+but not the route outcome. Complete source roots rose to 692/1,261 and drove
+595 completed publications plus 265 effective exact ordinary issues. Four
+effective delayed rows created leases; all four were revoked by fresh-body
+containment and effective no-write lease consumption remained zero. The run
+had four hits versus the prior different-RNG one-hit result. At canonical hit
+f3181, the last exact issue was f1406 and every decision in f2941..3181 lacked
+a future policy. Thus the new global path was active earlier but did not
+provide persistent authority into the hit window. L3 remains default-off;
+do not attribute either aggregate to the fraction correction.
+
 The authorized Stage-4A physical run `20260731_220830` did not exercise that
 authority: all 1,754 live source projections were incomplete, chiefly because
 the former sparse capture crossed the manager frame 1,726 times. Consequently

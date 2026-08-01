@@ -1,0 +1,1102 @@
+{
+  "decision_count": 11763,
+  "first_frame": 1,
+  "last_frame": 44960,
+  "frame_span": 44959,
+  "termination_reason": "route_complete",
+  "counter_gaps": 417,
+  "hit_frames": [
+    1957,
+    2383,
+    4165,
+    7039,
+    10814,
+    12980,
+    14449,
+    23153,
+    24224,
+    32085,
+    32657,
+    37734,
+    41028,
+    42603,
+    44419
+  ],
+  "hit_analyses": [
+    {
+      "hit_frame": 1957,
+      "window_start": 1717,
+      "stage_route_index": 5,
+      "stage_label": "Stage 5",
+      "resources": {
+        "lives": 8.0,
+        "bombs": 3.0,
+        "power": 128.0
+      },
+      "player": {
+        "x": 113.64169311523438,
+        "y": 277.21820068359375,
+        "projected_x": 113.64169311523438,
+        "projected_y": 277.21820068359375,
+        "control_origin_x": 113.64169311523438,
+        "control_origin_y": 277.21820068359375,
+        "phase": 0,
+        "phase_at_action": 2,
+        "predeath_at_action": 10,
+        "focus_logic": 1,
+        "secondary_character_active": true,
+        "focus_transition_counter": 59
+      },
+      "last_nonnegative_gate": null,
+      "first_negative_gate": null,
+      "minimum_gate_slack": null,
+      "first_nonpositive_pipeline": {
+        "frame": 1957,
+        "clearance": -3.0399527549743652
+      },
+      "minimum_pipeline_clearance": -3.0399527549743652,
+      "nearest_bullet": {
+        "slot": 1262,
+        "x": 123.86158752441406,
+        "y": 268.7900390625,
+        "center_distance": 13.246892090073802,
+        "aabb_clearance": 7.6351621989236325
+      },
+      "observed_bullet_contact_candidate": null,
+      "active_lasers_at_observation": 0
+    },
+    {
+      "hit_frame": 2383,
+      "window_start": 2143,
+      "stage_route_index": 5,
+      "stage_label": "Stage 5",
+      "resources": {
+        "lives": 8.0,
+        "bombs": 3.0,
+        "power": 112.0
+      },
+      "player": {
+        "x": 10.425956726074219,
+        "y": 432.0,
+        "projected_x": 10.425956726074219,
+        "projected_y": 432.0,
+        "control_origin_x": 10.425956726074219,
+        "control_origin_y": 432.0,
+        "phase": 0,
+        "phase_at_action": 2,
+        "predeath_at_action": 12,
+        "focus_logic": 1,
+        "secondary_character_active": true,
+        "focus_transition_counter": 16
+      },
+      "last_nonnegative_gate": null,
+      "first_negative_gate": null,
+      "minimum_gate_slack": null,
+      "first_nonpositive_pipeline": {
+        "frame": 2383,
+        "clearance": -3.2659072875976562
+      },
+      "minimum_pipeline_clearance": -3.2659072875976562,
+      "nearest_bullet": {
+        "slot": 688,
+        "x": 18.076801300048828,
+        "y": 425.0385437011719,
+        "center_distance": 10.343949753146063,
+        "aabb_clearance": 4.700945597769519
+      },
+      "observed_bullet_contact_candidate": null,
+      "active_lasers_at_observation": 0
+    },
+    {
+      "hit_frame": 4165,
+      "window_start": 3925,
+      "stage_route_index": 5,
+      "stage_label": "Stage 5",
+      "resources": {
+        "lives": 8.0,
+        "bombs": 3.0,
+        "power": 101.0
+      },
+      "player": {
+        "x": 374.3736572265625,
+        "y": 430.3736572265625,
+        "projected_x": 374.3736572265625,
+        "projected_y": 430.3736572265625,
+        "control_origin_x": 374.3736572265625,
+        "control_origin_y": 430.3736572265625,
+        "phase": 0,
+        "phase_at_action": 2,
+        "predeath_at_action": 12,
+        "focus_logic": 1,
+        "secondary_character_active": true,
+        "focus_transition_counter": 71
+      },
+      "last_nonnegative_gate": null,
+      "first_negative_gate": null,
+      "minimum_gate_slack": null,
+      "first_nonpositive_pipeline": {
+        "frame": 4153,
+        "clearance": -0.6837819814682007
+      },
+      "minimum_pipeline_clearance": -3.3636527061462402,
+      "nearest_bullet": {
+        "slot": 271,
+        "x": 363.2543640136719,
+        "y": 424.7493591308594,
+        "center_distance": 12.460794943484357,
+        "aabb_clearance": 4.119293212890625
+      },
+      "observed_bullet_contact_candidate": null,
+      "active_lasers_at_observation": 0
+    },
+    {
+      "hit_frame": 7039,
+      "window_start": 6799,
+      "stage_route_index": 5,
+      "stage_label": "Stage 5",
+      "resources": {
+        "lives": 8.0,
+        "bombs": 3.0,
+        "power": 86.0
+      },
+      "player": {
+        "x": 363.4000244140625,
+        "y": 427.61590576171875,
+        "projected_x": 363.4000244140625,
+        "projected_y": 427.61590576171875,
+        "control_origin_x": 363.4000244140625,
+        "control_origin_y": 427.61590576171875,
+        "phase": 2,
+        "phase_at_action": 2,
+        "predeath_at_action": 14,
+        "focus_logic": 0,
+        "secondary_character_active": true,
+        "focus_transition_counter": 1
+      },
+      "last_nonnegative_gate": null,
+      "first_negative_gate": null,
+      "minimum_gate_slack": null,
+      "first_nonpositive_pipeline": {
+        "frame": 7023,
+        "clearance": -1.114751935005188
+      },
+      "minimum_pipeline_clearance": -1.801397442817688,
+      "nearest_bullet": {
+        "slot": 1201,
+        "x": 361.2855224609375,
+        "y": 430.09735107421875,
+        "center_distance": 3.2601670737398813,
+        "aabb_clearance": -1.5185546875
+      },
+      "observed_bullet_contact_candidate": {
+        "slot": 1201,
+        "x": 361.2855224609375,
+        "y": 430.09735107421875,
+        "center_distance": 3.2601670737398813,
+        "aabb_clearance": -1.5185546875
+      },
+      "active_lasers_at_observation": 0
+    },
+    {
+      "hit_frame": 10814,
+      "window_start": 10574,
+      "stage_route_index": 5,
+      "stage_label": "Stage 5",
+      "resources": {
+        "lives": 8.0,
+        "bombs": 3.0,
+        "power": 70.0
+      },
+      "player": {
+        "x": 79.23112487792969,
+        "y": 432.0,
+        "projected_x": 79.23112487792969,
+        "projected_y": 432.0,
+        "control_origin_x": 79.23112487792969,
+        "control_origin_y": 432.0,
+        "phase": 0,
+        "phase_at_action": 2,
+        "predeath_at_action": 14,
+        "focus_logic": 0,
+        "secondary_character_active": false,
+        "focus_transition_counter": 8
+      },
+      "last_nonnegative_gate": null,
+      "first_negative_gate": null,
+      "minimum_gate_slack": null,
+      "first_nonpositive_pipeline": {
+        "frame": 10808,
+        "clearance": -1.0229543447494507
+      },
+      "minimum_pipeline_clearance": -3.2490901947021484,
+      "nearest_bullet": {
+        "slot": 1459,
+        "x": 71.12265014648438,
+        "y": 428.77044677734375,
+        "center_distance": 8.727965197481971,
+        "aabb_clearance": 4.1084747314453125
+      },
+      "observed_bullet_contact_candidate": null,
+      "active_lasers_at_observation": 0
+    },
+    {
+      "hit_frame": 12980,
+      "window_start": 12740,
+      "stage_route_index": 5,
+      "stage_label": "Stage 5",
+      "resources": {
+        "lives": 8.0,
+        "bombs": 3.0,
+        "power": 56.0
+      },
+      "player": {
+        "x": 376.0,
+        "y": 421.10003662109375,
+        "projected_x": 376.0,
+        "projected_y": 421.10003662109375,
+        "control_origin_x": 376.0,
+        "control_origin_y": 421.10003662109375,
+        "phase": 0,
+        "phase_at_action": 2,
+        "predeath_at_action": 14,
+        "focus_logic": 1,
+        "secondary_character_active": true,
+        "focus_transition_counter": 7
+      },
+      "last_nonnegative_gate": null,
+      "first_negative_gate": null,
+      "minimum_gate_slack": null,
+      "first_nonpositive_pipeline": {
+        "frame": 12974,
+        "clearance": -0.0398007333278656
+      },
+      "minimum_pipeline_clearance": -0.734271228313446,
+      "nearest_bullet": {
+        "slot": 114,
+        "x": 375.6276550292969,
+        "y": 419.0118103027344,
+        "center_distance": 2.121162401584721,
+        "aabb_clearance": -1.911773681640625
+      },
+      "observed_bullet_contact_candidate": {
+        "slot": 114,
+        "x": 375.6276550292969,
+        "y": 419.0118103027344,
+        "center_distance": 2.121162401584721,
+        "aabb_clearance": -1.911773681640625
+      },
+      "active_lasers_at_observation": 0
+    },
+    {
+      "hit_frame": 14449,
+      "window_start": 14209,
+      "stage_route_index": 5,
+      "stage_label": "Stage 5",
+      "resources": {
+        "lives": 8.0,
+        "bombs": 3.0,
+        "power": 47.0
+      },
+      "player": {
+        "x": 24.56696319580078,
+        "y": 413.60009765625,
+        "projected_x": 24.56696319580078,
+        "projected_y": 413.60009765625,
+        "control_origin_x": 24.56696319580078,
+        "control_origin_y": 413.60009765625,
+        "phase": 0,
+        "phase_at_action": 2,
+        "predeath_at_action": 8,
+        "focus_logic": 1,
+        "secondary_character_active": true,
+        "focus_transition_counter": 12
+      },
+      "last_nonnegative_gate": null,
+      "first_negative_gate": null,
+      "minimum_gate_slack": null,
+      "first_nonpositive_pipeline": {
+        "frame": 14449,
+        "clearance": -6.272741317749023
+      },
+      "minimum_pipeline_clearance": -6.272741317749023,
+      "nearest_bullet": {
+        "slot": 930,
+        "x": 26.944686889648438,
+        "y": 406.4111633300781,
+        "center_distance": 7.57194471125462,
+        "aabb_clearance": 0.188934326171875
+      },
+      "observed_bullet_contact_candidate": null,
+      "active_lasers_at_observation": 0
+    },
+    {
+      "hit_frame": 23153,
+      "window_start": 22913,
+      "stage_route_index": 5,
+      "stage_label": "Stage 5",
+      "resources": {
+        "lives": 8.0,
+        "bombs": 6.0,
+        "power": 52.0
+      },
+      "player": {
+        "x": 140.6770477294922,
+        "y": 432.0,
+        "projected_x": 140.6770477294922,
+        "projected_y": 432.0,
+        "control_origin_x": 140.6770477294922,
+        "control_origin_y": 432.0,
+        "phase": 2,
+        "phase_at_action": 2,
+        "predeath_at_action": 27,
+        "focus_logic": 1,
+        "secondary_character_active": true,
+        "focus_transition_counter": 36
+      },
+      "last_nonnegative_gate": null,
+      "first_negative_gate": null,
+      "minimum_gate_slack": null,
+      "first_nonpositive_pipeline": {
+        "frame": 23091,
+        "clearance": -0.07138574123382568
+      },
+      "minimum_pipeline_clearance": -0.4852651357650757,
+      "nearest_bullet": {
+        "slot": 1346,
+        "x": 142.78665161132812,
+        "y": 434.9088134765625,
+        "center_distance": 3.593274882288979,
+        "aabb_clearance": -1.0911865234375
+      },
+      "observed_bullet_contact_candidate": {
+        "slot": 1346,
+        "x": 142.78665161132812,
+        "y": 434.9088134765625,
+        "center_distance": 3.593274882288979,
+        "aabb_clearance": -1.0911865234375
+      },
+      "active_lasers_at_observation": 0
+    },
+    {
+      "hit_frame": 24224,
+      "window_start": 23984,
+      "stage_route_index": 5,
+      "stage_label": "Stage 5",
+      "resources": {
+        "lives": 8.0,
+        "bombs": 4.0,
+        "power": 37.0
+      },
+      "player": {
+        "x": 8.000000953674316,
+        "y": 432.0,
+        "projected_x": 8.000000953674316,
+        "projected_y": 432.0,
+        "control_origin_x": 8.000000953674316,
+        "control_origin_y": 432.0,
+        "phase": 0,
+        "phase_at_action": 2,
+        "predeath_at_action": 29,
+        "focus_logic": 1,
+        "secondary_character_active": true,
+        "focus_transition_counter": 53
+      },
+      "last_nonnegative_gate": {
+        "frame": 24196,
+        "source_frame": 24180,
+        "lane": "left",
+        "slack": 12.279252208280006,
+        "deadline": 23,
+        "travel_frames": 10.720747791719994
+      },
+      "first_negative_gate": null,
+      "minimum_gate_slack": 4.701844371365944,
+      "first_nonpositive_pipeline": {
+        "frame": 24163,
+        "clearance": -1.0826599597930908
+      },
+      "minimum_pipeline_clearance": -1.7993651628494263,
+      "nearest_bullet": {
+        "slot": 402,
+        "x": 10.975443840026855,
+        "y": 425.4722595214844,
+        "center_distance": 7.173887100087185,
+        "aabb_clearance": 2.527740478515625
+      },
+      "observed_bullet_contact_candidate": null,
+      "active_lasers_at_observation": 0
+    },
+    {
+      "hit_frame": 32085,
+      "window_start": 31845,
+      "stage_route_index": 5,
+      "stage_label": "Stage 5",
+      "resources": {
+        "lives": 8.0,
+        "bombs": 3.0,
+        "power": 23.0
+      },
+      "player": {
+        "x": 74.41436767578125,
+        "y": 432.0,
+        "projected_x": 74.41436767578125,
+        "projected_y": 432.0,
+        "control_origin_x": 74.41436767578125,
+        "control_origin_y": 432.0,
+        "phase": 0,
+        "phase_at_action": 2,
+        "predeath_at_action": 30,
+        "focus_logic": 0,
+        "secondary_character_active": true,
+        "focus_transition_counter": 2
+      },
+      "last_nonnegative_gate": null,
+      "first_negative_gate": null,
+      "minimum_gate_slack": null,
+      "first_nonpositive_pipeline": {
+        "frame": 31889,
+        "clearance": -2.972165107727051
+      },
+      "minimum_pipeline_clearance": -5.8662590980529785,
+      "nearest_bullet": {
+        "slot": 252,
+        "x": 78.78422546386719,
+        "y": 426.1216735839844,
+        "center_distance": 7.3246418711990575,
+        "aabb_clearance": 1.914394136145931
+      },
+      "observed_bullet_contact_candidate": null,
+      "active_lasers_at_observation": 0
+    },
+    {
+      "hit_frame": 32657,
+      "window_start": 32417,
+      "stage_route_index": 5,
+      "stage_label": "Stage 5",
+      "resources": {
+        "lives": 8.0,
+        "bombs": 4.0,
+        "power": 7.0
+      },
+      "player": {
+        "x": 202.06512451171875,
+        "y": 387.16839599609375,
+        "projected_x": 202.06512451171875,
+        "projected_y": 387.16839599609375,
+        "control_origin_x": 202.06512451171875,
+        "control_origin_y": 387.16839599609375,
+        "phase": 2,
+        "phase_at_action": 2,
+        "predeath_at_action": 27,
+        "focus_logic": 1,
+        "secondary_character_active": true,
+        "focus_transition_counter": 76
+      },
+      "last_nonnegative_gate": null,
+      "first_negative_gate": null,
+      "minimum_gate_slack": null,
+      "first_nonpositive_pipeline": {
+        "frame": 32420,
+        "clearance": -0.7641725540161133
+      },
+      "minimum_pipeline_clearance": -7.289422035217285,
+      "nearest_bullet": {
+        "slot": 84,
+        "x": 203.1173095703125,
+        "y": 385.13623046875,
+        "center_distance": 2.2884034015121184,
+        "aabb_clearance": -1.96783447265625
+      },
+      "observed_bullet_contact_candidate": {
+        "slot": 84,
+        "x": 203.1173095703125,
+        "y": 385.13623046875,
+        "center_distance": 2.2884034015121184,
+        "aabb_clearance": -1.96783447265625
+      },
+      "active_lasers_at_observation": 0
+    },
+    {
+      "hit_frame": 37734,
+      "window_start": 37494,
+      "stage_route_index": 5,
+      "stage_label": "Stage 5",
+      "resources": {
+        "lives": 8.0,
+        "bombs": 3.0,
+        "power": 11.0
+      },
+      "player": {
+        "x": 331.51116943359375,
+        "y": 432.0,
+        "projected_x": 331.51116943359375,
+        "projected_y": 432.0,
+        "control_origin_x": 331.51116943359375,
+        "control_origin_y": 432.0,
+        "phase": 0,
+        "phase_at_action": 2,
+        "predeath_at_action": 15,
+        "focus_logic": 1,
+        "secondary_character_active": true,
+        "focus_transition_counter": 92
+      },
+      "last_nonnegative_gate": null,
+      "first_negative_gate": null,
+      "minimum_gate_slack": null,
+      "first_nonpositive_pipeline": {
+        "frame": 37533,
+        "clearance": -0.14932763576507568
+      },
+      "minimum_pipeline_clearance": -2.1650753021240234,
+      "nearest_bullet": {
+        "slot": 1166,
+        "x": 335.45098876953125,
+        "y": 430.96685791015625,
+        "center_distance": 4.073028231872904,
+        "aabb_clearance": -0.0601806640625
+      },
+      "observed_bullet_contact_candidate": {
+        "slot": 1166,
+        "x": 335.45098876953125,
+        "y": 430.96685791015625,
+        "center_distance": 4.073028231872904,
+        "aabb_clearance": -0.0601806640625
+      },
+      "active_lasers_at_observation": 0
+    },
+    {
+      "hit_frame": 41028,
+      "window_start": 40788,
+      "stage_route_index": 5,
+      "stage_label": "Stage 5",
+      "resources": {
+        "lives": 8.0,
+        "bombs": 4.0,
+        "power": 1.0
+      },
+      "player": {
+        "x": 224.3089599609375,
+        "y": 196.9370880126953,
+        "projected_x": 224.3089599609375,
+        "projected_y": 196.9370880126953,
+        "control_origin_x": 224.3089599609375,
+        "control_origin_y": 196.9370880126953,
+        "phase": 0,
+        "phase_at_action": 2,
+        "predeath_at_action": 30,
+        "focus_logic": 1,
+        "secondary_character_active": true,
+        "focus_transition_counter": 133
+      },
+      "last_nonnegative_gate": {
+        "frame": 40903,
+        "source_frame": 40888,
+        "lane": "center",
+        "slack": 11.536827087402344,
+        "deadline": 23,
+        "travel_frames": 11.463172912597656
+      },
+      "first_negative_gate": null,
+      "minimum_gate_slack": 2.111827850341797,
+      "first_nonpositive_pipeline": {
+        "frame": 41028,
+        "clearance": -1.8323720693588257
+      },
+      "minimum_pipeline_clearance": -1.8323720693588257,
+      "nearest_bullet": {
+        "slot": 1146,
+        "x": 226.30593872070312,
+        "y": 192.44998168945312,
+        "center_distance": 4.91142009229867,
+        "aabb_clearance": 0.4871063232421875
+      },
+      "observed_bullet_contact_candidate": null,
+      "active_lasers_at_observation": 0
+    },
+    {
+      "hit_frame": 42603,
+      "window_start": 42363,
+      "stage_route_index": 5,
+      "stage_label": "Stage 5",
+      "resources": {
+        "lives": 8.0,
+        "bombs": 3.0,
+        "power": 12.0
+      },
+      "player": {
+        "x": 160.4123077392578,
+        "y": 430.3736572265625,
+        "projected_x": 160.4123077392578,
+        "projected_y": 430.3736572265625,
+        "control_origin_x": 160.4123077392578,
+        "control_origin_y": 430.3736572265625,
+        "phase": 0,
+        "phase_at_action": 2,
+        "predeath_at_action": 30,
+        "focus_logic": 1,
+        "secondary_character_active": true,
+        "focus_transition_counter": 44
+      },
+      "last_nonnegative_gate": null,
+      "first_negative_gate": null,
+      "minimum_gate_slack": null,
+      "first_nonpositive_pipeline": {
+        "frame": 42375,
+        "clearance": -0.22409570217132568
+      },
+      "minimum_pipeline_clearance": -1.9336273670196533,
+      "nearest_bullet": {
+        "slot": 1407,
+        "x": 159.921875,
+        "y": 426.482177734375,
+        "center_distance": 3.922261708485527,
+        "aabb_clearance": -0.1085205078125
+      },
+      "observed_bullet_contact_candidate": {
+        "slot": 1407,
+        "x": 159.921875,
+        "y": 426.482177734375,
+        "center_distance": 3.922261708485527,
+        "aabb_clearance": -0.1085205078125
+      },
+      "active_lasers_at_observation": 0
+    },
+    {
+      "hit_frame": 44419,
+      "window_start": 44179,
+      "stage_route_index": 5,
+      "stage_label": "Stage 5",
+      "resources": {
+        "lives": 8.0,
+        "bombs": 4.0,
+        "power": 9.0
+      },
+      "player": {
+        "x": 376.0,
+        "y": 432.0,
+        "projected_x": 376.0,
+        "projected_y": 432.0,
+        "control_origin_x": 376.0,
+        "control_origin_y": 432.0,
+        "phase": 0,
+        "phase_at_action": 2,
+        "predeath_at_action": 30,
+        "focus_logic": 0,
+        "secondary_character_active": true,
+        "focus_transition_counter": 0
+      },
+      "last_nonnegative_gate": null,
+      "first_negative_gate": null,
+      "minimum_gate_slack": null,
+      "first_nonpositive_pipeline": {
+        "frame": 44257,
+        "clearance": -1.023535132408142
+      },
+      "minimum_pipeline_clearance": -3.7948122024536133,
+      "nearest_bullet": {
+        "slot": 341,
+        "x": 374.8140869140625,
+        "y": 427.6307373046875,
+        "center_distance": 4.527344293075937,
+        "aabb_clearance": 0.3692626953125
+      },
+      "observed_bullet_contact_candidate": null,
+      "active_lasers_at_observation": 0
+    }
+  ],
+  "resources": {
+    "bombs": [
+      3.0,
+      3.0
+    ],
+    "lives": [
+      8.0,
+      8.0
+    ],
+    "power": [
+      128.0,
+      1.0
+    ]
+  },
+  "local_latency_ms": {
+    "read": {
+      "median": 4.048300004797056,
+      "p95": 7.601799996336922,
+      "max": 22.88639999460429
+    },
+    "plan": {
+      "median": 18.57800001744181,
+      "p95": 33.4566000092309,
+      "max": 166.7378999700304
+    }
+  },
+  "frame_lag": {
+    "snapshot": {
+      "median": 0.0,
+      "p95": 1.0,
+      "max": 3.0
+    },
+    "action": {
+      "median": 2.0,
+      "p95": 3.0,
+      "max": 12.0
+    },
+    "modeled_control_delays": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ]
+  },
+  "corridor": {
+    "record_count": 3688,
+    "unique_solution_count": 698,
+    "stale_record_count": 3,
+    "stale_fraction": 0.0008134490238611713,
+    "solve_latency_ms": {
+      "median": 75.72165000601672,
+      "p95": 182.34479997772723,
+      "max": 269.38139999401756
+    },
+    "lane_transitions": [
+      {
+        "source_frame": 22563,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 22645,
+        "lane": "center",
+        "bottleneck_clearance": 32.0
+      },
+      {
+        "source_frame": 22894,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 23217,
+        "lane": "center",
+        "bottleneck_clearance": 32.0
+      },
+      {
+        "source_frame": 23591,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 24180,
+        "lane": "left",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 24196,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 24297,
+        "lane": "center",
+        "bottleneck_clearance": 32.0
+      },
+      {
+        "source_frame": 24702,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 29613,
+        "lane": "left",
+        "bottleneck_clearance": 48.0
+      },
+      {
+        "source_frame": 29630,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 29662,
+        "lane": "center",
+        "bottleneck_clearance": 32.0
+      },
+      {
+        "source_frame": 30132,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 30149,
+        "lane": "center",
+        "bottleneck_clearance": 8.18407917022705
+      },
+      {
+        "source_frame": 30184,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 38764,
+        "lane": "left",
+        "bottleneck_clearance": 48.0
+      },
+      {
+        "source_frame": 38781,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 38814,
+        "lane": "center",
+        "bottleneck_clearance": 32.0
+      },
+      {
+        "source_frame": 39070,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 39087,
+        "lane": "center",
+        "bottleneck_clearance": 18.00191879272461
+      },
+      {
+        "source_frame": 39103,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 39410,
+        "lane": "left",
+        "bottleneck_clearance": 25.492727279663086
+      },
+      {
+        "source_frame": 39427,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 39747,
+        "lane": "center",
+        "bottleneck_clearance": 38.4970817565918
+      },
+      {
+        "source_frame": 39781,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 39797,
+        "lane": "center",
+        "bottleneck_clearance": 38.497257232666016
+      },
+      {
+        "source_frame": 39831,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 40429,
+        "lane": "center",
+        "bottleneck_clearance": 48.0
+      },
+      {
+        "source_frame": 40548,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 40854,
+        "lane": "center",
+        "bottleneck_clearance": 30.248291015625
+      },
+      {
+        "source_frame": 40904,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 41085,
+        "lane": "center",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 41351,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 41485,
+        "lane": "center",
+        "bottleneck_clearance": 48.0
+      },
+      {
+        "source_frame": 41655,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 41857,
+        "lane": "center",
+        "bottleneck_clearance": 48.0
+      },
+      {
+        "source_frame": 42163,
+        "lane": "left",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 42198,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 42265,
+        "lane": "center",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 42281,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 42299,
+        "lane": "center",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 42316,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 42725,
+        "lane": "right",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 42776,
+        "lane": "center",
+        "bottleneck_clearance": 34.369224548339844
+      },
+      {
+        "source_frame": 42825,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 42960,
+        "lane": "right",
+        "bottleneck_clearance": 2.2136001586914062
+      },
+      {
+        "source_frame": 42976,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 43132,
+        "lane": "right",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 43180,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 44492,
+        "lane": "center",
+        "bottleneck_clearance": 32.0
+      },
+      {
+        "source_frame": 44526,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 44542,
+        "lane": "right",
+        "bottleneck_clearance": 13.98162841796875
+      },
+      {
+        "source_frame": 44575,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 44680,
+        "lane": "center",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 44748,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 44936,
+        "lane": "center",
+        "bottleneck_clearance": 32.0
+      }
+    ]
+  },
+  "boundary_occupancy": {
+    "bottom_frames": 2935,
+    "side_frames": 1212
+  },
+  "stage_progress": {
+    "transitions": [
+      {
+        "frame": 1,
+        "stage_route_index": 5,
+        "stage_label": "Stage 5"
+      }
+    ],
+    "last_stage_route_index": 5,
+    "last_stage_label": "Stage 5"
+  },
+  "first_hit_analysis": {
+    "hit_frame": 1957,
+    "window_start": 1717,
+    "stage_route_index": 5,
+    "stage_label": "Stage 5",
+    "resources": {
+      "lives": 8.0,
+      "bombs": 3.0,
+      "power": 128.0
+    },
+    "player": {
+      "x": 113.64169311523438,
+      "y": 277.21820068359375,
+      "projected_x": 113.64169311523438,
+      "projected_y": 277.21820068359375,
+      "control_origin_x": 113.64169311523438,
+      "control_origin_y": 277.21820068359375,
+      "phase": 0,
+      "phase_at_action": 2,
+      "predeath_at_action": 10,
+      "focus_logic": 1,
+      "secondary_character_active": true,
+      "focus_transition_counter": 59
+    },
+    "last_nonnegative_gate": null,
+    "first_negative_gate": null,
+    "minimum_gate_slack": null,
+    "first_nonpositive_pipeline": {
+      "frame": 1957,
+      "clearance": -3.0399527549743652
+    },
+    "minimum_pipeline_clearance": -3.0399527549743652,
+    "nearest_bullet": {
+      "slot": 1262,
+      "x": 123.86158752441406,
+      "y": 268.7900390625,
+      "center_distance": 13.246892090073802,
+      "aabb_clearance": 7.6351621989236325
+    },
+    "observed_bullet_contact_candidate": null,
+    "active_lasers_at_observation": 0
+  }
+}

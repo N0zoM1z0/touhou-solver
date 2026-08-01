@@ -602,10 +602,13 @@ it.
    false finite-fraction UNKNOWN only under exact unit time scale. The repeat
    `141250` delivered 692 complete sources and 265 effective exact issues, but
    all four created leases were revoked by fresh-body containment and none was
-   consumed. Preserve this fail-closed result. Run the requested parent
-   `5fc6d92` Stage-4A/5 cross-workload observations, then return to continuity
-   of future-policy publication and hostile-body coverage; aggregate hits
-   alone do not validate the lease.
+   consumed. Parent `5fc6d92` cross-workload runs then produced Stage-4A
+   18/10 versus direct baseline 21/12 and Stage-5 exactly 18/10 versus 18/10;
+   zero leases were consumed in either. Preserve these fail-closed results.
+   Replace the inconsistent fresh linear future with complete active-hostile
+   source trajectories and observation-time containment; do not weaken
+   unknown topology or future-source coverage. Aggregate hits alone do not
+   validate the lease.
 7. Evaluate remaining hostile-birth uncertainty and only then local micro
    ranking after lease authority is physically effective; repeat a winner
    before a full route.

@@ -190,6 +190,17 @@ a future policy. Thus the new global path was active earlier but did not
 provide persistent authority into the hit window. L3 remains default-off;
 do not attribute either aggregate to the fraction correction.
 
+Parent-checkpoint cross-workload trials confirm that the Stage-3 one-hit run
+was not a general lease improvement. At `5fc6d92`, Stage-4A `20260801_142851`
+completed 18 hits/10 nonspell versus the direct `130742` baseline's 21/12,
+but first hit was 833 versus 819. Stage-5 `20260801_143952` completed exactly
+18/10 versus direct baseline `115838`, with first hit 1888 versus 1728. These
+different-RNG totals are observational. The general mechanism signal is
+stronger: Stage 4A created nine leases and Stage 5 created seven, yet neither
+workload consumed one effectively. Fresh-geometry revocation dominated both,
+matching all four Stage-3 v12 revocations. L3 remains default-off while active
+hostile native motion and fresh recertification are made causally consistent.
+
 The authorized Stage-4A physical run `20260731_220830` did not exercise that
 authority: all 1,754 live source projections were incomplete, chiefly because
 the former sparse capture crossed the manager frame 1,726 times. Consequently

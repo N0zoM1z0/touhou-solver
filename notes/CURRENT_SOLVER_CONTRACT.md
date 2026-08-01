@@ -170,6 +170,17 @@ gap: the last exact issue was f1406 and all 103 decisions in f2941..3181 had no
 future policy. Source v12 is therefore live-mechanism evidence only, not hit
 promotion or recursive viability closure.
 
+The parent `5fc6d92` rotation did not generalize the earlier Stage-3 one-hit
+sample. Stage-4A `142851` completed 18 hits/10 nonspell versus its direct
+21/12 baseline, with first hit almost unchanged at 833 versus 819. Stage-5
+`143952` repeated its direct baseline exactly at 18/10, with first hit 1888
+versus 1728. Different RNG prevents causal hit comparison. Mechanistically,
+both workloads created leases but consumed none: all nine Stage-4A leases and
+all seven Stage-5 leases had zero effective no-write issues, with fresh-body
+geometry the dominant revocation. This cross-stage evidence makes the
+active-hostile trajectory/fresh-recertification contract the next general
+blocker.
+
 Physical run `20260731_152921` found two independent invalidations. First,
 `player+0xE2A68` retains the deathbomb-window limit installed by
 `0x0044AB40`; it is not a zero-when-alive predeath predicate, so all 7,202

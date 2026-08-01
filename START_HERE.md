@@ -39,8 +39,13 @@ authority.
   decisions in f2941..3181 were `future_policy_unavailable` despite 14
   complete source captures in that window. The fraction correction is
   physically validated as source delivery, not as hit reduction or persistent
-  recursive viability. Cross-workload Stage-4A/5 trials at parent checkpoint
-  `5fc6d92` are the next user-requested observational gate.
+  recursive viability. Parent checkpoint `5fc6d92` then completed Stage 4A
+  with 18 hits/10 nonspell versus its direct 21/12 baseline, but first hit was
+  nearly unchanged at 833 versus 819; Stage 5 repeated exactly 18/10 versus
+  its direct baseline. Both are different-RNG observations. Across Stage
+  3/4A/5, every created lease remained ineffective and fresh-geometry
+  revocation dominated. The next gate is therefore the common active-hostile
+  trajectory/lease recertification seam, not another aggregate rerun.
 - **Observed physical latency correction:** the ordinary fallback now builds
   an action-conditioned H80 predecessor indexed by final observed issue age,
   including computation, old pending evolution, held no-write, replacement,

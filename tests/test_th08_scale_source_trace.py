@@ -16,6 +16,7 @@ from th08_live.enemy_ecl_inventory import (  # noqa: E402
 )
 from th08_live.enemy_sensor import (  # noqa: E402
     ENEMY_FLAGS_OFFSET,
+    ENEMY_MANAGER_TEMPLATE_BASE,
     ENEMY_POOL_BASE,
     ENEMY_POOL_SIZE,
     ENEMY_STRIDE,
@@ -156,6 +157,8 @@ class _Reader:
         }
 
     def read(self, address: int, size: int) -> bytes:
+        if address == ENEMY_MANAGER_TEMPLATE_BASE:
+            return bytes(size)
         if address == ENEMY_POOL_BASE:
             return self.pool[:size]
         if (

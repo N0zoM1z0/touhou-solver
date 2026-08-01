@@ -10,17 +10,75 @@ Historical material removed from the active tree is recoverable through
 `ARCHIVE_INDEX.md` and tag `pre-workspace-prune-20260731`. It has no current
 authority.
 
+## Active Scope Override
+
+The active completion target is now a fresh full-game Sakuya/Remilia **Hard
+Route-2 NMNB**. Lunatic and Extra are deferred. Fixed-root wind tunnels may
+help inspect an already named semantic mismatch, but they are not an
+optimization or promotion gate. Physical Hard evidence leads the iteration.
+
+Active implementation work moved to the independent TH06 solver workspace on
+2026-08-01. Preserve this repository as the final reviewed TH08 checkpoint;
+do not silently promote or simplify its hard-authority contracts when work
+resumes.
+
 ## Checkpoint
 
 - Branch: `main`.
-- Last physical checkpoint:
-  `lunatic_route2_stage3_unattended_20260801_171249`. It completed Stage 3
-  with ten hits at
-  `[594,946,2260,3838,7959,8973,14085,15363,23042,26069]` (eight nonspell,
-  spell 38, and spell 50), hard no-Bomb, accepted Route-2 Lunatic replay
-  SHA-256
-  `4af27ae69259182ed580f1b764cbd131583abacd266b31580c544ef0c95db5aa`,
-  and cleanup. Its 10/8 total is a different-RNG observation, not causal A/B.
+- Last retained physical checkpoint:
+  `hard_route2_stage4a_unattended_20260801_191508`. It completed Hard Stage
+  4A with 18 hits, first hit 1975, zero Bombs, accepted replay, and complete
+  cleanup. Twelve hits were boundary-associated and eleven used fast
+  movement. This is a regression/falsifier, not a promoted outcome.
+- **Observed no-scale-writer mechanism pass:** Stage-4A `184903` bound the
+  exact runtime/static ECL identity, coherent unit root, stage/difficulty/
+  route context, and complete installed-callback inventory. It restored
+  3,599 constrained decisions from zero in `183730`; spell-56/60/64/68/72
+  received 872/547/164/566/529 constraints, and recovery/distant-recovery was
+  selected 319/809 times. The run completed 12 hits, first hit 1209, and zero
+  Bombs. Different-RNG outcome counts remain observational; action-authority
+  activation is observed.
+- **Observed hard-authority seam:** `184903` also relaxed 57 exact-corridor
+  constraints through the coarse terminal-threat fallback. Exact corridor,
+  ordinary predecessor, held, delayed, and continuation-lease authorities
+  are now non-relaxable. `191508` recorded zero such relaxations.
+- **Observed continuous-position falsifier:** the old 16px global corridor
+  represented only cell centers with zero sampling-radius clearance. The
+  current lower bound consumes the complete cell half-diagonal
+  `sqrt(2)*8 = 11.3137px`. On `191508`, queryable rows increased 5,104 to
+  5,775 and median solve time fell 131.5 to 78.7 ms, but empty action sets
+  increased 1,723 to 2,927, constrained decisions fell 3,599 to 3,001, and
+  hits rose 12 to 18 on a different RNG root. The semantic hardening is
+  retained; a uniform 16px lower kernel is physically ineffective and must
+  not be called a solution.
+- **Observed Hard regression:** historical checkpoint `709e858` completed a
+  different-RNG Hard Stage 4A trial `20260726_212756` with six hits, one
+  nonspell hit, 13,203 queryable global-policy rows, 8,073 constrained
+  decisions, 725 selected recovery rows, 2,845 selected distant-recovery
+  rows, decision cadence median/p95 2/3 frames, and local planning
+  median/p95/max 11.686/20.830/38.136 ms. Current `175112` had only 4,737
+  queryable rows, 847 constrained decisions, zero selected recovery/distant
+  recovery rows, cadence 3/4, and local planning
+  17.953/32.725/250.616 ms. Different-RNG hit totals are observational; the
+  missing authority, zero selections, and latency tails are direct repeated
+  delivery mechanisms.
+- **Observed primary cause:** all 4,150 current spell policy queries had zero
+  constrained decisions. The solver computed viable spell actions, but the
+  schedule provenance was
+  `diagnostic_constant_current_root_unknown_direction_no_authority`, so
+  `time_scale.hard_authority` and corridor `action_authority` were false.
+  Later SEM-SCALE work correctly revoked the old unsound constant-root
+  assumption, but no sound Stage 1–5 replacement was installed. Work then
+  concentrated on the sparse ordinary exact lane while most Hard hits were in
+  spells.
+- **Observed/inferred replacement boundary:** shipped native dataflow has
+  gameplay scale writes in ECL callbacks 18/28/29; other writes reset scale at
+  game/stage initialization. Exact decoded ECL for Stages 1–5 contains no
+  literal or dynamic invoke/install of callbacks 18/28/29. Stage 6 and Final
+  do contain callback 18 and therefore cannot use the same certificate. The
+  next implementation is a runtime-ECL-identity-bound, unit-root,
+  no-scale-writer schedule authority that fails closed on content, context,
+  root, or callback-inventory mismatch.
 - **Observed source-v15 physical result:** 519/1,065 source roots completed,
   436 were truncated, and 83 carried the full H268. The v15-targeted dynamic
   type/color, `0x19`, `0x25`, `0x35`, `0x6F`, and supported-transform failure
@@ -582,37 +640,26 @@ predecessor still fails closed.
 Removed lanes must not be re-enabled from archive without a new causal need
 and explicit `STRATEGY.md` decision.
 
-## Next Useful Gate
+## Paused Resume Gate
 
-Do not rerun the rejected scalar-reserve or H=32 signed-terminal design. The
-future-source, retained-chain, delayed-pipeline, and fresh-hostile-body gates
-pass. Next:
+The Stage 1–5 no-scale-writer schedule certificate passed its named physical
+mechanism gate. The remaining blocker is not scale provenance: it is a
+continuous-position global solver that is both hard-authoritative and
+nonempty under physical density.
 
-1. Lease v4 passed its narrow persistence gate in `155718`; source v14 then
-   passed its targeted physical semantic gate in `163434`: complete roots rose
-   645→801 and full-H268 roots 47→58, with the intended opcode/motion failures
-   gone. It did not close global delivery. The first pre-hit full root was only
-   30 frames early while its solve completed about 141 frames later. Close the
-   newly reached exact main/auxiliary semantics far enough upstream to cover
-   publication latency. Source v15 closes exact `0x19/0x1A`, dynamic i16
-   type/color, `0x25`, record definition `0x6F`, and depth-zero auxiliary
-   `0x35`, with conservative geometry for the reached motion transforms. Run
-   Stage 3 to measure first full-H268 lead and proximate exact authority.
-   Dynamic transform intervals or unavailable call-stack state remain fail
-   closed.
-2. The f817/833/835/850/910 retained chain and physical f1456/f1469/f1470/
-   f1479 continuation now regress. Empty actual rows, terminal expiry, and
-   final-age misses remain fail closed.
-3. Keep observed-
-   body early kill still only an objective inside the hard set. Retain the
-   first ordinary hit and exact lease exposure.
-4. Lease authority is physically effective and source v14 materially improves
-   full-horizon coverage, but proximate pre-hit delivery is still absent.
-   Classify remaining hostile-birth uncertainty and local micro-ranking only
-   after reached source truncations are early enough to survive the measured
-   compute/publication pipeline. Do not compensate with a stage waypoint.
+If TH08 work resumes:
 
-Do not compensate with a stage-specific waypoint.
+1. keep exact-authority actions non-relaxable and retain the no-scale-writer
+   identity/inventory gate;
+2. replace the uniform 16px cell-radius lower kernel with adaptive/local
+   refinement or an equivalent exact continuous-position predecessor;
+3. require nonempty authority in retained pressure windows without reviving
+   center-only occupancy, scalar reserve, or local fallback widening;
+4. rotate Hard Stage 3/4A/5 only after the responsible representation has a
+   deterministic semantic falsifier and a bounded publication deadline.
+
+Do not compensate with a stage-specific waypoint. Active work now belongs in
+the TH06 repository.
 
 ## Research Loop
 

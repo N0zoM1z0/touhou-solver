@@ -105,6 +105,8 @@ from th08_runtime.ordinary_future_source_capture import (
 )
 from th08_live.scale_schedule_authority import (
     FinalBScaleScheduleAuthority,
+    NO_SCALE_WRITER_STAGE_ROUTE_INDICES,
+    NoScaleWriterScheduleAuthority,
 )
 from th08_live.scale_source_trace import (
     FinalBScaleSourceTraceConfiguration,
@@ -545,6 +547,26 @@ ORDINARY_CAUSAL_CONTINUATION_LEASE_AUTHORITY = (
     "causal_ordinary_nonspell_terminal_continuation_lease_v4"
 )
 CORRIDOR_ALLOWED_ACTION_AUTHORITY = "exact_corridor_viability_v1"
+_NONRELAXABLE_ALLOWED_ACTION_AUTHORITIES = frozenset(
+    {
+        CORRIDOR_ALLOWED_ACTION_AUTHORITY,
+        ORDINARY_PREEXHAUSTION_AUTHORITY,
+        ORDINARY_CAUSAL_HOLD_AUTHORITY,
+        ORDINARY_CAUSAL_DELAYED_ISSUE_AUTHORITY,
+        ORDINARY_CAUSAL_CONTINUATION_LEASE_AUTHORITY,
+    }
+)
+
+
+def _allow_coarse_viability_relaxation(
+    allowed_action_authority: str | None,
+) -> bool:
+    return (
+        allowed_action_authority
+        not in _NONRELAXABLE_ALLOWED_ACTION_AUTHORITIES
+    )
+
+
 _ORDINARY_PREEXHAUSTION_ACTIONS = tuple(
     action.name for action in _PLANNER_ACTIONS
 )
@@ -2362,12 +2384,8 @@ def _local_planner_request_from_capture(
             allowed_first_actions=policy_guidance.allowed_first_actions,
             allowed_action_authority=allowed_action_authority,
             allow_coarse_viability_relaxation=(
-                allowed_action_authority
-                not in (
-                    ORDINARY_PREEXHAUSTION_AUTHORITY,
-                    ORDINARY_CAUSAL_HOLD_AUTHORITY,
-                    ORDINARY_CAUSAL_DELAYED_ISSUE_AUTHORITY,
-                    ORDINARY_CAUSAL_CONTINUATION_LEASE_AUTHORITY,
+                _allow_coarse_viability_relaxation(
+                    allowed_action_authority
                 )
             ),
             viability_repair_volumes=policy_guidance.repair_volumes,
@@ -2865,6 +2883,9 @@ def _run_live_session(
     finalb_scale_schedule_authority: (
         FinalBScaleScheduleAuthority | None
     ) = None
+    no_scale_writer_schedule_authority: (
+        NoScaleWriterScheduleAuthority | None
+    ) = None
     runtime_ecl_static_image = getattr(
         args,
         "runtime_ecl_static_image",
@@ -2887,8 +2908,22 @@ def _run_live_session(
             expected_difficulty_index=args.difficulty,
             expected_stage_route_index=args.expected_stage,
         )
+        runtime_ecl = parse_ecl(runtime_ecl_static_path)
         if ordinary_preexhaustion_authority:
-            ordinary_future_ecl = parse_ecl(runtime_ecl_static_path)
+            ordinary_future_ecl = runtime_ecl
+        if args.expected_stage in NO_SCALE_WRITER_STAGE_ROUTE_INDICES:
+            no_scale_writer_schedule_authority = (
+                NoScaleWriterScheduleAuthority(
+                    runtime_ecl,
+                    expected_static_sha256=args.runtime_ecl_static_sha256,
+                    expected_route_id=2,
+                    expected_difficulty_index=args.difficulty,
+                    expected_stage_route_index=args.expected_stage,
+                    horizon_frames=DIAGNOSTIC_ROOT_ONLY_SCALE_HORIZON,
+                )
+            )
+            if not no_scale_writer_schedule_authority.static_eligible:
+                no_scale_writer_schedule_authority = None
         if getattr(args, "enable_finalb_scale_source_authority", False):
             finalb_scale_schedule_authority = (
                 FinalBScaleScheduleAuthority(
@@ -3178,6 +3213,15 @@ def _run_live_session(
                         )
                         else "disabled"
                     ),
+                    "no_scale_writer_schedule_authority": (
+                        no_scale_writer_schedule_authority is not None
+                    ),
+                    "no_scale_writer_static_audit": (
+                        no_scale_writer_schedule_authority.static_audit
+                        .compact_record()
+                        if no_scale_writer_schedule_authority is not None
+                        else None
+                    ),
                     "diagnostic_continue_root_only_scale": (
                         diagnostic_continue_root_only_scale
                     ),
@@ -3224,9 +3268,13 @@ def _run_live_session(
                         else "disabled"
                     ),
                     "viability_grid_step": (
-                        ORDINARY_AUTHORITY_GRID_STEP
-                        if ordinary_preexhaustion_authority
-                        else TH08_CORRIDOR_CONFIG.grid_step
+                        TH08_CORRIDOR_CONFIG.grid_step
+                    ),
+                    "viability_required_clearance": (
+                        TH08_CORRIDOR_CONFIG.required_clearance
+                    ),
+                    "viability_continuous_position_authority": (
+                        "boolean_lower_cell_radius_inflated"
                     ),
                     "ordinary_viability_authority": {
                         "enabled": ordinary_preexhaustion_authority,
@@ -3540,6 +3588,8 @@ def _run_live_session(
                 gameplay_epoch += 1
                 if finalb_scale_schedule_authority is not None:
                     finalb_scale_schedule_authority.reset()
+                if no_scale_writer_schedule_authority is not None:
+                    no_scale_writer_schedule_authority.reset()
                 boss_phase_tracker.reset()
                 trace_sink.emit(
                     {
@@ -4177,6 +4227,8 @@ def _run_live_session(
                 gameplay_epoch += 1
                 if finalb_scale_schedule_authority is not None:
                     finalb_scale_schedule_authority.reset()
+                if no_scale_writer_schedule_authority is not None:
+                    no_scale_writer_schedule_authority.reset()
                 safe_mask = previous_mask & SHOT
                 issue_controller.dispatch(
                     previous_mask,
@@ -4381,6 +4433,31 @@ def _run_live_session(
                         ),
                     )
                 )
+            elif (
+                no_scale_writer_schedule_authority is not None
+                and runtime_ecl_identity_service is not None
+                and runtime_ecl_identity_service.accepted_version is not None
+            ):
+                scale_authority_resolution = (
+                    no_scale_writer_schedule_authority.resolve(
+                        reader,
+                        runtime_version=(
+                            runtime_ecl_identity_service.accepted_version
+                        ),
+                        source_frame=counter_after_read,
+                        gameplay_epoch=gameplay_epoch,
+                        route_id=int(state["route_id"]),
+                        difficulty_index=int(state["difficulty_index"]),
+                        stage_route_index=int(state["stage_route_index"]),
+                        observed_root_scale_bits=(
+                            player_control_root.scale_bits
+                        ),
+                        observed_player_bomb_active=int(
+                            bool(player["bomb_active"])
+                        ),
+                    )
+                )
+            if scale_authority_resolution is not None:
                 if scale_authority_resolution.trace_record is not None:
                     trace_sink.emit(
                         scale_authority_resolution.trace_record,
@@ -4472,7 +4549,7 @@ def _run_live_session(
                 if scale_authority_resolution is not None:
                     trace_sink.emit(
                         {
-                            "kind": "finalb_scale_source_wait",
+                            "kind": "scale_schedule_authority_wait",
                             "frame": captured_iteration.snapshot_frame,
                             "source_frame": captured_iteration.source_frame,
                             "gameplay_epoch": gameplay_epoch,
@@ -6135,12 +6212,8 @@ def _run_live_session(
                             allowed_action_authority
                         ),
                         allow_coarse_viability_relaxation=(
-                            allowed_action_authority
-                            not in (
-                                ORDINARY_PREEXHAUSTION_AUTHORITY,
-                                ORDINARY_CAUSAL_HOLD_AUTHORITY,
-                                ORDINARY_CAUSAL_DELAYED_ISSUE_AUTHORITY,
-                                ORDINARY_CAUSAL_CONTINUATION_LEASE_AUTHORITY,
+                            _allow_coarse_viability_relaxation(
+                                allowed_action_authority
                             )
                         ),
                         viability_repair_volumes=(
@@ -6455,6 +6528,8 @@ def _run_live_session(
                 gameplay_epoch += 1
                 if finalb_scale_schedule_authority is not None:
                     finalb_scale_schedule_authority.reset()
+                if no_scale_writer_schedule_authority is not None:
+                    no_scale_writer_schedule_authority.reset()
                 safe_mask = previous_mask & SHOT
                 issue_controller.dispatch(
                     previous_mask,

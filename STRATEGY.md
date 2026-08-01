@@ -17,6 +17,10 @@ Promotion requires one immutable causal hypothesis, same-root evidence,
 deadline-safe integration, a fail-safe fallback, rotated physical validation,
 and an explicit edit here.
 
+The active physical objective is Hard Route-2 NMNB. Lunatic/Extra are
+deferred, and fixed-root wind-tunnel results cannot promote a change without
+the named Hard physical mechanism.
+
 ## Live
 
 ### L1 — Robust no-Bomb survival
@@ -55,6 +59,33 @@ The constant-current-root continuation is diagnostic and
 unknown-direction. It may publish a queryable shadow global policy, but its
 target and action labels are stripped before planning/issue; it is not general
 live safety authority.
+
+### L2a — Stage 1–5 no-scale-writer schedule authority
+
+**Live inside its exact identity boundary.** Restore spell global action authority without
+restoring the rejected constant-current-root assumption. The accepted
+boundary requires exact runtime/static ECL identity, the configured
+Route-2/difficulty/stage context, a coherent unit-scale root, a complete
+active installed-callback inventory, and a whole-file audit showing every
+`0x88/0x89` callback index is literal and none invokes or installs scale
+callbacks 18/28/29. Any mismatch fails closed.
+
+Shipped native dataflow establishes callbacks 18/28/29 as the gameplay scale
+writers; the remaining writes are game/stage initialization resets. Decoded
+Stages 1–5 satisfy the static no-writer condition. Stage 6 and Final contain
+real callback-18 writes and are explicitly excluded.
+
+Hard Stage-4A `20260801_184903` passed the named mechanism gate: 3,599
+decisions were constrained after the configuration-invalid `183730` run had
+zero, all five reached spell phases received constraints, and recovery/
+distant-recovery selections returned. It completed with 12 hits and zero
+Bombs. This promotes only finite unit-scale schedule provenance; it does not
+promote the fixed-grid corridor outcome.
+
+The same physical trace exposed 57 coarse terminal-threat relaxations after
+an exact corridor authority had been named. Exact corridor and ordinary exact
+authorities are now non-relaxable. The follow-up `191508` recorded zero such
+relaxations.
 
 ### L3 — Default-off ordinary prepublication predecessor
 
@@ -448,6 +479,21 @@ captures the four health successors plus the phase timer and proves only a
 timeout with `elapsed + H < deadline` unreachable. Armed health and reachable
 timeouts continue to fail closed. Retained exact sets are unchanged; physical
 revalidation precedes Stage 5.
+
+### L4 — Continuous-position coarse-cell lower bound
+
+The live 16px global corridor no longer treats a lattice center as the whole
+state. Its required clearance consumes the cell half-diagonal
+`sqrt(2)*8 = 11.3137px`; exact corridor authority may not relax to a local
+coarse fallback. This is a semantic hardening, not an outcome promotion.
+
+Hard Stage-4A `20260801_191508` physically falsified the uniform coarse lower
+kernel as a useful global solver. Relative to different-RNG `184903`, empty
+queried sets rose 1,723→2,927, constrained decisions fell 3,599→3,001,
+boundary-associated hits rose 5→12, and the run completed 18 hits with zero
+Bombs. Query availability and median solve latency improved, so missing
+publication alone does not explain the regression. Retain the sound lower
+bound, but require adaptive/local exact refinement before any outcome claim.
 
 ## Offline Native Authority
 

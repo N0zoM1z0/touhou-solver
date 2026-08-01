@@ -78,16 +78,23 @@ class EnemyBodySnapshot(Protocol):
 
 
 TH08_PLAYFIELD = CorridorBounds(8.0, 376.0, 16.0, 432.0)
+TH08_CORRIDOR_GRID_STEP = 16.0
+TH08_CORRIDOR_CELL_RADIUS = (
+    math.sqrt(2.0) * TH08_CORRIDOR_GRID_STEP / 2.0
+)
 TH08_CORRIDOR_CONFIG = CorridorConfig(
-    # This layer preserves long-horizon connectivity. The local MPC retains
-    # per-frame precision around the selected 16-pixel corridor tube.
-    grid_step=16.0,
+    # Each Boolean state represents the complete nearest-lattice cell, not
+    # only its center. Euclidean clearance is 1-Lipschitz, so inflating the
+    # required clearance by the 16px cell's half diagonal makes membership a
+    # conservative continuous-position lower kernel. Fresh local geometry
+    # may narrow this exact set but may never widen it.
+    grid_step=TH08_CORRIDOR_GRID_STEP,
     frames_per_layer=8,
     horizon_frames=80,
     cardinal_speed=4.0,
     diagonal_axis_speed=2.8284270763397217,
     player_radius=2.0,
-    required_clearance=0.0,
+    required_clearance=TH08_CORRIDOR_CELL_RADIUS,
     preferred_clearance=10.0,
     danger_radius=48.0,
     boundary_danger_radius=24.0,

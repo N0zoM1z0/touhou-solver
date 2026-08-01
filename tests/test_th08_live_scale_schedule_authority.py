@@ -2,10 +2,19 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+import struct
+from types import SimpleNamespace
 import unittest
 
+from th08_ecl_callback_model import CALLBACK_ADDRESSES
+from th08_ecl_tool.core import parse_ecl
+from th08_live.runtime_ecl_identity import RuntimeEclAcceptedVersion
+from th08_live.runtime_ecl_image import ECL_SUBROUTINE_TABLE_OFFSET
 from th08_live.scale_schedule_authority import (
     FinalBScaleScheduleAuthority,
+    NoScaleWriterAuthorityDependencies,
+    NoScaleWriterScheduleAuthority,
+    audit_no_scale_writer_ecl,
 )
 from th08_live.sensing_trace import _time_scale_schedule_hard_authority
 from th08_live.controller import (
@@ -29,6 +38,18 @@ PHYSICAL_C4_ARTIFACT = (
     / "artifacts"
     / "runtime_reports"
     / "finalb_scale_source_replay_20260729_215613.json"
+)
+STAGE4A_ECL = (
+    Path(__file__).resolve().parents[1]
+    / "artifacts"
+    / "decoded"
+    / "ecldata4a.ecl"
+)
+FINALB_ECL = (
+    Path(__file__).resolve().parents[1]
+    / "artifacts"
+    / "decoded"
+    / "ecldata7.ecl"
 )
 
 
@@ -82,6 +103,66 @@ class _TraceService:
         self.resets += 1
 
 
+class _NoWriterCapture:
+    def __init__(self, *, installed_callback: int = 0) -> None:
+        runtime_base = 0x02100000
+        self.status = "coherent"
+        self.coherent = True
+        self.phase_before = SimpleNamespace(
+            gameplay_active=True,
+            route_id=2,
+            difficulty_index=2,
+            stage_route_index=3,
+            ecl_context=struct.pack(
+                "<II",
+                runtime_base,
+                runtime_base + ECL_SUBROUTINE_TABLE_OFFSET,
+            ),
+            scale_bits=TH08_UNIT_TIME_SCALE_BITS,
+            player_bomb_active=0,
+        )
+        self.sources = (
+            SimpleNamespace(
+                snapshot=object(),
+                installed_callback=installed_callback,
+            ),
+        )
+
+    def compact_record(self) -> dict[str, object]:
+        return {
+            "status": self.status,
+            "source_count": len(self.sources),
+        }
+
+
+class _NoWriterCaptureDependency:
+    def __init__(self, *, installed_callback: int = 0) -> None:
+        self.installed_callback = installed_callback
+        self.calls = 0
+
+    def __call__(self, *_args: object, **_kwargs: object) -> _NoWriterCapture:
+        self.calls += 1
+        return _NoWriterCapture(
+            installed_callback=self.installed_callback,
+        )
+
+
+def _runtime_ecl_version() -> RuntimeEclAcceptedVersion:
+    return RuntimeEclAcceptedVersion(
+        runtime_base=0x02100000,
+        image_length=STAGE4A_ECL.stat().st_size,
+        relocated_sha256="1" * 64,
+        normalized_sha256="2" * 64,
+        static_sha256=parse_ecl(STAGE4A_ECL).sha256,
+        route_id=2,
+        difficulty_index=2,
+        stage_route_index=3,
+        gameplay_epoch=0,
+        decision_frame=99,
+        snapshot_frame=99,
+    )
+
+
 def _origin(*, source_frame: int = 100) -> Th08TimeScaleSchedule:
     return Th08TimeScaleSchedule.explicit(
         root_scale_bits=QUARTER_SCALE_BITS,
@@ -130,6 +211,117 @@ def _resolve(
         player_predeath_counter=predeath_counter,
         hit_started=hit_started,
     )
+
+
+class NoScaleWriterScheduleAuthorityTests(unittest.TestCase):
+    def _authority(
+        self,
+        dependency: _NoWriterCaptureDependency,
+    ) -> NoScaleWriterScheduleAuthority:
+        ecl = parse_ecl(STAGE4A_ECL)
+        return NoScaleWriterScheduleAuthority(
+            ecl,
+            expected_static_sha256=ecl.sha256,
+            expected_route_id=2,
+            expected_difficulty_index=2,
+            expected_stage_route_index=3,
+            horizon_frames=269,
+            dependencies=NoScaleWriterAuthorityDependencies(
+                capture_sources=dependency,
+            ),
+        )
+
+    def _resolve(
+        self,
+        authority: NoScaleWriterScheduleAuthority,
+        **overrides: object,
+    ):
+        keywords: dict[str, object] = {
+            "runtime_version": _runtime_ecl_version(),
+            "source_frame": 100,
+            "gameplay_epoch": 4,
+            "route_id": 2,
+            "difficulty_index": 2,
+            "stage_route_index": 3,
+            "observed_root_scale_bits": TH08_UNIT_TIME_SCALE_BITS,
+            "observed_player_bomb_active": 0,
+        }
+        keywords.update(overrides)
+        return authority.resolve(object(), **keywords)
+
+    def test_stage4a_static_inventory_accepts_while_finalb_rejects(self) -> None:
+        stage4a = audit_no_scale_writer_ecl(parse_ecl(STAGE4A_ECL))
+        finalb = audit_no_scale_writer_ecl(parse_ecl(FINALB_ECL))
+
+        self.assertTrue(stage4a.eligible)
+        self.assertEqual(stage4a.callback_instruction_count, 18)
+        self.assertFalse(finalb.eligible)
+        self.assertTrue(
+            any("scale_callback_18_present" in reason for reason in finalb.incomplete_reasons)
+        )
+
+    def test_exact_identity_unit_root_and_inventory_publish_authority(self) -> None:
+        dependency = _NoWriterCaptureDependency()
+        authority = self._authority(dependency)
+
+        accepted = self._resolve(authority)
+
+        self.assertTrue(accepted.planner_scale_authority)
+        self.assertTrue(
+            _time_scale_schedule_hard_authority(accepted.schedule)
+        )
+        self.assertEqual(accepted.schedule.complete_horizon, 269)
+        self.assertTrue(
+            all(
+                bits == TH08_UNIT_TIME_SCALE_BITS
+                for bits in (
+                    *accepted.schedule.player_scale_bits,
+                    *accepted.schedule.laser_scale_bits,
+                )
+            )
+        )
+        self.assertEqual(dependency.calls, 1)
+        self.assertIsNotNone(accepted.trace_record)
+        self.assertTrue(accepted.compact_record()["hard_action_authority"])
+
+        continued = self._resolve(authority, source_frame=101)
+        self.assertTrue(continued.planner_scale_authority)
+        self.assertEqual(dependency.calls, 1)
+        self.assertIsNone(continued.trace_record)
+
+    def test_scale_callback_root_and_context_mismatch_fail_closed(self) -> None:
+        dependency = _NoWriterCaptureDependency(
+            installed_callback=CALLBACK_ADDRESSES[18],
+        )
+        authority = self._authority(dependency)
+
+        callback = self._resolve(authority)
+        self.assertFalse(callback.planner_scale_authority)
+        self.assertEqual(callback.reason, "installed_scale_callback_present")
+
+        nonunit = self._resolve(
+            self._authority(_NoWriterCaptureDependency()),
+            observed_root_scale_bits=QUARTER_SCALE_BITS,
+        )
+        self.assertFalse(nonunit.planner_scale_authority)
+        self.assertEqual(nonunit.reason, "nonunit_root")
+
+        wrong_stage = self._resolve(
+            self._authority(_NoWriterCaptureDependency()),
+            stage_route_index=4,
+        )
+        self.assertFalse(wrong_stage.planner_scale_authority)
+        self.assertEqual(wrong_stage.reason, "immutable_context_mismatch")
+
+    def test_epoch_reset_recaptures_runtime_inventory(self) -> None:
+        dependency = _NoWriterCaptureDependency()
+        authority = self._authority(dependency)
+        self.assertTrue(self._resolve(authority).planner_scale_authority)
+
+        next_epoch = self._resolve(authority, gameplay_epoch=5)
+
+        self.assertTrue(next_epoch.planner_scale_authority)
+        self.assertEqual(dependency.calls, 2)
 
 
 class FinalBScaleScheduleAuthorityTests(unittest.TestCase):

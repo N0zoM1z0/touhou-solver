@@ -2,10 +2,10 @@
 
 This module never issues input and does not itself publish a schedule to live
 action authority.  It binds one exact shipped runtime ECL image, captures the
-full 480-slot ordinary-enemy pool plus an out-of-pool spell owner in one stable
-phase transaction, inventories installed callbacks and auxiliary contexts,
-and runs the causal scale producer only when the deliberately narrow Final-B
-spell-190 source contract is complete.
+manager singleton, full 480-slot ordinary-enemy pool, and any other
+out-of-pool spell owner in one stable phase transaction, inventories installed
+callbacks and auxiliary contexts, and runs the causal scale producer only
+when the deliberately narrow Final-B spell-190 source contract is complete.
 """
 
 from __future__ import annotations
@@ -43,6 +43,7 @@ from th08_live.enemy_ecl_inventory import (
 from th08_live.enemy_sensor import (
     ENEMY_ACTIVE_FLAG,
     ENEMY_FLAGS_OFFSET,
+    ENEMY_MANAGER_TEMPLATE_BASE,
     ENEMY_POOL_BASE,
     ENEMY_POOL_SIZE,
     ENEMY_STRIDE,
@@ -379,8 +380,10 @@ class CompleteScaleSourceCapture:
     phase_before: ScaleSourcePhaseIdentity
     phase_after: ScaleSourcePhaseIdentity
     sources: tuple[ScaleVmSource, ...]
+    manager_template_active: bool
     ordinary_active_slots: int
     spell_owner_in_ordinary_pool: bool
+    spell_owner_in_manager_template: bool
     process_read_count: int
     process_read_bytes: int
     capture_ms: float
@@ -400,9 +403,14 @@ class CompleteScaleSourceCapture:
             "ordinary_pool_base": ENEMY_POOL_BASE,
             "ordinary_pool_slots_scanned": ENEMY_POOL_SIZE,
             "ordinary_pool_complete": True,
+            "manager_template_scanned": True,
+            "manager_template_active": self.manager_template_active,
             "ordinary_active_slots": self.ordinary_active_slots,
             "spell_owner_in_ordinary_pool": (
                 self.spell_owner_in_ordinary_pool
+            ),
+            "spell_owner_in_manager_template": (
+                self.spell_owner_in_manager_template
             ),
             "source_count": len(self.sources),
             "phase_before": self.phase_before.compact_record(),
@@ -478,14 +486,22 @@ def capture_complete_scale_sources(
         counting_reader = _CountingReader()
         phase_before = ScaleSourcePhaseIdentity.capture(counting_reader)
         pool = read_pool()
+        manager_template = read(
+            ENEMY_MANAGER_TEMPLATE_BASE,
+            ENEMY_SCALE_SOURCE_READ_SIZE,
+        )
         spell_pointer = phase_before.spell_enemy_pointer
         owner_in_pool = _pointer_in_ordinary_pool(spell_pointer)
+        owner_in_manager_template = (
+            spell_pointer == ENEMY_MANAGER_TEMPLATE_BASE
+        )
         external_owner = (
             read(spell_pointer, ENEMY_SCALE_SOURCE_READ_SIZE)
             if (
                 phase_before.spell_active
                 and spell_pointer
                 and not owner_in_pool
+                and not owner_in_manager_template
             )
             else None
         )
@@ -496,6 +512,24 @@ def capture_complete_scale_sources(
         )[0]
 
         sources: list[ScaleVmSource] = []
+        manager_template_flags = struct.unpack_from(
+            "<I",
+            manager_template,
+            ENEMY_FLAGS_OFFSET,
+        )[0]
+        manager_template_active = bool(
+            manager_template_flags & ENEMY_ACTIVE_FLAG
+        )
+        if manager_template_active:
+            sources.append(
+                decode_scale_vm_source(
+                    manager_template,
+                    role="manager_template",
+                    slot=None,
+                    enemy_pointer=ENEMY_MANAGER_TEMPLATE_BASE,
+                    scale_bits=phase_before.scale_bits,
+                )
+            )
         ordinary_active_slots = 0
         for slot in range(ENEMY_POOL_SIZE):
             base = slot * ENEMY_STRIDE
@@ -547,8 +581,12 @@ def capture_complete_scale_sources(
             phase_before=phase_before,
             phase_after=phase_after,
             sources=tuple(sources),
+            manager_template_active=manager_template_active,
             ordinary_active_slots=ordinary_active_slots,
             spell_owner_in_ordinary_pool=owner_in_pool,
+            spell_owner_in_manager_template=(
+                owner_in_manager_template
+            ),
             process_read_count=read_count,
             process_read_bytes=read_bytes,
             capture_ms=(clock() - started) * 1000.0,

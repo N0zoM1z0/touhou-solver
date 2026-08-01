@@ -80,6 +80,7 @@ from th08_live_dodge_agent import (
     RobustActionCertificate,
     SHOT,
     UP,
+    _allow_coarse_viability_relaxation,
     _auto_confirm_eligible,
     _action_name_from_mask,
     _corridor_policy_status,
@@ -142,6 +143,14 @@ def _issue_certificates(
 
 
 class LiveDodgeAgentTests(unittest.TestCase):
+    def test_exact_corridor_authority_cannot_relax_to_local_fallback(self) -> None:
+        self.assertFalse(
+            _allow_coarse_viability_relaxation(
+                "exact_corridor_viability_v1"
+            )
+        )
+        self.assertTrue(_allow_coarse_viability_relaxation(None))
+
     def test_async_policy_minimum_covers_two_layers_and_control_latency(
         self,
     ) -> None:

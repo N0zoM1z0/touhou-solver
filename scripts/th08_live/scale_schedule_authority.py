@@ -9,13 +9,26 @@ it causally as manager frames advance, and fail closed on every mismatch.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Protocol
+import struct
+from typing import Callable, Protocol
+
+from th08_ecl_callback_model import CALLBACK_ADDRESSES
+from th08_ecl_scale_schedule import (
+    CALLBACK_RESTORE_BULLETS_AND_TIME_SCALE,
+    CALLBACK_SET_TIME_SCALE_RECIPROCAL,
+    CALLBACK_SLOWDOWN_AND_SCALE_BULLETS,
+)
+from th08_ecl_tool.core import EclFile
+from th08_live.runtime_ecl_identity import RuntimeEclAcceptedVersion
+from th08_live.runtime_ecl_image import ECL_SUBROUTINE_TABLE_OFFSET
 
 from th08_live.scale_source_trace import (
+    CompleteScaleSourceCapture,
     FINAL_B_QUARTER_SCALE_BITS,
     FINAL_B_SCALE_SPELL_ID,
     FINAL_B_STAGE_ROUTE_INDEX,
     FinalBScaleSourceTraceService,
+    capture_complete_scale_sources,
 )
 from th08_time_scale import (
     SCALE_COVERAGE_COMPLETE,
@@ -29,6 +42,385 @@ FINAL_B_LIVE_SCALE_AUTHORITY_SCHEMA = (
     "th08-finalb-live-scale-schedule-authority-v1"
 )
 PRETARGET_UNIT_TRANSPORT_HORIZON = 256
+NO_SCALE_WRITER_LIVE_AUTHORITY_SCHEMA = (
+    "th08-no-scale-writer-live-schedule-authority-v1"
+)
+NO_SCALE_WRITER_STAGE_ROUTE_INDICES = frozenset(range(5))
+_SCALE_CALLBACK_INDICES = frozenset(
+    {
+        CALLBACK_SET_TIME_SCALE_RECIPROCAL,
+        CALLBACK_SLOWDOWN_AND_SCALE_BULLETS,
+        CALLBACK_RESTORE_BULLETS_AND_TIME_SCALE,
+    }
+)
+_SCALE_CALLBACK_ADDRESSES = frozenset(
+    CALLBACK_ADDRESSES[index] for index in _SCALE_CALLBACK_INDICES
+)
+
+
+def _signed_int32(value: int) -> int:
+    return value if value < 0x80000000 else value - 0x100000000
+
+
+@dataclass(frozen=True, slots=True)
+class NoScaleWriterStaticAudit:
+    static_sha256: str
+    callback_instruction_count: int
+    callback_indices: tuple[int, ...]
+    incomplete_reasons: tuple[str, ...]
+
+    @property
+    def eligible(self) -> bool:
+        return not self.incomplete_reasons
+
+    def compact_record(self) -> dict[str, object]:
+        return {
+            "static_sha256": self.static_sha256,
+            "callback_instruction_count": self.callback_instruction_count,
+            "callback_indices": list(self.callback_indices),
+            "scale_callback_indices": sorted(_SCALE_CALLBACK_INDICES),
+            "complete": self.eligible,
+            "incomplete_reasons": list(self.incomplete_reasons),
+        }
+
+
+def audit_no_scale_writer_ecl(ecl: EclFile) -> NoScaleWriterStaticAudit:
+    """Prove that one complete decoded ECL image cannot select a scale callback."""
+
+    callback_indices: list[int] = []
+    reasons: list[str] = []
+    instruction_count = 0
+    for subroutine in ecl.subroutines:
+        for instruction in subroutine.instructions:
+            if instruction.opcode not in {0x88, 0x89}:
+                continue
+            instruction_count += 1
+            location = f"sub{subroutine.index}:offset={instruction.offset:#x}"
+            if not instruction.arguments:
+                reasons.append(f"callback_index_missing:{location}")
+                continue
+            if instruction.parameter_mask & 0x01:
+                reasons.append(f"callback_index_dynamic:{location}")
+                continue
+            callback_index = _signed_int32(instruction.arguments[0])
+            callback_indices.append(callback_index)
+            if instruction.opcode == 0x88 and not (
+                0 <= callback_index < len(CALLBACK_ADDRESSES)
+            ):
+                reasons.append(f"callback_invoke_index_invalid:{location}")
+            elif instruction.opcode == 0x89 and (
+                callback_index >= len(CALLBACK_ADDRESSES)
+            ):
+                reasons.append(f"callback_install_index_invalid:{location}")
+            if callback_index in _SCALE_CALLBACK_INDICES:
+                reasons.append(
+                    f"scale_callback_{callback_index}_present:{location}"
+                )
+    return NoScaleWriterStaticAudit(
+        static_sha256=ecl.sha256,
+        callback_instruction_count=instruction_count,
+        callback_indices=tuple(sorted(set(callback_indices))),
+        incomplete_reasons=tuple(dict.fromkeys(reasons)),
+    )
+
+
+@dataclass(frozen=True, slots=True)
+class NoScaleWriterScheduleResolution:
+    schedule: Th08TimeScaleSchedule
+    status: str
+    reason: str | None
+    trace_record: dict[str, object] | None
+    runtime_static_sha256: str | None
+    inventory_source_count: int | None
+
+    @property
+    def planner_scale_authority(self) -> bool:
+        return (
+            self.status == "complete_exact_no_scale_writer_schedule"
+            and self.schedule.coverage == SCALE_COVERAGE_COMPLETE
+        )
+
+    def compact_record(self) -> dict[str, object]:
+        return {
+            "kind": "no_scale_writer_live_scale_schedule_authority",
+            "schema": NO_SCALE_WRITER_LIVE_AUTHORITY_SCHEMA,
+            "status": self.status,
+            "reason": self.reason,
+            "planner_scale_schedule_authority": self.planner_scale_authority,
+            "hard_action_authority": self.planner_scale_authority,
+            "semantics_version": TH08_PLAYER_LASER_SCALE_SEMANTICS_VERSION,
+            "runtime_static_sha256": self.runtime_static_sha256,
+            "inventory_source_count": self.inventory_source_count,
+            "root_scale_bits": self.schedule.root_scale_bits,
+            "coverage": self.schedule.coverage,
+            "complete_horizon": self.schedule.complete_horizon,
+            "provenance": self.schedule.provenance,
+            "fallback": (
+                None
+                if self.planner_scale_authority
+                else "withhold_action_and_retry"
+            ),
+        }
+
+
+@dataclass(frozen=True, slots=True)
+class NoScaleWriterAuthorityDependencies:
+    capture_sources: Callable[..., CompleteScaleSourceCapture] = (
+        capture_complete_scale_sources
+    )
+
+
+class NoScaleWriterScheduleAuthority:
+    """Publish a finite unit schedule only under an exact no-writer proof."""
+
+    def __init__(
+        self,
+        ecl: EclFile,
+        *,
+        expected_static_sha256: str,
+        expected_route_id: int,
+        expected_difficulty_index: int,
+        expected_stage_route_index: int,
+        horizon_frames: int,
+        dependencies: NoScaleWriterAuthorityDependencies = (
+            NoScaleWriterAuthorityDependencies()
+        ),
+    ) -> None:
+        if ecl.sha256 != expected_static_sha256.lower():
+            raise ValueError("no-scale-writer ECL digest mismatch")
+        if expected_stage_route_index not in NO_SCALE_WRITER_STAGE_ROUTE_INDICES:
+            raise ValueError("no-scale-writer authority is limited to Stages 1-5")
+        if expected_route_id < 0 or expected_difficulty_index < 0:
+            raise ValueError("no-scale-writer context cannot be negative")
+        if horizon_frames <= 0:
+            raise ValueError("no-scale-writer horizon must be positive")
+        self.static_audit = audit_no_scale_writer_ecl(ecl)
+        self._expected_static_sha256 = expected_static_sha256.lower()
+        self._expected_route_id = expected_route_id
+        self._expected_difficulty_index = expected_difficulty_index
+        self._expected_stage_route_index = expected_stage_route_index
+        self._horizon_frames = horizon_frames
+        self._dependencies = dependencies
+        self._binding: tuple[object, ...] | None = None
+        self._inventory_source_count: int | None = None
+
+    @property
+    def static_eligible(self) -> bool:
+        return self.static_audit.eligible
+
+    def reset(self) -> None:
+        self._binding = None
+        self._inventory_source_count = None
+
+    @staticmethod
+    def _root_only(
+        *,
+        scale_bits: int,
+        source_frame: int,
+        status: str,
+        reason: str,
+        runtime_static_sha256: str | None = None,
+        inventory_source_count: int | None = None,
+        trace_record: dict[str, object] | None = None,
+    ) -> NoScaleWriterScheduleResolution:
+        return NoScaleWriterScheduleResolution(
+            schedule=Th08TimeScaleSchedule.root_observation(
+                scale_bits,
+                source_frame=source_frame,
+                provenance=f"no_scale_writer_authority_unavailable:{reason}",
+            ),
+            status=status,
+            reason=reason,
+            trace_record=trace_record,
+            runtime_static_sha256=runtime_static_sha256,
+            inventory_source_count=inventory_source_count,
+        )
+
+    def _complete(
+        self,
+        *,
+        source_frame: int,
+        runtime_version: RuntimeEclAcceptedVersion,
+        trace_record: dict[str, object] | None,
+    ) -> NoScaleWriterScheduleResolution:
+        return NoScaleWriterScheduleResolution(
+            schedule=Th08TimeScaleSchedule.constant(
+                TH08_UNIT_TIME_SCALE_BITS,
+                horizon=self._horizon_frames,
+                provenance=(
+                    "exact_runtime_ecl_no_scale_writer:"
+                    f"{runtime_version.static_sha256}:"
+                    f"stage={self._expected_stage_route_index}"
+                ),
+                source_frame=source_frame,
+            ),
+            status="complete_exact_no_scale_writer_schedule",
+            reason=None,
+            trace_record=trace_record,
+            runtime_static_sha256=runtime_version.static_sha256,
+            inventory_source_count=self._inventory_source_count,
+        )
+
+    def resolve(
+        self,
+        reader: object,
+        *,
+        runtime_version: RuntimeEclAcceptedVersion | None,
+        source_frame: int,
+        gameplay_epoch: int,
+        route_id: int,
+        difficulty_index: int,
+        stage_route_index: int,
+        observed_root_scale_bits: int,
+        observed_player_bomb_active: int,
+    ) -> NoScaleWriterScheduleResolution:
+        if not self.static_eligible:
+            return self._root_only(
+                scale_bits=observed_root_scale_bits,
+                source_frame=source_frame,
+                status="root_only_static_writer_inventory_unknown",
+                reason="static_writer_inventory_unknown",
+            )
+        if runtime_version is None:
+            return self._root_only(
+                scale_bits=observed_root_scale_bits,
+                source_frame=source_frame,
+                status="root_only_runtime_identity_unavailable",
+                reason="runtime_identity_unavailable",
+            )
+        runtime_key = (
+            runtime_version.runtime_base,
+            runtime_version.image_length,
+            runtime_version.relocated_sha256,
+            runtime_version.normalized_sha256,
+            runtime_version.static_sha256,
+        )
+        context_matches = (
+            route_id == self._expected_route_id
+            and difficulty_index == self._expected_difficulty_index
+            and stage_route_index == self._expected_stage_route_index
+            and runtime_version.route_id == self._expected_route_id
+            and runtime_version.difficulty_index
+            == self._expected_difficulty_index
+            and runtime_version.stage_route_index
+            == self._expected_stage_route_index
+            and runtime_version.static_sha256
+            == self._expected_static_sha256
+            and source_frame >= runtime_version.snapshot_frame
+        )
+        if not context_matches:
+            return self._root_only(
+                scale_bits=observed_root_scale_bits,
+                source_frame=source_frame,
+                status="root_only_immutable_context_mismatch",
+                reason="immutable_context_mismatch",
+                runtime_static_sha256=runtime_version.static_sha256,
+            )
+        if observed_root_scale_bits != TH08_UNIT_TIME_SCALE_BITS:
+            return self._root_only(
+                scale_bits=observed_root_scale_bits,
+                source_frame=source_frame,
+                status="root_only_nonunit_root",
+                reason="nonunit_root",
+                runtime_static_sha256=runtime_version.static_sha256,
+            )
+        if observed_player_bomb_active:
+            return self._root_only(
+                scale_bits=observed_root_scale_bits,
+                source_frame=source_frame,
+                status="root_only_bomb_active",
+                reason="bomb_active",
+                runtime_static_sha256=runtime_version.static_sha256,
+            )
+        binding = (runtime_key, gameplay_epoch)
+        if self._binding is not None:
+            if self._binding != binding:
+                self.reset()
+            else:
+                return self._complete(
+                    source_frame=source_frame,
+                    runtime_version=runtime_version,
+                    trace_record=None,
+                )
+
+        try:
+            capture = self._dependencies.capture_sources(
+                reader,
+                expected_manager_frame=source_frame,
+            )
+        except (OSError, RuntimeError, TypeError, ValueError, struct.error) as error:
+            return self._root_only(
+                scale_bits=observed_root_scale_bits,
+                source_frame=source_frame,
+                status="root_only_source_inventory_error",
+                reason=f"source_inventory_error:{type(error).__name__}",
+                runtime_static_sha256=runtime_version.static_sha256,
+            )
+        phase = capture.phase_before
+        expected_ecl_context = struct.pack(
+            "<II",
+            runtime_version.runtime_base,
+            runtime_version.runtime_base + ECL_SUBROUTINE_TABLE_OFFSET,
+        )
+        reasons: list[str] = []
+        if not capture.coherent:
+            reasons.append(f"source_capture:{capture.status}")
+        if not phase.gameplay_active:
+            reasons.append("gameplay_inactive")
+        if (
+            phase.route_id != route_id
+            or phase.difficulty_index != difficulty_index
+            or phase.stage_route_index != stage_route_index
+        ):
+            reasons.append("source_context_mismatch")
+        if phase.ecl_context != expected_ecl_context:
+            reasons.append("runtime_ecl_context_mismatch")
+        if phase.scale_bits != TH08_UNIT_TIME_SCALE_BITS:
+            reasons.append("source_root_nonunit")
+        if phase.player_bomb_active:
+            reasons.append("source_bomb_active")
+        if any(source.snapshot is None for source in capture.sources):
+            reasons.append("invalid_active_main_vm")
+        if any(
+            source.installed_callback
+            and source.installed_callback not in CALLBACK_ADDRESSES
+            for source in capture.sources
+        ):
+            reasons.append("installed_callback_unknown")
+        if any(
+            source.installed_callback in _SCALE_CALLBACK_ADDRESSES
+            for source in capture.sources
+        ):
+            reasons.append("installed_scale_callback_present")
+        trace_record = {
+            "kind": "no_scale_writer_source_inventory",
+            "schema": NO_SCALE_WRITER_LIVE_AUTHORITY_SCHEMA,
+            "status": "accepted" if not reasons else "unknown",
+            "gameplay_epoch": gameplay_epoch,
+            "source_frame": source_frame,
+            "static_audit": self.static_audit.compact_record(),
+            "runtime_version": runtime_version.record(),
+            "source_capture": capture.compact_record(),
+            "incomplete_reasons": list(dict.fromkeys(reasons)),
+            "changes_input": False,
+        }
+        if reasons:
+            return self._root_only(
+                scale_bits=observed_root_scale_bits,
+                source_frame=source_frame,
+                status="root_only_source_inventory_unknown",
+                reason=reasons[0],
+                runtime_static_sha256=runtime_version.static_sha256,
+                inventory_source_count=len(capture.sources),
+                trace_record=trace_record,
+            )
+        self._binding = binding
+        self._inventory_source_count = len(capture.sources)
+        return self._complete(
+            source_frame=source_frame,
+            runtime_version=runtime_version,
+            trace_record=trace_record,
+        )
 
 
 class _ScaleSourceService(Protocol):
@@ -406,6 +798,13 @@ class FinalBScaleScheduleAuthority:
 
 __all__ = [
     "FINAL_B_LIVE_SCALE_AUTHORITY_SCHEMA",
+    "NO_SCALE_WRITER_LIVE_AUTHORITY_SCHEMA",
+    "NO_SCALE_WRITER_STAGE_ROUTE_INDICES",
     "FinalBScaleScheduleAuthority",
     "FinalBScaleScheduleResolution",
+    "NoScaleWriterAuthorityDependencies",
+    "NoScaleWriterScheduleAuthority",
+    "NoScaleWriterScheduleResolution",
+    "NoScaleWriterStaticAudit",
+    "audit_no_scale_writer_ecl",
 ]

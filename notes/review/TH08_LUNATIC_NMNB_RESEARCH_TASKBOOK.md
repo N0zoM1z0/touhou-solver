@@ -2,6 +2,15 @@
 
 Last updated: 2026-07-31.
 
+> Active scope override (2026-08-01): the user has made Hard Route-2 NMNB the
+> current completion target. Lunatic and Extra items below are retained as
+> deferred backlog, not current authority. Physical Hard evidence leads;
+> fixed-root wind-tunnel results are diagnostic only.
+>
+> Workspace pause (2026-08-01): active implementation moved to the independent
+> TH06 solver. TH08 resumes only from the retained no-scale-writer mechanism
+> pass and uniform coarse-cell physical falsifier recorded in `START_HERE.md`.
+
 ## 1. Program Objective
 
 Produce a physically validated original-game Sakuya/Remilia controller that

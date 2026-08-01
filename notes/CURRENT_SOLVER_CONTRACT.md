@@ -1,16 +1,16 @@
 # Current TH08 Solver Contract
 
-Last updated: 2026-07-31.
+Last updated: 2026-08-01.
 
 This is the compact authority boundary for the active solver. Historical
 derivations are recoverable from tag `pre-workspace-prune-20260731`.
 
 ## Physical Problem
 
-Control Sakuya/Remilia through original TH08 Lunatic Route 2, then Extra,
-without misses or Bombs. Survival is a hard constraint. Within the viable set,
-prefer useful position, damage, Power collection, and shorter dangerous
-nonspell exposure.
+Control Sakuya/Remilia through original TH08 Hard Route 2 without misses or
+Bombs. Lunatic and Extra are deferred until Hard closes. Survival is a hard
+constraint. Within the viable set, prefer useful position, damage, Power
+collection, and shorter dangerous nonspell exposure.
 
 A state includes the native player state, complete active hazards, relevant
 enemy/phase state, resources, active input, held desired input, pending issue
@@ -37,6 +37,27 @@ The exact Final-B player-laser global-time-scale schedule is live only inside
 its pinned Route-2 content identity. Unknown or mismatched schedule state
 fails closed unless a diagnostic explicitly authorizes the root-only
 unknown-direction continuation.
+
+Current Hard Stage 4A evidence closed the former spell schedule-authority
+hole. The Stage 1–5 replacement requires exact runtime/static ECL identity, a
+coherent unit root, fixed route/difficulty/stage context, complete active
+installed-callback inventory, and a whole-file proof that callbacks 18/28/29
+cannot be invoked or installed. Stage 6/Final contains real scale writes and
+must fail this certificate. Stage-4A `184903` physically restored 3,599
+constrained decisions, including every reached spell phase, with zero Bombs.
+That promotes only the finite unit schedule, not the global corridor outcome.
+
+Every authority labelled exact corridor, ordinary predecessor, constant-hold,
+delayed issue, or continuation lease is non-relaxable by the coarse terminal-
+threat fallback. `184903` exposed 57 such relaxations; `191508` retained zero.
+
+The global 16px Boolean corridor consumes the complete cell half-diagonal
+`sqrt(2)*8` as required clearance. This makes its lattice membership a lower
+bound for continuous position instead of center-only occupancy. Physical
+`191508` then increased empty queried sets from 1,723 to 2,927 and completed
+18 hits with zero Bombs. The sound fixed coarse representation is therefore
+retained but physically ineffective; adaptive/local exact refinement is the
+next representation gate if TH08 resumes.
 
 The ordinary-stage root-only continuation remains diagnostic by default.
 `--ordinary-preexhaustion-authority` does not promote it or the shadow
@@ -501,4 +522,4 @@ The fastest valid loop is:
 
 Physical promotion additionally requires timing/deadline evidence, safe
 fallback, no Bombs, correct transition/menu behavior, and repeat evidence.
-Major integrated improvements earn a fresh full-route Lunatic diagnostic.
+Major integrated improvements earn a fresh full-route Hard diagnostic.

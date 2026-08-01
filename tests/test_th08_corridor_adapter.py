@@ -3,12 +3,14 @@
 
 from __future__ import annotations
 
+import math
 import unittest
 from dataclasses import replace
 
 import numpy as np
 
 from th08_corridor_adapter import (
+    TH08_CORRIDOR_CELL_RADIUS,
     TH08_CORRIDOR_CONFIG,
     TH08_VIABILITY_ACTIONS,
     lower_bullet_trajectories,
@@ -30,6 +32,14 @@ class Th08CorridorAdapterTests(unittest.TestCase):
         self.assertEqual(TH08_CORRIDOR_CONFIG.grid_step, 16.0)
         self.assertEqual(TH08_CORRIDOR_CONFIG.frames_per_layer, 8)
         self.assertEqual(TH08_CORRIDOR_CONFIG.horizon_frames, 80)
+        self.assertAlmostEqual(
+            TH08_CORRIDOR_CONFIG.required_clearance,
+            TH08_CORRIDOR_CELL_RADIUS,
+        )
+        self.assertAlmostEqual(
+            TH08_CORRIDOR_CELL_RADIUS,
+            math.sqrt(2.0) * 8.0,
+        )
 
     def test_future_birth_trajectory_is_retained_for_clearance(self) -> None:
         trajectory = AabbTrajectoryHazard(

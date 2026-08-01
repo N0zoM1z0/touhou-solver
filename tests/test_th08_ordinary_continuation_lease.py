@@ -4,6 +4,7 @@ from dataclasses import replace
 import unittest
 
 from th08_live.models import EnemyBody, EnemyPoolSnapshot
+from th08_live.enemy_sensor import ENEMY_CONTACT_ENABLED_FLAG
 from th08_live.ordinary_continuation_lease import (
     ContinuationCertifiedAabb,
     OrdinaryContinuationLease,
@@ -41,7 +42,7 @@ class OrdinaryContinuationLeaseTests(unittest.TestCase):
             gameplay_epoch=4,
             stage_route_index=3,
             action="right_fast",
-            mask=0x51,
+            mask=0x81,
             root_frame=100,
             issue_frame=102,
             horizon_frames=10,
@@ -184,7 +185,7 @@ class OrdinaryContinuationLeaseTests(unittest.TestCase):
             player_phase=0,
             issue_frame=105,
             selected_action="right_fast",
-            selected_mask=0x51,
+            selected_mask=0x81,
             minimum_remaining_frames=2,
         )
         switched = check_continuation_lease_issue(
@@ -205,6 +206,22 @@ class OrdinaryContinuationLeaseTests(unittest.TestCase):
             switched.reason,
             "selected_action_changed_without_predecessor",
         )
+
+    def test_issue_accepts_deadline_label_and_shot_only_wall_pulse(self) -> None:
+        check = check_continuation_lease_issue(
+            self._lease(),
+            gameplay_epoch=4,
+            stage_route_index=3,
+            spell_active=False,
+            player_phase=0,
+            issue_frame=105,
+            selected_action="right_fast+deadline_hold",
+            selected_mask=0x80,
+            minimum_remaining_frames=2,
+        )
+
+        self.assertTrue(check.valid)
+        self.assertEqual(check.reason, "exact_continuation_issue_valid")
 
     def test_fresh_body_envelope_may_reuse_old_certified_geometry(self) -> None:
         lease = replace(
@@ -231,7 +248,7 @@ class OrdinaryContinuationLeaseTests(unittest.TestCase):
             vy=0.0,
             half_width=1.0,
             half_height=1.0,
-            flags=0,
+            flags=ENEMY_CONTACT_ENABLED_FLAG,
         )
 
         check = check_continuation_enemy_geometry(
@@ -270,7 +287,7 @@ class OrdinaryContinuationLeaseTests(unittest.TestCase):
             vy=0.0,
             half_width=1.0,
             half_height=1.0,
-            flags=0,
+            flags=ENEMY_CONTACT_ENABLED_FLAG,
         )
 
         check = check_continuation_enemy_geometry(
@@ -306,7 +323,7 @@ class OrdinaryContinuationLeaseTests(unittest.TestCase):
             vy=0.0,
             half_width=1.0,
             half_height=1.0,
-            flags=0,
+            flags=ENEMY_CONTACT_ENABLED_FLAG,
         )
 
         check = check_continuation_enemy_geometry(
@@ -320,6 +337,32 @@ class OrdinaryContinuationLeaseTests(unittest.TestCase):
         self.assertEqual(check.reason, "fresh_body_envelope_not_contained")
         self.assertEqual(check.first_uncontained_pointer, 0xBEEF)
         self.assertIsNotNone(check.first_uncontained_frame)
+
+    def test_contact_disabled_body_does_not_revoke_exact_lease(self) -> None:
+        lease = replace(
+            self._lease(),
+            certified_enemy_boxes_by_step=((),) * 11,
+        )
+        disabled = EnemyBody(
+            pointer=0xD15AB1ED,
+            x=100.0,
+            y=200.0,
+            vx=0.0,
+            vy=0.0,
+            half_width=18.0,
+            half_height=18.0,
+            flags=0,
+        )
+
+        check = check_continuation_enemy_geometry(
+            lease,
+            body_root_frame=102,
+            valid_from_frame=102,
+            enemy_bodies=(disabled,),
+        )
+
+        self.assertTrue(check.valid)
+        self.assertEqual(check.checked_body_count, 0)
 
     def test_issue_snapshot_uses_native_observation_frame(self) -> None:
         lease = replace(
@@ -344,7 +387,7 @@ class OrdinaryContinuationLeaseTests(unittest.TestCase):
             vy=0.0,
             half_width=1.0,
             half_height=1.0,
-            flags=0,
+            flags=ENEMY_CONTACT_ENABLED_FLAG,
         )
 
         valid = check_continuation_enemy_snapshot(

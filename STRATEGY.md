@@ -225,6 +225,18 @@ veto after the exact old proof and observed body seam already passed. These
 are structural false revocations; fix them without widening direction/focus or
 future-source coverage, then repeat Stage 3 before rotating Stage 4A.
 
+Lease v4 implements that narrow correction. Hard ordinary certificates and
+global submissions use only currently contact-enabled enemy bodies; source
+v13 remains responsible for every future contact-enable transition. A lease
+consumes the held direction/focus mask and may survive only a SHOT-only
+auto-confirm write; Bomb, focus, or direction changes are still unequal. When
+a renewal table has no safe final issue-age row, the compatible older lease
+is selected before falling back to unconstrained local control. Stable
+contact-body seam containment and source-v13 coverage remain hard; the fresh
+local recertificate is diagnostic because it rereads no bullets and cannot
+supersede the old causal proof. Linux and focused Windows gates pass. This is
+not promoted until a fresh Stage-3 run records a nonzero effective lease.
+
 The authorized Stage-4A physical run `20260731_220830` did not exercise that
 authority: all 1,754 live source projections were incomplete, chiefly because
 the former sparse capture crossed the manager frame 1,726 times. Consequently

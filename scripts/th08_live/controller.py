@@ -542,7 +542,7 @@ ORDINARY_CAUSAL_DELAYED_ISSUE_AUTHORITY = (
     "causal_ordinary_nonspell_delayed_issue_horizon_v1"
 )
 ORDINARY_CAUSAL_CONTINUATION_LEASE_AUTHORITY = (
-    "causal_ordinary_nonspell_terminal_continuation_lease_v3"
+    "causal_ordinary_nonspell_terminal_continuation_lease_v4"
 )
 CORRIDOR_ALLOWED_ACTION_AUTHORITY = "exact_corridor_viability_v1"
 _ORDINARY_PREEXHAUSTION_ACTIONS = tuple(
@@ -1948,6 +1948,7 @@ def _build_ordinary_continuation_lease(
                 ),
             )
             for body in enemy_bodies
+            if enemy_body_contact_enabled(body)
         )
         + tuple(
             ContinuationCertifiedAabb(
@@ -4042,6 +4043,11 @@ def _run_live_session(
                 enemy_bodies,
                 spell_enemy_body_guard,
             )
+            exact_contact_enemy_bodies = tuple(
+                body
+                for body in enemy_bodies
+                if enemy_body_contact_enabled(body)
+            )
             player_control_root = capture_player_control_root(reader)
             counter_after_read = player_control_root.frame_after
             hazard_read_bookkeeping_ms = (
@@ -4797,7 +4803,11 @@ def _run_live_session(
                     player_y=forecast_player_y,
                     bullets=bullets,
                     lasers=lasers,
-                    enemy_bodies=enemy_bodies,
+                    enemy_bodies=(
+                        exact_contact_enemy_bodies
+                        if ordinary_submission
+                        else enemy_bodies
+                    ),
                     future_hazard_projection=(
                         ordinary_future_projection
                     ),
@@ -5182,7 +5192,7 @@ def _run_live_session(
                                     ),
                                     bullets=bullets,
                                     lasers=lasers,
-                                    enemy_bodies=enemy_bodies,
+                                    enemy_bodies=exact_contact_enemy_bodies,
                                     snapshot_lag=player_to_hazard_lag,
                                     player_scale_bits=(
                                         captured_iteration
@@ -5352,7 +5362,7 @@ def _run_live_session(
                             valid_from_frame=(
                                 captured_iteration.snapshot_frame
                             ),
-                            enemy_bodies=enemy_bodies,
+                            enemy_bodies=exact_contact_enemy_bodies,
                         )
                     )
                 if not ordinary_continuation_capture_check.valid:
@@ -5536,7 +5546,7 @@ def _run_live_session(
                             action_hold_frames=causal_hold_frames,
                             bullets=bullets,
                             lasers=lasers,
-                            enemy_bodies=enemy_bodies,
+                            enemy_bodies=exact_contact_enemy_bodies,
                             snapshot_lag=player_to_hazard_lag,
                             player_scale_bits=causal_player_scale_bits,
                             laser_scale_bits=(
@@ -5777,7 +5787,7 @@ def _run_live_session(
                                     player_y=player_control_root.y,
                                     bullets=bullets,
                                     lasers=lasers,
-                                    enemy_bodies=enemy_bodies,
+                                    enemy_bodies=exact_contact_enemy_bodies,
                                     snapshot_lag=player_to_hazard_lag,
                                     player_scale_bits=(
                                         causal_player_scale_bits
@@ -6244,6 +6254,11 @@ def _run_live_session(
             issue_enemy_bodies_for_shadow = (
                 fresh_enemy_issue.enemy_bodies_for_shadow
             )
+            issue_exact_contact_enemy_bodies = tuple(
+                body
+                for body in issue_enemy_bodies_for_shadow
+                if enemy_body_contact_enabled(body)
+            )
             decision = fresh_enemy_issue.decision
             plan_ms += issue_enemy_recertificate_ms
             post_issue_guard_action = decision.action
@@ -6296,9 +6311,7 @@ def _run_live_session(
                                 ),
                                 player_x=player_control_root.x,
                                 player_y=player_control_root.y,
-                                enemy_bodies=(
-                                    issue_enemy_bodies_for_shadow
-                                ),
+                                enemy_bodies=issue_exact_contact_enemy_bodies,
                                 player_scale_bits=(
                                     captured_iteration.time_scale_schedule
                                     .require_player_horizon(
@@ -6630,6 +6643,40 @@ def _run_live_session(
                 )
             )
             ordinary_continuation_lease_effective_at_issue = False
+            lease_fresh_safe = False
+            ordinary_continuation_primary_fallback = False
+            ordinary_continuation_held_mask_applied = False
+            if (
+                ordinary_continuation_lease_active
+                and ordinary_continuation_lease is not None
+                and (
+                    allowed_action_authority
+                    == ORDINARY_CAUSAL_CONTINUATION_LEASE_AUTHORITY
+                    or (
+                        allowed_action_authority
+                        == ORDINARY_CAUSAL_DELAYED_ISSUE_AUTHORITY
+                        and not ordinary_causal_delayed_effective_at_issue
+                    )
+                )
+            ):
+                ordinary_continuation_primary_fallback = bool(
+                    allowed_action_authority
+                    == ORDINARY_CAUSAL_DELAYED_ISSUE_AUTHORITY
+                )
+                # Consume the held complete mask as no-write.  A later
+                # auto-confirm SHOT pulse is movement-equivalent and is
+                # conditioned at the next capture like any pending command.
+                decision = replace(
+                    decision,
+                    mask=previous_mask,
+                    action=ordinary_continuation_lease.action,
+                    bomb=False,
+                    planned_focus=bool(previous_mask & FOCUS),
+                )
+                ordinary_continuation_held_mask_applied = True
+                allowed_action_authority = (
+                    ORDINARY_CAUSAL_CONTINUATION_LEASE_AUTHORITY
+                )
             if (
                 allowed_action_authority
                 == ORDINARY_CAUSAL_CONTINUATION_LEASE_AUTHORITY
@@ -6690,27 +6737,6 @@ def _run_live_session(
                             ),
                             matched_branch_count=(
                                 ordinary_continuation_issue_check
-                                .matched_branch_count
-                            ),
-                        )
-                    )
-                elif (
-                    ordinary_continuation_issue_check.valid
-                    and not lease_fresh_safe
-                ):
-                    ordinary_continuation_issue_check = (
-                        ContinuationLeaseCheck(
-                            valid=False,
-                            reason="fresh_local_lease_recertification_failed",
-                            age_frames=(
-                                ordinary_continuation_issue_check.age_frames
-                            ),
-                            remaining_frames=(
-                                ordinary_continuation_issue_check
-                                .remaining_frames
-                            ),
-                            matched_branch_count=(
-                                ordinary_continuation_capture_check
                                 .matched_branch_count
                             ),
                         )
@@ -6961,9 +6987,7 @@ def _run_live_session(
                                         ordinary_causal_delayed_horizon
                                     )
                                 ),
-                                enemy_bodies=(
-                                    issue_enemy_bodies_for_shadow
-                                ),
+                                enemy_bodies=issue_exact_contact_enemy_bodies,
                                 certificate=(
                                     ordinary_causal_delayed_issue_certificate
                                 ),
@@ -7512,7 +7536,7 @@ def _run_live_session(
                 }
                 record["ordinary_terminal_continuation_lease"] = {
                     "schema": (
-                        "th08-ordinary-terminal-continuation-lease-v3"
+                        "th08-ordinary-terminal-continuation-lease-v4"
                     ),
                     "authority": (
                         ORDINARY_CAUSAL_CONTINUATION_LEASE_AUTHORITY
@@ -7545,8 +7569,27 @@ def _run_live_session(
                     "effective_at_issue": (
                         ordinary_continuation_lease_effective_at_issue
                     ),
+                    "primary_authority_fallback": (
+                        ordinary_continuation_primary_fallback
+                    ),
+                    "held_complete_mask_applied": (
+                        ordinary_continuation_held_mask_applied
+                    ),
+                    "fresh_local_recertification_diagnostic_safe": (
+                        lease_fresh_safe
+                    ),
                     "physical_no_write": not bool(
                         input_dispatch.transitions
+                    ),
+                    "physical_movement_write": any(
+                        transition.bit != SHOT
+                        for transition in input_dispatch.transitions
+                    ),
+                    "shot_only_physical_write": bool(
+                        input_dispatch.transitions
+                    ) and all(
+                        transition.bit == SHOT
+                        for transition in input_dispatch.transitions
                     ),
                     "created": ordinary_continuation_lease_created,
                     "renewed": ordinary_continuation_lease_renewed,
@@ -7562,11 +7605,13 @@ def _run_live_session(
                         else None
                     ),
                     "direction_change_rule": (
-                        "new_complete_mask_requires_new_exact_predecessor"
+                        "new_direction_or_focus_requires_new_exact_"
+                        "predecessor_shot_only_pulse_is_movement_equivalent"
                     ),
                     "fresh_geometry_rule": (
-                        "fresh_observation_seam_must_be_contained_by_old_"
-                        "exact_active_or_future_source_trajectories"
+                        "fresh_contact_enabled_observation_seam_must_be_"
+                        "contained_by_old_exact_active_or_future_source_"
+                        "trajectories"
                     ),
                 }
                 record["corridor_delivery"] = {

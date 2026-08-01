@@ -592,9 +592,9 @@ it.
 5. Keep source-v13 future coverage fail closed. Stage-3 `152531` physically
    falsified lease v3 consumption despite 653 complete source roots, 267
    prepublication issues, 13 delayed issues, ten creates, and three renewals:
-   both selected leases failed at issue. Correct only the retained false
-   seams (contact-disabled bodies, decorated labels/SHOT-only pulses, and the
-   redundant fresh-local veto). A
+   both selected leases failed at issue. Lease v4 corrects only the retained
+   false seams: contact-disabled bodies, decorated labels/SHOT-only pulses,
+   and the redundant fresh-local veto. A
    compatible fallback root renews held/no-write first; another direction
    requires a new safe final-age predecessor. Root, epoch, stage, phase,
    pending support, exact position, expiry, old source semantics, unstable
@@ -617,8 +617,9 @@ it.
    not weaken unknown topology or future-source coverage. The v13 Stage-3
    rotation `152531` completed six hits/four nonspell, no Bomb, but zero
    effective leases. Physically repeat Stage 3 after the false-revocation
-   correction, then Stage 4A only if lease consumption appears. Aggregate
-   hits alone do not validate the lease.
+   correction. The next gate is Stage 3 with nonzero v4 effective issues;
+   rotate Stage 4A only if lease consumption appears. Aggregate hits alone do
+   not validate the lease.
 7. Evaluate remaining hostile-birth uncertainty and only then local micro
    ranking after lease authority is physically effective; repeat a winner
    before a full route.

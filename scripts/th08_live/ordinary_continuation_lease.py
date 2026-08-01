@@ -12,6 +12,8 @@ import math
 import struct
 from dataclasses import dataclass
 
+from .enemy_sensor import enemy_body_contact_enabled
+from .movement import SHOT
 from .models import EnemyBody, EnemyPoolSnapshot
 from touhou_control.local_pipeline_oracle import (
     DelayedIssuePipelineBranch,
@@ -82,7 +84,7 @@ class OrdinaryContinuationLease:
 
     def record(self) -> dict[str, object]:
         return {
-            "schema": "th08-ordinary-terminal-continuation-lease-v3",
+            "schema": "th08-ordinary-terminal-continuation-lease-v4",
             "lease_id": self.lease_id,
             "gameplay_epoch": self.gameplay_epoch,
             "stage_route_index": self.stage_route_index,
@@ -332,7 +334,17 @@ def check_continuation_lease_issue(
         return reject("spell_active_at_issue")
     if player_phase in (1, 2):
         return reject("player_phase_ineligible_at_issue")
-    if selected_action != lease.action or selected_mask != lease.mask:
+    canonical_selected_action = selected_action.split("+", 1)[0]
+    # Auto-confirm owns SHOT wall pulses.  Those writes can sample a native
+    # pickup delay, but they cannot change the movement trajectory certified
+    # by this lease because active, held, and pending movement actions remain
+    # identical.  Direction/focus and every non-SHOT bit remain exact.
+    movement_mask = selected_mask & ~SHOT
+    lease_movement_mask = lease.mask & ~SHOT
+    if (
+        canonical_selected_action != lease.action
+        or movement_mask != lease_movement_mask
+    ):
         return reject("selected_action_changed_without_predecessor")
     if remaining < minimum_remaining_frames:
         return reject("terminal_continuation_expired_at_issue")
@@ -371,25 +383,34 @@ def check_continuation_enemy_geometry(
     start_frame = max(body_root_frame, valid_from_frame)
     end_frame = lease.horizon_frame
     if body_root_frame < lease.root_frame:
+        contact_count = sum(
+            enemy_body_contact_enabled(body) for body in enemy_bodies
+        )
         return ContinuationGeometryCheck(
             False,
             "body_root_precedes_lease_root",
             0,
-            len(enemy_bodies),
+            contact_count,
         )
     if start_frame > end_frame:
+        contact_count = sum(
+            enemy_body_contact_enabled(body) for body in enemy_bodies
+        )
         return ContinuationGeometryCheck(
             False,
             "geometry_check_after_lease_horizon",
             0,
-            len(enemy_bodies),
+            contact_count,
         )
 
     frame = start_frame
     lease_step = frame - lease.root_frame
     body_step = frame - body_root_frame
     certified = lease.certified_enemy_boxes_by_step[lease_step]
-    for body in enemy_bodies:
+    contact_bodies = tuple(
+        body for body in enemy_bodies if enemy_body_contact_enabled(body)
+    )
+    for body in contact_bodies:
         robust_expansion = min(12.0, 0.5 * body_step)
         x = body.x + body.vx * body_step
         y = body.y + body.vy * body_step
@@ -415,7 +436,7 @@ def check_continuation_enemy_geometry(
             False,
             "fresh_body_envelope_not_contained",
             1,
-            len(enemy_bodies),
+            len(contact_bodies),
             body.pointer,
             frame,
         )
@@ -423,7 +444,7 @@ def check_continuation_enemy_geometry(
         True,
         "fresh_body_observation_seam_contained",
         1,
-        len(enemy_bodies),
+        len(contact_bodies),
     )
 
 

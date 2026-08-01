@@ -199,7 +199,23 @@ six capture revocations involved only contact-disabled bodies, three
 direction/focus-identical commands differed only by a decorated label or SHOT
 wall pulse, and one exact lease was vetoed solely because no separate fresh
 local transaction existed. Lease v3 therefore remains rejected as recursive
-live authority pending the narrowly scoped correction.
+live authority. Lease v4 supplies the narrowly scoped replacement:
+
+- current enemy AABBs enter hard ordinary/global contact slabs only while the
+  native contact gate is enabled; a future enable must still be present in
+  the immutable source-v13 trajectory;
+- `+deadline_hold` is a trace label, and a SHOT-only auto-confirm pulse is
+  movement-equivalent. Direction, focus, Bomb, root position, active/pending
+  movement, phase, stage, epoch, source version, and expiry remain exact;
+- if a newly computed delayed table has no safe observed issue-age row, a
+  compatible older lease retains the held complete mask instead of allowing a
+  new local direction;
+- stable contact-body seam containment conditions the exact old proof. The
+  separate fresh-local certificate is diagnostic and cannot override it,
+  because that path does not reread bullet geometry.
+
+Focused Linux and Windows gates pass. Physical authority remains unpromoted
+until Stage 3 shows nonzero effective lease issues and no unsafe widening.
 
 Physical run `20260731_152921` found two independent invalidations. First,
 `player+0xE2A68` retains the deathbomb-window limit installed by

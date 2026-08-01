@@ -498,9 +498,12 @@ pass. Next:
 1. Source-v13/lease-v3 was physically falsified on Lunatic Stage 3
    `20260801_152531`: 653/1,190 complete source roots, 267 prepublication and
    13 delayed exact issues, ten lease creates plus three renewals, but zero
-   effective lease issues. Fix only the observed false revocation seams:
-   contact-disabled bodies, decorated action labels/SHOT wall pulses, and the
-   redundant fresh-local veto. Then require nonzero exact lease consumption.
+   effective lease issues. Lease v4 now fixes only the observed false
+   revocation seams: current contact-disabled bodies are excluded from exact
+   contact slabs, decorated action labels and SHOT-only wall pulses preserve
+   movement identity, and the old exact proof is no longer vetoed by a
+   redundant local certificate. Require nonzero exact lease consumption in a
+   fresh Stage-3 physical run.
 2. The f817/833/835/850/910 retained chain and physical f1456/f1469/f1470/
    f1479 continuation now regress. Empty actual rows, terminal expiry, and
    final-age misses remain fail closed.

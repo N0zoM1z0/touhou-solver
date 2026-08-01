@@ -36,6 +36,17 @@ authority.
   next concrete blockers are main float-add `0x19`, main/auxiliary transform
   definition `0x6F`, auxiliary return `0x35`, dynamic type/color, auxiliary
   `0x25`, and the resulting active transform programs.
+- **Implemented source semantics v15, awaiting physical lead gate:** shipped
+  code confirms direct-fire type/color are independent dynamic i16 operands,
+  `0x25` normalizes one float lvalue, depth-zero auxiliary `0x35` terminates
+  without a saved-frame restore, and `0x6F` writes one exact 24-byte transform
+  record. Reached main `0x19/0x1A` now share the bounded auxiliary arithmetic.
+  Active vector/angular acceleration, re-aim, and reflection use a conservative
+  full-disc path bound; template replacement consumes the maximum reached
+  template hitbox. Unsupported stack state, set-valued transform fields, and
+  other transform kinds remain UNKNOWN. A real Stage-3 time-65 wave now closes
+  through six fires, including active angular-velocity geometry. 93 Linux and
+  93 Windows focused tests pass.
 - **Observed lease-v4 physical result:** one lease was created and one
   renewed; 31 decisions captured it, 30 selected it, and 29 exact no-write
   issues were effective from f1725 through f1783. All retained the certified
@@ -546,10 +557,13 @@ pass. Next:
    645→801 and full-H268 roots 47→58, with the intended opcode/motion failures
    gone. It did not close global delivery. The first pre-hit full root was only
    30 frames early while its solve completed about 141 frames later. Close the
-   newly reached exact main/auxiliary semantics (`0x19`, `0x6F`, bottom-level
-   `0x35`, then the exposed transform cases) far enough upstream to cover
-   publication latency. Dynamic operands or unavailable call-stack state
-   remain fail closed.
+   newly reached exact main/auxiliary semantics far enough upstream to cover
+   publication latency. Source v15 closes exact `0x19/0x1A`, dynamic i16
+   type/color, `0x25`, record definition `0x6F`, and depth-zero auxiliary
+   `0x35`, with conservative geometry for the reached motion transforms. Run
+   Stage 3 to measure first full-H268 lead and proximate exact authority.
+   Dynamic transform intervals or unavailable call-stack state remain fail
+   closed.
 2. The f817/833/835/850/910 retained chain and physical f1456/f1469/f1470/
    f1479 continuation now regress. Empty actual rows, terminal expiry, and
    final-age misses remain fail closed.

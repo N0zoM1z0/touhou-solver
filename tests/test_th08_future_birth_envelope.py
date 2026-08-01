@@ -54,6 +54,22 @@ def _stop_reaim_program(*, resume_speed: float = 2.5) -> bytes:
     return bytes(program)
 
 
+def _angular_velocity_program(*, acceleration: float = 0.5) -> bytes:
+    program = bytearray(18 * 24)
+    struct.pack_into(
+        "<ffiiII",
+        program,
+        0,
+        acceleration,
+        0.1,
+        40,
+        -1,
+        0x20,
+        0,
+    )
+    return bytes(program)
+
+
 class FutureBirthEnvelopeTests(unittest.TestCase):
     def test_native_state2_coefficients_retain_half_step_completion(self) -> None:
         self.assertEqual(state2_position_coefficient(1), -3.5)
@@ -158,6 +174,30 @@ class FutureBirthEnvelopeTests(unittest.TestCase):
         self.assertIsNotNone(sample)
         assert sample is not None
         self.assertGreaterEqual(sample.half_width, 2.0 + 2.5 * 14.0)
+
+    def test_active_angular_velocity_uses_accelerating_disc_bound(self) -> None:
+        event = _h1_event(
+            original_flags=0x223,
+            transform_program_zero=False,
+            transform_program=_angular_velocity_program(),
+        )
+        sector = lower_future_direct_fire_sectors(
+            event,
+            horizon_frames=12,
+        )[0].trajectory
+        self.assertEqual(
+            (sector.minimum_angle, sector.maximum_angle),
+            (-math.pi, math.pi),
+        )
+        # At age 10, state-2 uncertainty uses 14 conservative motion steps.
+        expected = event.speed1.lower * 14.0 + 0.5 * 14.0 * 15.0 / 2.0
+        self.assertGreaterEqual(sector.maximum_radii[10], expected)
+        sample = lower_future_direct_fire(event, horizon_frames=12)[
+            0
+        ].trajectory.sample(10)
+        self.assertIsNotNone(sample)
+        assert sample is not None
+        self.assertGreaterEqual(sample.half_width, event.half_width + expected)
 
     def test_unknown_native_flag_fails_closed(self) -> None:
         with self.assertRaisesRegex(ValueError, "unsupported future bullet flags"):

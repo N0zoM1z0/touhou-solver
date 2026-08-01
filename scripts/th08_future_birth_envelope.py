@@ -21,24 +21,34 @@ from touhou_control.corridor import (
 
 
 FUTURE_BIRTH_ENVELOPE_SEMANTICS_VERSION = (
-    "th08-future-birth-envelope-v2-native-state2-stop-reaim-disc"
+    "th08-future-birth-envelope-v3-motion-transform-disc"
 )
 FUTURE_BIRTH_SECTOR_SEMANTICS_VERSION = (
-    "th08-future-birth-sector-v2-native-state2-stop-reaim-disc-envelope"
+    "th08-future-birth-sector-v3-motion-transform-disc-envelope"
 )
 _TWO_PI = 2.0 * math.pi
 _STATE2_COMPLETION_AGE = 10
 _KNOWN_NONPROGRAM_FLAGS = 0x0203
 _TRANSFORM_PROGRAM_LENGTH = 18
 _TRANSFORM_RECORD_SIZE = 24
+_VECTOR_ACCELERATION = 0x0000010
+_ANGULAR_VELOCITY = 0x0000020
 _STOP_REAIM_REPEAT = 0x0000080
+_REFLECT_ALL_EDGES = 0x0000400
+_REFLECT_SIDES_AND_TOP = 0x0000800
 _SUPPRESS_OFFSCREEN_CULL = 0x0002000
+_REPLACE_BULLET_TEMPLATE = 0x0004000
 _TIMED_QUEUE_BARRIER = 0x0020000
 _PLAY_SOUND = 0x0080000
 _SUPPORTED_TRANSFORM_KINDS = frozenset(
     (
+        _VECTOR_ACCELERATION,
+        _ANGULAR_VELOCITY,
         _STOP_REAIM_REPEAT,
+        _REFLECT_ALL_EDGES,
+        _REFLECT_SIDES_AND_TOP,
         _SUPPRESS_OFFSCREEN_CULL,
+        _REPLACE_BULLET_TEMPLATE,
         _TIMED_QUEUE_BARRIER,
         _PLAY_SOUND,
     )
@@ -263,34 +273,70 @@ class FutureDirectFire:
         )
 
 
-def _stop_reaim_path_speed_bound(event: FutureDirectFire) -> float | None:
-    """Bound path length for the supported player-relative stop transform.
+def _transform_path_profile(
+    event: FutureDirectFire,
+) -> tuple[float, float] | None:
+    """Return conservative maximum initial speed and per-step acceleration.
 
-    Native 0x80 may choose a new direction from the future player position,
-    so its post-stop angle is deliberately set-valued.  Its handler only
-    decelerates, pauses, and resumes at ``float_1``; it cannot exceed the
-    larger magnitude of the emitted and resume speeds.  Queue barriers,
-    culling suppression, and sound records do not move the bullet.
+    Vector acceleration and angular-velocity records can change the native
+    velocity every update. Reflections and stop/reaim can change direction.
+    Treating every such update as immediately active, summing all acceleration
+    magnitudes, and ignoring finite durations is a conservative superset of
+    the shipped queue. Template, cull, barrier, and sound records do not move
+    the bullet and therefore retain the sharper linear sector.
     """
 
-    records = event.active_transform_records
-    stop_records = tuple(
-        record for record in records if record.kind == _STOP_REAIM_REPEAT
+    records = tuple(
+        record
+        for record in event.active_transform_records
+        if record.kind
+        in (
+            _VECTOR_ACCELERATION,
+            _ANGULAR_VELOCITY,
+            _STOP_REAIM_REPEAT,
+            _REFLECT_ALL_EDGES,
+            _REFLECT_SIDES_AND_TOP,
+        )
     )
-    if not stop_records:
+    if not records:
         return None
-    maximum_speed = max(abs(event.speed1.lower), abs(event.speed1.upper))
     maximum_speed = max(
-        maximum_speed,
+        abs(event.speed1.lower),
+        abs(event.speed1.upper),
         abs(event.speed2.lower),
         abs(event.speed2.upper),
     )
-    for record in stop_records:
-        resume_speed = (
-            maximum_speed if record.float_1 <= -999.0 else abs(record.float_1)
-        )
-        maximum_speed = max(maximum_speed, resume_speed)
-    return maximum_speed
+    acceleration = 0.0
+    for record in records:
+        if record.kind in (_VECTOR_ACCELERATION, _ANGULAR_VELOCITY):
+            acceleration += abs(record.float_0)
+        elif record.kind == _STOP_REAIM_REPEAT:
+            resume_speed = (
+                maximum_speed
+                if record.float_1 <= -999.0
+                else abs(record.float_1)
+            )
+            maximum_speed = max(maximum_speed, resume_speed)
+        elif record.kind in (_REFLECT_ALL_EDGES, _REFLECT_SIDES_AND_TOP):
+            if record.float_0 >= 0.0:
+                maximum_speed = max(maximum_speed, abs(record.float_0))
+    return maximum_speed, acceleration
+
+
+def _transform_path_radius_bound(
+    profile: tuple[float, float] | None,
+    *,
+    age: int,
+    state2: bool,
+) -> float | None:
+    if profile is None:
+        return None
+    maximum_speed, acceleration = profile
+    steps = age + 4 if state2 else age
+    return (
+        maximum_speed * steps
+        + acceleration * steps * (steps + 1) * 0.5
+    )
 
 
 @dataclass(frozen=True)
@@ -451,7 +497,7 @@ def lower_future_direct_fire(
         raise ValueError("future birth horizon cannot be negative")
     envelopes: list[FutureBirthEnvelope] = []
     state2 = bool(event.original_flags & 0x02)
-    transformed_speed_bound = _stop_reaim_path_speed_bound(event)
+    transform_profile = _transform_path_profile(event)
     for activation_frame in event.activation_frames:
         if activation_frame > horizon_frames:
             continue
@@ -469,10 +515,13 @@ def lower_future_direct_fire(
                     if age <= 0 or (state2 and age < _STATE2_COMPLETION_AGE):
                         samples.append(None)
                         continue
-                    if transformed_speed_bound is not None:
-                        radius = transformed_speed_bound * (
-                            age + 4 if state2 else age
-                        )
+                    transformed_radius = _transform_path_radius_bound(
+                        transform_profile,
+                        age=age,
+                        state2=state2,
+                    )
+                    if transformed_radius is not None:
+                        radius = transformed_radius
                         samples.append(
                             AabbHazard(
                                 x=event.origin_x.midpoint,
@@ -529,7 +578,7 @@ def lower_future_direct_fire_sectors(
         raise ValueError("future birth horizon cannot be negative")
     envelopes: list[FutureBirthSectorEnvelope] = []
     state2 = bool(event.original_flags & 0x02)
-    transformed_speed_bound = _stop_reaim_path_speed_bound(event)
+    transform_profile = _transform_path_profile(event)
     origin_uncertainty = math.hypot(
         event.origin_x.radius,
         event.origin_y.radius,
@@ -549,6 +598,14 @@ def lower_future_direct_fire_sectors(
                     raise ValueError(
                         "annular-sector lowering requires nonnegative speed"
                     )
+                transformed_path = (
+                    _transform_path_radius_bound(
+                        transform_profile,
+                        age=1,
+                        state2=state2,
+                    )
+                    is not None
+                )
                 minimum_radii: list[float | None] = []
                 maximum_radii: list[float | None] = []
                 for frame in range(horizon_frames + 1):
@@ -559,12 +616,14 @@ def lower_future_direct_fire_sectors(
                         minimum_radii.append(None)
                         maximum_radii.append(None)
                         continue
-                    if transformed_speed_bound is not None:
+                    transformed_radius = _transform_path_radius_bound(
+                        transform_profile,
+                        age=age,
+                        state2=state2,
+                    )
+                    if transformed_radius is not None:
                         minimum_radii.append(0.0)
-                        maximum_radii.append(
-                            transformed_speed_bound
-                            * (age + 4 if state2 else age)
-                        )
+                        maximum_radii.append(transformed_radius)
                     else:
                         coefficient = (
                             state2_position_coefficient(age)
@@ -583,12 +642,12 @@ def lower_future_direct_fire_sectors(
                             origin_y=event.origin_y.midpoint,
                             minimum_angle=(
                                 -math.pi
-                                if transformed_speed_bound is not None
+                                if transformed_path
                                 else angle.lower
                             ),
                             maximum_angle=(
                                 math.pi
-                                if transformed_speed_bound is not None
+                                if transformed_path
                                 else angle.upper
                             ),
                             minimum_radii=tuple(minimum_radii),

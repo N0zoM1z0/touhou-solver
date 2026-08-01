@@ -235,6 +235,19 @@ upstream across newly reached main/auxiliary semantics far enough to cover
 the observed compute/publication delay. Aggregate 4-versus-7 hits use
 different RNG and are observational only.
 
+Source semantics v15 retains that v14 native capture schema and adds no new
+observation. It lowers reached main float add/subtract, independent dynamic
+i16 fire type/color, in-place angle normalization, exact point-valued `0x6F`
+record writes, and depth-zero auxiliary return. Saved auxiliary frames were
+already rejected at capture, so only the observed zero-depth return may stop
+the auxiliary VM; main return remains unsupported. Motion-changing transform
+programs use a full-disc path-length upper bound over initial/resume speed and
+all acceleration magnitudes. Reflection and re-aim cannot narrow direction;
+template replacement uses the maximum reached hitbox. Missing template
+geometry, set-valued transform fields, unknown kinds, and unavailable stack
+state fail closed. The authority, delay, version, and no-write contracts are
+unchanged.
+
 Physical run `20260731_152921` found two independent invalidations. First,
 `player+0xE2A68` retains the deathbomb-window limit installed by
 `0x0044AB40`; it is not a zero-when-alive predeath predicate, so all 7,202

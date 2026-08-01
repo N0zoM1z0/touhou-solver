@@ -634,6 +634,13 @@ it.
    `0x35`, and subsequent transform cases far enough upstream to cover the
    measured publication delay. Rotate Stage 4A only after deterministic
    source lead improves; hidden state remains fail closed.
+   Source v15 now lowers those exact reached cases: main `0x19/0x1A`, dynamic
+   i16 type/color, `0x25`, point-valued `0x6F`, and depth-zero auxiliary
+   `0x35`. Motion-changing transforms receive a conservative disc bound and
+   template replacement consumes maximum reached geometry. The actual Stage-3
+   time-65 wave closes through six fires in the deterministic gate. Repeat
+   Stage 3 and require earlier full-H268 lead plus authority in a former hit
+   window; a label-only shift or no added lead fails the experiment.
 7. Evaluate remaining hostile-birth uncertainty and only then local micro
    ranking after lease authority is physically effective; repeat a winner
    before a full route.

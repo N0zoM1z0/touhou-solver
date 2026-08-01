@@ -269,6 +269,18 @@ closure of newly reached `0x19`, `0x6F`, bottom-level `0x35`, and resulting
 transform semantics; hidden operands and unavailable stack state remain
 UNKNOWN.
 
+Source semantics v15 implements only the newly proved shipped cases. Main
+`0x19/0x1A` reuse the set-valued captured-local arithmetic. Direct-fire type
+and color independently resolve their low/high dynamic i16 operands. `0x25`
+normalizes its float lvalue with a full `[-pi,pi]` union at a wrap seam, while
+depth-zero auxiliary `0x35` terminates; saved-frame returns remain UNKNOWN.
+`0x6F` writes the exact selected 24-byte record and rejects an out-of-range
+index or set-valued transform field. Active vector/angular acceleration,
+stop/re-aim, and reflection are consumed as conservative full-disc paths;
+template replacement expands geometry to every reached target template.
+The actual Stage-3 time-65 main wave now deterministically closes through six
+fires. This earns a physical source-lead gate, not live promotion.
+
 The authorized Stage-4A physical run `20260731_220830` did not exercise that
 authority: all 1,754 live source projections were incomplete, chiefly because
 the former sparse capture crossed the manager frame 1,726 times. Consequently

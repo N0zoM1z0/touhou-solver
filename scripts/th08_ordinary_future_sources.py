@@ -54,7 +54,7 @@ from touhou_control.corridor import AabbHazard, AabbTrajectoryHazard
 
 
 ORDINARY_FUTURE_SOURCE_SEMANTICS_VERSION = (
-    "th08-ordinary-future-sources-v14-main-loop-and-captured-timed-motion"
+    "th08-ordinary-future-sources-v15-reached-arithmetic-transform-return"
 )
 _PROJECTION_SCHEMA = "th08-native-snapshot-collision-control-projection-v14"
 _DIRECT_FIRE_OPCODES = frozenset(range(0x60, 0x69))
@@ -78,6 +78,8 @@ _MAX_INSTRUCTIONS_PER_UPDATE = 64
 _ENEMY_CONTACT_ENABLED_FLAG = 0x00000004
 _ENEMY_CONTACT_BLOCKING_FLAGS = 0x00000830
 _AUXILIARY_SLOT_COUNT = 4
+_TRANSFORM_PROGRAM_LENGTH = 18
+_TRANSFORM_RECORD_SIZE = 24
 _MAX_TIMELINE_FRONTIER_STATES = 4096
 _HEALTH_DAMAGE_ENVELOPE_SCHEMA = (
     "th08-route2-normal-shot-health-transition-damage-envelope-v1"
@@ -222,6 +224,11 @@ def _fail(message: str) -> None:
 
 def _signed_u32(value: int) -> int:
     return struct.unpack("<i", struct.pack("<I", value & 0xFFFFFFFF))[0]
+
+
+def _signed_i16(value: int) -> int:
+    value &= 0xFFFF
+    return value if value < 0x8000 else value - 0x10000
 
 
 def _float32(value: int) -> float:
@@ -911,6 +918,168 @@ def _scaled_affine_coefficient(
     return None
 
 
+def _apply_float_binary(
+    *,
+    source: _SourceState,
+    vm: _VmState,
+    instruction: SubInstruction,
+    aim_angle: FloatInterval,
+) -> None:
+    """Apply shipped float add/subtract while retaining aim dependence."""
+
+    opcode = int(instruction.opcode)
+    if opcode not in (0x19, 0x1A) or len(instruction.arguments) != 3:
+        _fail("float add/subtract argument layout drifted")
+    destination = _float_lvalue(int(instruction.arguments[0]))
+    left = _eval_float_operand(
+        int(instruction.arguments[1]),
+        dynamic=bool(instruction.parameter_mask & 0x02),
+        vm=vm,
+        aim_angle=aim_angle,
+        source=source,
+    )
+    right = _eval_float_operand(
+        int(instruction.arguments[2]),
+        dynamic=bool(instruction.parameter_mask & 0x04),
+        vm=vm,
+        aim_angle=aim_angle,
+        source=source,
+    )
+    vm.float_locals[destination] = (
+        left.add(right)
+        if opcode == 0x19
+        else FloatInterval(
+            left.lower - right.upper,
+            left.upper - right.lower,
+        )
+    )
+    left_coefficient = _float_operand_aim_coefficient(
+        int(instruction.arguments[1]),
+        dynamic=bool(instruction.parameter_mask & 0x02),
+        vm=vm,
+    )
+    right_coefficient = _float_operand_aim_coefficient(
+        int(instruction.arguments[2]),
+        dynamic=bool(instruction.parameter_mask & 0x04),
+        vm=vm,
+    )
+    vm.float_local_aim_coefficients[destination] = (
+        None
+        if left_coefficient is None or right_coefficient is None
+        else (
+            left_coefficient + right_coefficient
+            if opcode == 0x19
+            else left_coefficient - right_coefficient
+        )
+    )
+
+
+def _normalize_angle_interval(
+    value: FloatInterval,
+) -> tuple[FloatInterval, bool]:
+    """Conservatively lower native normalize_angle_pi over one interval."""
+
+    if value.upper - value.lower >= _TWO_PI:
+        return FloatInterval(-math.pi, math.pi), False
+    lower_bin = math.floor((value.lower + math.pi) / _TWO_PI)
+    upper_bin = math.floor((value.upper + math.pi) / _TWO_PI)
+    if lower_bin != upper_bin:
+        return FloatInterval(-math.pi, math.pi), False
+    return (
+        FloatInterval(
+            value.lower - lower_bin * _TWO_PI,
+            value.upper - lower_bin * _TWO_PI,
+        ),
+        True,
+    )
+
+
+def _normalize_float_lvalue_angle(
+    *,
+    source: _SourceState,
+    vm: _VmState,
+    instruction: SubInstruction,
+    aim_angle: FloatInterval,
+) -> None:
+    if len(instruction.arguments) != 1:
+        _fail("normalize-angle argument layout drifted")
+    destination = _float_lvalue(int(instruction.arguments[0]))
+    value = _eval_float_operand(
+        int(instruction.arguments[0]),
+        dynamic=bool(instruction.parameter_mask & 0x01),
+        vm=vm,
+        aim_angle=aim_angle,
+        source=source,
+    )
+    normalized, affine_preserved = _normalize_angle_interval(value)
+    vm.float_locals[destination] = normalized
+    if not affine_preserved:
+        vm.float_local_aim_coefficients[destination] = None
+
+
+def _define_bullet_transform(
+    *,
+    source: _SourceState,
+    vm: _VmState,
+    instruction: SubInstruction,
+    aim_angle: FloatInterval,
+) -> None:
+    """Apply shipped opcode 0x6F to the captured 18-record descriptor."""
+
+    if len(instruction.arguments) != 7:
+        _fail("bullet-transform definition argument layout drifted")
+    integer_values = [
+        _eval_integer_operand(
+            int(instruction.arguments[index]),
+            dynamic=bool(instruction.parameter_mask & (1 << index)),
+            vm=vm,
+        )
+        for index in range(5)
+    ]
+    index, kind, wait_for_clear, int_0, int_1 = integer_values
+    if not 0 <= index < _TRANSFORM_PROGRAM_LENGTH:
+        _fail(f"bullet-transform index {index} is out of range")
+    float_values = [
+        _eval_float_operand(
+            int(instruction.arguments[index]),
+            dynamic=bool(instruction.parameter_mask & (1 << index)),
+            vm=vm,
+            aim_angle=aim_angle,
+            source=source,
+        )
+        for index in (5, 6)
+    ]
+    if any(value.lower != value.upper for value in float_values):
+        _fail("bullet-transform float operand is set-valued")
+    descriptor = source.emission.get("descriptor")
+    if not isinstance(descriptor, dict):
+        _fail("source emission descriptor is absent")
+    transform_hex = descriptor.get("transform_program_hex")
+    if not isinstance(transform_hex, str):
+        _fail("source transform program is absent")
+    try:
+        program = bytearray.fromhex(transform_hex)
+    except ValueError as error:
+        raise FutureSourceClosureError(
+            "source transform program is malformed"
+        ) from error
+    expected_size = _TRANSFORM_PROGRAM_LENGTH * _TRANSFORM_RECORD_SIZE
+    if len(program) != expected_size:
+        _fail("source transform program has the wrong size")
+    struct.pack_into(
+        "<ffiiII",
+        program,
+        index * _TRANSFORM_RECORD_SIZE,
+        float_values[0].lower,
+        float_values[1].lower,
+        _signed_u32(int_0),
+        _signed_u32(int_1),
+        kind & 0xFFFFFFFF,
+        wait_for_clear & 0xFFFFFFFF,
+    )
+    descriptor["transform_program_hex"] = bytes(program).hex()
+
+
 def _aim_residual(
     value: FloatInterval,
     *,
@@ -920,10 +1089,12 @@ def _aim_residual(
     if coefficient is None:
         return None
     dependency = aim_angle.scale(coefficient)
-    return FloatInterval(
-        value.lower - dependency.lower,
-        value.upper - dependency.upper,
-    )
+    lower = value.lower - dependency.lower
+    upper = value.upper - dependency.upper
+    # The affine endpoints are mathematically ordered. Binary64 evaluation of
+    # the same binary32-derived angle can reverse two equal residual endpoints
+    # by one rounding unit, which must widen rather than create false UNKNOWN.
+    return FloatInterval(min(lower, upper), max(lower, upper))
 
 
 def _float_lvalue(raw: int) -> int:
@@ -1089,6 +1260,63 @@ def _template_geometry(
     return half_width, half_height
 
 
+def _direct_fire_type_color(
+    *,
+    packed: int,
+    parameter_mask: int,
+    vm: _VmState,
+) -> tuple[int, int]:
+    """Resolve the independent signed-i16 type/color operands used natively."""
+
+    raw_type = _signed_i16(packed)
+    raw_color = _signed_i16(packed >> 16)
+    bullet_type = _eval_integer_operand(
+        raw_type,
+        dynamic=bool(parameter_mask & 0x01),
+        vm=vm,
+    )
+    bullet_color = _eval_integer_operand(
+        raw_color,
+        dynamic=bool(parameter_mask & 0x02),
+        vm=vm,
+    )
+    return _signed_i16(bullet_type), _signed_i16(bullet_color)
+
+
+def _maximum_transform_template_geometry(
+    *,
+    payload: dict[str, object],
+    transform_program: bytes,
+    original_flags: int,
+    half_width: float,
+    half_height: float,
+) -> tuple[float, float]:
+    """Include every reached template replacement in collision geometry."""
+
+    if len(transform_program) != (
+        _TRANSFORM_PROGRAM_LENGTH * _TRANSFORM_RECORD_SIZE
+    ):
+        _fail("source transform program has the wrong size")
+    for index in range(_TRANSFORM_PROGRAM_LENGTH):
+        _float_0, _float_1, int_0, _int_1, kind, _wait = (
+            struct.unpack_from(
+                "<ffiiII",
+                transform_program,
+                index * _TRANSFORM_RECORD_SIZE,
+            )
+        )
+        if kind == 0:
+            break
+        if kind & original_flags and kind == 0x0004000:
+            replacement_width, replacement_height = _template_geometry(
+                payload,
+                int_0,
+            )
+            half_width = max(half_width, replacement_width)
+            half_height = max(half_height, replacement_height)
+    return half_width, half_height
+
+
 def _direct_fire_events(
     *,
     source: _SourceState,
@@ -1105,10 +1333,11 @@ def _direct_fire_events(
         )
     if len(instruction.arguments) != 8:
         _fail(f"direct fire at {instruction.offset:#x} argument layout drifted")
-    packed_type_color = int(instruction.arguments[0])
-    if instruction.parameter_mask & 0x03:
-        _fail("dynamic direct-fire type/color is unsupported")
-    bullet_type = struct.unpack("<h", struct.pack("<H", packed_type_color & 0xFFFF))[0]
+    bullet_type, _bullet_color = _direct_fire_type_color(
+        packed=int(instruction.arguments[0]),
+        parameter_mask=int(instruction.parameter_mask),
+        vm=vm,
+    )
     count1 = _direct_fire_count(
         int(instruction.arguments[1]),
         dynamic=bool(instruction.parameter_mask & 0x04),
@@ -1212,6 +1441,13 @@ def _direct_fire_events(
             max(origin_y.upper, source.precompose_origin_y.upper),
         )
     half_width, half_height = _template_geometry(payload, bullet_type)
+    half_width, half_height = _maximum_transform_template_geometry(
+        payload=payload,
+        transform_program=transform_program,
+        original_flags=original_flags,
+        half_width=half_width,
+        half_height=half_height,
+    )
     return (
         FutureDirectFire(
             source=(
@@ -1432,52 +1668,18 @@ def _execute_auxiliary(
                 )
             )
         elif opcode in (0x19, 0x1A):
-            if len(instruction.arguments) != 3:
-                _fail("auxiliary add/subtract argument layout drifted")
-            destination = _float_lvalue(int(instruction.arguments[0]))
-            left = _eval_float_operand(
-                int(instruction.arguments[1]),
-                dynamic=bool(instruction.parameter_mask & 0x02),
-                vm=vm,
-                aim_angle=aim_angle,
+            _apply_float_binary(
                 source=source,
-            )
-            right = _eval_float_operand(
-                int(instruction.arguments[2]),
-                dynamic=bool(instruction.parameter_mask & 0x04),
                 vm=vm,
+                instruction=instruction,
                 aim_angle=aim_angle,
+            )
+        elif opcode == 0x25:
+            _normalize_float_lvalue_angle(
                 source=source,
-            )
-            vm.float_locals[destination] = (
-                left.add(right)
-                if opcode == 0x19
-                else FloatInterval(
-                    left.lower - right.upper,
-                    left.upper - right.lower,
-                )
-            )
-            left_coefficient = _float_operand_aim_coefficient(
-                int(instruction.arguments[1]),
-                dynamic=bool(instruction.parameter_mask & 0x02),
                 vm=vm,
-            )
-            right_coefficient = _float_operand_aim_coefficient(
-                int(instruction.arguments[2]),
-                dynamic=bool(instruction.parameter_mask & 0x04),
-                vm=vm,
-            )
-            vm.float_local_aim_coefficients[destination] = (
-                None
-                if (
-                    left_coefficient is None
-                    or right_coefficient is None
-                )
-                else (
-                    left_coefficient + right_coefficient
-                    if opcode == 0x19
-                    else left_coefficient - right_coefficient
-                )
+                instruction=instruction,
+                aim_angle=aim_angle,
             )
         elif opcode == 0x0F:
             if len(instruction.arguments) != 2:
@@ -1530,6 +1732,19 @@ def _execute_auxiliary(
                     int(instruction.arguments[3])
                 )
                 continue
+        elif opcode == 0x35:
+            # Captured auxiliary contexts with a saved frame are rejected at
+            # the observation join. Native return pre-decrements depth, so a
+            # reached return at the retained depth zero terminates this VM.
+            vm.stopped = True
+            return tuple(events)
+        elif opcode == 0x6F:
+            _define_bullet_transform(
+                source=source,
+                vm=vm,
+                instruction=instruction,
+                aim_angle=aim_angle,
+            )
         elif opcode in _DIRECT_FIRE_OPCODES:
             events.extend(
                 _direct_fire_events(
@@ -1817,6 +2032,20 @@ def _execute_main(
                     vm=vm,
                 )
             )
+        elif opcode in (0x19, 0x1A):
+            _apply_float_binary(
+                source=source,
+                vm=vm,
+                instruction=instruction,
+                aim_angle=aim_angle,
+            )
+        elif opcode == 0x25:
+            _normalize_float_lvalue_angle(
+                source=source,
+                vm=vm,
+                instruction=instruction,
+                aim_angle=aim_angle,
+            )
         elif opcode == 0x41:
             if len(instruction.arguments) != 2:
                 _fail("set_velocity_polar argument layout drifted")
@@ -1904,6 +2133,13 @@ def _execute_main(
                 remaining_horizon=remaining_horizon,
             )
             silent_children += 1
+        elif opcode == 0x6F:
+            _define_bullet_transform(
+                source=source,
+                vm=vm,
+                instruction=instruction,
+                aim_angle=aim_angle,
+            )
         elif opcode in _DIRECT_FIRE_OPCODES:
             events.extend(
                 _direct_fire_events(

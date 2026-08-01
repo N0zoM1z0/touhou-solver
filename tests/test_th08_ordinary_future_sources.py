@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import math
 import struct
 import unittest
 from copy import deepcopy
@@ -11,7 +12,9 @@ from th08_future_birth_envelope import FloatInterval
 from th08_ordinary_future_sources import (
     _VmState,
     _advance_motion,
+    _define_bullet_transform,
     _direct_fire_count,
+    _direct_fire_type_color,
     _eval_float_operand,
     _execute_auxiliary,
     _execute_main,
@@ -23,6 +26,7 @@ from th08_ordinary_future_sources import (
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 ECL = parse_ecl(REPO_ROOT / "artifacts" / "decoded" / "ecldata5.ecl")
+ECL3 = parse_ecl(REPO_ROOT / "artifacts" / "decoded" / "ecldata3.ecl")
 ECL_BASE = 0x10000000
 SOURCE_POINTER = 0x0057D2F0
 
@@ -257,6 +261,254 @@ def _payload() -> dict[str, object]:
 
 
 class OrdinaryFutureSourceTests(unittest.TestCase):
+    def test_reached_stage3_main_arithmetic_and_transform_wave_closes(
+        self,
+    ) -> None:
+        payload = deepcopy(_payload())
+        manager = payload["enemy_manager_template_source"]
+        main = manager["main_ecl_vm_inventory"]["rows"][0]
+        main[3] = ECL_BASE + 0x230
+        main[5] = 65
+        main[6] = [0] * 8
+        main[7] = [0] * 8
+        main[8] = [0] * 4
+        manager["auxiliary_ecl_contexts"]["rows"] = []
+        timeline = payload["stage_timeline_runtime"]
+        timeline["ecl_file"].update(
+            subroutine_count=len(ECL3.subroutines),
+            timeline_count=len(ECL3.timelines),
+            static_data_end_offset=ECL3.header.data_end_offset,
+            canonical_sha256=ECL3.sha256,
+        )
+        timeline["rows"] = [
+            {
+                "elapsed": 0,
+                "fraction_bits": 0,
+                "current_instruction": {
+                    "static_offset": item.instructions[0].offset,
+                    "terminal": True,
+                },
+            }
+            for item in ECL3.timelines
+        ]
+        payload["bullet_template_geometry"]["rows"] = [
+            {"type": value, "half_width": 2.0, "half_height": 2.0}
+            for value in (1, 2, 6)
+        ]
+
+        closure = project_ordinary_future_sources(
+            payload,
+            ECL3,
+            horizon_frames=1,
+        )
+
+        self.assertTrue(closure.projection.source_closure_complete)
+        self.assertEqual(closure.projection.horizon_frames, 1)
+        self.assertEqual(len(closure.direct_fire_events), 6)
+        self.assertTrue(
+            any(
+                any(
+                    record.kind == 0x20
+                    for record in event.active_transform_records
+                )
+                for event in closure.direct_fire_events
+            )
+        )
+
+    def test_dynamic_direct_fire_type_and_color_are_independent_i16s(
+        self,
+    ) -> None:
+        vm = _VmState(
+            instruction_offset=0,
+            timer_elapsed=0,
+            integer_locals=[2, 7, 0, 0, 0, 0, 0, 0],
+            float_locals=[FloatInterval.point(0.0)] * 8,
+            scratch_integers=[0] * 4,
+        )
+        packed = (10001 << 16) | 10000
+
+        self.assertEqual(
+            _direct_fire_type_color(
+                packed=packed,
+                parameter_mask=0x03,
+                vm=vm,
+            ),
+            (2, 7),
+        )
+
+    def test_transform_definition_writes_exact_native_record_layout(
+        self,
+    ) -> None:
+        vm = _VmState(
+            instruction_offset=0,
+            timer_elapsed=0,
+            integer_locals=[2, 0x20, 1, 40, -1, 0, 0, 0],
+            float_locals=[
+                FloatInterval.point(0.25),
+                FloatInterval.point(-0.5),
+            ]
+            + [FloatInterval.point(0.0)] * 6,
+            scratch_integers=[0] * 4,
+        )
+        source = SimpleNamespace(
+            emission={
+                "descriptor": {
+                    "transform_program_hex": (
+                        b"\0" * (18 * 24)
+                    ).hex(),
+                }
+            }
+        )
+        instruction = SubInstruction(
+            offset=0,
+            time=0,
+            opcode=0x6F,
+            size=40,
+            byte_08=0,
+            difficulty_mask=0xFF,
+            parameter_mask=0x7F,
+            arguments=(
+                10000,
+                10001,
+                10002,
+                10003,
+                10004,
+                _bits(10016.0),
+                _bits(10017.0),
+            ),
+        )
+
+        _define_bullet_transform(
+            source=source,
+            vm=vm,
+            instruction=instruction,
+            aim_angle=FloatInterval.point(0.0),
+        )
+
+        program = bytes.fromhex(
+            source.emission["descriptor"]["transform_program_hex"]
+        )
+        self.assertEqual(
+            struct.unpack_from("<ffiiII", program, 2 * 24),
+            (0.25, -0.5, 40, -1, 0x20, 1),
+        )
+        vm.float_locals[0] = FloatInterval(0.2, 0.3)
+        with self.assertRaisesRegex(ValueError, "set-valued"):
+            _define_bullet_transform(
+                source=source,
+                vm=vm,
+                instruction=instruction,
+                aim_angle=FloatInterval.point(0.0),
+            )
+
+    def test_main_float_add_uses_same_captured_local_semantics(self) -> None:
+        vm = _VmState(
+            instruction_offset=0,
+            timer_elapsed=0,
+            integer_locals=[0] * 8,
+            float_locals=[
+                FloatInterval.point(0.0),
+                FloatInterval.point(2.25),
+            ]
+            + [FloatInterval.point(0.0)] * 6,
+            scratch_integers=[0] * 4,
+        )
+        vm.float_local_aim_coefficients[1] = 1.0
+        source = SimpleNamespace(identity="test", main=vm)
+        instructions = {
+            0: SubInstruction(
+                offset=0,
+                time=0,
+                opcode=0x19,
+                size=24,
+                byte_08=0,
+                difficulty_mask=0xFF,
+                parameter_mask=0x03,
+                arguments=(
+                    _bits(10016.0),
+                    _bits(10017.0),
+                    _bits(1.5),
+                ),
+            ),
+            24: SubInstruction(
+                offset=24,
+                time=0,
+                opcode=0x01,
+                size=12,
+                byte_08=0,
+                difficulty_mask=0xFF,
+                parameter_mask=0,
+                arguments=(),
+            ),
+        }
+
+        _execute_main(
+            source=source,
+            instructions=instructions,
+            difficulty_mask=0x08,
+            frame=1,
+            aim_angle=FloatInterval.point(0.0),
+            payload={},
+            ecl=ECL,
+            remaining_horizon=1,
+        )
+
+        self.assertEqual(vm.float_locals[0], FloatInterval.point(3.75))
+        self.assertEqual(vm.float_local_aim_coefficients[0], 1.0)
+
+    def test_auxiliary_normalize_and_bottom_return_are_exact(self) -> None:
+        vm = _VmState(
+            instruction_offset=0,
+            timer_elapsed=0,
+            integer_locals=[0] * 8,
+            float_locals=[FloatInterval(3.0, 3.2)]
+            + [FloatInterval.point(0.0)] * 7,
+            scratch_integers=[0] * 4,
+        )
+        vm.float_local_aim_coefficients[0] = 1.0
+        source = SimpleNamespace(identity="test")
+        instructions = {
+            0: SubInstruction(
+                offset=0,
+                time=0,
+                opcode=0x25,
+                size=16,
+                byte_08=0,
+                difficulty_mask=0xFF,
+                parameter_mask=0x01,
+                arguments=(_bits(10016.0),),
+            ),
+            16: SubInstruction(
+                offset=16,
+                time=0,
+                opcode=0x35,
+                size=12,
+                byte_08=0,
+                difficulty_mask=0xFF,
+                parameter_mask=0,
+                arguments=(),
+            ),
+        }
+
+        self.assertEqual(
+            _execute_auxiliary(
+                source=source,
+                vm=vm,
+                instructions=instructions,
+                difficulty_mask=0x08,
+                frame=1,
+                aim_angle=FloatInterval.point(0.0),
+                payload={},
+            ),
+            (),
+        )
+        self.assertEqual(
+            vm.float_locals[0],
+            FloatInterval(-math.pi, math.pi),
+        )
+        self.assertIsNone(vm.float_local_aim_coefficients[0])
+        self.assertTrue(vm.stopped)
+
     def test_main_integer_assignment_uses_captured_local_contract(self) -> None:
         vm = _VmState(
             instruction_offset=0,

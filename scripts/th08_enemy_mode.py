@@ -463,11 +463,17 @@ def _successor_pipeline_root(
             return LocalPipelineRoot(
                 active_action=root.pending_action,
                 held_desired_action=root.pending_action,
+                input_publication_to_motion_lag_frames=(
+                    root.input_publication_to_motion_lag_frames
+                ),
             )
         if root.pending_action is None:
             return LocalPipelineRoot(
                 active_action=root.active_action,
                 held_desired_action=root.active_action,
+                input_publication_to_motion_lag_frames=(
+                    root.input_publication_to_motion_lag_frames
+                ),
             )
         assert branch.older_remaining is not None
         return LocalPipelineRoot(
@@ -475,6 +481,9 @@ def _successor_pipeline_root(
             held_desired_action=root.pending_action,
             pending_action=root.pending_action,
             remaining_delay_support=(branch.older_remaining - physical_steps,),
+            input_publication_to_motion_lag_frames=(
+                root.input_publication_to_motion_lag_frames
+            ),
         )
 
     assert branch.new_delay is not None
@@ -482,6 +491,9 @@ def _successor_pipeline_root(
         return LocalPipelineRoot(
             active_action=selected,
             held_desired_action=selected,
+            input_publication_to_motion_lag_frames=(
+                root.input_publication_to_motion_lag_frames
+            ),
         )
     active_action = root.active_action
     if (
@@ -494,12 +506,18 @@ def _successor_pipeline_root(
         return LocalPipelineRoot(
             active_action=selected,
             held_desired_action=selected,
+            input_publication_to_motion_lag_frames=(
+                root.input_publication_to_motion_lag_frames
+            ),
         )
     return LocalPipelineRoot(
         active_action=active_action,
         held_desired_action=selected,
         pending_action=selected,
         remaining_delay_support=(branch.new_delay - physical_steps,),
+        input_publication_to_motion_lag_frames=(
+            root.input_publication_to_motion_lag_frames
+        ),
     )
 
 
@@ -1117,10 +1135,23 @@ def merge_route2_mode_decision_observation_classes(
 
     result: list[Route2ModeDecisionObservationClass] = []
     for key, hidden in grouped.items():
+        publication_motion_lags = {
+            branch.successor_pipeline_root
+            .input_publication_to_motion_lag_frames
+            for branch in hidden
+        }
+        if len(publication_motion_lags) != 1:
+            raise ValueError(
+                "merged observation disagrees on input-motion phase"
+            )
+        publication_motion_lag = publication_motion_lags.pop()
         if key.active_action == key.held_desired_action:
             successor_root = LocalPipelineRoot(
                 active_action=key.active_action,
                 held_desired_action=key.held_desired_action,
+                input_publication_to_motion_lag_frames=(
+                    publication_motion_lag
+                ),
             )
         else:
             remaining_support = tuple(
@@ -1139,6 +1170,9 @@ def merge_route2_mode_decision_observation_classes(
                 held_desired_action=key.held_desired_action,
                 pending_action=key.held_desired_action,
                 remaining_delay_support=remaining_support,
+                input_publication_to_motion_lag_frames=(
+                    publication_motion_lag
+                ),
             )
         result.append(
             Route2ModeDecisionObservationClass(

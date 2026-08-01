@@ -34,10 +34,19 @@ class LocalPipelineRoot:
     held_desired_action: str
     pending_action: str | None = None
     remaining_delay_support: tuple[int, ...] = ()
+    input_publication_to_motion_lag_frames: int = 0
 
     def __post_init__(self) -> None:
         if not self.active_action or not self.held_desired_action:
             raise ValueError("pipeline action names cannot be empty")
+        if (
+            type(self.input_publication_to_motion_lag_frames) is not int
+            or self.input_publication_to_motion_lag_frames < 0
+        ):
+            raise ValueError(
+                "input-publication-to-motion lag must be a nonnegative "
+                "integer"
+            )
         if self.pending_action is None:
             if self.remaining_delay_support:
                 raise ValueError(
@@ -72,6 +81,7 @@ class LocalPipelineBranch:
     write_required: bool
     older_remaining: int | None
     new_delay: int | None
+    published_actions: tuple[str, ...]
     active_actions: tuple[str, ...]
 
 
@@ -84,7 +94,31 @@ class DelayedIssuePipelineBranch:
     write_required: bool
     older_remaining: int | None
     new_delay: int | None
+    published_actions: tuple[str, ...]
     active_actions: tuple[str, ...]
+
+
+def _motion_actions_from_publications(
+    *,
+    root: LocalPipelineRoot,
+    published_actions: tuple[str, ...],
+) -> tuple[str, ...]:
+    """Translate post-player input publications into movement actions.
+
+    A lag of one means the input visible after physical frame ``f`` is first
+    consumed by movement on ``f + 1``.  The observable current input at the
+    root therefore drives every pre-publication motion slot.
+    """
+
+    lag = root.input_publication_to_motion_lag_frames
+    return tuple(
+        (
+            root.active_action
+            if physical_step <= lag
+            else published_actions[physical_step - lag - 1]
+        )
+        for physical_step in range(1, len(published_actions) + 1)
+    )
 
 
 @dataclass(frozen=True)
@@ -140,30 +174,35 @@ def enumerate_local_pipeline_branches(
     branches: list[LocalPipelineBranch] = []
     for older_remaining in older_support:
         for new_delay in new_delay_support:
-            actions: list[str] = []
+            publications: list[str] = []
             for physical_step in range(1, horizon_frames + 1):
                 if (
                     write_required
                     and new_delay is not None
                     and physical_step > new_delay
                 ):
-                    motion = selected_action
+                    publication = selected_action
                 elif (
                     root.pending_action is not None
                     and older_remaining is not None
                     and physical_step > older_remaining
                 ):
-                    motion = root.pending_action
+                    publication = root.pending_action
                 else:
-                    motion = root.active_action
-                actions.append(motion)
+                    publication = root.active_action
+                publications.append(publication)
+            published_actions = tuple(publications)
             branches.append(
                 LocalPipelineBranch(
                     selected_action=selected_action,
                     write_required=write_required,
                     older_remaining=older_remaining,
                     new_delay=new_delay,
-                    active_actions=tuple(actions),
+                    published_actions=published_actions,
+                    active_actions=_motion_actions_from_publications(
+                        root=root,
+                        published_actions=published_actions,
+                    ),
                 )
             )
     return tuple(branches)
@@ -218,7 +257,7 @@ def enumerate_delayed_issue_pipeline_branches(
     for issue_delay in issue_delay_frames:
         for older_remaining in older_support:
             for new_delay in new_delay_support:
-                actions: list[str] = []
+                publications: list[str] = []
                 old_active_at_issue = (
                     root.pending_action
                     if (
@@ -230,7 +269,7 @@ def enumerate_delayed_issue_pipeline_branches(
                 )
                 for physical_step in range(1, horizon_frames + 1):
                     if physical_step <= issue_delay or not write_required:
-                        motion = (
+                        publication = (
                             root.pending_action
                             if (
                                 root.pending_action is not None
@@ -243,10 +282,11 @@ def enumerate_delayed_issue_pipeline_branches(
                         new_delay is not None
                         and physical_step - issue_delay > new_delay
                     ):
-                        motion = selected_action
+                        publication = selected_action
                     else:
-                        motion = old_active_at_issue
-                    actions.append(motion)
+                        publication = old_active_at_issue
+                    publications.append(publication)
+                published_actions = tuple(publications)
                 branches.append(
                     DelayedIssuePipelineBranch(
                         selected_action=selected_action,
@@ -254,7 +294,11 @@ def enumerate_delayed_issue_pipeline_branches(
                         write_required=write_required,
                         older_remaining=older_remaining,
                         new_delay=new_delay,
-                        active_actions=tuple(actions),
+                        published_actions=published_actions,
+                        active_actions=_motion_actions_from_publications(
+                            root=root,
+                            published_actions=published_actions,
+                        ),
                     )
                 )
     return tuple(branches)

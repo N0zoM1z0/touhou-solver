@@ -33,6 +33,9 @@ from touhou_control.local_pipeline_oracle import (
     LocalPipelineRoot,
     enumerate_delayed_issue_pipeline_branches,
 )
+from th08_update_order import (
+    TH08_INPUT_PUBLICATION_TO_MOTION_LAG_FRAMES,
+)
 
 HazardQuery = Callable[..., tuple[np.ndarray, np.ndarray, np.ndarray]]
 _LocalCertificateTimingAccumulator = LocalCertificateTimingAccumulator
@@ -307,6 +310,9 @@ def robust_action_certificates(
         pipeline_root = LocalPipelineRoot(
             active_action=active_action,
             held_desired_action=active_action,
+            input_publication_to_motion_lag_frames=(
+                TH08_INPUT_PUBLICATION_TO_MOTION_LAG_FRAMES
+            ),
         )
 
     validation_finished_ns = time.perf_counter_ns()

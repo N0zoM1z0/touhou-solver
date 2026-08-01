@@ -11,6 +11,9 @@ from th08_live_dodge_agent import (
     _local_pipeline_action_from_mask,
 )
 from touhou_control.local_pipeline_oracle import LocalPipelineRoot
+from th08_update_order import (
+    TH08_INPUT_PUBLICATION_TO_MOTION_LAG_FRAMES,
+)
 from touhou_control.trajectory import VelocityChange
 
 
@@ -217,6 +220,9 @@ def local_pipeline_root_from_trace(
         held_desired_action=held_action,
         pending_action=pending_action,
         remaining_delay_support=remaining,
+        input_publication_to_motion_lag_frames=(
+            TH08_INPUT_PUBLICATION_TO_MOTION_LAG_FRAMES
+        ),
     )
     issue_age_raw = record.get("issue_age")
     if issue_age_raw is None:

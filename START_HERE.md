@@ -14,11 +14,11 @@ authority.
 
 - Branch: `main`.
 - Last physical checkpoint:
-  `lunatic_route2_stage5_unattended_20260801_115838`. It completed 18 hits,
-  10 nonspell, hard no-Bomb, accepted Route-2 Lunatic replay SHA-256
-  `00d8cd9839a5f972b1be144e3b7314e5c4e5afca473bcfbb974e9568d446fcfb`,
-  and cleanup. Its different-RNG total is observational; CE-0251's exact
-  authority conversion and latency reduction are the result.
+  `lunatic_route2_stage4a_unattended_20260801_130742`. It completed 21 hits,
+  12 nonspell, hard no-Bomb, accepted Route-2 Lunatic replay SHA-256
+  `1cfb13852fc8230abec784b068c9dd2530cb88860b1d9938bdeacac56f7212bc`,
+  and cleanup. Its different-RNG total is observational. It created six exact
+  leases and renewed 34, but effective no-write lease consumption was zero.
 - **Observed physical latency correction:** the ordinary fallback now builds
   an action-conditioned H80 predecessor indexed by final observed issue age,
   including computation, old pending evolution, held no-write, replacement,
@@ -28,7 +28,7 @@ authority.
   and reuses that immutable proposal after the scan. In `115838`, 11/21 scans
   physically acquired exact authority; median issue age was 25 frames versus
   43 before proposal reuse. CE-0250's zero-transition blocker is closed.
-- **Implemented, awaiting rotated physical falsification:** an effective
+- **Implemented after physical falsification, awaiting Stage-3 rotation:** an effective
   delayed action now creates an immutable H80 terminal-continuation lease.
   Each compatible fallback root first renews the held no-write action; only
   if that predecessor is unsafe may independent recovery directions be
@@ -38,10 +38,14 @@ authority.
   stage-route are reread at final issue, so computation may not carry an
   ordinary lease across a phase/context transition. A new complete mask
   requires a new exact delayed
-  predecessor. The retained `115838` f1456/f1469 witness remains exact at
-  f1470; the old unconstrained f1479 switch is now rejected. Rotated Stage-3
-  or 4A physical validation is next; scalar reserve remains rejected and
-  local ranking is not safety authority.
+  predecessor. Stage-4A f3191→f3192 exposed a native phase bug: priority-17
+  current-input publication precedes its first priority-9 movement by one
+  physical frame. Lease v2 now separates published and shifted motion
+  histories; the retained position matches bit-exactly. Fresh-body changes no
+  longer revoke by flag alone: every fresh expanded AABB must remain inside
+  an already certified active/future-source AABB at every remaining frame.
+  Rotated Stage-3 physical validation is next; scalar reserve remains rejected
+  and local ranking is not safety authority.
 - Native H=32 wind-tunnel checkpoint: `3d15953`; it is historical evidence,
   not the live ordinary horizon.
 - Workspace-prune checkpoint: `be3e583` (`Prune TH08 active research
@@ -49,8 +53,9 @@ authority.
   priority-17, and old focused Final-B lanes while preserving the promoted
   baseline/pre-loss live path, native snapshot executor, exact pipeline
   workspace, and Final-B scale authority.
-- Affected Linux and Windows focused discovery passes 130 issue-stage,
-  continuation-lease, local-certificate, preexhaustion, and controller tests.
+- Affected Linux focused gates and 186 Windows focused tests pass, including
+  input-phase, continuation-lease geometry, enemy-mode, issue-stage,
+  preexhaustion, prepublication, controller, and retained-source tests.
   Complete Linux
   discovery ran 1,284 tests in 10.659 seconds and exposed five unrelated
   workspace failures: four pre-existing native ABI header/binary-versus-
@@ -459,9 +464,9 @@ Do not rerun the rejected scalar-reserve or H=32 signed-terminal design. The
 future-source, retained-chain, delayed-pipeline, and fresh-hostile-body gates
 pass. Next:
 
-1. Physically falsify the versioned rolling lease on Lunatic Stage 3 or 4A.
-   Require nonzero no-write lease consumption or exact renewal, no action-set
-   widening, and explicit revocation on mismatch.
+1. Physically falsify lease v2 on Lunatic Stage 3 after the Stage-4A input-
+   phase counterexample. Require nonzero no-write lease consumption or exact
+   renewal, no action-set widening, and explicit revocation on mismatch.
 2. The f817/833/835/850/910 retained chain and physical f1456/f1469/f1470/
    f1479 continuation now regress. Empty actual rows, terminal expiry, and
    final-age misses remain fail closed.

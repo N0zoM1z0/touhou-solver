@@ -11,6 +11,32 @@ from touhou_control.local_pipeline_oracle import (
 
 
 class LocalPipelineOracleTests(unittest.TestCase):
+    def test_post_movement_publication_has_distinct_observed_and_motion_phase(
+        self,
+    ) -> None:
+        root = LocalPipelineRoot(
+            active_action="fast",
+            held_desired_action="fast",
+            input_publication_to_motion_lag_frames=1,
+        )
+
+        branch = enumerate_delayed_issue_pipeline_branches(
+            root=root,
+            selected_action="slow",
+            issue_delay_frames=(2,),
+            pickup_delay_frames=(0,),
+            horizon_frames=5,
+        )[0]
+
+        self.assertEqual(
+            branch.published_actions,
+            ("fast", "fast", "slow", "slow", "slow"),
+        )
+        self.assertEqual(
+            branch.active_actions,
+            ("fast", "fast", "fast", "slow", "slow"),
+        )
+
     def test_delayed_write_keeps_old_pending_until_issue(self) -> None:
         root = LocalPipelineRoot(
             active_action="stay",

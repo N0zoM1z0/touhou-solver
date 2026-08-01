@@ -46,6 +46,15 @@ class Th08PipelineShadowTests(unittest.TestCase):
 
         self.assertIsNotNone(snapshot.local_root)
         self.assertIsNotNone(snapshot.canonical_identity)
+        assert snapshot.local_root is not None
+        self.assertEqual(
+            snapshot.local_root.input_publication_to_motion_lag_frames,
+            1,
+        )
+        self.assertEqual(
+            snapshot.record["input_publication_to_motion_lag_frames"],
+            1,
+        )
         self.assertEqual(snapshot.record["pending_mask"], 0x55)
         self.assertEqual(
             snapshot.record["canonical_identity"]["root"]["pending_mask"],

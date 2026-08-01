@@ -592,11 +592,14 @@ it.
 5. Keep the implemented versioned terminal-continuation lease fail closed: a
    compatible fallback root renews held/no-write first; another direction
    requires a new safe final-age predecessor. Root, epoch, stage, phase,
-   pending support, exact position, expiry, or fresh-body mismatch revokes it.
+   pending support, exact position, expiry, or an uncontained fresh-body
+   envelope revokes it. Preserve the native one-frame publication-to-motion
+   phase: observations use published input; positions use shifted motion.
 6. The retained f817/833/835/850/910 empty actual rows and physical
-   f1456/f1469/f1470/f1479 continuation regress. Rotate now to Lunatic Stage 3
-   or 4A with hard no-Bomb and observed-body early kill only inside the exact
-   set; require nonzero lease creation/renewal or a concrete revocation.
+   f1456/f1469/f1470/f1479 and f3191/f3192 continuations regress. Rotate now
+   to Lunatic Stage 3 with hard no-Bomb and observed-body early kill only
+   inside the exact set; require nonzero effective no-write consumption or a
+   concrete fail-closed revocation.
 7. Evaluate remaining hostile-birth uncertainty and only then local micro
    ranking after lease authority is physically effective; repeat a winner
    before a full route.

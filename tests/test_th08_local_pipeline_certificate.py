@@ -58,8 +58,90 @@ def _unit_scale_bits(horizon: int) -> tuple[int, ...]:
 
 
 class Th08LocalPipelineCertificateTests(unittest.TestCase):
+    def test_retained_stage4a_write_pickup_observation_precedes_motion(
+        self,
+    ) -> None:
+        root = LocalPipelineRoot(
+            "down_right_fast",
+            "down_right_fast",
+            input_publication_to_motion_lag_frames=1,
+        )
+        branches = enumerate_delayed_issue_pipeline_branches(
+            root=root,
+            selected_action="down_right",
+            issue_delay_frames=(17,),
+            pickup_delay_frames=tuple(range(7)),
+            horizon_frames=80,
+        )
+        positions = _delayed_causal_pipeline_player_positions(
+            root=root,
+            selected_action="down_right",
+            issue_delay_frames=(17,),
+            pickup_delay_frames=tuple(range(7)),
+            horizon_frames=80,
+            player_x=197.6568603515625,
+            player_y=389.6568603515625,
+            player_scale_bits=_unit_scale_bits(80),
+        )
+        lease = OrdinaryContinuationLease(
+            lease_id="stage4a-f3174-down-right",
+            gameplay_epoch=3,
+            stage_route_index=3,
+            action="down_right",
+            mask=0xA5,
+            root_frame=3174,
+            issue_frame=3191,
+            horizon_frames=80,
+            projection_digest="retained-stage4a-projection",
+            projection_source="retained-physical",
+            projection_version=VersionIdentity.from_mapping(
+                "retained-stage4a-projection-v1",
+                {"root_frame": 3174},
+            ),
+            pipeline_root=root,
+            issue_delay=17,
+            pickup_delay_support=tuple(range(7)),
+            branches=branches,
+            positions_by_step=positions,
+            certified_enemy_boxes_by_step=((),) * 81,
+            minimum_clearance=0.350982666015625,
+            fresh_geometry_frame=3189,
+            fresh_geometry_changed=True,
+        )
+
+        self.assertTrue(
+            all(
+                x == 248.568603515625 and y == 432.0
+                for x, y in positions[18]
+            )
+        )
+        check = check_continuation_lease_capture(
+            lease,
+            gameplay_epoch=3,
+            stage_route_index=3,
+            spell_active=False,
+            player_phase=3,
+            unit_time_scale=True,
+            current_frame=3192,
+            player_x=248.568603515625,
+            player_y=432.0,
+            pipeline_root=LocalPipelineRoot(
+                "down_right",
+                "down_right",
+                input_publication_to_motion_lag_frames=1,
+            ),
+            minimum_remaining_frames=7,
+        )
+
+        self.assertTrue(check.valid)
+        self.assertEqual(check.matched_branch_count, 1)
+
     def test_retained_physical_no_write_path_forms_exact_lease(self) -> None:
-        root = LocalPipelineRoot("left_fast", "left_fast")
+        root = LocalPipelineRoot(
+            "left_fast",
+            "left_fast",
+            input_publication_to_motion_lag_frames=1,
+        )
         branches = enumerate_delayed_issue_pipeline_branches(
             root=root,
             selected_action="left_fast",
@@ -97,6 +179,7 @@ class Th08LocalPipelineCertificateTests(unittest.TestCase):
             pickup_delay_support=tuple(range(7)),
             branches=branches,
             positions_by_step=positions,
+            certified_enemy_boxes_by_step=((),) * 81,
             minimum_clearance=48.942928314208984,
             fresh_geometry_frame=1469,
             fresh_geometry_changed=True,
@@ -112,7 +195,11 @@ class Th08LocalPipelineCertificateTests(unittest.TestCase):
             current_frame=1470,
             player_x=45.80775451660156,
             player_y=402.46063232421875,
-            pipeline_root=LocalPipelineRoot("left_fast", "left_fast"),
+            pipeline_root=LocalPipelineRoot(
+                "left_fast",
+                "left_fast",
+                input_publication_to_motion_lag_frames=1,
+            ),
             minimum_remaining_frames=7,
         )
         discarded_by_old_controller = check_continuation_lease_capture(
@@ -125,7 +212,11 @@ class Th08LocalPipelineCertificateTests(unittest.TestCase):
             current_frame=1479,
             player_x=9.807754516601562,
             player_y=402.46063232421875,
-            pipeline_root=LocalPipelineRoot("right_fast", "right_fast"),
+            pipeline_root=LocalPipelineRoot(
+                "right_fast",
+                "right_fast",
+                input_publication_to_motion_lag_frames=1,
+            ),
             minimum_remaining_frames=7,
         )
 

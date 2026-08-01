@@ -132,6 +132,23 @@ its finite horizon; phase, context, position, pending-support, expiry, fresh
 geometry, or final-row mismatch revokes it. Empty and timed-out rows never
 create or renew a lease. Rotated physical validation is still pending.
 
+Stage-4A `20260801_130742` physically created six leases and renewed 34, but
+none survived to effective no-write consumption. The first exact mismatch was
+native input phase, not predecessor geometry: priority-9 movement consumes the
+input visible before priority-17 publication, so an input published on frame
+f first moves the player on f+1. TH08 pipeline roots now version this
+one-frame lag and retain separate publication histories for observation and
+shifted action histories for binary32 motion. The retained f3191→f3192
+physical path then matches exactly.
+
+Lease v2 records the active and future-source hostile-body AABBs already
+consumed by its certificate. A fresh body slab is compatible only when every
+uncertainty/robustness-expanded body envelope remains contained in that old
+set at every remaining frame. This is pointer-independent: removals are safe,
+while a new or changed body outside an already certified future-source set
+revokes fail closed. The Windows retained chain still has empty actual issue
+rows at f817/833/835/850/910. Rotated Stage-3 physical validation is pending.
+
 Physical run `20260731_152921` found two independent invalidations. First,
 `player+0xE2A68` retains the deathbomb-window limit installed by
 `0x0044AB40`; it is not a zero-when-alive predeath predicate, so all 7,202

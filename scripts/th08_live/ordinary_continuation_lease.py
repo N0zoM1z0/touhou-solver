@@ -8,9 +8,11 @@ held complete mask.  Any contract mismatch revokes the lease.
 
 from __future__ import annotations
 
+import math
 import struct
 from dataclasses import dataclass
 
+from .models import EnemyBody
 from touhou_control.local_pipeline_oracle import (
     DelayedIssuePipelineBranch,
     LocalPipelineRoot,
@@ -38,6 +40,9 @@ class OrdinaryContinuationLease:
     pickup_delay_support: tuple[int, ...]
     branches: tuple[DelayedIssuePipelineBranch, ...]
     positions_by_step: tuple[tuple[tuple[float, float], ...], ...]
+    certified_enemy_boxes_by_step: tuple[
+        tuple[ContinuationCertifiedAabb, ...], ...
+    ]
     minimum_clearance: float
     fresh_geometry_frame: int
     fresh_geometry_changed: bool
@@ -53,6 +58,8 @@ class OrdinaryContinuationLease:
             raise ValueError("lease horizon must extend beyond issue")
         if len(self.positions_by_step) != self.horizon_frames + 1:
             raise ValueError("lease positions do not cover its horizon")
+        if len(self.certified_enemy_boxes_by_step) != self.horizon_frames + 1:
+            raise ValueError("lease enemy boxes do not cover its horizon")
         if not self.branches:
             raise ValueError("continuation lease requires hidden branches")
         if any(
@@ -75,7 +82,7 @@ class OrdinaryContinuationLease:
 
     def record(self) -> dict[str, object]:
         return {
-            "schema": "th08-ordinary-terminal-continuation-lease-v1",
+            "schema": "th08-ordinary-terminal-continuation-lease-v2",
             "lease_id": self.lease_id,
             "gameplay_epoch": self.gameplay_epoch,
             "stage_route_index": self.stage_route_index,
@@ -89,8 +96,15 @@ class OrdinaryContinuationLease:
             "projection_version": self.projection_version.record(),
             "issue_delay": self.issue_delay,
             "pickup_delay_support": self.pickup_delay_support,
+            "input_publication_to_motion_lag_frames": (
+                self.pipeline_root.input_publication_to_motion_lag_frames
+            ),
             "pipeline_branch_count": len(self.branches),
             "minimum_clearance": self.minimum_clearance,
+            "maximum_certified_enemy_box_count": max(
+                map(len, self.certified_enemy_boxes_by_step),
+                default=0,
+            ),
             "fresh_geometry_frame": self.fresh_geometry_frame,
             "fresh_geometry_changed": self.fresh_geometry_changed,
         }
@@ -116,6 +130,47 @@ class ContinuationLeaseCheck:
         }
 
 
+@dataclass(frozen=True)
+class ContinuationCertifiedAabb:
+    """One already-certified enemy occupancy envelope at one frame."""
+
+    x: float
+    y: float
+    half_width: float
+    half_height: float
+
+    def __post_init__(self) -> None:
+        if not all(
+            math.isfinite(value)
+            for value in (self.x, self.y, self.half_width, self.half_height)
+        ):
+            raise ValueError("certified enemy AABB must be finite")
+        if self.half_width < 0.0 or self.half_height < 0.0:
+            raise ValueError("certified enemy AABB extent cannot be negative")
+
+
+@dataclass(frozen=True)
+class ContinuationGeometryCheck:
+    """Set-containment result for fresh bodies under one old witness."""
+
+    valid: bool
+    reason: str
+    checked_frame_count: int
+    checked_body_count: int
+    first_uncontained_pointer: int | None = None
+    first_uncontained_frame: int | None = None
+
+    def record(self) -> dict[str, object]:
+        return {
+            "valid": self.valid,
+            "reason": self.reason,
+            "checked_frame_count": self.checked_frame_count,
+            "checked_body_count": self.checked_body_count,
+            "first_uncontained_pointer": self.first_uncontained_pointer,
+            "first_uncontained_frame": self.first_uncontained_frame,
+        }
+
+
 def _float32_bits(value: float) -> bytes:
     return struct.pack("<f", value)
 
@@ -129,7 +184,7 @@ def _branch_observation(
     active_action = (
         lease.pipeline_root.active_action
         if age_frames == 0
-        else branch.active_actions[age_frames - 1]
+        else branch.published_actions[age_frames - 1]
     )
     if branch.write_required:
         assert branch.new_delay is not None
@@ -193,6 +248,11 @@ def check_continuation_lease_capture(
         return reject("pipeline_root_unavailable")
     if pipeline_root.held_desired_action != lease.action:
         return reject("held_action_mismatch")
+    if (
+        pipeline_root.input_publication_to_motion_lag_frames
+        != lease.pipeline_root.input_publication_to_motion_lag_frames
+    ):
+        return reject("input_motion_phase_contract_mismatch")
     if (
         pipeline_root.pending_action is not None
         and pipeline_root.pending_action != lease.action
@@ -284,9 +344,92 @@ def check_continuation_lease_issue(
     )
 
 
+def check_continuation_enemy_geometry(
+    lease: OrdinaryContinuationLease,
+    *,
+    body_root_frame: int,
+    valid_from_frame: int,
+    enemy_bodies: tuple[EnemyBody, ...],
+    numeric_guard: float = 2.0e-4,
+) -> ContinuationGeometryCheck:
+    """Require every fresh future body envelope to remain inside old proof.
+
+    ``enemy_bodies`` are rooted at ``body_root_frame``.  Their linearly
+    projected, uncertainty-expanded AABBs must be contained in the union of
+    body boxes already consumed by the lease at every remaining physical
+    frame.  Removed bodies are harmless; new or changed bodies are accepted
+    only when an old active/future-source box contains them.
+    """
+
+    if not math.isfinite(numeric_guard) or numeric_guard < 0.0:
+        raise ValueError("geometry numeric guard must be finite and nonnegative")
+    start_frame = max(body_root_frame, valid_from_frame)
+    end_frame = lease.horizon_frame
+    if body_root_frame < lease.root_frame:
+        return ContinuationGeometryCheck(
+            False,
+            "body_root_precedes_lease_root",
+            0,
+            len(enemy_bodies),
+        )
+    if start_frame > end_frame:
+        return ContinuationGeometryCheck(
+            False,
+            "geometry_check_after_lease_horizon",
+            0,
+            len(enemy_bodies),
+        )
+
+    checked_frames = 0
+    for frame in range(start_frame, end_frame + 1):
+        lease_step = frame - lease.root_frame
+        body_step = frame - body_root_frame
+        certified = lease.certified_enemy_boxes_by_step[lease_step]
+        checked_frames += 1
+        for body in enemy_bodies:
+            robust_expansion = min(12.0, 0.5 * body_step)
+            x = body.x + body.vx * body_step
+            y = body.y + body.vy * body_step
+            half_width = (
+                body.half_width
+                + body.uncertainty
+                + robust_expansion
+            )
+            half_height = (
+                body.half_height
+                + body.uncertainty
+                + robust_expansion
+            )
+            if any(
+                abs(x - box.x) + half_width
+                <= box.half_width + numeric_guard
+                and abs(y - box.y) + half_height
+                <= box.half_height + numeric_guard
+                for box in certified
+            ):
+                continue
+            return ContinuationGeometryCheck(
+                False,
+                "fresh_body_envelope_not_contained",
+                checked_frames,
+                len(enemy_bodies),
+                body.pointer,
+                frame,
+            )
+    return ContinuationGeometryCheck(
+        True,
+        "fresh_body_envelopes_contained",
+        checked_frames,
+        len(enemy_bodies),
+    )
+
+
 __all__ = [
+    "ContinuationCertifiedAabb",
+    "ContinuationGeometryCheck",
     "ContinuationLeaseCheck",
     "OrdinaryContinuationLease",
     "check_continuation_lease_capture",
+    "check_continuation_enemy_geometry",
     "check_continuation_lease_issue",
 ]

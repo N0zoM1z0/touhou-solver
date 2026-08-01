@@ -20,6 +20,10 @@ PLAYBACK_LEGACY = "playback_legacy"
 PLAYBACK_EXTENDED = "playback_extended"
 PLAYBACK_MODES = frozenset({PLAYBACK_LEGACY, PLAYBACK_EXTENDED})
 
+# Live/record input is published after priority-9 player movement and is
+# therefore first consumed by movement on the next physical update.
+TH08_INPUT_PUBLICATION_TO_MOTION_LAG_FRAMES = 1
+
 
 def _event(
     key: str,

@@ -18,6 +18,9 @@ from touhou_control.pipeline_identity import (
     PipelineQueryIdentity,
     VersionIdentity,
 )
+from th08_update_order import (
+    TH08_INPUT_PUBLICATION_TO_MOTION_LAG_FRAMES,
+)
 
 
 PIPELINE_SHADOW_ROLE = "shadow_no_action_authority"
@@ -162,6 +165,9 @@ def build_pipeline_shadow_snapshot(
             held_desired_action=held_action,
             pending_action=pending_action,
             remaining_delay_support=remaining_support,
+            input_publication_to_motion_lag_frames=(
+                TH08_INPUT_PUBLICATION_TO_MOTION_LAG_FRAMES
+            ),
         )
         if estimator_consistent
         else None
@@ -211,6 +217,9 @@ def build_pipeline_shadow_snapshot(
                     "pending_capacity": 1,
                     "issue_semantics": "complete-mask-no-write",
                     "observation_merge": True,
+                    "input_publication_to_motion_lag_frames": (
+                        TH08_INPUT_PUBLICATION_TO_MOTION_LAG_FRAMES
+                    ),
                 },
             ),
             clock_version=VersionIdentity.from_mapping(
@@ -232,6 +241,9 @@ def build_pipeline_shadow_snapshot(
         "pending_action": pending_action,
         "pending_mask": pending_mask,
         "remaining_delay_support": remaining_support,
+        "input_publication_to_motion_lag_frames": (
+            TH08_INPUT_PUBLICATION_TO_MOTION_LAG_FRAMES
+        ),
         "snapshot_age": (
             pending_estimate.snapshot_age
             if pending_estimate is not None

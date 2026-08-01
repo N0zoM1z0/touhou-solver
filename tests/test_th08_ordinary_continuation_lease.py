@@ -1,9 +1,13 @@
 from __future__ import annotations
 
+from dataclasses import replace
 import unittest
 
+from th08_live.models import EnemyBody
 from th08_live.ordinary_continuation_lease import (
+    ContinuationCertifiedAabb,
     OrdinaryContinuationLease,
+    check_continuation_enemy_geometry,
     check_continuation_lease_capture,
     check_continuation_lease_issue,
 )
@@ -51,6 +55,7 @@ class OrdinaryContinuationLeaseTests(unittest.TestCase):
             pickup_delay_support=(0, 2),
             branches=branches,
             positions_by_step=positions,
+            certified_enemy_boxes_by_step=((),) * 11,
             minimum_clearance=3.0,
             fresh_geometry_frame=102,
             fresh_geometry_changed=False,
@@ -199,6 +204,83 @@ class OrdinaryContinuationLeaseTests(unittest.TestCase):
             switched.reason,
             "selected_action_changed_without_predecessor",
         )
+
+    def test_fresh_body_envelope_may_reuse_old_certified_geometry(self) -> None:
+        lease = replace(
+            self._lease(),
+            certified_enemy_boxes_by_step=tuple(
+                (
+                    ContinuationCertifiedAabb(
+                        x=50.0 + step,
+                        y=100.0,
+                        half_width=10.0,
+                        half_height=10.0,
+                    ),
+                )
+                for step in range(11)
+            ),
+        )
+        # The pointer is intentionally unrelated to the old witness: safety
+        # is set containment, not native slot identity.
+        contained = EnemyBody(
+            pointer=0xDEAD,
+            x=52.0,
+            y=100.0,
+            vx=1.0,
+            vy=0.0,
+            half_width=1.0,
+            half_height=1.0,
+            flags=0,
+        )
+
+        check = check_continuation_enemy_geometry(
+            lease,
+            body_root_frame=102,
+            valid_from_frame=102,
+            enemy_bodies=(contained,),
+        )
+
+        self.assertTrue(check.valid)
+        self.assertEqual(check.checked_frame_count, 9)
+        self.assertEqual(check.checked_body_count, 1)
+
+    def test_divergent_fresh_body_revokes_with_first_witness(self) -> None:
+        lease = replace(
+            self._lease(),
+            certified_enemy_boxes_by_step=tuple(
+                (
+                    ContinuationCertifiedAabb(
+                        x=50.0 + step,
+                        y=100.0,
+                        half_width=10.0,
+                        half_height=10.0,
+                    ),
+                )
+                for step in range(11)
+            ),
+        )
+        divergent = EnemyBody(
+            pointer=0xBEEF,
+            x=52.0,
+            y=100.0,
+            vx=8.0,
+            vy=0.0,
+            half_width=1.0,
+            half_height=1.0,
+            flags=0,
+        )
+
+        check = check_continuation_enemy_geometry(
+            lease,
+            body_root_frame=102,
+            valid_from_frame=102,
+            enemy_bodies=(divergent,),
+        )
+
+        self.assertFalse(check.valid)
+        self.assertEqual(check.reason, "fresh_body_envelope_not_contained")
+        self.assertEqual(check.first_uncontained_pointer, 0xBEEF)
+        self.assertIsNotNone(check.first_uncontained_frame)
 
 
 if __name__ == "__main__":

@@ -154,6 +154,17 @@ default-off until a rotated Stage-3 or 4A run exercises renewal/revocation.
 Local ranking remains computation order/objective only, never survival
 authority.
 
+Stage-4A `20260801_130742` exercised lease creation/renewal but not physical
+consumption: six leases were created, 34 renewed, and zero were effective at
+issue. The first retained mismatch showed that native current-input
+publication at priority 17 is one frame ahead of priority-9 player movement.
+L3 lease v2 therefore separates published and motion histories and versions a
+TH08 publication-to-motion lag of one. It also replaces revocation on any
+fresh-body change with exact set containment against the active/future-body
+AABBs already consumed by the witness. An uncontained envelope still fails
+closed. Linux and Windows deterministic gates pass; this remains default-off
+pending a rotated Stage-3 physical gate.
+
 The authorized Stage-4A physical run `20260731_220830` did not exercise that
 authority: all 1,754 live source projections were incomplete, chiefly because
 the former sparse capture crossed the manager frame 1,726 times. Consequently

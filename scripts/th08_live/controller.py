@@ -224,8 +224,11 @@ from th08_live.local_hazards import (  # noqa: F401
     _select_items,
 )
 from th08_live.ordinary_continuation_lease import (
+    ContinuationCertifiedAabb,
+    ContinuationGeometryCheck,
     ContinuationLeaseCheck,
     OrdinaryContinuationLease,
+    check_continuation_enemy_geometry,
     check_continuation_lease_capture,
     check_continuation_lease_issue,
 )
@@ -535,7 +538,7 @@ ORDINARY_CAUSAL_DELAYED_ISSUE_AUTHORITY = (
     "causal_ordinary_nonspell_delayed_issue_horizon_v1"
 )
 ORDINARY_CAUSAL_CONTINUATION_LEASE_AUTHORITY = (
-    "causal_ordinary_nonspell_terminal_continuation_lease_v1"
+    "causal_ordinary_nonspell_terminal_continuation_lease_v2"
 )
 CORRIDOR_ALLOWED_ACTION_AUTHORITY = "exact_corridor_viability_v1"
 _ORDINARY_PREEXHAUSTION_ACTIONS = tuple(
@@ -1885,6 +1888,7 @@ def _build_ordinary_continuation_lease(
     player_x: float,
     player_y: float,
     player_scale_bits: tuple[int, ...],
+    enemy_bodies: tuple[EnemyBody, ...],
     certificate: RobustActionCertificate,
     fresh_geometry_frame: int,
     fresh_geometry_changed: bool,
@@ -1909,6 +1913,52 @@ def _build_ordinary_continuation_lease(
         player_y=player_y,
         player_scale_bits=player_scale_bits,
     )
+    projection_offset = root_frame - projection.root_frame
+    if projection_offset < 0:
+        raise ValueError("lease root predates future-hazard projection")
+    if projection_offset + horizon_frames > projection.horizon_frames:
+        raise ValueError("future-hazard projection does not cover lease")
+    certified_enemy_boxes_by_step = tuple(
+        tuple(
+            ContinuationCertifiedAabb(
+                x=body.x + body.vx * step,
+                y=body.y + body.vy * step,
+                half_width=(
+                    body.half_width
+                    + body.uncertainty
+                    + min(12.0, 0.5 * step)
+                ),
+                half_height=(
+                    body.half_height
+                    + body.uncertainty
+                    + min(12.0, 0.5 * step)
+                ),
+            )
+            for body in enemy_bodies
+        )
+        + tuple(
+            ContinuationCertifiedAabb(
+                x=sample.x,
+                y=sample.y,
+                half_width=(
+                    sample.half_width
+                    + sample.base_uncertainty
+                    + sample.uncertainty_per_frame
+                    * (projection_offset + step)
+                ),
+                half_height=(
+                    sample.half_height
+                    + sample.base_uncertainty
+                    + sample.uncertainty_per_frame
+                    * (projection_offset + step)
+                ),
+            )
+            for sample in projection.aabb_samples(
+                projection_offset + step
+            )
+        )
+        for step in range(horizon_frames + 1)
+    )
     return OrdinaryContinuationLease(
         lease_id=(
             f"{gameplay_epoch}:{stage_route_index}:{root_frame}:"
@@ -1929,6 +1979,7 @@ def _build_ordinary_continuation_lease(
         pickup_delay_support=pickup_delay_support,
         branches=branches,
         positions_by_step=positions_by_step,
+        certified_enemy_boxes_by_step=certified_enemy_boxes_by_step,
         minimum_clearance=certificate.min_clearance,
         fresh_geometry_frame=fresh_geometry_frame,
         fresh_geometry_changed=fresh_geometry_changed,
@@ -5249,6 +5300,14 @@ def _run_live_session(
                 age_frames=0,
                 remaining_frames=0,
             )
+            ordinary_continuation_capture_geometry_check = (
+                ContinuationGeometryCheck(
+                    valid=False,
+                    reason="no_active_lease",
+                    checked_frame_count=0,
+                    checked_body_count=len(enemy_bodies),
+                )
+            )
             if ordinary_continuation_lease is not None:
                 ordinary_continuation_capture_check = (
                     check_continuation_lease_capture(
@@ -5270,14 +5329,34 @@ def _run_live_session(
                         ),
                     )
                 )
+                if ordinary_continuation_capture_check.valid:
+                    ordinary_continuation_capture_geometry_check = (
+                        check_continuation_enemy_geometry(
+                            ordinary_continuation_lease,
+                            body_root_frame=(
+                                captured_iteration.snapshot_frame
+                            ),
+                            valid_from_frame=(
+                                captured_iteration.snapshot_frame
+                            ),
+                            enemy_bodies=enemy_bodies,
+                        )
+                    )
                 if not ordinary_continuation_capture_check.valid:
                     ordinary_continuation_lease_revoked_reason = (
                         ordinary_continuation_capture_check.reason
                     )
                     ordinary_continuation_lease = None
+                elif not ordinary_continuation_capture_geometry_check.valid:
+                    ordinary_continuation_lease_revoked_reason = (
+                        "fresh_geometry_not_contained_at_capture:"
+                        f"{ordinary_continuation_capture_geometry_check.reason}"
+                    )
+                    ordinary_continuation_lease = None
             ordinary_continuation_lease_active = bool(
                 ordinary_continuation_lease is not None
                 and ordinary_continuation_capture_check.valid
+                and ordinary_continuation_capture_geometry_check.valid
             )
             ordinary_continuation_renewal_due = bool(
                 ordinary_continuation_lease_active
@@ -6527,6 +6606,16 @@ def _run_live_session(
                 age_frames=ordinary_issue_age,
                 remaining_frames=0,
             )
+            ordinary_continuation_issue_geometry_check = (
+                ContinuationGeometryCheck(
+                    valid=False,
+                    reason="lease_authority_not_selected",
+                    checked_frame_count=0,
+                    checked_body_count=len(
+                        issue_enemy_bodies_for_shadow
+                    ),
+                )
+            )
             ordinary_continuation_lease_effective_at_issue = False
             if (
                 allowed_action_authority
@@ -6548,6 +6637,19 @@ def _run_live_session(
                         ),
                     )
                 )
+                if ordinary_continuation_issue_check.valid:
+                    ordinary_continuation_issue_geometry_check = (
+                        check_continuation_enemy_geometry(
+                            ordinary_continuation_lease,
+                            body_root_frame=(
+                                captured_iteration.snapshot_frame
+                            ),
+                            valid_from_frame=counter_at_action,
+                            enemy_bodies=(
+                                issue_enemy_bodies_for_shadow
+                            ),
+                        )
+                    )
                 lease_transaction = decision.issue_recertification
                 lease_fresh_safe = bool(
                     lease_transaction is not None
@@ -6561,13 +6663,16 @@ def _run_live_session(
                     .min_clearance
                     >= 0.0
                 )
-                if issue_enemy_changes:
+                if (
+                    ordinary_continuation_issue_check.valid
+                    and not ordinary_continuation_issue_geometry_check.valid
+                ):
                     ordinary_continuation_issue_check = (
                         ContinuationLeaseCheck(
                             valid=False,
                             reason=(
-                                "fresh_geometry_changed_without_full_"
-                                "continuation_recertification"
+                                "fresh_geometry_not_contained_at_issue:"
+                                f"{ordinary_continuation_issue_geometry_check.reason}"
                             ),
                             age_frames=(
                                 ordinary_continuation_issue_check.age_frames
@@ -6577,12 +6682,15 @@ def _run_live_session(
                                 .remaining_frames
                             ),
                             matched_branch_count=(
-                                ordinary_continuation_capture_check
+                                ordinary_continuation_issue_check
                                 .matched_branch_count
                             ),
                         )
                     )
-                elif not lease_fresh_safe:
+                elif (
+                    ordinary_continuation_issue_check.valid
+                    and not lease_fresh_safe
+                ):
                     ordinary_continuation_issue_check = (
                         ContinuationLeaseCheck(
                             valid=False,
@@ -6846,6 +6954,9 @@ def _run_live_session(
                                         ordinary_causal_delayed_horizon
                                     )
                                 ),
+                                enemy_bodies=(
+                                    issue_enemy_bodies_for_shadow
+                                ),
                                 certificate=(
                                     ordinary_causal_delayed_issue_certificate
                                 ),
@@ -6899,9 +7010,33 @@ def _run_live_session(
                         ORDINARY_AUTHORITY_MIN_TERMINAL_LEAD
                     ),
                 )
+                retained_geometry_check = ContinuationGeometryCheck(
+                    valid=False,
+                    reason="retained_issue_contract_invalid",
+                    checked_frame_count=0,
+                    checked_body_count=len(
+                        issue_enemy_bodies_for_shadow
+                    ),
+                )
+                if retained_issue_check.valid:
+                    retained_geometry_check = (
+                        check_continuation_enemy_geometry(
+                            lease_before_post_issue,
+                            body_root_frame=(
+                                captured_iteration.snapshot_frame
+                            ),
+                            valid_from_frame=counter_at_action,
+                            enemy_bodies=(
+                                issue_enemy_bodies_for_shadow
+                            ),
+                        )
+                    )
+                    ordinary_continuation_issue_geometry_check = (
+                        retained_geometry_check
+                    )
                 retain_old_lease = bool(
                     retained_issue_check.valid
-                    and not issue_enemy_changes
+                    and retained_geometry_check.valid
                     and (
                         ordinary_continuation_lease_effective_at_issue
                         or allowed_action_authority
@@ -6923,10 +7058,13 @@ def _run_live_session(
                         )
                         else retained_issue_check.reason
                     )
-                    if issue_enemy_changes:
+                    if (
+                        retained_issue_check.valid
+                        and not retained_geometry_check.valid
+                    ):
                         ordinary_continuation_lease_revoked_reason = (
-                            "fresh_geometry_changed_without_full_"
-                            "continuation_recertification"
+                            "fresh_geometry_not_contained_at_issue:"
+                            f"{retained_geometry_check.reason}"
                         )
                     ordinary_continuation_post_issue_reason = (
                         ordinary_continuation_lease_revoked_reason
@@ -7373,7 +7511,7 @@ def _run_live_session(
                 }
                 record["ordinary_terminal_continuation_lease"] = {
                     "schema": (
-                        "th08-ordinary-terminal-continuation-lease-v1"
+                        "th08-ordinary-terminal-continuation-lease-v2"
                     ),
                     "authority": (
                         ORDINARY_CAUSAL_CONTINUATION_LEASE_AUTHORITY
@@ -7387,6 +7525,9 @@ def _run_live_session(
                     "capture_check": (
                         ordinary_continuation_capture_check.record()
                     ),
+                    "capture_geometry_check": (
+                        ordinary_continuation_capture_geometry_check.record()
+                    ),
                     "renewal_due": ordinary_continuation_renewal_due,
                     "renewal_policy": (
                         "every_compatible_fallback_root_old_exact_lease_"
@@ -7397,6 +7538,9 @@ def _run_live_session(
                         == ORDINARY_CAUSAL_CONTINUATION_LEASE_AUTHORITY
                     ),
                     "issue_check": ordinary_continuation_issue_check.record(),
+                    "issue_geometry_check": (
+                        ordinary_continuation_issue_geometry_check.record()
+                    ),
                     "effective_at_issue": (
                         ordinary_continuation_lease_effective_at_issue
                     ),
@@ -7420,8 +7564,8 @@ def _run_live_session(
                         "new_complete_mask_requires_new_exact_predecessor"
                     ),
                     "fresh_geometry_rule": (
-                        "capture_to_issue_change_requires_full_delayed_"
-                        "recertification_or_revocation"
+                        "fresh_body_envelopes_must_be_contained_by_old_"
+                        "certified_active_or_future_source_aabbs"
                     ),
                 }
                 record["corridor_delivery"] = {

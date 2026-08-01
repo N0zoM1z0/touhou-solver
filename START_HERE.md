@@ -55,8 +55,9 @@ authority.
   and reuses that immutable proposal after the scan. In `115838`, 11/21 scans
   physically acquired exact authority; median issue age was 25 frames versus
   43 before proposal reuse. CE-0250's zero-transition blocker is closed.
-- **Implemented after physical falsification, awaiting Stage-3 rotation:** an effective
-  delayed action now creates an immutable H80 terminal-continuation lease.
+- **Implemented after cross-stage physical falsification, awaiting v13
+  physical rotation:** an effective delayed action creates an immutable H80
+  terminal-continuation lease.
   Each compatible fallback root first renews the held no-write action; only
   if that predecessor is unsafe may independent recovery directions be
   evaluated. Exact float32 position, active/held/pending support, epoch,
@@ -67,12 +68,15 @@ authority.
   requires a new exact delayed
   predecessor. Stage-4A f3191→f3192 exposed a native phase bug: priority-17
   current-input publication precedes its first priority-9 movement by one
-  physical frame. Lease v2 now separates published and shifted motion
-  histories; the retained position matches bit-exactly. Fresh-body changes no
-  longer revoke by flag alone: every fresh expanded AABB must remain inside
-  an already certified active/future-source AABB at every remaining frame.
-  Rotated Stage-3 physical validation is next; scalar reserve remains rejected
-  and local ranking is not safety authority.
+  physical frame. Lease v3 retains that input-phase correction and requires
+  source semantics v13, which adds every contact-enabled active hostile body
+  to the exact ECL/native-motion trajectory from the projection root. Fresh
+  geometry now conditions only the native observation seam at its own frame;
+  it cannot replace the old causal proof with a restarted linear H80 future.
+  Unstable observations, uncontained current bodies, older source semantics,
+  and incomplete topology still fail closed. Rotated Stage-3 physical
+  validation is next; scalar reserve remains rejected and local ranking is not
+  safety authority.
 - Native H=32 wind-tunnel checkpoint: `3d15953`; it is historical evidence,
   not the live ordinary horizon.
 - Workspace-prune checkpoint: `be3e583` (`Prune TH08 active research
@@ -491,9 +495,9 @@ Do not rerun the rejected scalar-reserve or H=32 signed-terminal design. The
 future-source, retained-chain, delayed-pipeline, and fresh-hostile-body gates
 pass. Next:
 
-1. Physically falsify lease v2 on Lunatic Stage 3 after the Stage-4A input-
-   phase counterexample. Require nonzero no-write lease consumption or exact
-   renewal, no action-set widening, and explicit revocation on mismatch.
+1. Physically falsify source-v13/lease-v3 on Lunatic Stage 3. Require nonzero
+   no-write lease consumption or exact renewal, no action-set widening, and
+   explicit fail-closed revocation on a genuinely uncontained observation.
 2. The f817/833/835/850/910 retained chain and physical f1456/f1469/f1470/
    f1479 continuation now regress. Empty actual rows, terminal expiry, and
    final-age misses remain fail closed.

@@ -10,6 +10,8 @@ The supported subset is intentionally sufficient for the retained H1
 ordinary root without using its native endpoint as model input:
 
 * every active manager-singleton and ordinary-pool main/auxiliary VM is joined;
+* every contact-enabled active source body is advanced by that same native
+  motion state and retained as a root-to-horizon AABB trajectory;
 * sub30's interval arithmetic, player aim, and RNG variables are lowered;
 * direct-fire modes 0x60..0x68 become finite angle-sector AABB trajectories;
 * native movement state 0/1 and the reached 0x41/0x47 writes are advanced;
@@ -52,7 +54,7 @@ from touhou_control.corridor import AabbHazard, AabbTrajectoryHazard
 
 
 ORDINARY_FUTURE_SOURCE_SEMANTICS_VERSION = (
-    "th08-ordinary-future-sources-v12-unit-timeline-fraction"
+    "th08-ordinary-future-sources-v13-active-hostile-body-trajectories"
 )
 _PROJECTION_SCHEMA = "th08-native-snapshot-collision-control-projection-v13"
 _DIRECT_FIRE_OPCODES = frozenset(range(0x60, 0x69))
@@ -73,6 +75,8 @@ _FLOAT32_ONE_BITS = 0x3F800000
 _PLAYER_MAX_AXIS_SPEED = 4.0
 _POSITION_TOLERANCE = 1.0e-3
 _MAX_INSTRUCTIONS_PER_UPDATE = 64
+_ENEMY_CONTACT_ENABLED_FLAG = 0x00000004
+_ENEMY_CONTACT_BLOCKING_FLAGS = 0x00000830
 _AUXILIARY_SLOT_COUNT = 4
 _MAX_TIMELINE_FRONTIER_STATES = 4096
 _HEALTH_DAMAGE_ENVELOPE_SCHEMA = (
@@ -191,6 +195,24 @@ class OrdinaryFutureSourceClosure:
     health_transition_proven_count: int
     health_transition_minimum_margin: int | None
     causal_prefix_reason: str | None
+
+
+def _source_contact_body_sample(
+    source: _SourceState,
+) -> AabbHazard | None:
+    """Return the exact source-motion contact AABB at the current update."""
+
+    if (
+        not source.enemy_flags & _ENEMY_CONTACT_ENABLED_FLAG
+        or source.enemy_flags & _ENEMY_CONTACT_BLOCKING_FLAGS
+    ):
+        return None
+    return AabbHazard(
+        x=source.motion.world_x,
+        y=source.motion.world_y,
+        half_width=source.body_half_width + source.motion.uncertainty_x,
+        half_height=source.body_half_height + source.motion.uncertainty_y,
+    )
 
 
 def _fail(message: str) -> None:
@@ -2369,7 +2391,13 @@ def _analyze(
     template = sources[0]
     instructions = _instruction_map(ecl)
     events: list[FutureDirectFire] = []
-    future_body_samples: dict[str, list[AabbHazard | None]] = {}
+    future_body_samples: dict[str, list[AabbHazard | None]] = {
+        source.identity: [
+            _source_contact_body_sample(source),
+            *([None] * projected_horizon_frames),
+        ]
+        for source in sources
+    }
     silent_children = 0
     timeline_spawn_count = 0
     for frame in range(1, projected_horizon_frames + 1):
@@ -2421,20 +2449,9 @@ def _analyze(
                 events.extend(source_events)
                 silent_children += child_count
                 _advance_motion(source)
-                if source.timeline_spawned and source.enemy_flags & 0x04:
-                    samples = future_body_samples[source.identity]
-                    samples[frame] = AabbHazard(
-                        x=source.motion.world_x,
-                        y=source.motion.world_y,
-                        half_width=(
-                            source.body_half_width
-                            + source.motion.uncertainty_x
-                        ),
-                        half_height=(
-                            source.body_half_height
-                            + source.motion.uncertainty_y
-                        ),
-                    )
+                future_body_samples[source.identity][frame] = (
+                    _source_contact_body_sample(source)
+                )
         except (
             FutureSourceClosureError,
             KeyError,

@@ -181,6 +181,18 @@ geometry the dominant revocation. This cross-stage evidence makes the
 active-hostile trajectory/fresh-recertification contract the next general
 blocker.
 
+Source semantics v13 closes the model side of that seam: every
+contact-enabled active hostile source now contributes its captured
+ECL/native-motion AABB trajectory from projection root through the complete
+horizon, in addition to future timeline-spawned bodies. Lease v3 may be built
+only from that semantics version. A later stable capture conditions the old
+proof on each observed body AABB at that capture's physical frame; it no
+longer invents a fresh linear future for all remaining frames. The issue seam
+uses the fresh native prefix snapshot at its own frame. Unstable observations,
+an uncontained current body, old source semantics, incomplete source/topology
+coverage, or version mismatch revoke/fail closed. This is deterministic
+contract evidence pending physical Stage-3 rotation.
+
 Physical run `20260731_152921` found two independent invalidations. First,
 `player+0xE2A68` retains the deathbomb-window limit installed by
 `0x0044AB40`; it is not a zero-when-alive predeath predicate, so all 7,202

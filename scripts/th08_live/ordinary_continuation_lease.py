@@ -12,7 +12,7 @@ import math
 import struct
 from dataclasses import dataclass
 
-from .models import EnemyBody
+from .models import EnemyBody, EnemyPoolSnapshot
 from touhou_control.local_pipeline_oracle import (
     DelayedIssuePipelineBranch,
     LocalPipelineRoot,
@@ -82,7 +82,7 @@ class OrdinaryContinuationLease:
 
     def record(self) -> dict[str, object]:
         return {
-            "schema": "th08-ordinary-terminal-continuation-lease-v2",
+            "schema": "th08-ordinary-terminal-continuation-lease-v3",
             "lease_id": self.lease_id,
             "gameplay_epoch": self.gameplay_epoch,
             "stage_route_index": self.stage_route_index,
@@ -352,13 +352,18 @@ def check_continuation_enemy_geometry(
     enemy_bodies: tuple[EnemyBody, ...],
     numeric_guard: float = 2.0e-4,
 ) -> ContinuationGeometryCheck:
-    """Require every fresh future body envelope to remain inside old proof.
+    """Require the fresh observed body seam to remain inside the old proof.
 
     ``enemy_bodies`` are rooted at ``body_root_frame``.  Their linearly
-    projected, uncertainty-expanded AABBs must be contained in the union of
-    body boxes already consumed by the lease at every remaining physical
-    frame.  Removed bodies are harmless; new or changed bodies are accepted
-    only when an old active/future-source box contains them.
+    aligned AABBs at the first observable frame must be contained in the union
+    of body boxes already consumed by the lease.  The remaining future is the
+    immutable causal source trajectory from the original exact predecessor;
+    restarting a second linear forecast from each observation would replace,
+    rather than condition, that proof and spuriously reject timed native
+    acceleration.  Removed bodies are harmless; new or changed bodies are
+    accepted only when an old active/future-source box contains the observed
+    seam.  Complete source/topology coverage is a lease-construction
+    precondition outside this function.
     """
 
     if not math.isfinite(numeric_guard) or numeric_guard < 0.0:
@@ -380,47 +385,69 @@ def check_continuation_enemy_geometry(
             len(enemy_bodies),
         )
 
-    checked_frames = 0
-    for frame in range(start_frame, end_frame + 1):
-        lease_step = frame - lease.root_frame
-        body_step = frame - body_root_frame
-        certified = lease.certified_enemy_boxes_by_step[lease_step]
-        checked_frames += 1
-        for body in enemy_bodies:
-            robust_expansion = min(12.0, 0.5 * body_step)
-            x = body.x + body.vx * body_step
-            y = body.y + body.vy * body_step
-            half_width = (
-                body.half_width
-                + body.uncertainty
-                + robust_expansion
-            )
-            half_height = (
-                body.half_height
-                + body.uncertainty
-                + robust_expansion
-            )
-            if any(
-                abs(x - box.x) + half_width
-                <= box.half_width + numeric_guard
-                and abs(y - box.y) + half_height
-                <= box.half_height + numeric_guard
-                for box in certified
-            ):
-                continue
-            return ContinuationGeometryCheck(
-                False,
-                "fresh_body_envelope_not_contained",
-                checked_frames,
-                len(enemy_bodies),
-                body.pointer,
-                frame,
-            )
+    frame = start_frame
+    lease_step = frame - lease.root_frame
+    body_step = frame - body_root_frame
+    certified = lease.certified_enemy_boxes_by_step[lease_step]
+    for body in enemy_bodies:
+        robust_expansion = min(12.0, 0.5 * body_step)
+        x = body.x + body.vx * body_step
+        y = body.y + body.vy * body_step
+        half_width = (
+            body.half_width
+            + body.uncertainty
+            + robust_expansion
+        )
+        half_height = (
+            body.half_height
+            + body.uncertainty
+            + robust_expansion
+        )
+        if any(
+            abs(x - box.x) + half_width
+            <= box.half_width + numeric_guard
+            and abs(y - box.y) + half_height
+            <= box.half_height + numeric_guard
+            for box in certified
+        ):
+            continue
+        return ContinuationGeometryCheck(
+            False,
+            "fresh_body_envelope_not_contained",
+            1,
+            len(enemy_bodies),
+            body.pointer,
+            frame,
+        )
     return ContinuationGeometryCheck(
         True,
-        "fresh_body_envelopes_contained",
-        checked_frames,
+        "fresh_body_observation_seam_contained",
+        1,
         len(enemy_bodies),
+    )
+
+
+def check_continuation_enemy_snapshot(
+    lease: OrdinaryContinuationLease,
+    *,
+    snapshot: EnemyPoolSnapshot,
+    numeric_guard: float = 2.0e-4,
+) -> ContinuationGeometryCheck:
+    """Condition a lease on one stable native observation at its own frame."""
+
+    if not snapshot.stable:
+        return ContinuationGeometryCheck(
+            False,
+            "fresh_enemy_snapshot_unstable",
+            0,
+            len(snapshot.bodies),
+        )
+    return check_continuation_enemy_geometry(
+        lease,
+        body_root_frame=snapshot.frame_after,
+        valid_from_frame=snapshot.frame_after,
+        enemy_bodies=snapshot.bodies,
+        numeric_guard=numeric_guard,
     )
 
 
@@ -431,5 +458,6 @@ __all__ = [
     "OrdinaryContinuationLease",
     "check_continuation_lease_capture",
     "check_continuation_enemy_geometry",
+    "check_continuation_enemy_snapshot",
     "check_continuation_lease_issue",
 ]

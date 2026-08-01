@@ -801,6 +801,25 @@ class OrdinaryFutureSourceTests(unittest.TestCase):
         )
         self.assertTrue(closure.projection.coverage.complete)
 
+    def test_active_hostile_body_motion_is_consumed_from_root(self) -> None:
+        payload = deepcopy(_payload())
+        body = payload["enemy_manager_template_source"]["enemy_bodies"][0]
+        body["flags"] |= 0x04
+
+        closure = project_ordinary_future_sources(
+            payload,
+            ECL,
+            horizon_frames=1,
+        )
+
+        self.assertTrue(closure.projection.source_closure_complete)
+        self.assertEqual(len(closure.projection.aabb_trajectories), 1)
+        sample = closure.projection.aabb_trajectories[0].sample(0)
+        self.assertIsNotNone(sample)
+        assert sample is not None
+        self.assertEqual((sample.x, sample.y), (60.0, 32.0))
+        self.assertEqual((sample.half_width, sample.half_height), (18.0, 18.0))
+
     def test_installed_callback_fails_closed(self) -> None:
         payload = _payload()
         payload["enemy_manager_template_source"][

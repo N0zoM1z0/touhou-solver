@@ -201,6 +201,17 @@ workload consumed one effectively. Fresh-geometry revocation dominated both,
 matching all four Stage-3 v12 revocations. L3 remains default-off while active
 hostile native motion and fresh recertification are made causally consistent.
 
+Source semantics v13 and lease v3 implement that correction without enlarging
+the viable set. Every contact-enabled active source body is advanced by the
+same captured ECL/native motion state as its emissions and retained as an
+exact root-to-horizon AABB trajectory. A fresh capture conditions only the
+observed body AABB at the capture frame; it does not restart a second linear
+future and compare two incompatible approximations. Issue recertification uses
+the stable native prefix snapshot at its own frame. Lease construction rejects
+older source semantics, while unstable snapshots, an uncontained observation,
+incomplete topology, or missing future coverage still fail closed. Focused
+Linux and Windows gates pass. Physical Stage-3 rotation remains required.
+
 The authorized Stage-4A physical run `20260731_220830` did not exercise that
 authority: all 1,754 live source projections were incomplete, chiefly because
 the former sparse capture crossed the manager frame 1,726 times. Consequently

@@ -3,11 +3,12 @@ from __future__ import annotations
 from dataclasses import replace
 import unittest
 
-from th08_live.models import EnemyBody
+from th08_live.models import EnemyBody, EnemyPoolSnapshot
 from th08_live.ordinary_continuation_lease import (
     ContinuationCertifiedAabb,
     OrdinaryContinuationLease,
     check_continuation_enemy_geometry,
+    check_continuation_enemy_snapshot,
     check_continuation_lease_capture,
     check_continuation_lease_issue,
 )
@@ -241,8 +242,46 @@ class OrdinaryContinuationLeaseTests(unittest.TestCase):
         )
 
         self.assertTrue(check.valid)
-        self.assertEqual(check.checked_frame_count, 9)
+        self.assertEqual(check.checked_frame_count, 1)
         self.assertEqual(check.checked_body_count, 1)
+
+    def test_fresh_velocity_does_not_restart_the_certified_future(self) -> None:
+        boxes = []
+        for step in range(11):
+            boxes.append(
+                (
+                    ContinuationCertifiedAabb(
+                        x=52.0 if step == 2 else -100.0,
+                        y=100.0,
+                        half_width=10.0,
+                        half_height=10.0,
+                    ),
+                )
+            )
+        lease = replace(
+            self._lease(),
+            certified_enemy_boxes_by_step=tuple(boxes),
+        )
+        observed = EnemyBody(
+            pointer=0xCAFE,
+            x=52.0,
+            y=100.0,
+            vx=8.0,
+            vy=0.0,
+            half_width=1.0,
+            half_height=1.0,
+            flags=0,
+        )
+
+        check = check_continuation_enemy_geometry(
+            lease,
+            body_root_frame=102,
+            valid_from_frame=102,
+            enemy_bodies=(observed,),
+        )
+
+        self.assertTrue(check.valid)
+        self.assertEqual(check.checked_frame_count, 1)
 
     def test_divergent_fresh_body_revokes_with_first_witness(self) -> None:
         lease = replace(
@@ -261,7 +300,7 @@ class OrdinaryContinuationLeaseTests(unittest.TestCase):
         )
         divergent = EnemyBody(
             pointer=0xBEEF,
-            x=52.0,
+            x=90.0,
             y=100.0,
             vx=8.0,
             vy=0.0,
@@ -281,6 +320,46 @@ class OrdinaryContinuationLeaseTests(unittest.TestCase):
         self.assertEqual(check.reason, "fresh_body_envelope_not_contained")
         self.assertEqual(check.first_uncontained_pointer, 0xBEEF)
         self.assertIsNotNone(check.first_uncontained_frame)
+
+    def test_issue_snapshot_uses_native_observation_frame(self) -> None:
+        lease = replace(
+            self._lease(),
+            certified_enemy_boxes_by_step=tuple(
+                (
+                    ContinuationCertifiedAabb(
+                        x=50.0 + step,
+                        y=100.0,
+                        half_width=10.0,
+                        half_height=10.0,
+                    ),
+                )
+                for step in range(11)
+            ),
+        )
+        observed = EnemyBody(
+            pointer=0xABCD,
+            x=55.0,
+            y=100.0,
+            vx=0.0,
+            vy=0.0,
+            half_width=1.0,
+            half_height=1.0,
+            flags=0,
+        )
+
+        valid = check_continuation_enemy_snapshot(
+            lease,
+            snapshot=EnemyPoolSnapshot(105, 105, (observed,), 0.1),
+        )
+        unstable = check_continuation_enemy_snapshot(
+            lease,
+            snapshot=EnemyPoolSnapshot(105, 106, (observed,), 0.1),
+        )
+
+        self.assertTrue(valid.valid)
+        self.assertEqual(valid.checked_frame_count, 1)
+        self.assertFalse(unstable.valid)
+        self.assertEqual(unstable.reason, "fresh_enemy_snapshot_unstable")
 
 
 if __name__ == "__main__":

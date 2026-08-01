@@ -54,6 +54,9 @@ from th08_future_hazard_projection import (
     OrdinaryFutureHazardProjection,
     condition_future_hazard_projection_on_player_paths,
 )
+from th08_ordinary_future_sources import (
+    ORDINARY_FUTURE_SOURCE_SEMANTICS_VERSION,
+)
 from th08_laser_runtime import (
     Laser,
     PackedLaserFrame as _PackedLaserFrame,
@@ -229,6 +232,7 @@ from th08_live.ordinary_continuation_lease import (
     ContinuationLeaseCheck,
     OrdinaryContinuationLease,
     check_continuation_enemy_geometry,
+    check_continuation_enemy_snapshot,
     check_continuation_lease_capture,
     check_continuation_lease_issue,
 )
@@ -538,7 +542,7 @@ ORDINARY_CAUSAL_DELAYED_ISSUE_AUTHORITY = (
     "causal_ordinary_nonspell_delayed_issue_horizon_v1"
 )
 ORDINARY_CAUSAL_CONTINUATION_LEASE_AUTHORITY = (
-    "causal_ordinary_nonspell_terminal_continuation_lease_v2"
+    "causal_ordinary_nonspell_terminal_continuation_lease_v3"
 )
 CORRIDOR_ALLOWED_ACTION_AUTHORITY = "exact_corridor_viability_v1"
 _ORDINARY_PREEXHAUSTION_ACTIONS = tuple(
@@ -1894,6 +1898,15 @@ def _build_ordinary_continuation_lease(
     fresh_geometry_changed: bool,
 ) -> OrdinaryContinuationLease:
     """Retain one exact delayed predecessor as a no-write continuation."""
+
+    if (
+        projection.source_semantics_version.split("+", 1)[0]
+        != ORDINARY_FUTURE_SOURCE_SEMANTICS_VERSION
+    ):
+        raise ValueError(
+            "continuation lease requires exact active-hostile source "
+            "trajectory coverage"
+        )
 
     issue_delay = issue_frame - root_frame
     branches = enumerate_delayed_issue_pipeline_branches(
@@ -6639,15 +6652,9 @@ def _run_live_session(
                 )
                 if ordinary_continuation_issue_check.valid:
                     ordinary_continuation_issue_geometry_check = (
-                        check_continuation_enemy_geometry(
+                        check_continuation_enemy_snapshot(
                             ordinary_continuation_lease,
-                            body_root_frame=(
-                                captured_iteration.snapshot_frame
-                            ),
-                            valid_from_frame=counter_at_action,
-                            enemy_bodies=(
-                                issue_enemy_bodies_for_shadow
-                            ),
+                            snapshot=issue_enemy_prefix_snapshot,
                         )
                     )
                 lease_transaction = decision.issue_recertification
@@ -7020,15 +7027,9 @@ def _run_live_session(
                 )
                 if retained_issue_check.valid:
                     retained_geometry_check = (
-                        check_continuation_enemy_geometry(
+                        check_continuation_enemy_snapshot(
                             lease_before_post_issue,
-                            body_root_frame=(
-                                captured_iteration.snapshot_frame
-                            ),
-                            valid_from_frame=counter_at_action,
-                            enemy_bodies=(
-                                issue_enemy_bodies_for_shadow
-                            ),
+                            snapshot=issue_enemy_prefix_snapshot,
                         )
                     )
                     ordinary_continuation_issue_geometry_check = (
@@ -7511,7 +7512,7 @@ def _run_live_session(
                 }
                 record["ordinary_terminal_continuation_lease"] = {
                     "schema": (
-                        "th08-ordinary-terminal-continuation-lease-v2"
+                        "th08-ordinary-terminal-continuation-lease-v3"
                     ),
                     "authority": (
                         ORDINARY_CAUSAL_CONTINUATION_LEASE_AUTHORITY
@@ -7564,8 +7565,8 @@ def _run_live_session(
                         "new_complete_mask_requires_new_exact_predecessor"
                     ),
                     "fresh_geometry_rule": (
-                        "fresh_body_envelopes_must_be_contained_by_old_"
-                        "certified_active_or_future_source_aabbs"
+                        "fresh_observation_seam_must_be_contained_by_old_"
+                        "exact_active_or_future_source_trajectories"
                     ),
                 }
                 record["corridor_delivery"] = {

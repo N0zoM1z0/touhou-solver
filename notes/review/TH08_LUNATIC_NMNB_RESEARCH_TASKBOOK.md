@@ -589,11 +589,13 @@ it.
    ECL/timeline/callback/motion case into free space.
 4. Keep the physically effective computation-delay/action-conditioned table:
    local ranking orders work only; the fresh exact issue-age row is authority.
-5. Keep the implemented versioned terminal-continuation lease fail closed: a
+5. Keep the implemented source-v13/lease-v3 continuation authority fail closed: a
    compatible fallback root renews held/no-write first; another direction
    requires a new safe final-age predecessor. Root, epoch, stage, phase,
-   pending support, exact position, expiry, or an uncontained fresh-body
-   envelope revokes it. Preserve the native one-frame publication-to-motion
+   pending support, exact position, expiry, old source semantics, unstable
+   snapshot, or an uncontained fresh observation revokes it. Active hostile
+   bodies use the original exact ECL/native-motion trajectory; never restart a
+   fresh linear future. Preserve the native one-frame publication-to-motion
    phase: observations use published input; positions use shifted motion.
 6. The retained f817/833/835/850/910 empty actual rows and physical
    f1456/f1469/f1470/f1479 and f3191/f3192 continuations regress. Stage-3
@@ -605,10 +607,11 @@ it.
    consumed. Parent `5fc6d92` cross-workload runs then produced Stage-4A
    18/10 versus direct baseline 21/12 and Stage-5 exactly 18/10 versus 18/10;
    zero leases were consumed in either. Preserve these fail-closed results.
-   Replace the inconsistent fresh linear future with complete active-hostile
-   source trajectories and observation-time containment; do not weaken
-   unknown topology or future-source coverage. Aggregate hits alone do not
-   validate the lease.
+   Source v13 now replaces the inconsistent fresh linear future with complete
+   active-hostile source trajectories and observation-time containment; do
+   not weaken unknown topology or future-source coverage. Physically rotate
+   Stage 3, then Stage 4A if lease consumption appears. Aggregate hits alone
+   do not validate the lease.
 7. Evaluate remaining hostile-birth uncertainty and only then local micro
    ranking after lease authority is physically effective; repeat a winner
    before a full route.

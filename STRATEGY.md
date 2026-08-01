@@ -257,6 +257,18 @@ easing bits, current/fractional timer `+0x2DE4/+0x2DE0`, and duration
 Linux and 147 Windows tests pass; Stage-3 full-horizon delivery is the next
 physical falsifier.
 
+Stage-3 `20260801_163434` passes that narrow semantic falsifier but exposes
+the next delivery boundary. Source-v14 completed 801/1,275 roots and 58 full
+H268 roots, up from 645/1,235 and 47 under v13; the targeted loop/set and
+timed-motion failures disappeared. However, all three ordinary hit windows
+still had zero exact authority. The first full root before f1253 was f1223,
+submitted at f1230, and its 2352.884 ms solve completed only at f1371. Thus
+v14 is retained as exact model progress, while the 4-versus-7 different-RNG
+hit delta has no promotion value. The next authority gate is earlier exact
+closure of newly reached `0x19`, `0x6F`, bottom-level `0x35`, and resulting
+transform semantics; hidden operands and unavailable stack state remain
+UNKNOWN.
+
 The authorized Stage-4A physical run `20260731_220830` did not exercise that
 authority: all 1,754 live source projections were incomplete, chiefly because
 the former sparse capture crossed the manager frame 1,726 times. Consequently

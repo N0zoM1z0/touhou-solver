@@ -225,7 +225,15 @@ displacement/start, easing mode, fractional/current timer, and duration; it is
 never inferred from instantaneous velocity. The native timer current field is
 `+0x2DE4`, not timer-base/previous `+0x2DDC`, so state 3 now also receives the
 actual remaining timer. Missing/malformed fields remain UNKNOWN. Physical
-full-H268 delivery remains unpromoted.
+source-v14 run `20260801_163434` raised complete roots from 645 to 801 and
+full-H268 roots from 47 to 58, removing those named failures. Full-H268
+delivery remains unpromoted as action authority: every ordinary pre-hit
+240-frame window still had zero exact authority. The first complete root
+before canonical hit f1253 was f1223; it was submitted at f1230 and its
+2352.884 ms solve completed only at f1371. Exact source coverage must move
+upstream across newly reached main/auxiliary semantics far enough to cover
+the observed compute/publication delay. Aggregate 4-versus-7 hits use
+different RNG and are observational only.
 
 Physical run `20260731_152921` found two independent invalidations. First,
 `player+0xE2A68` retains the deathbomb-window limit installed by

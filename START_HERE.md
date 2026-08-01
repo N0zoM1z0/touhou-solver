@@ -14,12 +14,28 @@ authority.
 
 - Branch: `main`.
 - Last physical checkpoint:
-  `lunatic_route2_stage3_unattended_20260801_155718`. It completed Stage 3
-  with seven hits at `[1263,2136,6695,7711,13011,13860,25791]` (five
-  nonspell, two spell), hard no-Bomb, an accepted Route-2 Lunatic replay
+  `lunatic_route2_stage3_unattended_20260801_163434`. It completed Stage 3
+  with four hits at `[1253,2141,8884,16134]` (three nonspell, one spell),
+  hard no-Bomb, an accepted Route-2 Lunatic replay
   SHA-256
-  `e100140171749ef039f13634afc2df369298a967af043bc89d8490440eaf43ee`,
+  `0c65e8835b7cd9c6837cc0cbf37575552dc86e660d11d1e6c0cc7cc057bda80e`,
   and cleanup. Different-RNG totals remain observational.
+- **Observed source-v14 physical result:** 801/1,275 source roots completed
+  versus 645/1,235 in source-v13 `155718`; 58 versus 47 carried the full
+  H268. The targeted main `0x05`/`0x06` and captured movement-state-2
+  failures disappeared. Exact prepublication/delayed/lease authority was
+  effective on 316/7/5 issues, with three lease creates and four renewals.
+  This physically validates the v14 semantic correction, not route
+  improvement.
+- **Observed remaining latency/coverage mismatch:** all three ordinary hits
+  still had zero exact authority in their prior 240-frame windows. Before
+  canonical hit f1253, the first full-H268 root was f1223 and was submitted
+  at f1230, but its 2352.884 ms solve completed at f1371, after the hit and
+  after expiry. Closing reached main/auxiliary semantics must move complete
+  coverage more than the observed roughly 141-frame publication delay. The
+  next concrete blockers are main float-add `0x19`, main/auxiliary transform
+  definition `0x6F`, auxiliary return `0x35`, dynamic type/color, auxiliary
+  `0x25`, and the resulting active transform programs.
 - **Observed lease-v4 physical result:** one lease was created and one
   renewed; 31 decisions captured it, 30 selected it, and 29 exact no-write
   issues were effective from f1725 through f1783. All retained the certified
@@ -36,7 +52,7 @@ authority.
   f1263, the first nontruncated full-H268 root appeared only at f1249, too late
   to solve and publish. Exact closure of these reached source states is now
   the next general gate; local ranking and stage waypoints remain behind it.
-- **Implemented source semantics v14, awaiting physical delivery gate:**
+- **Implemented source semantics v14; physical semantic gate passed:**
   shipped `enemy_ecl_vm_step` confirms main opcodes `0x05` and `0x06` share
   the already-bounded local loop/set semantics. Shipped
   `enemy_motion_update` confirms state 2 requires stored displacement
@@ -45,8 +61,8 @@ authority.
   those fields and corrects the former `+0x2DDC` previous/current timer
   confusion, which also affected state 3. Missing or malformed timed state
   remains UNKNOWN. Linux focused and 147 Windows tests pass. Old retained
-  state-2/3 roots cannot be uplifted; the next Stage-3 run must measure true
-  full-H268 delivery and proximate authority.
+  state-2/3 roots cannot be uplifted. Physical `163434` confirms more complete
+  and full-H268 roots, but not enough pre-hit lead for publication.
 - **Observed Stage-3 first mismatch:** 701/1,214 source attempts failed because
   timeline 2 retained a nonzero fractional timer component; 465 crossed the
   native clock bracket. Every one of the 49 source attempts in the f7695..7935
@@ -316,6 +332,7 @@ Latest user-authorized Lunatic Route-2 practice ring:
 | Workload | Run | Hits | First hit | Bombs | Replay |
 | --- | --- | ---: | ---: | ---: | --- |
 | Stage 3 lease-v4 persistence gate | `20260801_155718` | 7 | 1263 | 0 | accepted |
+| Stage 3 source-v14 delivery gate | `20260801_163434` | 4 | 1253 | 0 | accepted |
 | Stage 3 | `20260731_091104` | 5 | 2150 | 0 | accepted |
 | Stage 4A | `20260731_091925` | 13 | 2555 | 0 | accepted |
 | Stage 5 | `20260731_093027` | 12 | 2124 | 0 | accepted |
@@ -524,25 +541,26 @@ Do not rerun the rejected scalar-reserve or H=32 signed-terminal design. The
 future-source, retained-chain, delayed-pipeline, and fresh-hostile-body gates
 pass. Next:
 
-1. Lease v4 passed its narrow Lunatic Stage-3 mechanism gate in
-   `20260801_155718`: 29 effective held/no-write issues preserved the exact
-   certified direction and the only revocation was terminal expiry. Do not
-   interpret the different-RNG seven-hit/five-nonspell result as improvement.
-   Every ordinary hit's prior 240-frame window still had zero exact authority.
-   Source semantics v14 now closes reached main ECL `0x05`/`0x06`, captures
-   the complete state-2 motion root, and fixes the state-3 current-timer
-   offset. Run Stage 3 to test whether full H268 is now available early enough
-   to solve and publish; reject it if those blockers merely move downstream.
+1. Lease v4 passed its narrow persistence gate in `155718`; source v14 then
+   passed its targeted physical semantic gate in `163434`: complete roots rose
+   645→801 and full-H268 roots 47→58, with the intended opcode/motion failures
+   gone. It did not close global delivery. The first pre-hit full root was only
+   30 frames early while its solve completed about 141 frames later. Close the
+   newly reached exact main/auxiliary semantics (`0x19`, `0x6F`, bottom-level
+   `0x35`, then the exposed transform cases) far enough upstream to cover
+   publication latency. Dynamic operands or unavailable call-stack state
+   remain fail closed.
 2. The f817/833/835/850/910 retained chain and physical f1456/f1469/f1470/
    f1479 continuation now regress. Empty actual rows, terminal expiry, and
    final-age misses remain fail closed.
 3. Keep observed-
    body early kill still only an objective inside the hard set. Retain the
    first ordinary hit and exact lease exposure.
-4. Lease authority is now physically effective, but full-horizon future
-   source delivery is not. Classify remaining hostile-birth uncertainty and
-   local micro-ranking only after the reached source truncations are closed.
-   Do not compensate with a stage waypoint.
+4. Lease authority is physically effective and source v14 materially improves
+   full-horizon coverage, but proximate pre-hit delivery is still absent.
+   Classify remaining hostile-birth uncertainty and local micro-ranking only
+   after reached source truncations are early enough to survive the measured
+   compute/publication pipeline. Do not compensate with a stage waypoint.
 
 Do not compensate with a stage-specific waypoint.
 

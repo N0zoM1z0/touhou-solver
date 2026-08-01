@@ -625,8 +625,15 @@ it.
    the next gate is exact full-H268 source closure for reached main ECL
    `0x05`/`0x06` and captured movement state 2. Source v14 implements those
    semantics and fixes the state-3 timer current offset from `+0x2DDC` to
-   `+0x2DE4`; missing timed roots remain UNKNOWN. Rotate Stage 4A only after
-   a focused Stage-3 full-H268 delivery check.
+   `+0x2DE4`; missing timed roots remain UNKNOWN. Stage-3 `163434` confirms
+   that correction physically: complete roots rose 645→801, full-H268 roots
+   47→58, and the named failures disappeared. It still delivered zero exact
+   authority in all three ordinary pre-hit windows. The first full root before
+   f1253 was only 30 frames early and its 2352.884 ms solve completed at f1371,
+   after the hit. Close newly reached exact `0x19`, `0x6F`, bottom-level
+   `0x35`, and subsequent transform cases far enough upstream to cover the
+   measured publication delay. Rotate Stage 4A only after deterministic
+   source lead improves; hidden state remains fail closed.
 7. Evaluate remaining hostile-birth uncertainty and only then local micro
    ranking after lease authority is physically effective; repeat a winner
    before a full route.

@@ -587,14 +587,17 @@ it.
    projection geometry across the publication prefix and corridor horizon.
 3. Preserve fail-closed source semantics; never convert an unsupported
    ECL/timeline/callback/motion case into free space.
-4. Run the already authorized single Stage-4A physical test with
-   observed-body early kill only inside the new viable set.
-5. Verify effective exact constraints, prefix/source version matches,
-   deadline/fallback behavior, hard no-Bomb, and retain the first-hit witness.
-6. Rotate to Stage 5 only if Stage 4A materially improves.
-7. Evaluate hostile-birth uncertainty or local micro ranking only after
-   global action authority is physically effective; repeat a winner before a
-   full route.
+4. Keep the physically effective computation-delay/action-conditioned table:
+   local ranking orders work only; the fresh exact issue-age row is authority.
+5. Build a versioned terminal-continuation lease so a later unconstrained
+   iteration cannot immediately discard an effective delayed direction. Any
+   root/version/phase/pending/fresh-body mismatch must revoke it.
+6. Regress retained f817/833/835/850/910 plus the physical intermediate-safe/
+   final-miss records, then rotate to Lunatic Stage 3 or 4A with hard no-Bomb
+   and observed-body early kill only inside the exact set.
+7. Evaluate remaining hostile-birth uncertainty and only then local micro
+   ranking after lease authority is physically effective; repeat a winner
+   before a full route.
 
 Optional warm-service work and learned/MCTS candidate ordering stay behind
 this backlog unless branch latency becomes the measured bottleneck.

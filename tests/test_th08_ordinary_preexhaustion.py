@@ -10,13 +10,61 @@ from th08_live.controller import (
     _ordinary_prefix_candidate_actions,
     _ordinary_submission_projection,
     _ordinary_terminal_probe_actions,
+    _prioritize_ordinary_delayed_actions,
     _ordinary_target_query_frame,
+    _select_delayed_issue_action,
 )
+from th08_local_planner import RobustActionCertificate
 from th08_time_scale import TH08_UNIT_TIME_SCALE_BITS
 from touhou_control.local_pipeline_oracle import LocalPipelineRoot
 
 
 class OrdinaryNonspellPreexhaustionTests(unittest.TestCase):
+    def test_delayed_issue_selection_uses_only_the_observed_age_row(
+        self,
+    ) -> None:
+        safe_left = RobustActionCertificate(
+            action="left_fast",
+            delay_frames=(0, 1, 2),
+            worst_collisions=0,
+            min_clearance=4.0,
+            cvar_risk=10.0,
+            worst_delay=2,
+        )
+        unsafe_right = RobustActionCertificate(
+            action="right_fast",
+            delay_frames=(0, 1, 2),
+            worst_collisions=1,
+            min_clearance=-1.0,
+            cvar_risk=20.0,
+            worst_delay=2,
+        )
+
+        action, certificate, reason = _select_delayed_issue_action(
+            certificates_by_issue_delay={
+                7: {"left_fast": safe_left, "right_fast": unsafe_right},
+                8: {"right_fast": unsafe_right},
+            },
+            issue_age=7,
+            planned_action="right_fast",
+            preferred_action="left_fast",
+        )
+
+        self.assertEqual(action, "left_fast")
+        self.assertIs(certificate, safe_left)
+        self.assertEqual(
+            reason, "preferred_action_safe_for_observed_issue_age"
+        )
+        self.assertEqual(
+            _select_delayed_issue_action(
+                certificates_by_issue_delay={7: {"left_fast": safe_left}},
+                issue_age=8,
+                planned_action="left_fast",
+                preferred_action=None,
+            ),
+            (None, None, "issue_age_outside_certified_support"),
+        )
+
     def test_terminal_probe_is_a_bounded_held_and_recovery_subset(
         self,
     ) -> None:
@@ -33,6 +81,24 @@ class OrdinaryNonspellPreexhaustionTests(unittest.TestCase):
         self.assertEqual(
             tuple(action.name for action in selected),
             ("right_fast", "left_fast", "up_fast"),
+        )
+
+    def test_delayed_computation_prioritizes_local_proposal_without_authority(
+        self,
+    ) -> None:
+        candidates = _ordinary_terminal_probe_actions(
+            held_action="up_right",
+            recovery_distances=(),
+        )
+
+        prioritized = _prioritize_ordinary_delayed_actions(
+            candidates,
+            planned_action="right_fast",
+        )
+
+        self.assertEqual(
+            tuple(action.name for action in prioritized),
+            ("right_fast", "up_right", "left_fast"),
         )
 
     def test_prefix_certificate_selection_is_a_bounded_terminal_subset(

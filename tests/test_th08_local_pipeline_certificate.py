@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import random
+import struct
 import unittest
 
 import numpy as np
@@ -28,13 +29,18 @@ from th08_live_dodge_agent import (
     _build_bullet_frames,
     _build_packed_laser_collision_frames,
     _causal_pipeline_player_positions,
+    _delayed_causal_pipeline_player_positions,
+    _advance_planner_action,
     _hazards_for_positions,
     _legacy_robust_action_certificates,
     _robust_action_certificates,
     _direct_root_certificate_shadow,
+    _recertify_delayed_issue_rows_for_fresh_enemy_bodies,
 )
+from th08_live.local_certificates import delayed_issue_action_certificates
 from touhou_control.local_pipeline_oracle import (
     LocalPipelineRoot,
+    enumerate_delayed_issue_pipeline_branches,
     scalar_local_pipeline_certificates,
 )
 from touhou_control.corridor import AabbHazard, AabbTrajectoryHazard
@@ -46,6 +52,190 @@ def _unit_scale_bits(horizon: int) -> tuple[int, ...]:
 
 
 class Th08LocalPipelineCertificateTests(unittest.TestCase):
+    def test_fresh_enemy_body_slab_is_conditioned_after_each_issue_age(
+        self,
+    ) -> None:
+        left_fast = next(
+            action for action in _PLANNER_ACTIONS
+            if action.name == "left_fast"
+        )
+
+        def empty_hazard(
+            positions_x: np.ndarray,
+            positions_y: np.ndarray,
+            **_ignored: object,
+        ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+            count = positions_x.size
+            return (
+                np.zeros(count),
+                np.zeros(count, dtype=np.int32),
+                np.full(count, np.inf),
+            )
+
+        issue_delays = (1, 3)
+        scale_bits = _unit_scale_bits(5)
+        base = delayed_issue_action_certificates(
+            hazards_for_positions=empty_hazard,
+            player_x=100.0,
+            player_y=300.0,
+            actions=(left_fast,),
+            issue_delay_frames=issue_delays,
+            pickup_delay_frames=(0,),
+            horizon_frames=5,
+            bullets=(),
+            lasers=(),
+            enemy_bodies=(),
+            snapshot_lag=0,
+            player_scale_bits=scale_bits,
+            laser_scale_bits=scale_bits,
+            pipeline_root=LocalPipelineRoot("stay", "stay"),
+        )
+        recertified = _recertify_delayed_issue_rows_for_fresh_enemy_bodies(
+            certificates_by_issue_delay=base,
+            root=LocalPipelineRoot("stay", "stay"),
+            actions=(left_fast,),
+            issue_delay_frames=issue_delays,
+            pickup_delay_frames=(0,),
+            horizon_frames=5,
+            player_x=100.0,
+            player_y=300.0,
+            enemy_bodies=(
+                EnemyBody(
+                    pointer=0x1000,
+                    x=84.0,
+                    y=300.0,
+                    vx=0.0,
+                    vy=0.0,
+                    half_width=1.0,
+                    half_height=1.0,
+                    flags=1,
+                ),
+            ),
+            player_scale_bits=scale_bits,
+            laser_scale_bits=scale_bits,
+        )
+
+        self.assertGreater(
+            recertified[1]["left_fast"].worst_collisions, 0
+        )
+        self.assertEqual(
+            recertified[3]["left_fast"].worst_collisions, 0
+        )
+
+    def test_packed_delayed_paths_match_native_order_scalar_bits(self) -> None:
+        horizon = 9
+        scale_bits = (
+            TH08_UNIT_TIME_SCALE_BITS,
+            0x3F000000,
+            0x3F400000,
+        ) * 3
+        root = LocalPipelineRoot(
+            active_action="up_left",
+            held_desired_action="right_fast",
+            pending_action="right_fast",
+            remaining_delay_support=(0, 2, 5),
+        )
+        issue_delays = (0, 3, 6)
+        pickup_delays = (0, 2)
+        branches = enumerate_delayed_issue_pipeline_branches(
+            root=root,
+            selected_action="down_left",
+            issue_delay_frames=issue_delays,
+            pickup_delay_frames=pickup_delays,
+            horizon_frames=horizon,
+        )
+        packed = _delayed_causal_pipeline_player_positions(
+            root=root,
+            selected_action="down_left",
+            issue_delay_frames=issue_delays,
+            pickup_delay_frames=pickup_delays,
+            horizon_frames=horizon,
+            player_x=9.25,
+            player_y=430.75,
+            player_scale_bits=scale_bits,
+        )
+        action_by_name = {action.name: action for action in _PLANNER_ACTIONS}
+        expected = [[(9.25, 430.75) for _ in branches]]
+        branch_positions = expected[0]
+        for step in range(1, horizon + 1):
+            branch_positions = [
+                _advance_planner_action(
+                    x,
+                    y,
+                    action_by_name[branch.active_actions[step - 1]],
+                    time_scale_bits=scale_bits[step - 1],
+                )
+                for (x, y), branch in zip(branch_positions, branches)
+            ]
+            expected.append(branch_positions)
+
+        def bits(value: float) -> bytes:
+            return struct.pack("<f", value)
+
+        self.assertEqual(len(packed), len(expected))
+        for packed_step, expected_step in zip(packed, expected):
+            self.assertEqual(len(packed_step), len(expected_step))
+            for packed_position, expected_position in zip(
+                packed_step, expected_step
+            ):
+                self.assertEqual(bits(packed_position[0]), bits(expected_position[0]))
+                self.assertEqual(bits(packed_position[1]), bits(expected_position[1]))
+
+    def test_delayed_issue_table_is_conditioned_on_observed_issue_age(
+        self,
+    ) -> None:
+        left_fast = next(
+            action for action in _PLANNER_ACTIONS
+            if action.name == "left_fast"
+        )
+        right = next(
+            action for action in _PLANNER_ACTIONS
+            if action.name == "right"
+        )
+
+        def terminal_right_hazard(
+            positions_x: np.ndarray,
+            positions_y: np.ndarray,
+            *,
+            step: int,
+            **_ignored: object,
+        ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+            clearance = (
+                100.0 - positions_x
+                if step == 5
+                else np.full(positions_x.size, 100.0)
+            )
+            collisions = (clearance <= 0.0).astype(np.int32)
+            risk = np.square(np.maximum(-clearance, 0.0))
+            return risk, collisions, clearance
+
+        rows = delayed_issue_action_certificates(
+            hazards_for_positions=terminal_right_hazard,
+            player_x=100.0,
+            player_y=300.0,
+            actions=(left_fast, right),
+            issue_delay_frames=(1, 3),
+            pickup_delay_frames=(0, 2),
+            horizon_frames=5,
+            bullets=(),
+            lasers=(),
+            enemy_bodies=(),
+            snapshot_lag=0,
+            player_scale_bits=_unit_scale_bits(5),
+            laser_scale_bits=_unit_scale_bits(5),
+            pipeline_root=LocalPipelineRoot("right", "right"),
+        )
+
+        self.assertEqual(rows[1]["left_fast"].worst_collisions, 0)
+        self.assertGreater(rows[1]["left_fast"].min_clearance, 0.0)
+        self.assertGreater(rows[3]["left_fast"].worst_collisions, 0)
+        self.assertFalse(rows[1]["right"].write_required)
+        self.assertEqual(rows[1]["right"].pipeline_branch_count, 1)
+        self.assertEqual(
+            rows[1]["right"].worst_collisions,
+            rows[3]["right"].worst_collisions,
+        )
+
     def test_causal_player_paths_preserve_held_no_write_pending_support(
         self,
     ) -> None:

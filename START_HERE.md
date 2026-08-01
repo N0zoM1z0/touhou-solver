@@ -14,17 +14,27 @@ authority.
 
 - Branch: `main`.
 - Last physical checkpoint:
-  `lunatic_route2_stage5_unattended_20260801_093817`. It completed 20 hits,
-  first hit 1873, hard no-Bomb, accepted replay, and cleanup. Its different-RNG
-  total is observational; CE-0250's latency/authority sequence is the result.
-- **Observed physical latency boundary:** predecessor geometry can be correct
-  offline yet expire in live delivery. Stage-5 `092136` spent 796.649 ms in
-  one all-action terminal probe and issued from a snapshot 70 frames old.
-  The bounded-subset correction made the action-conditioned held witness
-  effective seven times in `093817`, then it correctly became unsafe 106
-  frames before the canonical hit. The unresolved priority is the exact
-  computation-delay/old-pending/new-write causal transition, not scalar
-  reserve, hostile-birth ranking, or local micro-ranking.
+  `lunatic_route2_stage5_unattended_20260801_115838`. It completed 18 hits,
+  10 nonspell, hard no-Bomb, accepted Route-2 Lunatic replay SHA-256
+  `00d8cd9839a5f972b1be144e3b7314e5c4e5afca473bcfbb974e9568d446fcfb`,
+  and cleanup. Its different-RNG total is observational; CE-0251's exact
+  authority conversion and latency reduction are the result.
+- **Observed physical latency correction:** the ordinary fallback now builds
+  an action-conditioned H80 predecessor indexed by final observed issue age,
+  including computation, old pending evolution, held no-write, replacement,
+  pickup delay 0..6, complete future births, and a fresh hostile-body slab.
+  Packed player paths are bitwise equal to native-order scalar movement.
+  Incremental action evaluation is ordered by a no-authority local proposal
+  and reuses that immutable proposal after the scan. In `115838`, 11/21 scans
+  physically acquired exact authority; median issue age was 25 frames versus
+  43 before proposal reuse. CE-0250's zero-transition blocker is closed.
+- **Remaining ordinary blocker:** exact authority is not yet a persistent
+  lease. Some final-age rows are empty, unsafe candidate sequences can still
+  consume H80, and a later unconstrained iteration can replace a previously
+  safe direction. `115838` still had 10 nonspell hits. The next general work
+  is terminal-continuation/lease authority, followed by a rotated Stage-3 or
+  4A gate; scalar reserve remains rejected and local ranking is not safety
+  authority.
 - Native H=32 wind-tunnel checkpoint: `3d15953`; it is historical evidence,
   not the live ordinary horizon.
 - Workspace-prune checkpoint: `be3e583` (`Prune TH08 active research
@@ -32,10 +42,13 @@ authority.
   priority-17, and old focused Final-B lanes while preserving the promoted
   baseline/pre-loss live path, native snapshot executor, exact pipeline
   workspace, and Final-B scale authority.
-- Current complete Linux discovery passes 1,240 tests in 9.894 seconds.
-  Complete Windows UNC discovery passes 1,240 tests with three platform
-  skips in 23.118 seconds. Linux and Windows native builds pass the
-  checked-in 44-symbol ABI gate.
+- Affected Linux and Windows focused discovery passes 126 delayed-pipeline,
+  local-certificate, preexhaustion, and controller tests. Complete Linux
+  discovery ran 1,284 tests in 10.659 seconds and exposed five unrelated
+  workspace failures: four pre-existing native ABI header/binary-versus-
+  manifest mismatches and the preserved user-edited factorized report's
+  worker count 8 versus the old test expectation 16. Do not rewrite that user
+  artifact or rebuild unrelated native outputs as part of this checkpoint.
 - **Implemented, factorized hard lower authority:** default-off
   `--ordinary-preexhaustion-authority` no longer uses scalar reserve or the
   coarse signed terminal tensor. Ordinary nonspells build a 4px Boolean
@@ -435,20 +448,22 @@ and explicit `STRATEGY.md` decision.
 ## Next Useful Gate
 
 Do not rerun the rejected scalar-reserve or H=32 signed-terminal design. The
-future-source and factorized retained-chain semantic gates pass. Next:
+future-source, retained-chain, delayed-pipeline, and fresh-hostile-body gates
+pass. Next:
 
-1. Run the continuously authorized fresh Stage-4A physical trial from the
-   persistent zero-copy capture checkpoint with ordinary prepublication
-   authority and observed-body early kill enabled.
-2. Confirm that complete future-source projections publish, the 4px active
-   kernel remains serviceable, held-prefix sets affect issue, empty/gap states
-   are never relaxed, no Bomb is emitted, and the first-hit witness is
-   retained.
-3. Rotate to Stage 5 only if Stage 4A materially improves as the user
-   requested.
-4. Treat the physical first hit as the next counterexample. Hostile-birth
-   uncertainty or local micro-ranking is later work only if the new hard
-   authority is physically effective.
+1. Turn one effective delayed action into a versioned lease: later iterations
+   may retain it only while the original exact row still covers the current
+   age, player phase, action/pending state, complete future slab, and fresh
+   hostile-body geometry. A new direction requires a new exact predecessor.
+2. Regress the f817/833/835/850/910 retained chain and the physical
+   intermediate-safe/final-miss records. Empty rows, terminal expiry, and
+   timeouts must remain fail closed.
+3. Rotate the next physical workload to Lunatic Stage 3 or 4A with observed-
+   body early kill still only an objective inside the hard set. Retain the
+   first ordinary hit and exact lease exposure.
+4. Only after lease authority is physically effective, classify remaining
+   hostile-birth uncertainty and then local micro-ranking. Do not compensate
+   with a stage waypoint.
 
 Do not compensate with a stage-specific waypoint.
 

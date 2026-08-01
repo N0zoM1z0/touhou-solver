@@ -48,6 +48,7 @@ from th08_ecl_runtime import (
     EclVmSnapshot,
     TaggedVelocityToggle,
 )
+from th08_ecl_vm_state import float32_from_bits
 from th08_ecl_tool.core import parse_ecl
 from th08_future_hazard_projection import (
     OrdinaryFutureHazardProjection,
@@ -208,6 +209,7 @@ from th08_live.kill_before_saturation import (
 )
 from th08_live.local_certificates import (
     control_prefix_hazards as _control_prefix_hazards_impl,
+    delayed_issue_action_certificates as _delayed_issue_action_certificates_impl,
     legacy_robust_action_certificates as _legacy_robust_action_certificates_impl,
     robust_action_certificates as _robust_action_certificates_impl,
 )
@@ -406,6 +408,7 @@ from touhou_control.input_clock import (
 )
 from touhou_control.local_pipeline_oracle import (
     LocalPipelineRoot,
+    enumerate_delayed_issue_pipeline_branches,
     enumerate_local_pipeline_branches,
 )
 from touhou_control.phase_progress import (  # noqa: F401
@@ -485,6 +488,11 @@ ORDINARY_AUTHORITY_NATIVE_WORKERS = 8
 ORDINARY_AUTHORITY_MIN_TERMINAL_LEAD = LIVE_ACTION_HOLD_MAX + 1
 ORDINARY_TERMINAL_PROBE_ACTION_LIMIT = 3
 ORDINARY_PREFIX_CERTIFICATE_ACTION_LIMIT = 3
+ORDINARY_CAUSAL_ISSUE_DELAY_MIN = 0
+ORDINARY_CAUSAL_ISSUE_DELAY_MAX = 79
+ORDINARY_CAUSAL_ISSUE_BIN_FRAMES = 16
+ORDINARY_CAUSAL_SCAN_INTERVAL_FRAMES = 60
+ORDINARY_CAUSAL_HOLD_COMPATIBILITY_ENABLED = False
 DIAGNOSTIC_ROOT_ONLY_SCALE_HORIZON = max(
     MAX_ACTION_CONTIGUOUS_ADVANCE_FRAMES,
     MAX_SENSOR_EPOCH_EXTENT_FRAMES
@@ -516,6 +524,9 @@ ORDINARY_PREEXHAUSTION_AUTHORITY = (
 )
 ORDINARY_CAUSAL_HOLD_AUTHORITY = (
     "causal_ordinary_nonspell_constant_hold_remaining_horizon_v2"
+)
+ORDINARY_CAUSAL_DELAYED_ISSUE_AUTHORITY = (
+    "causal_ordinary_nonspell_delayed_issue_horizon_v1"
 )
 CORRIDOR_ALLOWED_ACTION_AUTHORITY = "exact_corridor_viability_v1"
 _ORDINARY_PREEXHAUSTION_ACTIONS = tuple(
@@ -603,6 +614,35 @@ def _ordinary_terminal_probe_actions(
         for action in _PLANNER_ACTIONS
         if action.name == name
     )
+
+
+def _prioritize_ordinary_delayed_actions(
+    actions: tuple[PlannerAction, ...],
+    *,
+    planned_action: str,
+    limit: int = ORDINARY_TERMINAL_PROBE_ACTION_LIMIT,
+) -> tuple[PlannerAction, ...]:
+    """Put the already-observed local proposal first for computation only.
+
+    This ordering never grants authority or removes the exact held/no-write
+    path from a candidate certificate.  It only decides which independent
+    action-conditioned predecessor is computed first.
+    """
+
+    if limit <= 0:
+        raise ValueError("ordinary delayed action limit must be positive")
+    by_name = {action.name: action for action in _PLANNER_ACTIONS}
+    ordered: list[PlannerAction] = []
+    for candidate in (
+        by_name.get(planned_action),
+        *actions,
+    ):
+        if candidate is None or candidate in ordered:
+            continue
+        ordered.append(candidate)
+        if len(ordered) >= limit:
+            break
+    return tuple(ordered)
 
 
 def _finalize_ordinary_terminal_probe(
@@ -1482,6 +1522,349 @@ def _causal_pipeline_player_positions(
     return tuple(tuple(positions) for positions in positions_by_step)
 
 
+def _delayed_causal_pipeline_player_positions(
+    *,
+    root: LocalPipelineRoot,
+    selected_action: str,
+    issue_delay_frames: tuple[int, ...],
+    pickup_delay_frames: tuple[int, ...],
+    horizon_frames: int,
+    player_x: float,
+    player_y: float,
+    player_scale_bits: tuple[int, ...],
+) -> tuple[tuple[tuple[float, float], ...], ...]:
+    """Pack exact emission-time paths through computation and pickup.
+
+    The previous scalar implementation repeated the native-order movement
+    interpreter once per hidden branch.  That made the computation delay we
+    were trying to certify dominate the real issue age.  Planner action
+    velocities and every intermediate store are binary32 here, matching the
+    packed certificate kernel while retaining every delayed-issue branch.
+    """
+
+    if len(player_scale_bits) < horizon_frames:
+        raise ValueError("delayed causal path lacks time-scale coverage")
+    action_table = tuple(_LOCAL_PIPELINE_STATE_ACTIONS)
+    action_index_by_name = {
+        action.name: index for index, action in enumerate(action_table)
+    }
+    branches = enumerate_delayed_issue_pipeline_branches(
+        root=root,
+        selected_action=selected_action,
+        issue_delay_frames=issue_delay_frames,
+        pickup_delay_frames=pickup_delay_frames,
+        horizon_frames=horizon_frames,
+    )
+    unknown_names = {
+        name
+        for branch in branches
+        for name in branch.active_actions
+        if name not in action_index_by_name
+    }
+    if unknown_names:
+        raise ValueError(
+            f"delayed causal path contains unknown actions: "
+            f"{sorted(unknown_names)}"
+        )
+    packed_motion = np.asarray(
+        [
+            tuple(
+                action_index_by_name[name]
+                for name in branch.active_actions
+            )
+            for branch in branches
+        ],
+        dtype=np.int16,
+    )
+    packed_dx = np.asarray(
+        [action.dx for action in action_table], dtype=np.float32
+    )
+    packed_dy = np.asarray(
+        [action.dy for action in action_table], dtype=np.float32
+    )
+    positions_x = np.full(len(branches), player_x, dtype=np.float32)
+    positions_y = np.full(len(branches), player_y, dtype=np.float32)
+    positions_by_step: list[tuple[tuple[float, float], ...]] = [
+        tuple(
+            (float(x), float(y))
+            for x, y in zip(positions_x, positions_y)
+        )
+    ]
+    for step in range(1, horizon_frames + 1):
+        motion_indices = packed_motion[:, step - 1]
+        scale = np.float32(
+            float32_from_bits(player_scale_bits[step - 1])
+        )
+        positions_x = np.clip(
+            positions_x + packed_dx[motion_indices] * scale,
+            PLAYFIELD_LEFT,
+            PLAYFIELD_RIGHT,
+        ).astype(np.float32, copy=False)
+        positions_y = np.clip(
+            positions_y + packed_dy[motion_indices] * scale,
+            PLAYFIELD_TOP,
+            PLAYFIELD_BOTTOM,
+        ).astype(np.float32, copy=False)
+        positions_by_step.append(
+            tuple(
+                (float(x), float(y))
+                for x, y in zip(positions_x, positions_y)
+            )
+        )
+    return tuple(positions_by_step)
+
+
+def _delayed_issue_action_certificates(
+    *,
+    root: LocalPipelineRoot,
+    actions: tuple[PlannerAction, ...],
+    issue_delay_frames: tuple[int, ...],
+    pickup_delay_frames: tuple[int, ...],
+    horizon_frames: int,
+    player_x: float,
+    player_y: float,
+    bullets: tuple[Bullet, ...],
+    lasers: tuple[Laser, ...],
+    enemy_bodies: tuple[EnemyBody, ...],
+    snapshot_lag: int,
+    player_scale_bits: tuple[int, ...],
+    laser_scale_bits: tuple[int, ...],
+    future_hazard_projection: OrdinaryFutureHazardProjection,
+    source_frame: int,
+) -> tuple[
+    dict[int, dict[str, RobustActionCertificate]],
+    dict[str, OrdinaryFutureHazardProjection],
+]:
+    """Build a hard action table conditioned on observable issue age."""
+
+    if not future_hazard_projection.source_closure_complete:
+        raise ValueError("delayed causal certificate lacks source closure")
+    if not future_hazard_projection.coverage.complete:
+        raise ValueError("delayed causal certificate lacks future coverage")
+    certificates: dict[int, dict[str, RobustActionCertificate]] = {
+        issue_delay: {} for issue_delay in issue_delay_frames
+    }
+    conditioned_projections: dict[
+        str, OrdinaryFutureHazardProjection
+    ] = {}
+    issue_delay_bins = tuple(
+        issue_delay_frames[start : start + ORDINARY_CAUSAL_ISSUE_BIN_FRAMES]
+        for start in range(
+            0,
+            len(issue_delay_frames),
+            ORDINARY_CAUSAL_ISSUE_BIN_FRAMES,
+        )
+    )
+    bullet_frames = _build_bullet_frames(
+        bullets,
+        horizon=horizon_frames,
+        snapshot_lag=-max(0, snapshot_lag),
+    )
+    laser_frames = _build_packed_laser_collision_frames(
+        lasers,
+        horizon=horizon_frames,
+        time_scale_schedule_bits=laser_scale_bits[:horizon_frames],
+    )
+    for action in actions:
+        for issue_delay_bin in issue_delay_bins:
+            player_positions = _delayed_causal_pipeline_player_positions(
+                root=root,
+                selected_action=action.name,
+                issue_delay_frames=issue_delay_bin,
+                pickup_delay_frames=pickup_delay_frames,
+                horizon_frames=horizon_frames,
+                player_x=player_x,
+                player_y=player_y,
+                player_scale_bits=player_scale_bits,
+            )
+            conditioned = condition_future_hazard_projection_on_player_paths(
+                future_hazard_projection,
+                source_frame=source_frame,
+                horizon_frames=horizon_frames,
+                player_positions_by_step=player_positions,
+            )
+            projection_key = (
+                f"{action.name}@{issue_delay_bin[0]}-"
+                f"{issue_delay_bin[-1]}"
+            )
+            conditioned_projections[projection_key] = conditioned
+
+            def hazards_for_positions(
+                positions_x: np.ndarray,
+                positions_y: np.ndarray,
+                *,
+                step: int,
+                bullet_frame: tuple[np.ndarray, ...],
+                lasers: tuple[Laser, ...] | _PackedLaserFrame,
+                enemy_bodies: tuple[EnemyBody, ...],
+            ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+                return _hazards_for_positions_with_future_projection(
+                    positions_x,
+                    positions_y,
+                    step=step,
+                    bullet_frame=bullet_frame,
+                    lasers=lasers,
+                    enemy_bodies=enemy_bodies,
+                    future_hazard_projection=conditioned,
+                    future_projection_offset=0,
+                )
+
+            action_rows = _delayed_issue_action_certificates_impl(
+                hazards_for_positions=hazards_for_positions,
+                player_x=player_x,
+                player_y=player_y,
+                actions=(action,),
+                issue_delay_frames=issue_delay_bin,
+                pickup_delay_frames=pickup_delay_frames,
+                horizon_frames=horizon_frames,
+                bullets=bullets,
+                lasers=lasers,
+                enemy_bodies=enemy_bodies,
+                snapshot_lag=snapshot_lag,
+                player_scale_bits=player_scale_bits,
+                laser_scale_bits=laser_scale_bits,
+                pipeline_root=root,
+                bullet_frames=bullet_frames,
+                laser_frames=laser_frames,
+            )
+            for issue_delay, row in action_rows.items():
+                certificates[issue_delay].update(row)
+    return certificates, conditioned_projections
+
+
+def _recertify_delayed_issue_rows_for_fresh_enemy_bodies(
+    *,
+    certificates_by_issue_delay: dict[
+        int, dict[str, RobustActionCertificate]
+    ],
+    root: LocalPipelineRoot,
+    actions: tuple[PlannerAction, ...],
+    issue_delay_frames: tuple[int, ...],
+    pickup_delay_frames: tuple[int, ...],
+    horizon_frames: int,
+    player_x: float,
+    player_y: float,
+    enemy_bodies: tuple[EnemyBody, ...],
+    player_scale_bits: tuple[int, ...],
+    laser_scale_bits: tuple[int, ...],
+) -> dict[int, dict[str, RobustActionCertificate]]:
+    """Intersect root certificates with one fresh issue-time body slab.
+
+    Fresh bodies are aligned back to the same observable root by
+    ``EnemyBodyModeMemory``.  Only steps after each branch's eventual issue
+    age are evaluated: the earlier prefix has already physically happened by
+    the time this refresh is observed.  The operation covers every issue-age
+    row before the final issue-age read, so its own computation is included
+    in the subsequently observed delay.
+    """
+
+    if not certificates_by_issue_delay:
+        return {}
+    body_rows = _delayed_issue_action_certificates_impl(
+        hazards_for_positions=_hazards_for_positions,
+        player_x=player_x,
+        player_y=player_y,
+        actions=actions,
+        issue_delay_frames=issue_delay_frames,
+        pickup_delay_frames=pickup_delay_frames,
+        horizon_frames=horizon_frames,
+        bullets=(),
+        lasers=(),
+        enemy_bodies=enemy_bodies,
+        snapshot_lag=0,
+        player_scale_bits=player_scale_bits,
+        laser_scale_bits=laser_scale_bits,
+        pipeline_root=root,
+        evaluate_after_issue_only=True,
+    )
+    recertified: dict[int, dict[str, RobustActionCertificate]] = {}
+    for issue_delay in issue_delay_frames:
+        base_row = certificates_by_issue_delay.get(issue_delay, {})
+        body_row = body_rows.get(issue_delay, {})
+        merged_row: dict[str, RobustActionCertificate] = {}
+        for action in actions:
+            base = base_row.get(action.name)
+            body = body_row.get(action.name)
+            if base is None or body is None:
+                continue
+            merged_row[action.name] = replace(
+                base,
+                worst_collisions=max(
+                    base.worst_collisions,
+                    body.worst_collisions,
+                ),
+                min_clearance=min(
+                    base.min_clearance,
+                    body.min_clearance,
+                ),
+                cvar_risk=base.cvar_risk + body.cvar_risk,
+            )
+        recertified[issue_delay] = merged_row
+    return recertified
+
+
+def _select_delayed_issue_action(
+    *,
+    certificates_by_issue_delay: dict[
+        int, dict[str, RobustActionCertificate]
+    ],
+    issue_age: int,
+    planned_action: str,
+    preferred_action: str | None,
+) -> tuple[str | None, RobustActionCertificate | None, str]:
+    """Choose only from the hard row for the now-observed issue age."""
+
+    row = certificates_by_issue_delay.get(issue_age)
+    if row is None:
+        return None, None, "issue_age_outside_certified_support"
+    safe = {
+        action: certificate
+        for action, certificate in row.items()
+        if (
+            certificate.worst_collisions == 0
+            and certificate.min_clearance > 0.0
+        )
+    }
+    if not safe:
+        return None, None, "observed_issue_row_empty"
+    for reason, action in (
+        ("planned_action_safe_for_observed_issue_age", planned_action),
+        (
+            "preferred_action_safe_for_observed_issue_age",
+            preferred_action,
+        ),
+    ):
+        if action is not None and action in safe:
+            return action, safe[action], reason
+    action, certificate = min(
+        safe.items(),
+        key=lambda item: (
+            -item[1].min_clearance,
+            item[1].cvar_risk,
+            item[0],
+        ),
+    )
+    return action, certificate, "best_margin_for_observed_issue_age"
+
+
+def _contiguous_integer_ranges(
+    values: tuple[int, ...],
+) -> tuple[tuple[int, int], ...]:
+    if not values:
+        return ()
+    ordered = tuple(sorted(set(values)))
+    ranges: list[tuple[int, int]] = []
+    start = previous = ordered[0]
+    for value in ordered[1:]:
+        if value == previous + 1:
+            previous = value
+            continue
+        ranges.append((start, previous))
+        start = previous = value
+    ranges.append((start, previous))
+    return tuple(ranges)
+
+
 def _direct_root_certificate_shadow(
     *,
     root: LocalPipelineRoot,
@@ -1742,6 +2125,94 @@ def choose_local_proposal_request(
 
     return LocalProposal.from_decision(
         _choose_action_decision_request(request)
+    )
+
+
+def _local_planner_request_from_capture(
+    *,
+    capture: CapturedIteration,
+    pipeline_root: LocalPipelineRoot | None,
+    action_hold_frames: int,
+    corridor_target: tuple[float, float, int] | None,
+    policy_guidance: object,
+    allowed_action_authority: str | None,
+    horizon: int,
+    threat_horizon: int,
+    beam_width: int,
+    losing_control_reserve: bool,
+    preserve_previous_direction_inertia: bool,
+    damage_target_x: float | None = None,
+    damage_target_half_width: float = 0.0,
+    damageable: bool = False,
+) -> LocalPlannerRequest:
+    """Assemble one immutable local request from the captured version."""
+
+    return LocalPlannerRequest(
+        physical=PhysicalHazardSnapshot(
+            player_x=capture.player_x,
+            player_y=capture.player_y,
+            bullets=capture.bullets,
+            lasers=capture.lasers,
+            time_scale_schedule=capture.time_scale_schedule,
+            enemy_bodies=capture.enemy_bodies,
+            items=capture.items,
+            snapshot_lag=capture.player_to_hazard_lag,
+        ),
+        actuator=ActuatorPipeline(
+            previous_direction=capture.previous_direction,
+            can_bomb=capture.can_bomb,
+            previous_focus=bool(capture.held_desired_mask & FOCUS),
+            control_delay_frames=capture.control_delay_frames,
+            control_delay_candidates=capture.delay_estimate.support,
+            action_hold_frames=action_hold_frames,
+            local_pipeline_root=pipeline_root,
+        ),
+        guidance=GlobalGuidance(
+            target_x=(
+                corridor_target[0] if corridor_target is not None else None
+            ),
+            target_y=(
+                corridor_target[1] if corridor_target is not None else None
+            ),
+            target_deadline=(
+                corridor_target[2] if corridor_target is not None else None
+            ),
+            allowed_first_actions=policy_guidance.allowed_first_actions,
+            allowed_action_authority=allowed_action_authority,
+            allow_coarse_viability_relaxation=(
+                allowed_action_authority
+                not in (
+                    ORDINARY_PREEXHAUSTION_AUTHORITY,
+                    ORDINARY_CAUSAL_HOLD_AUTHORITY,
+                )
+            ),
+            viability_repair_volumes=policy_guidance.repair_volumes,
+            viability_recovery_distances=policy_guidance.recovery_distances,
+            viability_safety_actions=policy_guidance.safety_actions,
+            viability_safety_state_value=policy_guidance.safety_state_value,
+            viability_survival_actions=policy_guidance.survival_actions,
+            viability_survival_frames=policy_guidance.survival_frames,
+            viability_survival_bottleneck_margin=(
+                policy_guidance.survival_bottleneck_margin
+            ),
+            viability_position_error=policy_guidance.position_error,
+        ),
+        config=PlannerConfig(
+            horizon=horizon,
+            threat_horizon=threat_horizon,
+            beam_width=beam_width,
+            losing_control_reserve=losing_control_reserve,
+            preserve_previous_direction_inertia=(
+                preserve_previous_direction_inertia
+            ),
+        ),
+        objective=ObjectiveContext(
+            power=capture.power,
+            bombs=capture.bombs,
+            damage_target_x=damage_target_x,
+            damage_target_half_width=damage_target_half_width,
+            damageable=damageable,
+        ),
     )
 
 
@@ -2105,6 +2576,9 @@ def _run_live_session(
         OrdinaryFutureSourceCaptureResult | None
     ) = None
     ordinary_future_source_last_submit = CORRIDOR_INITIAL_SUBMIT_FRAME
+    ordinary_causal_delayed_last_scan: (
+        tuple[tuple[int, int], int] | None
+    ) = None
     enemy_future: Future[EnemyPoolSnapshot] | None = None
     enemy_snapshot: EnemyPoolSnapshot | None = None
     enemy_last_submit = CORRIDOR_INITIAL_SUBMIT_FRAME
@@ -4015,6 +4489,9 @@ def _run_live_session(
                     )
                 )
                 ordinary_future_source_last_submit = counter_after_read
+            pending_command_estimate = delay_estimator.pending_estimate(
+                frame=counter_after_read,
+            )
             corridor_started = time.perf_counter()
             corridor_updated = False
             corridor_completed = False
@@ -4207,9 +4684,6 @@ def _run_live_session(
             observed_input_action = _action_name_from_mask(
                 captured_iteration.native_active_mask
             )
-            pending_command_estimate = delay_estimator.pending_estimate(
-                frame=counter_after_read,
-            )
             policy_query_request = PolicyQueryRequest(
                 solution=corridor_solution,
                 target_frame=(
@@ -4330,6 +4804,7 @@ def _run_live_session(
             ordinary_prefix_certificate_ms = 0.0
             ordinary_terminal_probe_ms = 0.0
             published_future_projection = None
+            delayed_projection_source = "unavailable"
             future_projection_offset = -1
             ordinary_authority_solution: CorridorSolution | None = None
             ordinary_future_policy_query_frame = 0
@@ -4439,6 +4914,7 @@ def _run_live_session(
                         )
                     )
                     if prefix_projection_usable:
+                        delayed_projection_source = "global_solution"
                         ordinary_prefix_certified_frames = (
                             candidate_prefix_certified_frames
                         )
@@ -4586,6 +5062,32 @@ def _run_live_session(
                                     > 0.0
                                 )
                             )
+            if (
+                published_future_projection is None
+                and ordinary_future_source_result is not None
+            ):
+                candidate_projection = (
+                    ordinary_future_source_result.closure.projection
+                )
+                candidate_offset = (
+                    captured_iteration.snapshot_frame
+                    - candidate_projection.root_frame
+                )
+                if (
+                    candidate_projection.source_closure_complete
+                    and candidate_projection.coverage.complete
+                    and candidate_offset >= 0
+                    and (
+                        candidate_offset
+                        + TH08_CORRIDOR_CONFIG.horizon_frames
+                        <= candidate_projection.horizon_frames
+                    )
+                ):
+                    published_future_projection = candidate_projection
+                    future_projection_offset = candidate_offset
+                    delayed_projection_source = (
+                        "latest_complete_future_source_capture"
+                    )
             if ordinary_terminal_probe_result is not None:
                 ordinary_preexhaustion = (
                     _finalize_ordinary_terminal_probe(
@@ -4631,7 +5133,9 @@ def _run_live_session(
                     selected_actions=(),
                     )
                 )
-            ordinary_causal_hold_reason = "not_needed"
+            # Compatibility trace only: the held-only v2 authority is
+            # superseded by the contingent delayed-issue table below.
+            ordinary_causal_hold_reason = "superseded_by_delayed_issue_v1"
             ordinary_causal_hold_action: str | None = None
             ordinary_causal_hold_safe = False
             ordinary_causal_hold_min_clearance: float | None = None
@@ -4641,12 +5145,66 @@ def _run_live_session(
             ordinary_causal_hold_projection_digest: str | None = None
             ordinary_causal_hold_horizon = 0
             ordinary_causal_hold_ms = 0.0
+            ordinary_causal_delayed_reason = "not_needed"
+            ordinary_causal_delayed_actions: tuple[str, ...] = ()
+            ordinary_causal_delayed_evaluated_actions: tuple[str, ...] = ()
+            ordinary_causal_delayed_incremental_observations: tuple[
+                tuple[str, int, bool], ...
+            ] = ()
+            ordinary_causal_delayed_ranking_action: str | None = None
+            ordinary_causal_delayed_ranking_ms = 0.0
+            ordinary_causal_delayed_ranking_proposal: (
+                LocalProposal | None
+            ) = None
+            ordinary_causal_delayed_ranking_proposal_reused = False
+            ordinary_causal_delayed_safe_union: tuple[str, ...] = ()
+            ordinary_causal_delayed_issue_support: tuple[int, ...] = ()
+            ordinary_causal_delayed_pickup_support: tuple[int, ...] = ()
+            ordinary_causal_delayed_certificates: dict[
+                int, dict[str, RobustActionCertificate]
+            ] = {}
+            ordinary_causal_delayed_projection_records: tuple[
+                tuple[str, str, int], ...
+            ] = ()
+            ordinary_causal_delayed_horizon = 0
+            ordinary_causal_delayed_ms = 0.0
+            ordinary_causal_delayed_fresh_enemy_ms = 0.0
+            ordinary_causal_delayed_fresh_enemy_reason = "not_needed"
+            ordinary_causal_delayed_post_fresh_safe_union: tuple[
+                str, ...
+            ] = ()
+            ordinary_causal_delayed_trigger_reason = (
+                ordinary_preexhaustion.reason
+            )
+            ordinary_causal_delayed_scan_key = (
+                gameplay_epoch,
+                int(state["stage_route_index"]),
+            )
+            ordinary_causal_delayed_scan_due = bool(
+                ordinary_causal_delayed_last_scan is None
+                or ordinary_causal_delayed_last_scan[0]
+                != ordinary_causal_delayed_scan_key
+                or (
+                    captured_iteration.snapshot_frame
+                    - ordinary_causal_delayed_last_scan[1]
+                    >= ORDINARY_CAUSAL_SCAN_INTERVAL_FRAMES
+                )
+            )
             if (
-                ordinary_preexhaustion_authority
+                observed_local_pipeline_root is not None
+                and observed_local_pipeline_root.pending_action is not None
+            ):
+                ordinary_causal_delayed_reason = (
+                    "older_pending_must_resolve_before_delayed_direction_scan"
+                )
+            if (
+                ORDINARY_CAUSAL_HOLD_COMPATIBILITY_ENABLED
+                and ordinary_preexhaustion_authority
                 and ordinary_preexhaustion.authority_eligible
                 and ordinary_preexhaustion.reason
                 == "prepublication_viable_predecessor_empty"
                 and observed_local_pipeline_root is not None
+                and observed_local_pipeline_root.pending_action is None
             ):
                 ordinary_causal_hold_reason = "prerequisite_unavailable"
                 held_action_name = (
@@ -4778,6 +5336,266 @@ def _run_live_session(
                     ordinary_causal_hold_ms = (
                         time.perf_counter() - causal_hold_started
                     ) * 1000.0
+            if (
+                ordinary_preexhaustion_authority
+                and not bool(spell_state["active"])
+                and int(player["phase"]) not in (1, 2)
+                and (
+                    player_control_root.scale_bits
+                    == TH08_UNIT_TIME_SCALE_BITS
+                )
+                and ordinary_preexhaustion.reason
+                in {
+                    "prepublication_viable_predecessor_empty",
+                    "future_policy_unavailable",
+                }
+                and observed_local_pipeline_root is not None
+                and observed_local_pipeline_root.pending_action is None
+                and ordinary_causal_delayed_scan_due
+            ):
+                ordinary_causal_delayed_last_scan = (
+                    ordinary_causal_delayed_scan_key,
+                    captured_iteration.snapshot_frame,
+                )
+                ordinary_causal_delayed_reason = "prerequisite_unavailable"
+                ranking_started = time.perf_counter()
+                ranking_authority = (
+                    CORRIDOR_ALLOWED_ACTION_AUTHORITY
+                    if (
+                        corridor_action_authority
+                        and actionable_policy_guidance.allowed_first_actions
+                        is not None
+                    )
+                    else None
+                )
+                ranking_proposal = choose_local_proposal_request(
+                    _local_planner_request_from_capture(
+                        capture=published_guidance.capture,
+                        pipeline_root=observed_local_pipeline_root,
+                        action_hold_frames=action_hold_frames,
+                        corridor_target=actionable_corridor_target,
+                        policy_guidance=actionable_policy_guidance,
+                        allowed_action_authority=ranking_authority,
+                        horizon=args.horizon,
+                        threat_horizon=args.threat_horizon,
+                        beam_width=args.beam_width,
+                        losing_control_reserve=(
+                            args.losing_control_reserve
+                        ),
+                        preserve_previous_direction_inertia=(
+                            not corridor_context_changed
+                        ),
+                    )
+                )
+                ordinary_causal_delayed_ranking_action = (
+                    ranking_proposal.decision.action
+                )
+                ordinary_causal_delayed_ranking_proposal = ranking_proposal
+                ordinary_causal_delayed_ranking_ms = (
+                    time.perf_counter() - ranking_started
+                ) * 1000.0
+                causal_actions = _ordinary_terminal_probe_actions(
+                    held_action=(
+                        observed_local_pipeline_root.held_desired_action
+                    ),
+                    recovery_distances=policy_guidance.recovery_distances,
+                )
+                causal_actions = _prioritize_ordinary_delayed_actions(
+                    causal_actions,
+                    planned_action=(
+                        ordinary_causal_delayed_ranking_action
+                    ),
+                )
+                causal_horizon = (
+                    min(
+                        TH08_CORRIDOR_CONFIG.horizon_frames,
+                        (
+                            published_future_projection.horizon_frames
+                            - future_projection_offset
+                        ),
+                    )
+                    if isinstance(
+                        published_future_projection,
+                        OrdinaryFutureHazardProjection,
+                    )
+                    and future_projection_offset >= 0
+                    else 0
+                )
+                causal_pickup_delay_frames = tuple(
+                    range(LIVE_ACTION_HOLD_MAX + 1)
+                )
+                causal_issue_delay_frames = tuple(
+                    range(
+                        ORDINARY_CAUSAL_ISSUE_DELAY_MIN,
+                        min(
+                            ORDINARY_CAUSAL_ISSUE_DELAY_MAX,
+                            causal_horizon
+                            - max(causal_pickup_delay_frames)
+                            - 1,
+                        )
+                        + 1
+                    )
+                ) if (
+                    causal_horizon
+                    - max(causal_pickup_delay_frames)
+                    - 1
+                    >= ORDINARY_CAUSAL_ISSUE_DELAY_MIN
+                ) else ()
+                causal_projection_usable = bool(
+                    causal_actions
+                    and isinstance(
+                        published_future_projection,
+                        OrdinaryFutureHazardProjection,
+                    )
+                    and future_projection_offset >= 0
+                    and causal_issue_delay_frames
+                    and future_projection_offset + causal_horizon
+                    <= published_future_projection.horizon_frames
+                )
+                if causal_projection_usable:
+                    ordinary_causal_delayed_actions = tuple(
+                        action.name for action in causal_actions
+                    )
+                    ordinary_causal_delayed_issue_support = (
+                        causal_issue_delay_frames
+                    )
+                    ordinary_causal_delayed_pickup_support = (
+                        causal_pickup_delay_frames
+                    )
+                    ordinary_causal_delayed_horizon = causal_horizon
+                    causal_delayed_started = time.perf_counter()
+                    try:
+                        causal_player_scale_bits = (
+                            captured_iteration.time_scale_schedule
+                            .require_player_horizon(causal_horizon)
+                        )
+                        causal_laser_scale_bits = (
+                            captured_iteration.time_scale_schedule
+                            .require_laser_horizon(causal_horizon)
+                        )
+                        causal_projections: dict[
+                            str, OrdinaryFutureHazardProjection
+                        ] = {}
+                        incremental_observations: list[
+                            tuple[str, int, bool]
+                        ] = []
+                        evaluated_action_names: list[str] = []
+                        # Candidate actions are independent exact
+                        # predecessors.  Stop once one is safe at the
+                        # non-authoritative intermediate age instead of
+                        # spending the remaining physical lease computing
+                        # actions that cannot enlarge that certificate.  The
+                        # later fresh read and exact issue-age row remain the
+                        # only authority.
+                        for causal_action in causal_actions:
+                            action_rows, action_projections = (
+                                _delayed_issue_action_certificates(
+                                    root=observed_local_pipeline_root,
+                                    actions=(causal_action,),
+                                    issue_delay_frames=(
+                                        causal_issue_delay_frames
+                                    ),
+                                    pickup_delay_frames=(
+                                        causal_pickup_delay_frames
+                                    ),
+                                    horizon_frames=causal_horizon,
+                                    player_x=player_control_root.x,
+                                    player_y=player_control_root.y,
+                                    bullets=bullets,
+                                    lasers=lasers,
+                                    enemy_bodies=enemy_bodies,
+                                    snapshot_lag=player_to_hazard_lag,
+                                    player_scale_bits=(
+                                        causal_player_scale_bits
+                                    ),
+                                    laser_scale_bits=(
+                                        causal_laser_scale_bits
+                                    ),
+                                    future_hazard_projection=(
+                                        published_future_projection
+                                    ),
+                                    source_frame=(
+                                        captured_iteration.snapshot_frame
+                                    ),
+                                )
+                            )
+                            for issue_delay, row in action_rows.items():
+                                ordinary_causal_delayed_certificates.setdefault(
+                                    issue_delay, {}
+                                ).update(row)
+                            causal_projections.update(action_projections)
+                            evaluated_action_names.append(
+                                causal_action.name
+                            )
+                            intermediate_issue_age = max(
+                                0,
+                                reader.u32(ADDR_ENEMY_MANAGER_FRAME)
+                                - captured_iteration.snapshot_frame,
+                            )
+                            intermediate_certificate = (
+                                action_rows.get(
+                                    intermediate_issue_age, {}
+                                ).get(causal_action.name)
+                            )
+                            intermediate_safe = bool(
+                                intermediate_certificate is not None
+                                and intermediate_certificate
+                                .worst_collisions == 0
+                                and intermediate_certificate.min_clearance
+                                > 0.0
+                            )
+                            incremental_observations.append(
+                                (
+                                    causal_action.name,
+                                    intermediate_issue_age,
+                                    intermediate_safe,
+                                )
+                            )
+                            if intermediate_safe:
+                                break
+                        ordinary_causal_delayed_evaluated_actions = tuple(
+                            evaluated_action_names
+                        )
+                        ordinary_causal_delayed_incremental_observations = (
+                            tuple(incremental_observations)
+                        )
+                        ordinary_causal_delayed_safe_union = tuple(
+                            action.name
+                            for action in causal_actions
+                            if action.name in evaluated_action_names
+                            if any(
+                                action.name in row
+                                and row[action.name].worst_collisions == 0
+                                and row[action.name].min_clearance > 0.0
+                                for row in (
+                                    ordinary_causal_delayed_certificates
+                                    .values()
+                                )
+                            )
+                        )
+                        ordinary_causal_delayed_projection_records = tuple(
+                            (
+                                key,
+                                projection.digest,
+                                len(projection.direct_fire_events),
+                            )
+                            for key, projection in sorted(
+                                causal_projections.items()
+                            )
+                        )
+                        ordinary_causal_delayed_reason = (
+                            "contingent_issue_table_has_safe_action"
+                            if ordinary_causal_delayed_safe_union
+                            else "contingent_issue_table_empty"
+                        )
+                    except (KeyError, TypeError, ValueError) as error:
+                        ordinary_causal_delayed_reason = (
+                            "delayed_causal_conditioning_failed:"
+                            f"{type(error).__name__}:{error}"
+                        )
+                    ordinary_causal_delayed_ms = (
+                        time.perf_counter() - causal_delayed_started
+                    ) * 1000.0
             allowed_action_authority = (
                 CORRIDOR_ALLOWED_ACTION_AUTHORITY
                 if (
@@ -4809,6 +5627,28 @@ def _run_live_session(
                 )
                 allowed_action_authority = (
                     ORDINARY_PREEXHAUSTION_AUTHORITY
+                )
+            if (
+                allowed_action_authority is None
+                and ordinary_causal_delayed_safe_union
+            ):
+                actionable_policy_guidance = replace(
+                    actionable_policy_guidance,
+                    support_covers_current=True,
+                    allowed_first_actions=(
+                        ordinary_causal_delayed_safe_union
+                    ),
+                    repair_volumes=(),
+                    recovery_distances=(),
+                    safety_actions=(),
+                    safety_state_value=None,
+                    survival_actions=(),
+                    survival_frames=None,
+                    survival_bottleneck_margin=None,
+                    position_error=0.0,
+                )
+                allowed_action_authority = (
+                    ORDINARY_CAUSAL_DELAYED_ISSUE_AUTHORITY
                 )
             if (
                 allowed_action_authority is None
@@ -4855,8 +5695,11 @@ def _run_live_session(
             )
                 damageable = boss_phase_progress.state.damageable
             plan_started = time.perf_counter()
-            local_proposal = choose_local_proposal_request(
-                LocalPlannerRequest(
+            local_proposal = (
+                ordinary_causal_delayed_ranking_proposal
+                if ordinary_causal_delayed_ranking_proposal is not None
+                else choose_local_proposal_request(
+                    LocalPlannerRequest(
                     physical=PhysicalHazardSnapshot(
                         player_x=(
                             published_guidance.capture.player_x
@@ -4970,7 +5813,11 @@ def _run_live_session(
                         ),
                         damageable=damageable,
                     ),
+                    )
                 )
+            )
+            ordinary_causal_delayed_ranking_proposal_reused = bool(
+                ordinary_causal_delayed_ranking_proposal is not None
             )
             decision = local_proposal.decision
             if kill_before_saturation_observation.target is not None:
@@ -5102,6 +5949,99 @@ def _run_live_session(
             plan_ms += issue_enemy_recertificate_ms
             post_issue_guard_action = decision.action
             post_issue_guard_mask = decision.mask
+            if (
+                allowed_action_authority
+                == ORDINARY_CAUSAL_DELAYED_ISSUE_AUTHORITY
+                and issue_enemy_changes
+            ):
+                unusable_fresh_enemy_snapshot = any(
+                    change in {"unstable_capture", "frame_reversed"}
+                    for change in issue_enemy_changes
+                )
+                if unusable_fresh_enemy_snapshot:
+                    ordinary_causal_delayed_certificates = {
+                        issue_delay: {}
+                        for issue_delay in (
+                            ordinary_causal_delayed_issue_support
+                        )
+                    }
+                    ordinary_causal_delayed_fresh_enemy_reason = (
+                        "fresh_enemy_snapshot_unstable_fail_closed"
+                    )
+                else:
+                    fresh_body_started = time.perf_counter()
+                    try:
+                        delayed_action_names = set(
+                            ordinary_causal_delayed_evaluated_actions
+                        )
+                        delayed_action_objects = tuple(
+                            action
+                            for action in _PLANNER_ACTIONS
+                            if action.name in delayed_action_names
+                        )
+                        ordinary_causal_delayed_certificates = (
+                            _recertify_delayed_issue_rows_for_fresh_enemy_bodies(
+                                certificates_by_issue_delay=(
+                                    ordinary_causal_delayed_certificates
+                                ),
+                                root=observed_local_pipeline_root,
+                                actions=delayed_action_objects,
+                                issue_delay_frames=(
+                                    ordinary_causal_delayed_issue_support
+                                ),
+                                pickup_delay_frames=(
+                                    ordinary_causal_delayed_pickup_support
+                                ),
+                                horizon_frames=(
+                                    ordinary_causal_delayed_horizon
+                                ),
+                                player_x=player_control_root.x,
+                                player_y=player_control_root.y,
+                                enemy_bodies=(
+                                    issue_enemy_bodies_for_shadow
+                                ),
+                                player_scale_bits=(
+                                    captured_iteration.time_scale_schedule
+                                    .require_player_horizon(
+                                        ordinary_causal_delayed_horizon
+                                    )
+                                ),
+                                laser_scale_bits=(
+                                    captured_iteration.time_scale_schedule
+                                    .require_laser_horizon(
+                                        ordinary_causal_delayed_horizon
+                                    )
+                                ),
+                            )
+                        )
+                        ordinary_causal_delayed_fresh_enemy_reason = (
+                            "fresh_enemy_body_slab_recertified"
+                        )
+                    except (KeyError, TypeError, ValueError) as error:
+                        ordinary_causal_delayed_certificates = {
+                            issue_delay: {}
+                            for issue_delay in (
+                                ordinary_causal_delayed_issue_support
+                            )
+                        }
+                        ordinary_causal_delayed_fresh_enemy_reason = (
+                            "fresh_enemy_body_recertification_failed:"
+                            f"{type(error).__name__}:{error}"
+                        )
+                    ordinary_causal_delayed_fresh_enemy_ms = (
+                        time.perf_counter() - fresh_body_started
+                    ) * 1000.0
+                    plan_ms += ordinary_causal_delayed_fresh_enemy_ms
+            ordinary_causal_delayed_post_fresh_safe_union = tuple(
+                action
+                for action in ordinary_causal_delayed_evaluated_actions
+                if any(
+                    action in row
+                    and row[action].worst_collisions == 0
+                    and row[action].min_clearance > 0.0
+                    for row in ordinary_causal_delayed_certificates.values()
+                )
+            )
             action_issue_observation = observe_action_issue(
                 reader,
                 source_frame=int(state["enemy_manager_frame"]),
@@ -5174,15 +6114,207 @@ def _run_live_session(
             planned_action = decision.action
             planned_mask = decision.mask
             action_deadline_missed = action_alignment.deadline_missed
+            ordinary_issue_age = (
+                counter_at_action - captured_iteration.snapshot_frame
+            )
+            ordinary_causal_delayed_effective_at_issue = False
+            ordinary_causal_delayed_issue_reason = "authority_not_selected"
+            ordinary_causal_delayed_issue_safe_actions: tuple[str, ...] = ()
+            ordinary_causal_delayed_issue_action: str | None = None
+            ordinary_causal_delayed_issue_certificate: (
+                RobustActionCertificate | None
+            ) = None
+            if (
+                allowed_action_authority
+                == ORDINARY_CAUSAL_DELAYED_ISSUE_AUTHORITY
+            ):
+                if not ordinary_issue_phase_eligible:
+                    ordinary_causal_delayed_issue_reason = (
+                        "player_phase_ineligible_at_issue"
+                    )
+                elif ordinary_causal_delayed_fresh_enemy_reason.startswith(
+                    (
+                        "fresh_enemy_snapshot_unstable_fail_closed",
+                        "fresh_enemy_body_recertification_failed:",
+                    )
+                ):
+                    ordinary_causal_delayed_issue_reason = (
+                        ordinary_causal_delayed_fresh_enemy_reason
+                    )
+                else:
+                    (
+                        ordinary_causal_delayed_issue_action,
+                        ordinary_causal_delayed_issue_certificate,
+                        ordinary_causal_delayed_issue_reason,
+                    ) = _select_delayed_issue_action(
+                        certificates_by_issue_delay=(
+                            ordinary_causal_delayed_certificates
+                        ),
+                        issue_age=ordinary_issue_age,
+                        planned_action=planned_action,
+                        preferred_action=(
+                            kill_before_saturation_preferred_action
+                        ),
+                    )
+                    issue_row = ordinary_causal_delayed_certificates.get(
+                        ordinary_issue_age,
+                        {},
+                    )
+                    ordinary_causal_delayed_issue_safe_actions = tuple(
+                        action.name
+                        for action in _PLANNER_ACTIONS
+                        if (
+                            action.name in issue_row
+                            and issue_row[action.name].worst_collisions == 0
+                            and issue_row[action.name].min_clearance > 0.0
+                        )
+                    )
+                    if (
+                        ordinary_causal_delayed_issue_action is not None
+                        and ordinary_causal_delayed_issue_certificate
+                        is not None
+                    ):
+                        selected_action = next(
+                            action
+                            for action in _PLANNER_ACTIONS
+                            if action.name
+                            == ordinary_causal_delayed_issue_action
+                        )
+                        selected_mask = (
+                            SHOT
+                            | (
+                                FOCUS if selected_action.focused else 0
+                            )
+                            | selected_action.direction
+                        )
+                        if selected_mask & BOMB:
+                            raise AssertionError(
+                                "delayed causal authority emitted Bomb"
+                            )
+                        transaction = decision.issue_recertification
+                        if transaction is None:
+                            transaction = IssueRecertification(
+                                planned_action=planned_action,
+                                global_allowed_actions=(
+                                    ordinary_causal_delayed_issue_safe_actions
+                                ),
+                                global_constraint_applicable=True,
+                                fresh_safe_actions=(
+                                    ordinary_causal_delayed_issue_safe_actions
+                                ),
+                                fresh_global_intersection=(
+                                    ordinary_causal_delayed_issue_safe_actions
+                                ),
+                                selected_action=selected_action.name,
+                                selection_reason=(
+                                    ordinary_causal_delayed_issue_reason
+                                ),
+                                global_constraint_relaxed=False,
+                                planned_certificate=issue_row.get(
+                                    planned_action
+                                ),
+                                selected_certificate=(
+                                    ordinary_causal_delayed_issue_certificate
+                                ),
+                                preferred_action=(
+                                    kill_before_saturation_preferred_action
+                                ),
+                                preference_reason=(
+                                    "kill_before_saturation_inside_"
+                                    "delayed_causal_viable_set"
+                                    if (
+                                        kill_before_saturation_preferred_action
+                                        is not None
+                                    )
+                                    else None
+                                ),
+                                preference_applied=bool(
+                                    selected_action.name
+                                    == kill_before_saturation_preferred_action
+                                ),
+                                allowed_action_authority=(
+                                    ORDINARY_CAUSAL_DELAYED_ISSUE_AUTHORITY
+                                ),
+                            )
+                        else:
+                            transaction = replace(
+                                transaction,
+                                global_allowed_actions=(
+                                    ordinary_causal_delayed_issue_safe_actions
+                                ),
+                                global_constraint_applicable=True,
+                                fresh_safe_actions=(
+                                    ordinary_causal_delayed_issue_safe_actions
+                                ),
+                                fresh_global_intersection=(
+                                    ordinary_causal_delayed_issue_safe_actions
+                                ),
+                                selected_action=selected_action.name,
+                                selection_reason=(
+                                    ordinary_causal_delayed_issue_reason
+                                ),
+                                global_constraint_relaxed=False,
+                                planned_certificate=issue_row.get(
+                                    planned_action
+                                ),
+                                selected_certificate=(
+                                    ordinary_causal_delayed_issue_certificate
+                                ),
+                                allowed_action_authority=(
+                                    ORDINARY_CAUSAL_DELAYED_ISSUE_AUTHORITY
+                                ),
+                            )
+                        decision = replace(
+                            decision,
+                            mask=selected_mask,
+                            action=selected_action.name,
+                            bomb=False,
+                            planned_focus=selected_action.focused,
+                            robust_delay_frames=(
+                                ordinary_causal_delayed_issue_certificate
+                                .delay_frames
+                            ),
+                            robust_override=bool(
+                                decision.robust_override
+                                or selected_action.name != planned_action
+                            ),
+                            robust_collisions=0,
+                            robust_min_clearance=(
+                                ordinary_causal_delayed_issue_certificate
+                                .min_clearance
+                            ),
+                            robust_cvar_risk=(
+                                ordinary_causal_delayed_issue_certificate
+                                .cvar_risk
+                            ),
+                            robust_worst_delay=(
+                                ordinary_causal_delayed_issue_certificate
+                                .worst_delay
+                            ),
+                            viability_constrained=True,
+                            viability_safe_action_count=len(
+                                ordinary_causal_delayed_issue_safe_actions
+                            ),
+                            viability_constraint_relaxed=False,
+                            issue_recertification=transaction,
+                        )
+                        ordinary_causal_delayed_effective_at_issue = True
             decision = apply_deadline_hold(
                 decision,
-                deadline_missed=action_deadline_missed,
+                deadline_missed=bool(
+                    (
+                        allowed_action_authority
+                        == ORDINARY_CAUSAL_DELAYED_ISSUE_AUTHORITY
+                        and not ordinary_causal_delayed_effective_at_issue
+                    )
+                    or (
+                        action_deadline_missed
+                        and not ordinary_causal_delayed_effective_at_issue
+                    )
+                ),
                 previous_mask=previous_mask,
                 focus_bit=FOCUS,
                 action_name_from_mask=_action_name_from_mask,
-            )
-            ordinary_issue_age = (
-                counter_at_action - captured_iteration.snapshot_frame
             )
             ordinary_issued_action = _action_name_from_mask(decision.mask)
             ordinary_preexhaustion_effective_at_issue = bool(
@@ -5295,7 +6427,10 @@ def _run_live_session(
                 ),
                 "issued_allowed_action_authority": (
                     allowed_action_authority
-                    if not action_deadline_missed
+                    if (
+                        not action_deadline_missed
+                        or ordinary_causal_delayed_effective_at_issue
+                    )
                     else None
                 ),
             }
@@ -5617,6 +6752,157 @@ def _run_live_session(
                         "only_selected_action_hidden_pickup_paths"
                     ),
                 }
+                record["ordinary_causal_delayed_issue"] = {
+                    "schema": (
+                        "th08-ordinary-causal-delayed-issue-table-v1"
+                    ),
+                    "authority": (
+                        ORDINARY_CAUSAL_DELAYED_ISSUE_AUTHORITY
+                    ),
+                    "reason": ordinary_causal_delayed_reason,
+                    "trigger_reason": (
+                        ordinary_causal_delayed_trigger_reason
+                    ),
+                    "scan_due": ordinary_causal_delayed_scan_due,
+                    "scan_interval_frames": (
+                        ORDINARY_CAUSAL_SCAN_INTERVAL_FRAMES
+                    ),
+                    "future_projection_source": delayed_projection_source,
+                    "candidate_actions": ordinary_causal_delayed_actions,
+                    "local_ranking_action": (
+                        ordinary_causal_delayed_ranking_action
+                    ),
+                    "local_ranking_ms": ordinary_causal_delayed_ranking_ms,
+                    "local_ranking_proposal_reused": (
+                        ordinary_causal_delayed_ranking_proposal_reused
+                    ),
+                    "local_ranking_role": (
+                        "computation_order_only_no_action_authority"
+                    ),
+                    "evaluated_actions": (
+                        ordinary_causal_delayed_evaluated_actions
+                    ),
+                    "incremental_stop_observations": tuple(
+                        {
+                            "action": action,
+                            "issue_age_after_action_certificate": issue_age,
+                            "safe_at_intermediate_age": safe,
+                        }
+                        for action, issue_age, safe in (
+                            ordinary_causal_delayed_incremental_observations
+                        )
+                    ),
+                    "incremental_stop_observation_role": (
+                        "scheduling_only_final_fresh_exact_issue_row_"
+                        "remains_authority"
+                    ),
+                    "safe_action_union": (
+                        ordinary_causal_delayed_safe_union
+                    ),
+                    "issue_delay_support": (
+                        ordinary_causal_delayed_issue_support
+                    ),
+                    "issue_delay_support_policy": (
+                        "complete_actionable_horizon_fail_closed_after_"
+                        "terminal_issue_age"
+                    ),
+                    "pickup_delay_support": (
+                        ordinary_causal_delayed_pickup_support
+                    ),
+                    "issue_delay_conditioning_bin_frames": (
+                        ORDINARY_CAUSAL_ISSUE_BIN_FRAMES
+                    ),
+                    "safe_issue_age_ranges": {
+                        action: _contiguous_integer_ranges(
+                            tuple(
+                                issue_delay
+                                for issue_delay, row in (
+                                    ordinary_causal_delayed_certificates
+                                    .items()
+                                )
+                                if (
+                                    action in row
+                                    and row[action].worst_collisions == 0
+                                    and row[action].min_clearance > 0.0
+                                )
+                            )
+                        )
+                        for action in ordinary_causal_delayed_actions
+                    },
+                    "post_fresh_safe_action_union": (
+                        ordinary_causal_delayed_post_fresh_safe_union
+                    ),
+                    "fresh_enemy_recertification_reason": (
+                        ordinary_causal_delayed_fresh_enemy_reason
+                    ),
+                    "fresh_enemy_recertification_ms": (
+                        ordinary_causal_delayed_fresh_enemy_ms
+                    ),
+                    "conditioned_projections": tuple(
+                        {
+                            "action_issue_bin": key,
+                            "digest": digest,
+                            "direct_fire_event_count": event_count,
+                        }
+                        for key, digest, event_count in (
+                            ordinary_causal_delayed_projection_records
+                        )
+                    ),
+                    "certified_horizon_frames": (
+                        ordinary_causal_delayed_horizon
+                    ),
+                    "terminal_continuation": (
+                        "constant_selected_action_through_complete_"
+                        "future_slab_without_saturated_global_kernel"
+                    ),
+                    "elapsed_ms": ordinary_causal_delayed_ms,
+                    "selected_as_allowed_action_authority": (
+                        allowed_action_authority
+                        == ORDINARY_CAUSAL_DELAYED_ISSUE_AUTHORITY
+                    ),
+                    "actual_issue_age_frames": ordinary_issue_age,
+                    "actual_issue_safe_actions": (
+                        ordinary_causal_delayed_issue_safe_actions
+                    ),
+                    "actual_issue_selected_action": (
+                        ordinary_causal_delayed_issue_action
+                    ),
+                    "actual_issue_selection_reason": (
+                        ordinary_causal_delayed_issue_reason
+                    ),
+                    "actual_issue_certificate": (
+                        _robust_action_certificate_record(
+                            ordinary_causal_delayed_issue_certificate
+                        )
+                        if (
+                            ordinary_causal_delayed_issue_certificate
+                            is not None
+                        )
+                        else None
+                    ),
+                    "fresh_enemy_changed": bool(issue_enemy_changes),
+                    "player_phase_eligible": (
+                        ordinary_issue_phase_eligible
+                    ),
+                    "nominal_deadline_missed": action_deadline_missed,
+                    "effective_at_issue": bool(
+                        ordinary_causal_delayed_effective_at_issue
+                    ),
+                    "deadline_bypassed_by_explicit_delay_certificate": bool(
+                        ordinary_causal_delayed_effective_at_issue
+                        and action_deadline_missed
+                    ),
+                    "computation_delay_observation": (
+                        "issue_frame_minus_snapshot_frame"
+                    ),
+                    "no_write_semantics": (
+                        "held_complete_mask_preserves_old_pending"
+                    ),
+                    "future_observation_merge": (
+                        "hidden_old_pending_and_pickup_merged_per_"
+                        "observable_issue_age_bin_before_action_selection"
+                    ),
+                }
                 record["corridor_delivery"] = {
                     "executor_enabled": corridor_executor is not None,
                     "worker_pending": corridor_future is not None,
@@ -5775,6 +7061,9 @@ def _run_live_session(
                 timing_trace_fields["timing_ms"][
                     "ordinary_causal_hold_remaining_horizon"
                 ] = ordinary_causal_hold_ms
+                timing_trace_fields["timing_ms"][
+                    "ordinary_causal_delayed_issue_table"
+                ] = ordinary_causal_delayed_ms
                 record.update(timing_trace_fields)
                 if hit_contact_observation is not None:
                     record["hit_contact_observation"] = (

@@ -76,6 +76,18 @@ class LocalPipelineBranch:
 
 
 @dataclass(frozen=True)
+class DelayedIssuePipelineBranch:
+    """One history when a selected command is issued after computation."""
+
+    selected_action: str
+    issue_delay: int
+    write_required: bool
+    older_remaining: int | None
+    new_delay: int | None
+    active_actions: tuple[str, ...]
+
+
+@dataclass(frozen=True)
 class ScalarLocalPipelineCertificate:
     """Lexicographic hard measurements over every hidden local branch."""
 
@@ -154,6 +166,97 @@ def enumerate_local_pipeline_branches(
                     active_actions=tuple(actions),
                 )
             )
+    return tuple(branches)
+
+
+def enumerate_delayed_issue_pipeline_branches(
+    *,
+    root: LocalPipelineRoot,
+    selected_action: str,
+    issue_delay_frames: tuple[int, ...],
+    pickup_delay_frames: tuple[int, ...],
+    horizon_frames: int,
+) -> tuple[DelayedIssuePipelineBranch, ...]:
+    """Enumerate computation, old-pending, issue, and pickup uncertainty.
+
+    No command is written during ``issue_delay``.  An older pending command
+    may therefore become active before issue.  At issue, selecting the held
+    complete mask remains no-write and preserves that pending command;
+    selecting a different mask replaces any still-pending command and samples
+    one new pickup delay.
+    """
+
+    if not selected_action:
+        raise ValueError("selected action cannot be empty")
+    for name, support in (
+        ("issue delay", issue_delay_frames),
+        ("pickup delay", pickup_delay_frames),
+    ):
+        if (
+            not support
+            or tuple(sorted(set(support))) != support
+            or support[0] < 0
+        ):
+            raise ValueError(
+                f"{name} support must be sorted, unique, and nonnegative"
+            )
+    if horizon_frames <= 0:
+        raise ValueError("delayed-issue horizon must be positive")
+    if issue_delay_frames[-1] >= horizon_frames:
+        raise ValueError("issue delay must occur before the horizon")
+
+    write_required = selected_action != root.held_desired_action
+    older_support: tuple[int | None, ...] = (
+        tuple(root.remaining_delay_support)
+        if root.pending_action is not None
+        else (None,)
+    )
+    new_delay_support: tuple[int | None, ...] = (
+        tuple(pickup_delay_frames) if write_required else (None,)
+    )
+    branches: list[DelayedIssuePipelineBranch] = []
+    for issue_delay in issue_delay_frames:
+        for older_remaining in older_support:
+            for new_delay in new_delay_support:
+                actions: list[str] = []
+                old_active_at_issue = (
+                    root.pending_action
+                    if (
+                        root.pending_action is not None
+                        and older_remaining is not None
+                        and issue_delay > older_remaining
+                    )
+                    else root.active_action
+                )
+                for physical_step in range(1, horizon_frames + 1):
+                    if physical_step <= issue_delay or not write_required:
+                        motion = (
+                            root.pending_action
+                            if (
+                                root.pending_action is not None
+                                and older_remaining is not None
+                                and physical_step > older_remaining
+                            )
+                            else root.active_action
+                        )
+                    elif (
+                        new_delay is not None
+                        and physical_step - issue_delay > new_delay
+                    ):
+                        motion = selected_action
+                    else:
+                        motion = old_active_at_issue
+                    actions.append(motion)
+                branches.append(
+                    DelayedIssuePipelineBranch(
+                        selected_action=selected_action,
+                        issue_delay=issue_delay,
+                        write_required=write_required,
+                        older_remaining=older_remaining,
+                        new_delay=new_delay,
+                        active_actions=tuple(actions),
+                    )
+                )
     return tuple(branches)
 
 
@@ -268,9 +371,11 @@ def scalar_local_pipeline_certificates(
 
 
 __all__ = [
+    "DelayedIssuePipelineBranch",
     "LocalPipelineBranch",
     "LocalPipelineRoot",
     "ScalarLocalPipelineCertificate",
+    "enumerate_delayed_issue_pipeline_branches",
     "enumerate_local_pipeline_branches",
     "scalar_local_pipeline_certificates",
 ]

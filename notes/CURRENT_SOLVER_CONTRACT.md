@@ -90,10 +90,27 @@ Selecting the held complete mask remains no-write even when a nominal
 new-command pickup deadline has passed. Its action-conditioned future witness
 is effective only while actual snapshot-to-issue age remains inside the
 certified remaining projection horizon and the issued mask is still the held
-mask. This does not authorize a different input. Physical CE-0250 proves the
-next missing state: a new write must model computation/issue delay, evolution
-of the old pending command before issue, replacement at issue, new pickup
-delay, and publication lead in one causal predecessor.
+mask.
+
+The ordinary delayed predecessor is the exact different-input replacement.
+For every candidate action it retains active input and old pending evolution
+during computation. At each possible issue age, selecting held remains
+no-write; selecting another complete mask replaces any still-pending command
+and universally ranges over pickup delay 0..6. Its selected-action hidden
+paths condition future player-aim events. Rows cover the complete actionable
+H80 interval; phase 1/2, missing coverage, terminal expiry, or nonpositive
+signed clearance returns no authority.
+
+Candidate actions are independent predecessors. A local proposal may order
+their computation but has no action authority. Evaluation stops only after an
+action is safe at a non-authoritative intermediate age; final selection still
+uses the exact issue age after a fresh hostile-body slab has intersected every
+row. The immutable ranking proposal is reused after the scan, but fresh issue
+independently recertifies all local actions. Physical CE-0251 proves this path
+can issue a different safe mask: Stage-5 `20260801_115838` made 11/21 delayed
+scans effective. It does not prove recursive viability. No delayed result may
+persist beyond its exact version/age/root unless a separate lease contract
+proves that continuation.
 
 Physical run `20260731_152921` found two independent invalidations. First,
 `player+0xE2A68` retains the deathbomb-window limit installed by

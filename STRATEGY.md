@@ -117,18 +117,29 @@ fail closed. Windows measured f817 kernel/certificate delivery at 1412/21 ms;
 the five roots have no unresolved action. This is deterministic native-replay
 evidence.
 
-Stage-5 physical runs `20260801_092136` and `20260801_093817` establish the
-current boundary. Offline/native hazard parity is insufficient because the
-live terminal query, sensor, and issue pipeline consume the action lease. The
-first run retained a 796.649 ms terminal probe and a 70-frame-old issue. The
-second run bounded terminal authority to held plus two recovery actions,
-reused the terminal result, and made the remaining-horizon held/no-write
-witness effective seven times. It then declared held `right` unsafe 106 frames
-before the canonical hit, but no exact transition could issue a different
-mask after computation while preserving the old pending command. L3 remains
-default-off and unpromoted. The next general change is an action-conditioned
-predecessor over computation delay, old pending evolution, new write pickup,
-and publication lead; hostile-birth objectives and local ranking remain later.
+Stage-5 physical runs through `20260801_115838` establish the current
+boundary. Offline/native hazard parity is insufficient because the live
+terminal query, sensor, and issue pipeline consume the action lease. The new
+fallback builds an H80 table indexed by final observed issue age. It models
+active input during computation, old pending evolution, held no-write,
+replacement by a different complete mask, pickup delay 0..6, action-
+conditioned future aim, and a fresh hostile-body slab before the final age
+read. Missing rows and nonpositive signed clearance remain fail closed.
+
+Packed binary32 paths are bitwise equal to the scalar native-order oracle.
+Independent action predecessors are evaluated incrementally in the order of
+an already-observed local proposal; that proposal has no action authority and
+is reused only to avoid repeating stale-root computation. Fresh issue still
+recertifies all local actions, and the exact final-age row alone may override
+input. In `115838`, 11/21 delayed scans were physically effective; median
+issue age was 25 frames versus 43 before proposal reuse. The run completed 18
+hits, 10 nonspell, zero Bombs, accepted replay, and cleanup. Different-RNG hit
+counts remain observational. L3 remains default-off and unpromoted because
+this is one-step authority, not a persistent exact lease; later iterations
+can still discard the safe direction and some terminal rows are empty or
+expired. Lease/terminal-continuation authority is next, then a rotated Stage-3
+or 4A gate. Local ranking remains computation order/objective only, never
+survival authority.
 
 The authorized Stage-4A physical run `20260731_220830` did not exercise that
 authority: all 1,754 live source projections were incomplete, chiefly because

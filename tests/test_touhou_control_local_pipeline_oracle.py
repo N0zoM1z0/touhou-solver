@@ -4,12 +4,68 @@ import unittest
 
 from touhou_control.local_pipeline_oracle import (
     LocalPipelineRoot,
+    enumerate_delayed_issue_pipeline_branches,
     enumerate_local_pipeline_branches,
     scalar_local_pipeline_certificates,
 )
 
 
 class LocalPipelineOracleTests(unittest.TestCase):
+    def test_delayed_write_keeps_old_pending_until_issue(self) -> None:
+        root = LocalPipelineRoot(
+            active_action="stay",
+            held_desired_action="left",
+            pending_action="left",
+            remaining_delay_support=(2,),
+        )
+
+        branches = enumerate_delayed_issue_pipeline_branches(
+            root=root,
+            selected_action="right",
+            issue_delay_frames=(1, 3),
+            pickup_delay_frames=(2,),
+            horizon_frames=7,
+        )
+
+        by_issue = {branch.issue_delay: branch for branch in branches}
+        self.assertEqual(
+            by_issue[1].active_actions,
+            ("stay", "stay", "stay", "right", "right", "right", "right"),
+        )
+        self.assertEqual(
+            by_issue[3].active_actions,
+            ("stay", "stay", "left", "left", "left", "right", "right"),
+        )
+
+    def test_delayed_held_selection_is_no_write_and_preserves_pending(
+        self,
+    ) -> None:
+        root = LocalPipelineRoot(
+            active_action="stay",
+            held_desired_action="left",
+            pending_action="left",
+            remaining_delay_support=(1, 3),
+        )
+
+        branches = enumerate_delayed_issue_pipeline_branches(
+            root=root,
+            selected_action="left",
+            issue_delay_frames=(0, 2),
+            pickup_delay_frames=(0, 1, 2),
+            horizon_frames=5,
+        )
+
+        self.assertEqual(len(branches), 4)
+        self.assertTrue(all(not branch.write_required for branch in branches))
+        self.assertTrue(all(branch.new_delay is None for branch in branches))
+        self.assertEqual(
+            {branch.active_actions for branch in branches},
+            {
+                ("stay", "left", "left", "left", "left"),
+                ("stay", "stay", "stay", "left", "left"),
+            },
+        )
+
     def test_zero_remaining_pending_pickup_applies_on_first_step(
         self,
     ) -> None:

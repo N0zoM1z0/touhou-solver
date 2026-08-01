@@ -29,7 +29,10 @@ from th08_live.movement import (
 )
 from th08_live.planner_pass_types import LocalCertificateTimingAccumulator
 from th08_local_planner import PlannerAction, RobustActionCertificate
-from touhou_control.local_pipeline_oracle import LocalPipelineRoot
+from touhou_control.local_pipeline_oracle import (
+    LocalPipelineRoot,
+    enumerate_delayed_issue_pipeline_branches,
+)
 
 HazardQuery = Callable[..., tuple[np.ndarray, np.ndarray, np.ndarray]]
 _LocalCertificateTimingAccumulator = LocalCertificateTimingAccumulator
@@ -536,4 +539,222 @@ def robust_action_certificates(
         timing_accumulator.certificate_total_ms += (
             finished_ns - total_started_ns
         ) * nanoseconds_to_ms
+    return certificates
+
+
+def delayed_issue_action_certificates(
+    *,
+    hazards_for_positions: HazardQuery,
+    player_x: float,
+    player_y: float,
+    actions: tuple[PlannerAction, ...],
+    issue_delay_frames: tuple[int, ...],
+    pickup_delay_frames: tuple[int, ...],
+    horizon_frames: int,
+    bullets: tuple[Bullet, ...],
+    lasers: tuple[Laser, ...],
+    enemy_bodies: tuple[EnemyBody, ...],
+    snapshot_lag: int,
+    player_scale_bits: tuple[int, ...],
+    laser_scale_bits: tuple[int, ...],
+    pipeline_root: LocalPipelineRoot,
+    bullet_frames: tuple[tuple[np.ndarray, ...], ...] | None = None,
+    laser_frames: tuple[_PackedLaserFrame, ...] | None = None,
+    evaluate_after_issue_only: bool = False,
+) -> dict[int, dict[str, RobustActionCertificate]]:
+    """Certify an action table indexed by observable computation delay.
+
+    Each row keeps the issue delay fixed and reduces over only the hidden old
+    pending and new pickup-delay branches.  A caller may therefore observe the
+    actual issue age and choose from that row without requiring one action to
+    survive every possible computation delay.
+    """
+
+    if not actions:
+        return {}
+    for name, support in (
+        ("issue delay", issue_delay_frames),
+        ("pickup delay", pickup_delay_frames),
+    ):
+        if (
+            not support
+            or tuple(sorted(set(support))) != support
+            or support[0] < 0
+        ):
+            raise ValueError(
+                f"{name} support must be sorted, unique, and nonnegative"
+            )
+    if horizon_frames <= issue_delay_frames[-1]:
+        raise ValueError("delayed issue must occur before the horizon")
+    if (
+        len(player_scale_bits) < horizon_frames
+        or len(laser_scale_bits) < horizon_frames
+    ):
+        raise ValueError(
+            "time-scale schedules do not cover delayed-issue certificates"
+        )
+
+    action_by_name = {
+        action.name: action for action in _LOCAL_PIPELINE_STATE_ACTIONS
+    }
+    required_names = {
+        pipeline_root.active_action,
+        pipeline_root.held_desired_action,
+        *(action.name for action in actions),
+    }
+    if pipeline_root.pending_action is not None:
+        required_names.add(pipeline_root.pending_action)
+    unknown_names = required_names - set(action_by_name)
+    if unknown_names:
+        raise ValueError(
+            f"pipeline root contains unknown actions: {sorted(unknown_names)}"
+        )
+
+    branch_action_indices: list[int] = []
+    branch_issue_delays: list[int] = []
+    branch_new_delays: list[int | None] = []
+    branch_older_remaining: list[int | None] = []
+    branch_motion_indices: list[tuple[int, ...]] = []
+    action_name_indices = {
+        name: index for index, name in enumerate(action_by_name)
+    }
+    action_table = tuple(action_by_name.values())
+    for action_index, action in enumerate(actions):
+        for branch in enumerate_delayed_issue_pipeline_branches(
+            root=pipeline_root,
+            selected_action=action.name,
+            issue_delay_frames=issue_delay_frames,
+            pickup_delay_frames=pickup_delay_frames,
+            horizon_frames=horizon_frames,
+        ):
+            branch_action_indices.append(action_index)
+            branch_issue_delays.append(branch.issue_delay)
+            branch_new_delays.append(branch.new_delay)
+            branch_older_remaining.append(branch.older_remaining)
+            branch_motion_indices.append(
+                tuple(
+                    action_name_indices[name]
+                    for name in branch.active_actions
+                )
+            )
+
+    packed_motion = np.asarray(branch_motion_indices, dtype=np.int16)
+    packed_dx = np.asarray(
+        [action.dx for action in action_table], dtype=np.float32
+    )
+    packed_dy = np.asarray(
+        [action.dy for action in action_table], dtype=np.float32
+    )
+    action_indices = np.asarray(branch_action_indices, dtype=np.int16)
+    issue_delays = np.asarray(branch_issue_delays, dtype=np.int16)
+    branch_count = len(branch_action_indices)
+
+    if bullet_frames is None:
+        bullet_frames = _build_bullet_frames(
+            bullets,
+            horizon=horizon_frames,
+            snapshot_lag=-max(0, snapshot_lag),
+        )
+    if laser_frames is None:
+        laser_frames = _build_packed_laser_collision_frames(
+            lasers,
+            horizon=horizon_frames,
+            time_scale_schedule_bits=laser_scale_bits[:horizon_frames],
+        )
+    if (
+        len(bullet_frames) < horizon_frames
+        or len(laser_frames) < horizon_frames
+    ):
+        raise ValueError("hazard timelines do not cover delayed issue")
+    positions_x = np.full(branch_count, player_x, dtype=np.float32)
+    positions_y = np.full(branch_count, player_y, dtype=np.float32)
+    risks = np.zeros(branch_count, dtype=np.float64)
+    collisions = np.zeros(branch_count, dtype=np.int32)
+    minimum = np.full(branch_count, np.inf, dtype=np.float64)
+    for step in range(1, horizon_frames + 1):
+        motion_indices = packed_motion[:, step - 1]
+        scale = np.float32(float32_from_bits(player_scale_bits[step - 1]))
+        positions_x = np.clip(
+            positions_x + packed_dx[motion_indices] * scale,
+            PLAYFIELD_LEFT,
+            PLAYFIELD_RIGHT,
+        ).astype(np.float32, copy=False)
+        positions_y = np.clip(
+            positions_y + packed_dy[motion_indices] * scale,
+            PLAYFIELD_TOP,
+            PLAYFIELD_BOTTOM,
+        ).astype(np.float32, copy=False)
+        evaluated_indices = (
+            np.flatnonzero(step > issue_delays)
+            if evaluate_after_issue_only
+            else np.arange(branch_count)
+        )
+        if not len(evaluated_indices):
+            continue
+        hazard_risk, hazard_collisions, hazard_clearance = (
+            hazards_for_positions(
+                positions_x[evaluated_indices],
+                positions_y[evaluated_indices],
+                step=step,
+                bullet_frame=bullet_frames[step - 1],
+                lasers=laser_frames[step - 1],
+                enemy_bodies=enemy_bodies,
+            )
+        )
+        risks[evaluated_indices] += (
+            _boundary_risk_for_positions(
+                positions_x[evaluated_indices],
+                positions_y[evaluated_indices],
+            )
+            + hazard_risk
+        )
+        collisions[evaluated_indices] += hazard_collisions
+        minimum[evaluated_indices] = np.minimum(
+            minimum[evaluated_indices], hazard_clearance
+        )
+
+    certificates: dict[int, dict[str, RobustActionCertificate]] = {
+        delay: {} for delay in issue_delay_frames
+    }
+    for issue_delay in issue_delay_frames:
+        for action_index, action in enumerate(actions):
+            indices = np.flatnonzero(
+                (issue_delays == issue_delay)
+                & (action_indices == action_index)
+            )
+            if not len(indices):
+                raise RuntimeError("delayed candidate has no pipeline branch")
+            worst_index = max(
+                (int(index) for index in indices),
+                key=lambda index: (
+                    int(collisions[index]),
+                    -float(minimum[index]),
+                    float(risks[index]),
+                ),
+            )
+            tail_count = max(1, math.ceil(0.5 * len(indices)))
+            tail_risks = sorted(
+                (float(risks[index]) for index in indices),
+                reverse=True,
+            )[:tail_count]
+            action_minimum = min(float(minimum[index]) for index in indices)
+            certificates[issue_delay][action.name] = RobustActionCertificate(
+                action=action.name,
+                delay_frames=pickup_delay_frames,
+                worst_collisions=max(
+                    int(collisions[index]) for index in indices
+                ),
+                min_clearance=(
+                    9999.0 if math.isinf(action_minimum) else action_minimum
+                ),
+                cvar_risk=sum(tail_risks) / len(tail_risks),
+                worst_delay=branch_new_delays[worst_index],
+                write_required=(
+                    action.name != pipeline_root.held_desired_action
+                ),
+                pipeline_branch_count=len(indices),
+                worst_pending_remaining=(
+                    branch_older_remaining[worst_index]
+                ),
+            )
     return certificates

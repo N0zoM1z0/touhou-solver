@@ -14,12 +14,28 @@ authority.
 
 - Branch: `main`.
 - Last physical checkpoint:
-  `lunatic_route2_stage3_unattended_20260801_141250`. It completed Stage 3
-  with four hits at `[3181,7956,8414,25932]` (three nonspell, one spell 50),
-  hard no-Bomb, an accepted Route-2 Lunatic replay SHA-256
-  `c1b99e9215e4bd044f574c449a2064837afa531c062cb5709ba559c7371a7d11`,
-  and cleanup. Power fell 128 to 93 after misses. The preceding different-RNG
-  Stage-3 run had one hit; neither aggregate is causal A/B evidence.
+  `lunatic_route2_stage3_unattended_20260801_155718`. It completed Stage 3
+  with seven hits at `[1263,2136,6695,7711,13011,13860,25791]` (five
+  nonspell, two spell), hard no-Bomb, an accepted Route-2 Lunatic replay
+  SHA-256
+  `e100140171749ef039f13634afc2df369298a967af043bc89d8490440eaf43ee`,
+  and cleanup. Different-RNG totals remain observational.
+- **Observed lease-v4 physical result:** one lease was created and one
+  renewed; 31 decisions captured it, 30 selected it, and 29 exact no-write
+  issues were effective from f1725 through f1783. All retained the certified
+  `down_left_fast` movement, emitted no physical input transition, passed the
+  contact-body seam, and ended only at terminal expiry. Lease v4 therefore
+  passes its narrow persistence/mechanism gate. It does not pass the global
+  outcome gate: the run had five ordinary hits, and every ordinary hit's
+  prior 240-frame window had zero effective prepublication, delayed, or lease
+  authority.
+- **Observed next source blocker:** the common pre-hit status was
+  `future_policy_unavailable`. Source roots frequently reported a complete
+  causal prefix but were truncated below H268 by reached main ECL opcode
+  `0x05`/`0x06` or captured hostile movement state 2. Before canonical hit
+  f1263, the first nontruncated full-H268 root appeared only at f1249, too late
+  to solve and publish. Exact closure of these reached source states is now
+  the next general gate; local ranking and stage waypoints remain behind it.
 - **Observed Stage-3 first mismatch:** 701/1,214 source attempts failed because
   timeline 2 retained a nonzero fractional timer component; 465 crossed the
   native clock bracket. Every one of the 49 source attempts in the f7695..7935
@@ -287,6 +303,7 @@ Latest user-authorized Lunatic Route-2 practice ring:
 
 | Workload | Run | Hits | First hit | Bombs | Replay |
 | --- | --- | ---: | ---: | ---: | --- |
+| Stage 3 lease-v4 persistence gate | `20260801_155718` | 7 | 1263 | 0 | accepted |
 | Stage 3 | `20260731_091104` | 5 | 2150 | 0 | accepted |
 | Stage 4A | `20260731_091925` | 13 | 2555 | 0 | accepted |
 | Stage 5 | `20260731_093027` | 12 | 2124 | 0 | accepted |
@@ -495,24 +512,24 @@ Do not rerun the rejected scalar-reserve or H=32 signed-terminal design. The
 future-source, retained-chain, delayed-pipeline, and fresh-hostile-body gates
 pass. Next:
 
-1. Source-v13/lease-v3 was physically falsified on Lunatic Stage 3
-   `20260801_152531`: 653/1,190 complete source roots, 267 prepublication and
-   13 delayed exact issues, ten lease creates plus three renewals, but zero
-   effective lease issues. Lease v4 now fixes only the observed false
-   revocation seams: current contact-disabled bodies are excluded from exact
-   contact slabs, decorated action labels and SHOT-only wall pulses preserve
-   movement identity, and the old exact proof is no longer vetoed by a
-   redundant local certificate. Require nonzero exact lease consumption in a
-   fresh Stage-3 physical run.
+1. Lease v4 passed its narrow Lunatic Stage-3 mechanism gate in
+   `20260801_155718`: 29 effective held/no-write issues preserved the exact
+   certified direction and the only revocation was terminal expiry. Do not
+   interpret the different-RNG seven-hit/five-nonspell result as improvement.
+   Every ordinary hit's prior 240-frame window still had zero exact authority.
+   Close the reached main ECL `0x05`/`0x06` and captured movement-state-2
+   source truncations so full H268 is available early enough to solve and
+   publish.
 2. The f817/833/835/850/910 retained chain and physical f1456/f1469/f1470/
    f1479 continuation now regress. Empty actual rows, terminal expiry, and
    final-age misses remain fail closed.
 3. Keep observed-
    body early kill still only an objective inside the hard set. Retain the
    first ordinary hit and exact lease exposure.
-4. Only after lease authority is physically effective, classify remaining
-   hostile-birth uncertainty and then local micro-ranking. Do not compensate
-   with a stage waypoint.
+4. Lease authority is now physically effective, but full-horizon future
+   source delivery is not. Classify remaining hostile-birth uncertainty and
+   local micro-ranking only after the reached source truncations are closed.
+   Do not compensate with a stage waypoint.
 
 Do not compensate with a stage-specific waypoint.
 

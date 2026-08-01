@@ -214,8 +214,14 @@ live authority. Lease v4 supplies the narrowly scoped replacement:
   separate fresh-local certificate is diagnostic and cannot override it,
   because that path does not reread bullet geometry.
 
-Focused Linux and Windows gates pass. Physical authority remains unpromoted
-until Stage 3 shows nonzero effective lease issues and no unsafe widening.
+Focused Linux and Windows gates pass. Stage-3 `20260801_155718` physically
+consumed the compatible held lease on 29 issues without an input write or
+direction/focus widening; the only revocation was terminal expiry. This
+promotes the v4 persistence seam, not ordinary global survival. All five
+ordinary hits had no exact authority in their preceding 240-frame windows.
+Reached main ECL `0x05`/`0x06` and captured movement state 2 truncated many
+otherwise complete source roots below H268, so source coverage still fails
+closed and remains the next authority blocker.
 
 Physical run `20260731_152921` found two independent invalidations. First,
 `player+0xE2A68` retains the deathbomb-window limit installed by

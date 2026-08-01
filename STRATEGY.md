@@ -234,8 +234,17 @@ a renewal table has no safe final issue-age row, the compatible older lease
 is selected before falling back to unconstrained local control. Stable
 contact-body seam containment and source-v13 coverage remain hard; the fresh
 local recertificate is diagnostic because it rereads no bullets and cannot
-supersede the old causal proof. Linux and focused Windows gates pass. This is
-not promoted until a fresh Stage-3 run records a nonzero effective lease.
+supersede the old causal proof. Linux and focused Windows gates pass.
+
+Stage-3 `20260801_155718` physically validates this narrow mechanism: one
+lease create plus one renewal yielded 29 effective held/no-write issues, all
+with the exact certified `down_left_fast` movement and no physical input
+transition; the only revocation was terminal expiry. It does not validate the
+global outcome. The run completed seven hits/five nonspell, and every ordinary
+hit's preceding 240 frames had zero exact authority. Source prefixes were
+commonly truncated below H268 by reached main ECL `0x05`/`0x06` or captured
+movement state 2. Exact source closure, not another lease or scalar-reserve
+patch, is now the next authority gate.
 
 The authorized Stage-4A physical run `20260731_220830` did not exercise that
 authority: all 1,754 live source projections were incomplete, chiefly because

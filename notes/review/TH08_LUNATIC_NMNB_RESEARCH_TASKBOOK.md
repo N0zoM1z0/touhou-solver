@@ -602,6 +602,9 @@ it.
    bodies use the original exact ECL/native-motion trajectory; never restart a
    fresh linear future. Preserve the native one-frame publication-to-motion
    phase: observations use published input; positions use shifted motion.
+   Stage-3 `155718` then selected the compatible v4 lease 30 times and made
+   29 held/no-write issues effective; terminal expiry was the sole revocation.
+   This promotes the persistence seam only.
 6. The retained f817/833/835/850/910 empty actual rows and physical
    f1456/f1469/f1470/f1479 and f3191/f3192 continuations regress. Stage-3
    `20260801_134853` produced only one hit/no-Bomb but zero leases because all
@@ -616,10 +619,12 @@ it.
    active-hostile source trajectories and observation-time containment; do
    not weaken unknown topology or future-source coverage. The v13 Stage-3
    rotation `152531` completed six hits/four nonspell, no Bomb, but zero
-   effective leases. Physically repeat Stage 3 after the false-revocation
-   correction. The next gate is Stage 3 with nonzero v4 effective issues;
-   rotate Stage 4A only if lease consumption appears. Aggregate hits alone do
-   not validate the lease.
+   effective leases. Its v4 successor `155718` completed seven/five with 29
+   effective lease issues and no Bomb. Aggregate hits remain different-RNG
+   observations. All five ordinary hit windows still lacked exact authority;
+   the next gate is exact full-H268 source closure for reached main ECL
+   `0x05`/`0x06` and captured movement state 2. Rotate Stage 4A only after
+   deterministic closure and a focused Stage-3 delivery check.
 7. Evaluate remaining hostile-birth uncertainty and only then local micro
    ranking after lease authority is physically effective; repeat a winner
    before a full route.
